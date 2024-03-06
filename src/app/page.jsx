@@ -2,6 +2,7 @@
 import CategorySection from "@/components/HomePage/CategorySection";
 import Header from "@/components/HomePage/Header";
 import HeroSection from "@/components/HomePage/HeroSection";
+import PopularDesign from "@/components/HomePage/PopularDesign";
 export default function Home() {
   return (
     <>
@@ -10,6 +11,8 @@ export default function Home() {
       <HeroSection />
       {/* For Category section */}
       <CategorySection />
+      {/* For Popular Embroidery Designs */}
+      <PopularDesign />
     </>
   );
 }

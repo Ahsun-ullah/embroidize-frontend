@@ -1,8 +1,8 @@
 import { Inter } from "next/font/google";
+import Head from "next/head";
 import "remixicon/fonts/remixicon.css";
 import "./globals.css";
 import { Providers } from "./providers";
-import Head from "next/head";
 
 const inter = Inter({ subsets: ["latin"] });
 
