@@ -21,8 +21,8 @@ const PopularDesign = () => {
       <section className=" text-black my-8 py-6">
         <div className="flex items-center justify-center">
           <div class="grid grid-cols-4 gap-10">
-            <div className="bg-blue-50  border">
-              <div className="p-4 flex items-center justify-center bg-white">
+            <div className="bg-blue-50  border rounded-lg">
+              <div className="p-4 flex items-center justify-center ">
                 <Image
                   alt="Relaxing app background"
                   className="rounded-xl "
@@ -38,12 +38,16 @@ const PopularDesign = () => {
                     Your checklist for better sleep
                   </p>
 
-                  <Button radius="full" size="sm">
+                  <Button
+                    radius="full"
+                    size="sm"
+                    className="bg-black text-white"
+                  >
                     Get App
                   </Button>
                 </div>
                 <div className="flex items-center justify-between ">
-                  <p className="text-tiny text-black/60">
+                  <p className="text-tiny text-black">
                     Get a good night sleep.
                   </p>
                   <i className="ri-heart-fill text-red-500"></i>
@@ -138,6 +142,11 @@ const PopularDesign = () => {
               </div>
             </div>
           </div>
+        </div>
+        <div className="flex justify-center items-center my-14">
+          <button className=" bg-black rounded-full hover:bg-blue-400 text-white font-medium px-6 p-2">
+            View All
+          </button>
         </div>
       </section>
     </>
