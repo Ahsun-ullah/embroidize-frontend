@@ -1,5 +1,5 @@
 "use client";
-import { Avatar, Card, CardBody, CardFooter } from "@nextui-org/react";
+import Image from "next/image";
 import "swiper/css";
 import { A11y, Navigation, Pagination, Scrollbar } from "swiper/modules";
 import { Swiper, SwiperSlide } from "swiper/react";
@@ -17,15 +17,21 @@ const CardSlider = ({ cardData }) => {
       onSlideChange={""}
     >
       {cardData.map((card, index) => (
-        <SwiperSlide className="p-8" key={index}>
-          <Card className="bg-blue-50 p-2">
-            <CardBody className="flex justify-center items-center">
-              <Avatar size="lg" src={card.avatarSrc} className="text-large" />
-            </CardBody>
-            <CardFooter className="flex-col items-center">
-              <h4 className="font-bold text-large">{card.title}</h4>
-            </CardFooter>
-          </Card>
+        <SwiperSlide className="p-3" key={index}>
+          <div className="flex flex-col items-center justify-center bg-white shadow-medium ">
+            <div className="relative w-10/12 h-40">
+              <Image
+                src={card?.avatarSrc}
+                className="absolute inset-0 w-full h-full object-cover pt-6"
+                layout="fill"
+                alt="img"
+              />
+            </div>
+            <hr />
+            <h4 className="font-bold text-large text-center py-1">
+              {card?.title}
+            </h4>
+          </div>
         </SwiperSlide>
       ))}
     </Swiper>

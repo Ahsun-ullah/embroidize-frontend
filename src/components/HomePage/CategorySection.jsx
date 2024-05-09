@@ -5,27 +5,27 @@ import CardSlider from "../Common/CardSlider";
 const CategorySection = () => {
   const cardData = [
     {
-      avatarSrc: "https://i.pravatar.cc/150?u=a04258114e29026708c",
+      avatarSrc: "/blog.jpg",
       title: "Animal ",
     },
     {
-      avatarSrc: "https://i.pravatar.cc/150?u=a04258114e29026708c",
+      avatarSrc: "/images.jpg",
       title: "Flowers",
     },
     {
-      avatarSrc: "https://i.pravatar.cc/150?u=a04258114e29026708c",
+      avatarSrc: "/category.jpg",
       title: "Kids",
     },
     {
-      avatarSrc: "https://i.pravatar.cc/150?u=a04258114e29026708c",
+      avatarSrc: "/category.jpg",
       title: "Travel",
     },
     {
-      avatarSrc: "https://i.pravatar.cc/150?u=a04258114e29026708c",
+      avatarSrc: "/category.jpg",
       title: "Monogram",
     },
     {
-      avatarSrc: "https://i.pravatar.cc/150?u=a04258114e29026708c",
+      avatarSrc: "/category.jpg",
       title: "Others",
     },
   ];
