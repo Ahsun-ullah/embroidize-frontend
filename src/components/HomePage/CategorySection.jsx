@@ -38,7 +38,7 @@ const CategorySection = () => {
         </h3>
         <Link
           href={""}
-          className="bg-black rounded-md hover:bg-blue-400 text-white font-medium px-2"
+          className="bg-black rounded-md hover:bg-blue-400 text-white font-normal px-2 text-sm py-1"
         >
           Sign Up For Free
         </Link>

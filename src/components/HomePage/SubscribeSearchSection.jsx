@@ -20,7 +20,7 @@ const SubscribeSearchSection = () => {
             placeholder="Type to search..."
             size="sm"
             endContent={
-              <button className="px-2 rounded-full bg-black font-semibold hover:bg-blue-400 text-white  ">
+              <button className="px-2 py-1 rounded-full bg-black font-semibold hover:bg-blue-400 text-white text-sm ">
                 Subscribe
               </button>
             }

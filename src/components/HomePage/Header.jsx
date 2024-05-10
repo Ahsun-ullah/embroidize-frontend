@@ -36,7 +36,7 @@ export default function Header() {
       <NavbarContent justify="start">
         <NavbarMenuToggle
           aria-label={isMenuOpen ? "Close menu" : "Open menu"}
-          className="sm:hidden  text-black"
+          className="sm:hidden  text-black "
         />
         <NavbarBrand>
           <Image
@@ -46,47 +46,31 @@ export default function Header() {
             alt="Logo"
             className="mr-2 max-sm:hidden"
           />
-          <p className="font-extrabold text-black max-sm:hidden">EmbroiD</p>
+          <p className="font-extrabold text-black max-sm:hidden me-10">
+            EmbroiD
+          </p>
         </NavbarBrand>
       </NavbarContent>
 
-      {/* For Category */}
-      <NavbarContent className="flex gap-3 max-sm:hidden font-semibold">
-        <NavbarItem>
-          <Link color="foreground" href="#">
-            Pricing
-          </Link>
-        </NavbarItem>
-        <NavbarItem>
-          <Link href="#" color="foreground">
-            Contact
-          </Link>
-        </NavbarItem>
-        <NavbarItem>
-          <Link color="foreground" href="#">
-            About
-          </Link>
-        </NavbarItem>
-      </NavbarContent>
+      <Input
+        style={{ width: "100%" }}
+        isBordered
+        classNames={{
+          base: " h-10 ",
+          mainWrapper: "h-full",
+          input: "text-small",
+          inputWrapper:
+            " h-full font-normal text-default-500 bg-default-200/20 border",
+        }}
+        placeholder="Type to search..."
+        size="md"
+        startContent={<i className="ri-search-2-line" />}
+        type="search"
+      />
 
       {/* For Search  */}
       <NavbarContent justify="end">
-        <NavbarContent className="" justify="end">
-          <Input
-            isBordered
-            classNames={{
-              base: "max-w-full sm:max-w-[10rem] h-10 ",
-              mainWrapper: "h-full",
-              input: "text-small",
-              inputWrapper:
-                "h-full font-normal text-default-500 bg-default-200/20 ",
-            }}
-            placeholder="Type to search..."
-            size="sm"
-            startContent={<i className="ri-search-2-line" />}
-            type="search"
-          />
-        </NavbarContent>
+        <NavbarContent className="" justify="end"></NavbarContent>
         <NavbarItem>
           <Button
             as={Link}

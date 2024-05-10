@@ -4,9 +4,9 @@ const HeroSection = () => {
   return (
     <>
       <section className=" bg-blue-50  py-[10rem] text-black">
-        <div className="flex flex-col  ">
+        <div className="flex flex-col">
           <div className=" flex justify-center content-center">
-            <h1 className="text-3xl font-bold ">Machine Embroidery Designs</h1>
+            <h1 className="text-3xl font-bold mb-4">Machine Embroidery Designs</h1>
           </div>
           <div className="flex justify-center content-center mb-4">
             <h4>
@@ -14,7 +14,7 @@ const HeroSection = () => {
               quality for the lowest price.
             </h4>
           </div>
-          <div className="flex justify-center content-center">
+          <div className="flex justify-center content-center mt-4">
             <Input
               radius="full"
               isBordered

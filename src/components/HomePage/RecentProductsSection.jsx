@@ -21,14 +21,14 @@ const RecentProductsSection = () => {
       <section className=" text-black my-8 py-6">
         <div className="flex items-center justify-center">
           <div class="grid grid-cols-4 gap-10">
-            <div className="bg-blue-50  border rounded-lg">
-              <div className="p-4 flex items-center justify-center ">
+            <div className="bg-white  border rounded-lg shadow-xl">
+              <div className="p-6 flex items-center justify-center ">
                 <Image
                   alt="Relaxing app background"
                   className="rounded-xl "
                   src="/logo.png"
                   height={200}
-                  width={200}
+                  width={280}
                 />
               </div>
               <Divider />
@@ -54,14 +54,14 @@ const RecentProductsSection = () => {
                 </div>
               </div>
             </div>
-            <div className="bg-blue-50  border">
-              <div className="p-4 flex items-center justify-center">
+            <div className="bg-white  border rounded-lg shadow-xl">
+              <div className="p-6 flex items-center justify-center ">
                 <Image
                   alt="Relaxing app background"
-                  className="rounded-xl"
+                  className="rounded-xl "
                   src="/logo.png"
                   height={200}
-                  width={200}
+                  width={280}
                 />
               </div>
               <Divider />
@@ -71,26 +71,30 @@ const RecentProductsSection = () => {
                     Your checklist for better sleep
                   </p>
 
-                  <Button radius="full" size="sm">
+                  <Button
+                    radius="full"
+                    size="sm"
+                    className="bg-black text-white"
+                  >
                     Get App
                   </Button>
                 </div>
                 <div className="flex items-center justify-between ">
-                  <p className="text-tiny text-black/60">
+                  <p className="text-tiny text-black">
                     Get a good night sleep.
                   </p>
                   <i className="ri-heart-fill text-red-500"></i>
                 </div>
               </div>
             </div>
-            <div className="bg-blue-50  border">
-              <div className="p-4 flex items-center justify-center">
+            <div className="bg-white  border rounded-lg shadow-xl">
+              <div className="p-6 flex items-center justify-center ">
                 <Image
                   alt="Relaxing app background"
-                  className="rounded-xl"
+                  className="rounded-xl "
                   src="/logo.png"
                   height={200}
-                  width={200}
+                  width={280}
                 />
               </div>
               <Divider />
@@ -100,26 +104,30 @@ const RecentProductsSection = () => {
                     Your checklist for better sleep
                   </p>
 
-                  <Button radius="full" size="sm">
+                  <Button
+                    radius="full"
+                    size="sm"
+                    className="bg-black text-white"
+                  >
                     Get App
                   </Button>
                 </div>
                 <div className="flex items-center justify-between ">
-                  <p className="text-tiny text-black/60">
+                  <p className="text-tiny text-black">
                     Get a good night sleep.
                   </p>
                   <i className="ri-heart-fill text-red-500"></i>
                 </div>
               </div>
             </div>
-            <div className="bg-blue-50  border">
-              <div className="p-4 flex items-center justify-center">
+            <div className="bg-white  border rounded-lg shadow-xl">
+              <div className="p-6 flex items-center justify-center ">
                 <Image
                   alt="Relaxing app background"
-                  className="rounded-xl"
+                  className="rounded-xl "
                   src="/logo.png"
                   height={200}
-                  width={200}
+                  width={280}
                 />
               </div>
               <Divider />
@@ -129,12 +137,16 @@ const RecentProductsSection = () => {
                     Your checklist for better sleep
                   </p>
 
-                  <Button radius="full" size="sm">
+                  <Button
+                    radius="full"
+                    size="sm"
+                    className="bg-black text-white"
+                  >
                     Get App
                   </Button>
                 </div>
                 <div className="flex items-center justify-between ">
-                  <p className="text-tiny text-black/60">
+                  <p className="text-tiny text-black">
                     Get a good night sleep.
                   </p>
                   <i className="ri-heart-fill text-red-500"></i>

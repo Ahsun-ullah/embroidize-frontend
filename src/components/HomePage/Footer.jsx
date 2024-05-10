@@ -8,7 +8,7 @@ const Footer = () => {
         <div class="container mx-auto px-4">
           <div class=" flex flex-wrap text-left lg:text-left mb-6">
             <div class="w-full lg:w-6/12 px-4">
-              <div className="flex">
+              <div className="flex my-4">
                 <i class="ri-centos-fill text-3xl mr-2"></i>
                 <h4 class="text-3xl font-bold text-black">EmbroID</h4>
               </div>
@@ -128,12 +128,10 @@ const Footer = () => {
             </div>
           </div>
           <hr class=" border-blue-500" />
-          <div class="bg-white flex flex-wrap items-center md:justify-between justify-center mt-4">
+          <div class="bg-white flex flex-wrap items-center md:justify-between justify-between mt-4">
             <div class=" w-full md:w-4/12 px-4 mx-auto text-center">
-              <div class="flex text-sm font-semibold py-1">
-                <strong>EmbroID</strong>
-                <p>&copy; 2024. All rights reserved.</p>
-              </div>
+              <strong>EmbroID</strong>
+              <p>&copy;2024. All rights reserved.</p>
             </div>
           </div>
         </div>
