@@ -3,17 +3,27 @@
 @tailwind utilities;
 
 :root {
-  --foreground-rgb: 0, 0, 0;
-  --background-start-rgb: 214, 219, 220;
-  --background-end-rgb: 255, 255, 255;
+  --primary-color: #eff6ff;
+  --secondary-color: #000000;
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --foreground-rgb: 255, 255, 255;
-    --background-start-rgb: 0, 0, 0;
-    --background-end-rgb: 0, 0, 0;
-  }
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+html {
+  position: relative;
+  overflow-x: hidden;
+  font-size: 10px;
+  margin: 0;
+  height: 100%;
+}
+body {
+  position: relative;
+  font-family: "Poppins", sans-serif !important;
+  overflow-x: hidden;
+
 }
 
 body {
@@ -21,8 +31,37 @@ body {
   background: #ffffff;
 }
 
-@layer utilities {
-  .text-balance {
-    text-wrap: balance;
+.pagination-separated {
+  .page-item {
+  font-size: larger;
+    .page-link {
+      margin-left: 0.35rem;
+     
+    }
+  }
+}
+
+
+.pagination-rounded {
+  .page-link {
+    border-radius: 30px !important;
+    margin: 0 3px !important;
+    border: none;
+    min-width: 32px;
+    min-height: 32px;
+    text-align: center;
+  }
+
+  &.pagination-sm {
+    .page-link {
+      min-width: 25px;
+      min-height: 25px;
+    }
+  }
+}
+
+.page-item.active {
+  .page-link {
+    box-shadow: black;
   }
 }
