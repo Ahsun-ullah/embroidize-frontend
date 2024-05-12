@@ -1,126 +1,84 @@
-"use client";
 import React, { useEffect } from "react";
 
 const Pagination = ({ data, currentPage, setCurrentPage, perPageData }) => {
-  const handleClick = (e) => {
-    setCurrentPage(e);
+  const handleClick = (pageNumber) => {
+    setCurrentPage(pageNumber);
   };
 
-  const pageNumbers = [];
-  for (let i = 1; i <= Math.ceil(data?.length / perPageData); i++) {
-    pageNumbers.push(i);
-  }
-  const handleprevPage = () => {
-    let prevPage = currentPage - 1;
-    setCurrentPage(prevPage);
+  const handlePrevPage = () => {
+    setCurrentPage((prevPage) => prevPage - 1);
   };
-  const handlenextPage = () => {
-    let nextPage = currentPage + 1;
-    setCurrentPage(nextPage);
+
+  const handleNextPage = () => {
+    setCurrentPage((prevPage) => prevPage + 1);
   };
+
+  const totalPages = Math.ceil(data?.length / perPageData);
+  const visiblePages = 15;
 
   useEffect(() => {
-    if (pageNumbers?.length && pageNumbers?.length < currentPage) {
-      setCurrentPage(pageNumbers?.length);
+    if (currentPage < 0) {
+      setCurrentPage(0);
+    } else if (currentPage >= totalPages) {
+      setCurrentPage(totalPages - 1);
     }
-  }, [pageNumbers?.length, currentPage, setCurrentPage]);
+  }, [currentPage, totalPages, setCurrentPage]);
+
+  const renderPageNumbers = () => {
+    const pageNumbers = [];
+    if (totalPages <= visiblePages) {
+      for (let i = 1; i <= totalPages; i++) {
+        pageNumbers.push(i);
+      }
+    } else {
+      const halfVisiblePages = Math.floor(visiblePages / 2);
+      let startPage = currentPage - halfVisiblePages;
+      let endPage = currentPage + halfVisiblePages;
+
+      if (startPage < 0) {
+        startPage = 0;
+        endPage = visiblePages - 1;
+      } else if (endPage >= totalPages) {
+        startPage = totalPages - visiblePages;
+        endPage = totalPages - 1;
+      }
+
+      for (let i = startPage; i <= endPage; i++) {
+        pageNumbers.push(i + 1);
+      }
+    }
+
+    return pageNumbers.map((pageNumber) => (
+      <li
+        key={pageNumber}
+        className={
+          pageNumber === currentPage + 1
+            ? "active bg-blue-100 px-[6px] py-[2px] border"
+            : "button"
+        }
+        onClick={() => handleClick(pageNumber - 1)}
+      >
+        {pageNumber}
+      </li>
+    ));
+  };
+
   return (
-    <>
-      <div className="justify-end my-3">
-        <div className="col-sm-auto">
-          <ul className="pagination-block pagination pagination-separated justify-center">
-            {currentPage <= 0 ? (
-              <span
-                style={{ cursor: "pointer" }}
-                className="page-item pagination-prev disabled"
-              >
-                Previous
-              </span>
-            ) : (
-              <li
-                role={currentPage >= 1 ? "button" : ""}
-                className={
-                  currentPage >= 1 ? "page-item" : "page-item disabled"
-                }
-              >
-                <span
-                  style={{ cursor: "pointer" }}
-                  className="page-link fs-2"
-                  onClick={handleprevPage}
-                >
-                  Previous
-                </span>
-              </li>
-            )}
-            {pageNumbers.map((item, key) => (
-              <React.Fragment key={key}>
-                <li className="page-item" role={"button"}>
-                  <span
-                    className={
-                      currentPage === item - 1
-                        ? "page-link active fs-2"
-                        : "page-link fs-2"
-                    }
-                    onClick={() => handleClick(item - 1)}
-                  >
-                    {item}
-                  </span>
-                </li>
-              </React.Fragment>
-            ))}
-            {/* {<span> </span>}
-            {'...'}
-            {currentPage >= pageNumbers.length - 1 ? (
-              <span
-                style={{ cursor: 'pointer' }}
-                className="page-item pagination-next disabled"
-              >
-                Next
-              </span>
-            ) : (
-              <li
-                role={currentPage <= 0 ? 'button' : ''}
-                className={
-                  currentPage >= 0 ? 'page-item' : 'page-item disabled'
-                }
-              >
-                <span
-                  style={{ cursor: 'pointer' }}
-                  className="page-link fs-2"
-                  onClick={handlenextPage}
-                >
-                  Next
-                </span>
-              </li>
-            )} */}
-            {/*  */}
-            {currentPage >= pageNumbers.length - 1 ? (
-              <span
-                style={{ cursor: "pointer" }}
-                className="page-item pagination-next disabled"
-              >
-                Next
-              </span>
-            ) : (
-              <li
-                role={currentPage <= 0 ? "button" : ""}
-                className={
-                  currentPage >= 0 ? "page-item" : "page-item disabled"
-                }
-              >
-                <span
-                  style={{ cursor: "pointer" }}
-                  className="page-link fs-2"
-                  onClick={handlenextPage}
-                >
-                  Next
-                </span>
-              </li>
-            )}
-          </ul>
-        </div>
-      </div>
-    </>
+    <div className="mt-16 me-5 text-lg">
+      <ul className="flex justify-end gap-2">
+        {currentPage >= 0 && (
+          <li className="button" onClick={handlePrevPage}>
+            &laquo; Previous
+          </li>
+        )}
+        {renderPageNumbers()}
+        {currentPage <= totalPages - 1 && (
+          <li className="button" onClick={handleNextPage}>
+            Next &raquo;
+          </li>
+        )}
+      </ul>
+    </div>
   );
 };
 

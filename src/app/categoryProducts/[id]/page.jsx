@@ -8,13 +8,22 @@ import Header from "../../../components/HomePage/Header";
 
 const CategoryProducts = () => {
   const [currentPage, setCurrentPage] = useState(0);
-  const [perPageData, setPerPageData] = useState(5);
+  const [perPageData, setPerPageData] = useState(1);
+
+  let objectsArray = [
+    { name: "Chair", color: "Brown", material: "Wood" },
+    { name: "Laptop", brand: "Dell", model: "XPS 13" },
+    { fruit: "Apple", color: "Red", origin: "Washington" },
+    { city: "Paris", country: "France", population: 2141000 },
+    { name: "Book", genre: "Fantasy", author: "J.K. Rowling" },
+  ];
+
   return (
     <>
       <Header />
 
       <div className="h-screen ">
-        <section className=" text-black my-8 py-6 border mx-16">
+        <section className=" text-black my-8 py-6 border-b-2">
           <div className="flex items-center justify-center ">
             <div class="grid grid-cols-4 gap-10 ">
               <div className="bg-white  border rounded-lg shadow-xl">
@@ -157,7 +166,7 @@ const CategoryProducts = () => {
               bottom: 0,
               right: 20,
             }}
-            data={""}
+            data={objectsArray}
             currentPage={currentPage}
             setCurrentPage={setCurrentPage}
             perPageData={perPageData}
