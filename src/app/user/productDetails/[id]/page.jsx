@@ -2,6 +2,8 @@
 "use client";
 /* eslint-disable @next/next/no-img-element */
 import {
+  BreadcrumbItem,
+  Breadcrumbs,
   Button,
   Card,
   Chip,
@@ -37,12 +39,24 @@ const ProductDetails = () => {
     <>
       <Header />
       <SecondHeader />
-
-      <div className="flex justify-center flex-row mx-64 my-10">
+      <div className="flex gap-4 mx-64 mt-10 font-medium ">
+        <Breadcrumbs size="lg" className="flex">
+          <BreadcrumbItem href="/docs/components/button">Button</BreadcrumbItem>
+          <BreadcrumbItem href="/docs/components/breadcrumbs">
+            Breadcrumbs
+          </BreadcrumbItem>
+          <BreadcrumbItem href="/docs/components/card">Card</BreadcrumbItem>
+          <BreadcrumbItem href="/docs/components/checkbox">
+            Checkbox
+          </BreadcrumbItem>
+          <BreadcrumbItem href="/docs/components/code">Code</BreadcrumbItem>
+        </Breadcrumbs>
+      </div>
+      <div className="flex justify-center flex-row ms-64 my-10">
         <div className="basis-3/4 relative">
           <Card
             isFooterBlurred
-            className="w-[700px] h-[700px] col-span-12 sm:col-span-5 "
+            className="w-[800px] h-[700px] col-span-12 sm:col-span-5 me-10"
           >
             <img
               removeWrapper
@@ -52,11 +66,77 @@ const ProductDetails = () => {
             />
           </Card>
 
-          <div className="flex-col mt-10">
+          <div className="flex-col mt-10 ">
             <h1 className="text-black text-lg font-semibold">
               Related Keywords
             </h1>
-            <div className="flex gap-4 mt-4">
+            <div className="flex gap-4 mt-4 flex-wrap">
+              <Chip variant="faded" size="lg">
+                flower cart
+              </Chip>
+              <Chip variant="faded" size="lg">
+                flower cart
+              </Chip>
+              <Chip variant="faded" size="lg">
+                flower cart
+              </Chip>
+              <Chip variant="faded" size="lg">
+                flower cart
+              </Chip>
+              <Chip variant="faded" size="lg">
+                flower cart
+              </Chip>
+              <Chip variant="faded" size="lg">
+                flower cart
+              </Chip>
+              <Chip variant="faded" size="lg">
+                flower cart
+              </Chip>
+              <Chip variant="faded" size="lg">
+                flower cart
+              </Chip>
+              <Chip variant="faded" size="lg">
+                flower cart
+              </Chip>
+              <Chip variant="faded" size="lg">
+                flower cart
+              </Chip>
+              <Chip variant="faded" size="lg">
+                flower cart
+              </Chip>
+              <Chip variant="faded" size="lg">
+                flower cart
+              </Chip>
+              <Chip variant="faded" size="lg">
+                flower cart
+              </Chip>
+              <Chip variant="faded" size="lg">
+                flower cart
+              </Chip>
+              <Chip variant="faded" size="lg">
+                flower cart
+              </Chip>
+              <Chip variant="faded" size="lg">
+                flower cart
+              </Chip>
+              <Chip variant="faded" size="lg">
+                flower cart
+              </Chip>
+              <Chip variant="faded" size="lg">
+                flower cart
+              </Chip>
+              <Chip variant="faded" size="lg">
+                flower cart
+              </Chip>
+              <Chip variant="faded" size="lg">
+                flower cart
+              </Chip>
+              <Chip variant="faded" size="lg">
+                flower cart
+              </Chip>
+              <Chip variant="faded" size="lg">
+                flower cart
+              </Chip>
               <Chip variant="faded" size="lg">
                 flower cart
               </Chip>
