@@ -75,7 +75,7 @@ export default function Header() {
           <Button
             as={Link}
             color="primary"
-            href="#"
+            href="/auth/login"
             variant="flat"
             size="sm"
             radius="large"
@@ -86,34 +86,34 @@ export default function Header() {
         </NavbarItem>
       </NavbarContent>
       {user && (
-      <div className="items-center" justify="end">
-        <Dropdown placement="bottom-end" className="text-black">
-          <DropdownTrigger>
-            <Avatar
-              isBordered
-              as="button"
-              className="transition-transform"
-              color="primary"
-              name="Jason Hughes"
-              size="sm"
-              src="/logo.png"
-            />
-          </DropdownTrigger>
-          <DropdownMenu>
-            <DropdownItem
-              isBordered
-              key="profile"
-              className="h-14 gap-2 border-dashed"
-            >
-              {/* <p className="font-semibold">Signed in as</p> */}
-              <p className="font-semibold">user name </p>
-            </DropdownItem>
-            <DropdownItem key="logout" isBordered className="p-2">
-              Log Out
-            </DropdownItem>
-          </DropdownMenu>
-        </Dropdown>
-      </div>
+        <div className="items-center" justify="end">
+          <Dropdown placement="bottom-end" className="text-black">
+            <DropdownTrigger>
+              <Avatar
+                isBordered
+                as="button"
+                className="transition-transform"
+                color="primary"
+                name="Jason Hughes"
+                size="sm"
+                src="/logo.png"
+              />
+            </DropdownTrigger>
+            <DropdownMenu>
+              <DropdownItem
+                isBordered
+                key="profile"
+                className="h-14 gap-2 border-dashed"
+              >
+                {/* <p className="font-semibold">Signed in as</p> */}
+                <p className="font-semibold">user name </p>
+              </DropdownItem>
+              <DropdownItem key="logout" isBordered className="p-2">
+                Log Out
+              </DropdownItem>
+            </DropdownMenu>
+          </Dropdown>
+        </div>
       )}
 
       <NavbarMenu className="sm:max-w-[4rem] bg-transparent">
