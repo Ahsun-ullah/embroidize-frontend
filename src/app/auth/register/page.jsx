@@ -15,16 +15,27 @@ const Login = () => {
     <div className="flex flex-col h-screen items-center justify-center gap-14">
       <Card className="w-1/4 p-4">
         <CardHeader className="flex flex-col items-start">
-          <h4 className="font-bold text-lg mb-3">Welcome!</h4>
+          <h4 className="font-bold text-lg mb-3">Hello!</h4>
           <p className="text-sm uppercase font-bold">
-            Sign in to continue to EmbroiD.
+            Please Fill The All Fields For Registration.
           </p>
         </CardHeader>
         <CardBody className="overflow-visible py-2">
           <form onSubmit={"handleSubmit"}>
             <div className="mb-4">
               <label htmlFor="username" className="form-label">
-                User Email
+                User Name
+              </label>
+              <Input
+                onChange={(e) => setUserName(e.target.value)}
+                type="text"
+                className="form-control mt-2"
+                placeholder="Enter Your FullName"
+              />
+            </div>
+            <div className="mb-4">
+              <label htmlFor="username" className="form-label">
+                Email
               </label>
               <Input
                 onChange={(e) => setEmail(e.target.value)}
@@ -34,15 +45,6 @@ const Login = () => {
               />
             </div>
             <div className="mb-6">
-              <div className="float-right">
-                <div
-                  style={{ cursor: "pointer" }}
-                  onClick={() => togOpenModal()}
-                  className="text-muted text-primary font-semibold underline"
-                >
-                  Forgot password?
-                </div>
-              </div>
               <label className="form-label" htmlFor="password-input">
                 Password
               </label>
@@ -67,7 +69,7 @@ const Login = () => {
             <div>
               <input
                 type="submit"
-                value="Sign In"
+                value="Register"
                 className="button text-light w-full py-16"
               />
             </div>
@@ -75,12 +77,12 @@ const Login = () => {
 
           <div className="mt-5 text-center">
             <p className="mb-0">
-              Don't have an account?
+              Already have an account?
               <Link
-                href="/auth/register"
+                href="/auth/login"
                 className="font-semibold ms-1 text-primary underline"
               >
-                Signup
+                SignIn
               </Link>
             </p>
           </div>
