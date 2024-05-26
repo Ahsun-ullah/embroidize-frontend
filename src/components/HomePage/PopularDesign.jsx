@@ -1,4 +1,3 @@
-"use client";
 import { Button, Divider } from "@nextui-org/react";
 import Image from "next/image";
 
@@ -7,158 +6,57 @@ const PopularDesign = () => {
     <>
       <section className="bg-blue-50 text-black my-8 py-6">
         <div className="flex items-center justify-center">
-          <h1 className="flex justify-center text-3xl font-bold">
-            Popular embroidery designs
-          </h1>
+          <h1 className="text-3xl font-bold">Popular embroidery designs</h1>
         </div>
-
-        <div className="flex items-center justify-center ">
+        <div className="flex items-center justify-center mt-4">
           <h3 className="font-semibold">
             Design for every Budget & every Project.
           </h3>
         </div>
       </section>
-      <section className=" text-black my-8 py-6">
-        <div className="flex items-center justify-center ">
-          <div class="grid grid-cols-4 gap-10 ">
-            <div className="bg-white  border rounded-lg shadow-xl">
-              <div className="p-6 flex items-center justify-center ">
-                <Image
-                  alt="Relaxing app background"
-                  className="rounded-xl "
-                  src="/logo.png"
-                  height={200}
-                  width={280}
-                />
-              </div>
-              <Divider />
-              <div className="flex-col border-default-600 dark:border-default-100 p-4">
-                <div className="flex items-center justify-between gap-4 ">
-                  <p className="text-black/90 font-medium text-sm">
-                    Your checklist for better sleep
-                  </p>
-
-                  <Button
-                    radius="full"
-                    size="sm"
-                    className="bg-black text-white"
-                  >
-                    Get App
-                  </Button>
+      <section className="text-black my-8 py-6">
+        <div className="container mx-auto px-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-10">
+            {Array.from({ length: 4 }).map((_, index) => (
+              <div key={index} className="bg-white border rounded-lg shadow-xl">
+                <div className="p-6 flex items-center justify-center">
+                  <Image
+                    alt="Embroidery design"
+                    src="/logo.png"
+                    className="rounded-xl"
+                    height={200}
+                    width={280}
+                  />
                 </div>
-                <div className="flex items-center justify-between ">
-                  <p className="text-tiny text-black">
-                    Get a good night sleep.
-                  </p>
-                  <i className="ri-heart-fill text-red-500"></i>
-                </div>
-              </div>
-            </div>
-            <div className="bg-white  border rounded-lg shadow-xl">
-              <div className="p-6 flex items-center justify-center ">
-                <Image
-                  alt="Relaxing app background"
-                  className="rounded-xl "
-                  src="/logo.png"
-                  height={200}
-                  width={280}
-                />
-              </div>
-              <Divider />
-              <div className="flex-col border-default-600 dark:border-default-100 p-4">
-                <div className="flex items-center justify-between gap-4 ">
-                  <p className="text-black/90 font-medium text-sm">
-                    Your checklist for better sleep
-                  </p>
-
-                  <Button
-                    radius="full"
-                    size="sm"
-                    className="bg-black text-white"
-                  >
-                    Get App
-                  </Button>
-                </div>
-                <div className="flex items-center justify-between ">
-                  <p className="text-tiny text-black">
-                    Get a good night sleep.
-                  </p>
-                  <i className="ri-heart-fill text-red-500"></i>
+                <Divider />
+                <div className="flex flex-col border-default-600 dark:border-default-100 p-4">
+                  <div className="flex items-center justify-between gap-4">
+                    <p className="text-sm font-medium">{`Your checklist for better sleep ${
+                      index + 1
+                    }`}</p>
+                    <Button
+                      radius="full"
+                      size="sm"
+                      className="bg-black text-white"
+                    >
+                      Get App
+                    </Button>
+                  </div>
+                  <div className="flex items-center justify-between mt-2">
+                    <p className="text-xs text-black">
+                      Get a good night sleep.
+                    </p>
+                    <i className="ri-heart-fill text-red-500"></i>
+                  </div>
                 </div>
               </div>
-            </div>
-            <div className="bg-white  border rounded-lg shadow-xl">
-              <div className="p-6 flex items-center justify-center ">
-                <Image
-                  alt="Relaxing app background"
-                  className="rounded-xl "
-                  src="/logo.png"
-                  height={200}
-                  width={280}
-                />
-              </div>
-              <Divider />
-              <div className="flex-col border-default-600 dark:border-default-100 p-4">
-                <div className="flex items-center justify-between gap-4 ">
-                  <p className="text-black/90 font-medium text-sm">
-                    Your checklist for better sleep
-                  </p>
-
-                  <Button
-                    radius="full"
-                    size="sm"
-                    className="bg-black text-white"
-                  >
-                    Get App
-                  </Button>
-                </div>
-                <div className="flex items-center justify-between ">
-                  <p className="text-tiny text-black">
-                    Get a good night sleep.
-                  </p>
-                  <i className="ri-heart-fill text-red-500"></i>
-                </div>
-              </div>
-            </div>
-            <div className="bg-white  border rounded-lg shadow-xl">
-              <div className="p-6 flex items-center justify-center ">
-                <Image
-                  alt="Relaxing app background"
-                  className="rounded-xl "
-                  src="/logo.png"
-                  height={200}
-                  width={280}
-                />
-              </div>
-              <Divider />
-              <div className="flex-col border-default-600 dark:border-default-100 p-4">
-                <div className="flex items-center justify-between gap-4 ">
-                  <p className="text-black/90 font-medium text-sm">
-                    Your checklist for better sleep
-                  </p>
-
-                  <Button
-                    radius="full"
-                    size="sm"
-                    className="bg-black text-white"
-                  >
-                    Get App
-                  </Button>
-                </div>
-                <div className="flex items-center justify-between ">
-                  <p className="text-tiny text-black">
-                    Get a good night sleep.
-                  </p>
-                  <i className="ri-heart-fill text-red-500"></i>
-                </div>
-              </div>
-            </div>
+            ))}
           </div>
-        </div>
-        <div className="flex justify-center items-center my-14">
-          <button className=" bg-black rounded-full hover:bg-blue-400 text-white font-medium px-6 p-2">
-            View All
-          </button>
+          <div className="flex justify-center items-center mt-14">
+            <button className="bg-black rounded-full hover:bg-blue-400 text-white font-medium px-6 py-2">
+              View All
+            </button>
+          </div>
         </div>
       </section>
     </>

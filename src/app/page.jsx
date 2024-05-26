@@ -23,7 +23,7 @@ export default function Home() {
       {/* for Blog  Part  */}
       <BlogSection />
       {/* FAq section */}
-      <FaqSection />
+      {/* <FaqSection /> */}
       {/* subscribe search  */}
       <SubscribeSearchSection />
       {/* footer */}

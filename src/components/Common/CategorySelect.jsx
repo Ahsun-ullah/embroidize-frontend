@@ -1,4 +1,3 @@
-"use client";
 import {
   Button,
   Dropdown,
@@ -19,7 +18,7 @@ const CategorySelect = () => {
   return (
     <Dropdown>
       <DropdownTrigger>
-        <Button variant="" className="capitalize text-white">
+        <Button variant="" className="capitalize font-semibold text-white">
           {selectedValue}
         </Button>
       </DropdownTrigger>
@@ -31,12 +30,24 @@ const CategorySelect = () => {
         selectedKeys={selectedKeys}
         onSelectionChange={setSelectedKeys}
       >
-        <DropdownItem key="All Categories">All Categories</DropdownItem>
-        <DropdownItem key="text">Text</DropdownItem>
-        <DropdownItem key="number">Number</DropdownItem>
-        <DropdownItem key="date">Date</DropdownItem>
-        <DropdownItem key="single_date">Single Date</DropdownItem>
-        <DropdownItem key="iteration">Iteration</DropdownItem>
+        <DropdownItem key="All Categories" className="capitalize">
+          All Categories
+        </DropdownItem>
+        <DropdownItem key="text" className="capitalize">
+          Text
+        </DropdownItem>
+        <DropdownItem key="number" className="capitalize">
+          Number
+        </DropdownItem>
+        <DropdownItem key="date" className="capitalize">
+          Date
+        </DropdownItem>
+        <DropdownItem key="single_date" className="capitalize">
+          Single Date
+        </DropdownItem>
+        <DropdownItem key="iteration" className="capitalize">
+          Iteration
+        </DropdownItem>
       </DropdownMenu>
     </Dropdown>
   );

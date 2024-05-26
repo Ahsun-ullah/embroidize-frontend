@@ -6,11 +6,11 @@ const Pagination = ({ data, currentPage, setCurrentPage, perPageData }) => {
   };
 
   const handlePrevPage = () => {
-    setCurrentPage((prevPage) => prevPage - 1);
+    setCurrentPage((prevPage) => Math.max(prevPage - 1, 0));
   };
 
   const handleNextPage = () => {
-    setCurrentPage((prevPage) => prevPage + 1);
+    setCurrentPage((prevPage) => Math.min(prevPage + 1, totalPages - 1));
   };
 
   const totalPages = Math.ceil(data?.length / perPageData);
@@ -57,6 +57,8 @@ const Pagination = ({ data, currentPage, setCurrentPage, perPageData }) => {
             : "button"
         }
         onClick={() => handleClick(pageNumber - 1)}
+        role="button"
+        tabIndex={0}
       >
         {pageNumber}
       </li>
@@ -66,14 +68,24 @@ const Pagination = ({ data, currentPage, setCurrentPage, perPageData }) => {
   return (
     <div className="mt-16 me-5 text-lg">
       <ul className="flex justify-end gap-2">
-        {currentPage >= 0 && (
-          <li className="button" onClick={handlePrevPage}>
+        {currentPage > 0 && (
+          <li
+            className="button"
+            onClick={handlePrevPage}
+            role="button"
+            tabIndex={0}
+          >
             &laquo; Previous
           </li>
         )}
         {renderPageNumbers()}
-        {currentPage <= totalPages - 1 && (
-          <li className="button" onClick={handleNextPage}>
+        {currentPage < totalPages - 1 && (
+          <li
+            className="button"
+            onClick={handleNextPage}
+            role="button"
+            tabIndex={0}
+          >
             Next &raquo;
           </li>
         )}
