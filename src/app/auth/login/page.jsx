@@ -10,7 +10,7 @@ import {
 import Link from "next/link";
 import Footer from "../../../components/HomePage/Footer";
 import Header from "../../../components/HomePage/Header";
-import { googleLogin } from "../../actions/page";
+import { googleLogin } from "../../actions";
 
 const Login = () => {
   return (

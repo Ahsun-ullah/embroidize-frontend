@@ -4,5 +4,7 @@ import { signIn } from "../../auth";
 
 export async function googleLogin(formData) {
   const action = formData.get("action");
-  await signIn(action, { redirectTo: "/" });
+  if (action) {
+    await signIn(action, { redirectTo: "/" });
+  }
 }
