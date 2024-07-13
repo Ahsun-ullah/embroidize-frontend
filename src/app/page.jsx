@@ -1,13 +1,12 @@
 "use client ";
-import BlogSection from "@/components/HomePage/BlogSection";
-import CategorySection from "@/components/HomePage/CategorySection";
-import FaqSection from "@/components/HomePage/FaqSection";
-import Footer from "@/components/HomePage/Footer";
-import Header from "@/components/HomePage/Header";
-import HeroSection from "@/components/HomePage/HeroSection";
-import PopularDesign from "@/components/HomePage/PopularDesign";
-import RecentProductsSection from "@/components/HomePage/RecentProductsSection";
-import SubscribeSearchSection from "@/components/HomePage/SubscribeSearchSection";
+import CategorySection from "../components/HomePage/CategorySection";
+import Footer from "../components/HomePage/Footer";
+import Header from "../components/HomePage/Header";
+import HeroSection from "../components/HomePage/HeroSection";
+import PopularDesign from "../components/HomePage/PopularDesign";
+import RecentProductsSection from "../components/HomePage/RecentProductsSection";
+import SubscribeSearchSection from "../components/HomePage/SubscribeSearchSection";
+import BlogSection from "../components/HomePage/BlogSection";
 export default function Home() {
   return (
     <>

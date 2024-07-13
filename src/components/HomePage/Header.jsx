@@ -18,18 +18,35 @@ import {
 } from "@nextui-org/react";
 
 import Image from "next/image.js";
-import { useState } from "react";
+import { redirect } from "next/navigation";
+import { useEffect, useState } from "react";
 import logo from "../../../public/twitter-bird-logo-pictures-0.png";
+import { auth } from "../../auth";
 
-export default function Header() {
-  const [user, setUser] = useState("");
+const Header = () => {
+  const [session, setSession] = useState(null);
   const [isMenuOpen, setIsMenuOpen] = useState(false);
+
+  useEffect(() => {
+    const fetchSession = async () => {
+      const userSession = await auth();
+      setSession(userSession);
+    };
+
+    fetchSession();
+  }, []);
+
+  if (!session?.user) {
+    redirect("/");
+  }
+
   const menuItems = [
     { name: "Home", link: "/" },
     { name: "Pricing", link: "/pricing" },
     { name: "Contact", link: "/Contact" },
     { name: "About", link: "/About" },
   ];
+
   return (
     <Navbar isBordered shouldHideOnScroll onMenuOpenChange={setIsMenuOpen}>
       {/*  For Logo And Name  */}
@@ -69,23 +86,8 @@ export default function Header() {
       />
 
       {/* For Search  */}
-      <NavbarContent justify="end">
-        <NavbarContent className="" justify="end"></NavbarContent>
-        <NavbarItem>
-          <Button
-            as={Link}
-            color="primary"
-            href="/auth/login"
-            variant="flat"
-            size="sm"
-            radius="large"
-            className="text-black font-bold"
-          >
-            Sign In
-          </Button>
-        </NavbarItem>
-      </NavbarContent>
-      {user && (
+
+      {session ? (
         <div className="items-center" justify="end">
           <Dropdown placement="bottom-end" className="text-black">
             <DropdownTrigger>
@@ -105,7 +107,6 @@ export default function Header() {
                 key="profile"
                 className="h-14 gap-2 border-dashed"
               >
-                {/* <p className="font-semibold">Signed in as</p> */}
                 <p className="font-semibold">user name </p>
               </DropdownItem>
               <DropdownItem key="logout" isBordered className="p-2">
@@ -114,6 +115,23 @@ export default function Header() {
             </DropdownMenu>
           </Dropdown>
         </div>
+      ) : (
+        <NavbarContent justify="end">
+          <NavbarContent className="" justify="end"></NavbarContent>
+          <NavbarItem>
+            <Button
+              as={Link}
+              color="primary"
+              href="/auth/login"
+              variant="flat"
+              size="sm"
+              radius="large"
+              className="button text-black font-bold"
+            >
+              Sign In
+            </Button>
+          </NavbarItem>
+        </NavbarContent>
       )}
 
       <NavbarMenu className="sm:max-w-[4rem] bg-transparent">
@@ -141,4 +159,6 @@ export default function Header() {
       </NavbarMenu>
     </Navbar>
   );
-}
+};
+
+export default Header;

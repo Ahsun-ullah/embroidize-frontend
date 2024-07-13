@@ -8,9 +8,9 @@ import {
   Input,
 } from "@nextui-org/react";
 import Link from "next/link";
-import React from "react";
 import Footer from "../../../components/HomePage/Footer";
 import Header from "../../../components/HomePage/Header";
+import { googleLogin } from "../../actions/page";
 
 const Login = () => {
   return (
@@ -73,7 +73,7 @@ const Login = () => {
                 <input
                   type="submit"
                   value="Sign In"
-                  className="button bg-blue-500 hover:bg-blue-600 text-white w-full py-2 rounded-md"
+                  className="button font-semibold w-full py-2 rounded-md"
                 />
               </div>
             </form>
@@ -90,7 +90,19 @@ const Login = () => {
               </p>
             </div>
           </CardBody>
-          <CardFooter></CardFooter>
+          <CardFooter className="flex justify-center">
+            <form action={googleLogin}>
+              <button
+                className="button flex items-center justify-center mx-auto  hover:text-black font-bolder"
+                type="submit"
+                name="action"
+                value="google"
+              >
+                <i className="ri-google-fill  me-2 text-3xl "></i>
+                Sign In With Google
+              </button>
+            </form>
+          </CardFooter>
         </Card>
         <div className="text-center">
           <p className="mb-0">
