@@ -1,4 +1,3 @@
-"use client";
 import {
   Avatar,
   Button,
@@ -18,27 +17,13 @@ import {
 } from "@nextui-org/react";
 
 import Image from "next/image.js";
-import { redirect } from "next/navigation";
-import { useEffect, useState } from "react";
+import { useRouter } from "next/navigation";
+import { useState } from "react";
 import logo from "../../../public/twitter-bird-logo-pictures-0.png";
-import { auth } from "../../auth";
 
-const Header = () => {
-  const [session, setSession] = useState(null);
+const Header = ({ session }) => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
-
-  useEffect(() => {
-    const fetchSession = async () => {
-      const userSession = await auth();
-      setSession(userSession);
-    };
-
-    fetchSession();
-  }, []);
-
-  if (!session?.user) {
-    redirect("/");
-  }
+  const router = useRouter();
 
   const menuItems = [
     { name: "Home", link: "/" },
@@ -56,16 +41,21 @@ const Header = () => {
           className="sm:hidden  text-black "
         />
         <NavbarBrand>
-          <Image
-            src={logo}
-            width={30}
-            height={20}
-            alt="Logo"
-            className="mr-2 max-sm:hidden"
-          />
-          <p className="font-extrabold text-black max-sm:hidden me-10">
-            EmbroiD
-          </p>
+          <div
+            className="flex align-middle justify-center cursor-pointer"
+            onClick={() => router.push("/")}
+          >
+            <Image
+              src={logo}
+              width={30}
+              height={20}
+              alt="Logo"
+              className="mr-2 max-sm:hidden"
+            />
+            <p className="font-extrabold text-black max-sm:hidden me-10">
+              EmbroiD
+            </p>
+          </div>
         </NavbarBrand>
       </NavbarContent>
 
@@ -87,7 +77,7 @@ const Header = () => {
 
       {/* For Search  */}
 
-      {session ? (
+      {session?.user ? (
         <div className="items-center" justify="end">
           <Dropdown placement="bottom-end" className="text-black">
             <DropdownTrigger>
@@ -98,7 +88,7 @@ const Header = () => {
                 color="primary"
                 name="Jason Hughes"
                 size="sm"
-                src="/logo.png"
+                src={session?.user?.image}
               />
             </DropdownTrigger>
             <DropdownMenu>
@@ -107,7 +97,7 @@ const Header = () => {
                 key="profile"
                 className="h-14 gap-2 border-dashed"
               >
-                <p className="font-semibold">user name </p>
+                <p className="font-semibold">{session?.user?.name} </p>
               </DropdownItem>
               <DropdownItem key="logout" isBordered className="p-2">
                 Log Out

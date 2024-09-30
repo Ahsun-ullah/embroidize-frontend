@@ -8,8 +8,6 @@ import {
   Input,
 } from "@nextui-org/react";
 import Link from "next/link";
-import React from "react";
-import Footer from "../../../components/HomePage/Footer";
 import Header from "../../../components/HomePage/Header";
 
 const Login = () => {
@@ -101,7 +99,6 @@ const Login = () => {
           </p>
         </div>
       </div>
-      <Footer />
     </>
   );
 };

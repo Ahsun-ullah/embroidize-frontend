@@ -6,13 +6,10 @@ import { Providers } from "./providers";
 
 const inter = Inter({ subsets: ["latin"] });
 
-export const metadata = {
-  title: "EmbroiD",
-};
-
 export default function RootLayout({ children }) {
   return (
     <html lang="en">
+      <title>EmbroID</title>
       <Head>
         <link rel="icon" href="/favicon.ico" />
       </Head>

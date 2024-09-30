@@ -25,7 +25,7 @@ const HeroSection = () => {
                 }}
                 placeholder="Type to search..."
                 size="sm"
-                endContent={<i class="ri-search-eye-fill text-xl"></i>}
+                endContent={<i className="ri-search-eye-fill text-xl"></i>}
                 type="search"
               />
             </div>

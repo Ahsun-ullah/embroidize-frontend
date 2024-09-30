@@ -8,11 +8,16 @@ import {
   Input,
 } from "@nextui-org/react";
 import Link from "next/link";
-import Footer from "../../../components/HomePage/Footer";
 import Header from "../../../components/HomePage/Header";
 import { googleLogin } from "../../actions";
 
 const Login = () => {
+  //
+  const handleSubmit = (e) => {
+    e.preventDefault();
+    console.log("Login");
+  };
+
   return (
     <>
       <Header />
@@ -25,7 +30,7 @@ const Login = () => {
             </p>
           </CardHeader>
           <CardBody className="overflow-visible py-2">
-            <form onSubmit={"handleSubmit"}>
+            <form onSubmit={(e) => handleSubmit(e)}>
               <div className="mb-4">
                 <label htmlFor="email" className="form-label">
                   User Email
@@ -106,12 +111,11 @@ const Login = () => {
         </Card>
         <div className="text-center">
           <p className="mb-0">
-            &copy; {new Date().getFullYear()} EmbroiD. Crafted with{" "}
+            &copy; {new Date().getFullYear()} EmbroiD. Crafted{" "}
             <i className="mdi mdi-heart text-red-500"></i> by Ahsun
           </p>
         </div>
       </div>
-      <Footer />
     </>
   );
 };
