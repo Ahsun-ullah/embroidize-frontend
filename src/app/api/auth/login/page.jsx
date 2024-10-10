@@ -9,15 +9,8 @@ import {
 } from "@nextui-org/react";
 import Link from "next/link";
 import Header from "../../../../components/HomePage/Header";
-import { googleLogin } from "../../../actions";
 
 const Login = () => {
-  //
-  const handleSubmit = (e) => {
-    e.preventDefault();
-    console.log("Login");
-  };
-
   return (
     <>
       <Header />
@@ -30,14 +23,14 @@ const Login = () => {
             </p>
           </CardHeader>
           <CardBody className="overflow-visible py-2">
-            <form onSubmit={(e) => handleSubmit(e)}>
+            <form onSubmit={"handleSubmit"} action={""}>
               <div className="mb-4">
                 <label htmlFor="email" className="form-label">
                   User Email
                 </label>
                 <Input
-                  onChange={(e) => setEmail(e.target.value)}
                   type="email"
+                  name="email"
                   className="form-control mt-2"
                   placeholder="Enter Your Email"
                 />
@@ -57,8 +50,8 @@ const Login = () => {
                 </label>
                 <div className="relative">
                   <Input
-                    onChange={(e) => handleChange(e)}
                     type="password"
+                    name="password"
                     className="form-control password-input mt-2"
                     placeholder="Enter password"
                     aria-describedby="passwordInput"
@@ -77,7 +70,7 @@ const Login = () => {
               <div>
                 <input
                   type="submit"
-                  value="Sign In"
+                  value="Login"
                   className="button font-semibold w-full py-2 rounded-md"
                 />
               </div>
@@ -90,13 +83,13 @@ const Login = () => {
                   href="/auth/register"
                   className="font-semibold ml-1 text-blue-500 underline"
                 >
-                  Signup
+                  Register
                 </Link>
               </p>
             </div>
           </CardBody>
           <CardFooter className="flex justify-center">
-            <form action={googleLogin}>
+            <form action={"googleLogin"}>
               <button
                 className="button flex items-center justify-center mx-auto  hover:text-black font-bolder"
                 type="submit"
