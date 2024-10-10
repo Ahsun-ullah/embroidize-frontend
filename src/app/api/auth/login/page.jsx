@@ -8,8 +8,8 @@ import {
   Input,
 } from "@nextui-org/react";
 import Link from "next/link";
-import Header from "../../../components/HomePage/Header";
-import { googleLogin } from "../../actions";
+import Header from "../../../../components/HomePage/Header";
+import { googleLogin } from "../../../actions";
 
 const Login = () => {
   //

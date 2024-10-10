@@ -1,16 +1,29 @@
 /* eslint-disable react/no-unescaped-entities */
 "use client";
-import {
-  Card,
-  CardBody,
-  CardFooter,
-  CardHeader,
-  Input,
-} from "@nextui-org/react";
+import { Card, CardBody, CardHeader, Input } from "@nextui-org/react";
 import Link from "next/link";
-import Header from "../../../components/HomePage/Header";
+import Header from "../../../../components/HomePage/Header";
 
-const Login = () => {
+const Register = () => {
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    const newUser = {
+      name: e.target.username.value,
+      email: e.target.email.value,
+      password: e.target.password.value,
+    };
+
+    const response = await fetch(
+      "http://localhost:3000/api/auth/register/new-user",
+      {
+        method: "POST",
+        body: JSON.stringify(newUser),
+        headers: { "content-type": "application/json" },
+      }
+    );
+
+    console.log(response);
+  };
   return (
     <>
       <Header />
@@ -23,14 +36,14 @@ const Login = () => {
             </p>
           </CardHeader>
           <CardBody className="overflow-visible py-2">
-            <form onSubmit={"handleSubmit"}>
+            <form onSubmit={handleSubmit} action={""}>
               <div className="mb-4">
                 <label htmlFor="username" className="form-label">
                   User Name
                 </label>
                 <Input
-                  onChange={(e) => setUserName(e.target.value)}
                   type="text"
+                  name="username"
                   className="form-control mt-2"
                   placeholder="Enter Your FullName"
                 />
@@ -40,8 +53,8 @@ const Login = () => {
                   Email
                 </label>
                 <Input
-                  onChange={(e) => setEmail(e.target.value)}
                   type="email"
+                  name="email"
                   className="form-control mt-2"
                   placeholder="Enter Your Email"
                 />
@@ -52,8 +65,8 @@ const Login = () => {
                 </label>
                 <div className="relative">
                   <Input
-                    onChange={(e) => handleChange(e)}
                     type="password"
+                    name="password"
                     className="form-control password-input mt-2"
                     placeholder="Enter password"
                     aria-describedby="passwordInput"
@@ -90,7 +103,6 @@ const Login = () => {
               </p>
             </div>
           </CardBody>
-          <CardFooter></CardFooter>
         </Card>
         <div className="text-center">
           <p className="mb-0">
@@ -103,4 +115,4 @@ const Login = () => {
   );
 };
 
-export default Login;
+export default Register;
