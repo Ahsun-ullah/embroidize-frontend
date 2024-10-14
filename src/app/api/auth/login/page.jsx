@@ -7,10 +7,35 @@ import {
   CardHeader,
   Input,
 } from "@nextui-org/react";
+import { signIn } from "next-auth/react";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
+import { useState } from "react";
 import Header from "../../../../components/HomePage/Header";
 
 const Login = () => {
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [error, setError] = useState(null);
+  const router = useRouter();
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    setError(null); // Reset error state on submit
+
+    const res = await signIn("credentials", {
+      redirect: false,
+      email,
+      password,
+    });
+
+    if (res.ok) {
+      router.push("/"); // Redirect to home on successful login
+    } else {
+      setError("Invalid credentials. Please try again."); // Set error message
+    }
+  };
+
   return (
     <>
       <Header />
@@ -23,64 +48,45 @@ const Login = () => {
             </p>
           </CardHeader>
           <CardBody className="overflow-visible py-2">
-            <form onSubmit={"handleSubmit"} action={""}>
+            <form onSubmit={handleSubmit}>
               <div className="mb-4">
                 <label htmlFor="email" className="form-label">
                   User Email
                 </label>
                 <Input
                   type="email"
-                  name="email"
                   className="form-control mt-2"
                   placeholder="Enter Your Email"
+                  onChange={(e) => setEmail(e.target.value)}
+                  required
                 />
               </div>
               <div className="mb-6">
-                <div className="text-right">
-                  <div
-                    style={{ cursor: "pointer" }}
-                    onClick={() => togOpenModal()}
-                    className="text-blue-500 font-semibold underline"
-                  >
-                    Forgot password?
-                  </div>
-                </div>
                 <label className="form-label" htmlFor="password-input">
                   Password
                 </label>
-                <div className="relative">
-                  <Input
-                    type="password"
-                    name="password"
-                    className="form-control password-input mt-2"
-                    placeholder="Enter password"
-                    aria-describedby="passwordInput"
-                    required
-                  />
-                  <button
-                    className="absolute inset-y-0 right-0 flex items-center pr-3 text-gray-500"
-                    type="button"
-                    style={{ backgroundColor: "transparent" }}
-                  >
-                    <i></i>
-                  </button>
-                </div>
+                <Input
+                  type="password"
+                  className="form-control password-input mt-2"
+                  placeholder="Enter password"
+                  onChange={(e) => setPassword(e.target.value)}
+                  required
+                />
               </div>
-
+              {error && <p className="text-red-500 text-sm">{error}</p>}
               <div>
                 <input
                   type="submit"
                   value="Login"
-                  className="button font-semibold w-full py-2 rounded-md"
+                  className="button font-semibold w-full py-2 rounded-md bg-blue-500 hover:bg-blue-600 text-white"
                 />
               </div>
             </form>
-
             <div className="mt-5 text-center">
               <p className="mb-0">
                 Don't have an account?
                 <Link
-                  href="/auth/register"
+                  href="/api/auth/register"
                   className="font-semibold ml-1 text-blue-500 underline"
                 >
                   Register
@@ -89,17 +95,14 @@ const Login = () => {
             </div>
           </CardBody>
           <CardFooter className="flex justify-center">
-            <form action={"googleLogin"}>
-              <button
-                className="button flex items-center justify-center mx-auto  hover:text-black font-bolder"
-                type="submit"
-                name="action"
-                value="google"
-              >
-                <i className="ri-google-fill  me-2 text-3xl "></i>
-                Sign In With Google
-              </button>
-            </form>
+            <button
+              className="button flex items-center justify-center mx-auto hover:text-black font-bold"
+              type="button"
+              onClick={() => signIn("google")}
+            >
+              <i className="ri-google-fill me-2 text-3xl"></i> Sign In With
+              Google
+            </button>
           </CardFooter>
         </Card>
         <div className="text-center">

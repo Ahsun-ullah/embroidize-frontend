@@ -1,29 +1,55 @@
 /* eslint-disable react/no-unescaped-entities */
 "use client";
 import { Card, CardBody, CardHeader, Input } from "@nextui-org/react";
+import { signIn } from "next-auth/react";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
+import { useState } from "react";
 import Header from "../../../../components/HomePage/Header";
 
 const Register = () => {
+  const [error, setError] = useState("");
+  const router = useRouter();
+
   const handleSubmit = async (e) => {
     e.preventDefault();
+    setError("");
     const newUser = {
       name: e.target.username.value,
       email: e.target.email.value,
       password: e.target.password.value,
     };
 
-    const response = await fetch(
-      "http://localhost:3000/api/auth/register/new-user",
-      {
+    try {
+      const response = await fetch("/api/auth/register/new-user", {
         method: "POST",
         body: JSON.stringify(newUser),
-        headers: { "content-type": "application/json" },
-      }
-    );
+        headers: { "Content-Type": "application/json" },
+      });
 
-    console.log(response);
+      if (response.ok) {
+        // Registration successful, attempt to sign in
+        const loginResponse = await signIn("credentials", {
+          redirect: false,
+          email: newUser.email,
+          password: newUser.password,
+        });
+
+        if (!loginResponse.error) {
+          router.push("/"); // Redirect to home page
+        } else {
+          setError("Login failed after registration.");
+        }
+      } else {
+        const result = await response.json();
+        setError(result.message || "Registration failed.");
+      }
+    } catch (error) {
+      console.error("Registration error:", error); // Log for debugging
+      setError("An error occurred. Please try again.");
+    }
   };
+
   return (
     <>
       <Header />
@@ -32,11 +58,12 @@ const Register = () => {
           <CardHeader className="flex flex-col items-start">
             <h4 className="font-bold text-xl mb-3">Hello!</h4>
             <p className="text-sm uppercase font-bold">
-              Please Fill The All Fields For Registration.
+              Please fill all fields for registration.
             </p>
           </CardHeader>
           <CardBody className="overflow-visible py-2">
-            <form onSubmit={handleSubmit} action={""}>
+            {error && <p className="text-red-500">{error}</p>}
+            <form onSubmit={handleSubmit}>
               <div className="mb-4">
                 <label htmlFor="username" className="form-label">
                   User Name
@@ -45,7 +72,8 @@ const Register = () => {
                   type="text"
                   name="username"
                   className="form-control mt-2"
-                  placeholder="Enter Your FullName"
+                  placeholder="Enter your full name"
+                  required
                 />
               </div>
               <div className="mb-4">
@@ -56,30 +84,21 @@ const Register = () => {
                   type="email"
                   name="email"
                   className="form-control mt-2"
-                  placeholder="Enter Your Email"
+                  placeholder="Enter your email"
+                  required
                 />
               </div>
               <div className="mb-6">
                 <label className="form-label" htmlFor="password-input">
                   Password
                 </label>
-                <div className="relative">
-                  <Input
-                    type="password"
-                    name="password"
-                    className="form-control password-input mt-2"
-                    placeholder="Enter password"
-                    aria-describedby="passwordInput"
-                    required
-                  />
-                  <button
-                    className="absolute inset-y-0 right-0 flex items-center pr-3 text-gray-500"
-                    type="button"
-                    style={{ backgroundColor: "transparent" }}
-                  >
-                    <i></i>
-                  </button>
-                </div>
+                <Input
+                  type="password"
+                  name="password"
+                  className="form-control password-input mt-2"
+                  placeholder="Enter password"
+                  required
+                />
               </div>
 
               <div>
@@ -95,10 +114,10 @@ const Register = () => {
               <p className="mb-0">
                 Already have an account?
                 <Link
-                  href="/auth/login"
+                  href="/api/auth/login"
                   className="font-semibold ms-1 text-blue-500 underline"
                 >
-                  SignIn
+                  Sign In
                 </Link>
               </p>
             </div>

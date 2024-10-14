@@ -113,7 +113,7 @@ const Header = ({ session }) => {
             <Button
               as={Link}
               color="primary"
-              href="/auth/login"
+              href="/api/auth/login"
               variant="flat"
               size="sm"
               radius="large"
