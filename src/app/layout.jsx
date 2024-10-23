@@ -1,9 +1,9 @@
 import { Inter } from "next/font/google";
 import "remixicon/fonts/remixicon.css";
-import AuthProviders from "./AuthProviders";
+import { AuthProvider } from "../lib/providers/AuthProvider";
+import { StoreProvider } from "../lib/providers/StoreProvider";
+import { UiProvider } from "../lib/providers/UiProvider";
 import "./globals.css";
-import { Providers } from "./providers";
-import StoreProvider from "./StoreProvider";
 
 const inter = Inter({ subsets: ["latin"] });
 
@@ -15,13 +15,13 @@ export default function RootLayout({ children }) {
         <link rel="icon" href="/favicon.ico" />
       </head>
       <body className={inter.className}>
-        <AuthProviders>
+        <AuthProvider>
           <StoreProvider>
-            <Providers>
+            <UiProvider>
               <main className="min-h-screen">{children}</main>
-            </Providers>
+            </UiProvider>
           </StoreProvider>
-        </AuthProviders>
+        </AuthProvider>
       </body>
     </html>
   );
