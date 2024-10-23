@@ -1,8 +1,8 @@
 import { Inter } from "next/font/google";
 import "remixicon/fonts/remixicon.css";
-import { AuthProvider } from "../lib/providers/AuthProvider";
-import { StoreProvider } from "../lib/providers/StoreProvider";
-import { UiProvider } from "../lib/providers/UiProvider";
+import AuthProvider from "../lib/providers/AuthProvider";
+import StoreProvider from "../lib/providers/StoreProvider";
+import UiProvider from "../lib/providers/UiProvider";
 import "./globals.css";
 
 const inter = Inter({ subsets: ["latin"] });

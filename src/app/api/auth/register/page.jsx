@@ -28,7 +28,6 @@ const Register = () => {
       });
 
       if (response.ok) {
-        // Registration successful, attempt to sign in
         const loginResponse = await signIn("credentials", {
           redirect: false,
           email: newUser.email,
@@ -36,7 +35,6 @@ const Register = () => {
         });
 
         if (!loginResponse.error) {
-          router.push("/"); // Redirect to home page
         } else {
           setError("Login failed after registration.");
         }
@@ -45,7 +43,7 @@ const Register = () => {
         setError(result.message || "Registration failed.");
       }
     } catch (error) {
-      console.error("Registration error:", error); // Log for debugging
+      console.error("Registration error:", error); 
       setError("An error occurred. Please try again.");
     }
   };

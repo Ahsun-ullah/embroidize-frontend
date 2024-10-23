@@ -21,7 +21,7 @@ const Login = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    setError(null); // Reset error state on submit
+    setError(null); 
 
     const res = await signIn("credentials", {
       redirect: false,
@@ -30,9 +30,9 @@ const Login = () => {
     });
 
     if (res.ok) {
-      router.push("/"); // Redirect to home on successful login
+      router.push("/"); 
     } else {
-      setError("Invalid credentials. Please try again."); // Set error message
+      setError("Invalid credentials. Please try again.");
     }
   };
 

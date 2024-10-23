@@ -2,7 +2,6 @@
 
 import { useSession } from "next-auth/react";
 import { useRouter } from "next/navigation";
-import { useEffect } from "react";
 import BlogSection from "../components/HomePage/BlogSection";
 import CategorySection from "../components/HomePage/CategorySection";
 import Footer from "../components/HomePage/Footer";
@@ -16,11 +15,11 @@ export default function Home() {
   const { data: session, status } = useSession();
   const router = useRouter();
 
-  useEffect(() => {
-    if (status === "unauthenticated") {
-      router.push("/api/auth/login");
-    }
-  }, [status, router]);
+  // useEffect(() => {
+  //   if (status === "unauthenticated") {
+  //     router.push("/api/auth/login");
+  //   }
+  // }, [status, router]);
 
   if (status === "loading") {
     return <div>Loading...</div>;
@@ -30,8 +29,8 @@ export default function Home() {
 
   return (
     <>
-      <Header session={session} />
-      {/* <Header /> */}
+      {/* <Header session={session} /> */}
+      <Header />
       {/* Hero Section */}
       <HeroSection />
       {/* For Category section */}
