@@ -1,32 +1,32 @@
-"use client";
-import Link from "next/link";
-import CardSlider from "../Common/CardSlider";
+'use client';
+import Link from 'next/link';
+import CardSlider from '../../Common/CardSlider';
 
 const CategorySection = () => {
   const cardData = [
     {
-      avatarSrc: "/blog.jpg",
-      title: "Animal",
+      avatarSrc: '/blog.jpg',
+      title: 'Animal',
     },
     {
-      avatarSrc: "/images.jpg",
-      title: "Flowers",
+      avatarSrc: '/images.jpg',
+      title: 'Flowers',
     },
     {
-      avatarSrc: "/category.jpg",
-      title: "Kids",
+      avatarSrc: '/category.jpg',
+      title: 'Kids',
     },
     {
-      avatarSrc: "/category.jpg",
-      title: "Travel",
+      avatarSrc: '/category.jpg',
+      title: 'Travel',
     },
     {
-      avatarSrc: "/category.jpg",
-      title: "Monogram",
+      avatarSrc: '/category.jpg',
+      title: 'Monogram',
     },
     {
-      avatarSrc: "/category.jpg",
-      title: "Others",
+      avatarSrc: '/category.jpg',
+      title: 'Others',
     },
   ];
 
@@ -38,7 +38,7 @@ const CategorySection = () => {
             Sign up for 10 free-forever daily downloads and never miss out!
           </h3>
           <Link
-            href={""}
+            href={''}
             className="bg-black rounded-md hover:bg-blue-400 text-white font-normal px-4 py-2 text-sm"
           >
             Sign Up For Free

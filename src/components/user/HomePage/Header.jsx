@@ -1,4 +1,4 @@
-"use client";
+'use client';
 import {
   Avatar,
   Button,
@@ -15,22 +15,22 @@ import {
   NavbarMenu,
   NavbarMenuItem,
   NavbarMenuToggle,
-} from "@nextui-org/react";
+} from '@nextui-org/react';
 
-import Image from "next/image.js";
-import { useRouter } from "next/navigation";
-import { useState } from "react";
-import logo from "../../../public/twitter-bird-logo-pictures-0.png";
+import Image from 'next/image.js';
+import { useRouter } from 'next/navigation';
+import { useState } from 'react';
+import { headerLogo } from '../../../lib/datas/page';
 
 const Header = ({ session }) => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const router = useRouter();
 
   const menuItems = [
-    { name: "Home", link: "/" },
-    { name: "Pricing", link: "/pricing" },
-    { name: "Contact", link: "/Contact" },
-    { name: "About", link: "/About" },
+    { name: 'Home', link: '/' },
+    { name: 'Pricing', link: '/pricing' },
+    { name: 'Contact', link: '/Contact' },
+    { name: 'About', link: '/About' },
   ];
 
   return (
@@ -38,16 +38,16 @@ const Header = ({ session }) => {
       {/*  For Logo And Name  */}
       <NavbarContent justify="start">
         <NavbarMenuToggle
-          aria-label={isMenuOpen ? "Close menu" : "Open menu"}
+          aria-label={isMenuOpen ? 'Close menu' : 'Open menu'}
           className="sm:hidden  text-black "
         />
         <NavbarBrand>
           <div
             className="flex align-middle justify-center cursor-pointer"
-            onClick={() => router.push("/")}
+            onClick={() => router.push('/')}
           >
             <Image
-              src={logo}
+              src={headerLogo}
               width={30}
               height={20}
               alt="Logo"
@@ -61,14 +61,14 @@ const Header = ({ session }) => {
       </NavbarContent>
 
       <Input
-        style={{ width: "100%" }}
+        style={{ width: '100%' }}
         isBordered
         classNames={{
-          base: " h-10 ",
-          mainWrapper: "h-full",
-          input: "text-small",
+          base: ' h-10 ',
+          mainWrapper: 'h-full',
+          input: 'text-small',
           inputWrapper:
-            " h-full font-normal text-default-500 bg-default-200/20 border",
+            ' h-full font-normal text-default-500 bg-default-200/20 border',
         }}
         placeholder="Type to search..."
         size="md"
@@ -129,7 +129,7 @@ const Header = ({ session }) => {
         <div className="flex">
           <Link href="/">
             <Image
-              src={logo}
+              src={headerLogo}
               width={30}
               height={20}
               alt="Logo"
