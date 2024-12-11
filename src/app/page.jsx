@@ -12,7 +12,6 @@ import SubscribeSearchSection from "../components/user/HomePage/SubscribeSearchS
 export default function Home() {
   return (
     <>
-      {/* <Header session={session} /> */}
       <Header />
       {/* Hero Section */}
       <HeroSection />

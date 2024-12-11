@@ -1,10 +1,7 @@
 'use client';
 import Link from 'next/link';
-import { useState } from 'react';
 
-export default function AdminSidebar() {
-  const [isCollapsed, setIsCollapsed] = useState(false);
-
+export default function AdminSidebar({ isCollapsed, setIsCollapsed }) {
   return (
     <div className={`admin-sidebar ${isCollapsed ? 'collapsed' : ''}`}>
       <button
