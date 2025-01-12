@@ -16,9 +16,9 @@ import {
 import Image from "next/image";
 import React from "react";
 import SecondHeader from "../../../../components/Common/SecondHeader";
-import Footer from "../../../../components/HomePage/Footer";
-import Header from "../../../../components/HomePage/Header";
-import SubscribeSearchSection from "../../../../components/HomePage/SubscribeSearchSection";
+import Header from "../../../../components/user/HomePage/Header";
+import SubscribeSearchSection from "../../../../components/user/HomePage/SubscribeSearchSection";
+import Footer from "../../../../components/user/HomePage/Footer";
 
 const ProductDetails = () => {
   const items = [

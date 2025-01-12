@@ -4,8 +4,8 @@ import Image from "next/image";
 import Link from "next/link";
 import React, { useState } from "react";
 import Pagination from "../../../../components/Common/Pagination";
-import Footer from "../../../../components/HomePage/Footer";
-import Header from "../../../../components/HomePage/Header";
+import Header from "../../../../components/user/HomePage/Header";
+import Footer from "../../../../components/user/HomePage/Footer";
 
 const CategoryProducts = () => {
   const [currentPage, setCurrentPage] = useState(0);
