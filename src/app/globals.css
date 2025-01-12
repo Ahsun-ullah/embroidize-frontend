@@ -63,14 +63,16 @@ body {
 .admin-main {
   display: flex;
   flex: 1;
-  height: calc(100vh - 80px);
+  top: 5%;
+  right: 20%;
+  bottom: 5%;
+  left: 20%;
   position: relative;
-  left: 240px !important;
   transition: left 0.4s ease;
 }
 
 .admin-main.collapsed {
-  left: 80px !important;
+  left: 20%;
 }
 
 .admin-content {
@@ -83,24 +85,23 @@ body {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  width: 100%;
   background-color: #333;
+  padding: 1% 21% 1% 1%;
   color: white;
-  text-align: center;
-  padding: 1rem 20vh 1rem 20vh;
   position: relative;
-  left: 240px !important;
+  left: 20%;
   transition: left 0.4s ease;
 }
 
 .admin-header.collapsed {
-  left: 80px !important;
+  left: 5%;
+  padding: 1% 6% 1% 1%;
 }
 
 .admin-sidebar {
   background-color: #2c3e50;
   color: white;
-  width: 240px;
+  width: 20%;
   padding: 1rem;
   transition: width 0.4s ease;
   height: 100vh;
@@ -110,7 +111,7 @@ body {
 }
 
 .admin-sidebar.collapsed {
-  width: 80px;
+  width: 5%;
 }
 
 .admin-sidebar ul {
@@ -149,14 +150,15 @@ body {
   background-color: #333;
   color: white;
   text-align: center;
-  padding: 1rem;
+  padding: 1% 21% 1% 1%;
   position: relative;
-  left: 240px !important;
+  left: 20%;
   transition: left 0.4s ease;
 }
 
 .admin-footer.collapsed {
-  left: 80px !important;
+  padding: 1% 21% 1% 1%;
+  left: 5%;
 }
 
 .admin-footer p {
@@ -169,9 +171,6 @@ body {
   border: none;
   font-size: 1.5rem;
   cursor: pointer;
-  margin-bottom: 1rem;
-  display: block;
-  margin-left: auto;
 }
 
 /* Responsive Design */
@@ -201,7 +200,7 @@ body {
   }
 
   .sidebar-text {
-    display: none; /* Hide text on very small screens */
+    display: none;
   }
 
   .admin-sidebar.collapsed .sidebar-text {
