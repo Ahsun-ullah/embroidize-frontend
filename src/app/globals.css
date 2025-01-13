@@ -72,7 +72,7 @@ body {
 }
 
 .admin-main.collapsed {
-  left: 20%;
+  left: 5%;
 }
 
 .admin-content {
@@ -146,7 +146,7 @@ body {
 .admin-footer {
   display: flex;
   align-items: center;
-  justify-content: start;
+  justify-content: flex-start;
   background-color: #333;
   color: white;
   text-align: center;

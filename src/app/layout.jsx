@@ -1,11 +1,9 @@
-import { Inter } from "next/font/google";
-import "remixicon/fonts/remixicon.css";
-import AuthProvider from "../lib/providers/AuthProvider";
-import StoreProvider from "../lib/providers/StoreProvider";
-import UiProvider from "../lib/providers/UiProvider";
-import "./globals.css";
+import { Inter } from 'next/font/google';
+import 'remixicon/fonts/remixicon.css';
+import UiProvider from '../lib/providers/UiProvider';
+import './globals.css';
 
-const inter = Inter({ subsets: ["latin"] });
+const inter = Inter({ subsets: ['latin'] });
 
 export default function RootLayout({ children }) {
   return (
@@ -14,14 +12,12 @@ export default function RootLayout({ children }) {
         <title>EmbroID</title>
         <link rel="icon" href="/favicon.ico" />
       </head>
-      <body className={inter.className}>
-        <AuthProvider>
-          <StoreProvider>
-            <UiProvider>
-              <main className="min-h-screen">{children}</main>
-            </UiProvider>
-          </StoreProvider>
-        </AuthProvider>
+      <body className={inter.className} suppressHydrationWarning={true}>
+        {/* <StoreProvider> */}
+        <UiProvider>
+          <main className="min-h-screen">{children}</main>
+        </UiProvider>
+        {/* </StoreProvider> */}
       </body>
     </html>
   );

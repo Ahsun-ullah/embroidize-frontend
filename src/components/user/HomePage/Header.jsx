@@ -47,6 +47,10 @@ const Header = ({ session }) => {
             onClick={() => router.push('/')}
           >
             <Image
+              style={{
+                height: 'auto',
+                width: 'auto',
+              }}
               src={headerLogo}
               width={30}
               height={20}
@@ -113,7 +117,7 @@ const Header = ({ session }) => {
             <Button
               as={Link}
               color="primary"
-              href="/api/auth/login"
+              href="/auth/login"
               variant="flat"
               size="sm"
               radius="large"

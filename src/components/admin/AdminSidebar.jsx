@@ -1,4 +1,5 @@
 'use client';
+import { Tooltip } from '@nextui-org/react';
 import Image from 'next/image';
 import Link from 'next/link';
 
@@ -8,10 +9,32 @@ export default function AdminSidebar({ isCollapsed, setIsCollapsed }) {
       <div className="flex items-center justify-between mb-8">
         {!isCollapsed ? (
           <Link href={'/admin'} className="sidebar-text">
-            <Image src={'/twitter-bird-logo-pictures-0.png'} alt='logo' width={50} height={50} />
+            <Image
+              style={{
+                height: 'auto',
+                width: 'auto',
+              }}
+              src={'/twitter-bird-logo-pictures-0.png'}
+              alt="logo"
+              width={20}
+              height={50}
+            />
           </Link>
         ) : (
-          '*'
+          <Tooltip content={'Logo'}>
+            <Link href={'/admin'} className="sidebar-text me-2">
+              <Image
+                style={{
+                  height: 'auto',
+                  width: 'auto',
+                }}
+                src={'/twitter-bird-logo-pictures-0.png'}
+                alt="logo"
+                width={20}
+                height={50}
+              />
+            </Link>
+          </Tooltip>
         )}
         <button
           onClick={() => setIsCollapsed(!isCollapsed)}
@@ -24,20 +47,72 @@ export default function AdminSidebar({ isCollapsed, setIsCollapsed }) {
         <li>
           <Link href="/admin">
             {!isCollapsed ? (
-              <span className="sidebar-text">Dashboard</span>
+              <span className="sidebar-text ">
+                <i className="ri-dashboard-fill me-2"></i>
+                Dashboard
+              </span>
             ) : (
-              '*'
+              <Tooltip content={'Dashboard'}>
+                <i className="ri-dashboard-fill "></i>
+              </Tooltip>
             )}
           </Link>
         </li>
         <li>
-          <Link href="/admin/users">Users</Link>
+          <Link href="/admin/users">
+            {!isCollapsed ? (
+              <span className="sidebar-text ">
+                <i className="ri-dashboard-fill me-2"></i>
+                Users
+              </span>
+            ) : (
+              <Tooltip content={'Users'}>
+                <i className="ri-group-fill "></i>
+              </Tooltip>
+            )}
+          </Link>
         </li>
         <li>
-          <Link href="/admin/settings">Settings</Link>
+          <Link href="/admin/add-products">
+            {!isCollapsed ? (
+              <span className="sidebar-text ">
+                <i className="ri-add-box-fill me-2"></i>
+                Add Product
+              </span>
+            ) : (
+              <Tooltip content={'Add Products'}>
+                <i className="ri-add-box-fill"></i>
+              </Tooltip>
+            )}
+          </Link>
         </li>
         <li>
-          <Link href="/admin/reports">Reports</Link>
+          <Link href="/admin/all-products">
+            {!isCollapsed ? (
+              <span className="sidebar-text ">
+                <i className="ri-list-check me-2"></i>
+                All Product
+              </span>
+            ) : (
+              <Tooltip content={' All Product'}>
+                <i className="ri-list-check"></i>
+              </Tooltip>
+            )}
+          </Link>
+        </li>
+        <li>
+          <Link href="/admin/settings">
+            {!isCollapsed ? (
+              <span className="sidebar-text ">
+                <i className="ri-settings-fill me-2"></i>
+                Settings
+              </span>
+            ) : (
+              <Tooltip content={'Settings'}>
+                <i className="ri-settings-fill"></i>
+              </Tooltip>
+            )}
+          </Link>
         </li>
       </ul>
     </div>
