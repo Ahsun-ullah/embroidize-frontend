@@ -12,7 +12,7 @@ import {
   DropdownItem,
   DropdownMenu,
   DropdownTrigger,
-} from "@nextui-org/react";
+} from "@heroui/react";
 import Image from "next/image";
 import React from "react";
 import SecondHeader from "../../../../components/Common/SecondHeader";

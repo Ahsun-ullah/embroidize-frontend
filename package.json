@@ -1,39 +1,32 @@
 {
-  "name": "embrod-sign",
+  "name": "embro-id",
   "version": "0.1.0",
   "private": true,
   "scripts": {
-    "dev": "next dev -H 0.0.0.0 -p 3001",
+    "dev": "next dev --turbopack",
     "build": "next build",
     "start": "next start",
-    "lint": "next lint",
-    "prettier": "prettier --write ."
+    "lint": "next lint"
   },
   "dependencies": {
-    "@nextui-org/react": "^2.2.9",
-    "@reduxjs/toolkit": "^2.2.7",
-    "bcryptjs": "^2.4.3",
-    "framer-motion": "^11.0.5",
-    "mongodb": "^6.9.0",
-    "next": "14.1.0",
-    "next-auth": "^4.24.8",
-    "react": "^18",
-    "react-dom": "^18",
-    "react-redux": "^9.1.2",
-    "remixicon": "^4.1.0",
-    "sharp": "^0.33.5",
-    "swiper": "^11.0.7"
+    "@heroui/react": "^2.7.5",
+    "@reduxjs/toolkit": "^2.6.1",
+    "framer-motion": "^12.5.0",
+    "next": "15.2.2",
+    "next-themes": "^0.4.6",
+    "react": "^19.0.0",
+    "react-dom": "^19.0.0",
+    "react-redux": "^9.2.0",
+    "remixicon": "^4.6.0",
+    "swiper": "^11.2.5"
   },
   "devDependencies": {
-    "@types/bcryptjs": "^2.4.6",
-    "@types/node": "^20.14.10",
-    "@types/react": "^18.3.3",
-    "autoprefixer": "^10.0.1",
-    "eslint": "^8",
-    "eslint-config-next": "14.1.0",
-    "postcss": "^8",
-    "prettier": "^3.4.2",
-    "tailwindcss": "^3.4.1",
-    "typescript": "^5.7.2"
+    "@eslint/eslintrc": "^3",
+    "@tailwindcss/postcss": "^4",
+    "autoprefixer": "^10.4.21",
+    "eslint": "^9",
+    "eslint-config-next": "15.2.2",
+    "postcss": "^8.5.3",
+    "tailwindcss": "^3.4.17"
   }
 }

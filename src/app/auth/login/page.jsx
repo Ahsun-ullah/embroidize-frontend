@@ -1,20 +1,14 @@
 /* eslint-disable react/no-unescaped-entities */
-'use client';
-import {
-  Card,
-  CardBody,
-  CardFooter,
-  CardHeader,
-  Input,
-} from '@nextui-org/react';
-import Link from 'next/link';
-import { useRouter } from 'next/navigation';
-import { useState } from 'react';
-import Header from '../../../components/user/HomePage/Header';
+"use client";
+import { Card, CardBody, CardFooter, CardHeader, Input } from "@heroui/react";
+import Link from "next/link";
+import { useRouter } from "next/navigation";
+import { useState } from "react";
+import Header from "../../../components/user/HomePage/Header";
 
 const Login = () => {
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
   const [error, setError] = useState(null);
   const router = useRouter();
 
@@ -94,7 +88,7 @@ const Login = () => {
         </Card>
         <div className="text-center">
           <p className="mb-0">
-            &copy; {new Date().getFullYear()} EmbroID. Crafted{' '}
+            &copy; {new Date().getFullYear()} EmbroID. Crafted{" "}
             <i className="mdi mdi-heart text-red-500"></i> by Ahsun
           </p>
         </div>

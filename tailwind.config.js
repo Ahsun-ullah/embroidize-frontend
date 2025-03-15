@@ -1,21 +1,21 @@
-import { nextui } from "@nextui-org/react";
+// tailwind.config.js
+import { heroui } from "@heroui/react";
 
 /** @type {import('tailwindcss').Config} */
-module.exports = {
+const config = {
   content: [
-    "./src/**/*.{html,js,jsx}",
-    "./pages/**/*.{js,ts,jsx,tsx}",
-    "./app/**/*.{js,ts,jsx,tsx}",
-    "./components/**/*.{js,ts,jsx,tsx}",
-    "./node_modules/@nextui-org/theme/dist/**/*.{js,ts,jsx,tsx}",
+    "./app/**/*.{js,ts,jsx,tsx,mdx}",
+    "./pages/**/*.{js,ts,jsx,tsx,mdx}",
+    "./components/**/*.{js,ts,jsx,tsx,mdx}",
+    "./src/**/*.{js,ts,jsx,tsx,mdx}",
+    // make sure it's pointing to the ROOT node_module
+    "./node_modules/@heroui/theme/dist/**/*.{js,ts,jsx,tsx}",
   ],
   theme: {
-    extend: {
-      textColor: {
-        "regal-blue": "#243c5a",
-      },
-    },
+    extend: {},
   },
   darkMode: "class",
-  plugins: [nextui()],
+  plugins: [heroui()],
 };
+
+export default config;

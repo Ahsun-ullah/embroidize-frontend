@@ -1,159 +1,197 @@
-'use client';
 import {
-  Avatar,
-  Button,
-  Dropdown,
-  DropdownItem,
-  DropdownMenu,
-  DropdownTrigger,
-  Input,
-  Link,
-  Navbar,
-  NavbarBrand,
+  Navbar as HeroUINavbar,
   NavbarContent,
-  NavbarItem,
   NavbarMenu,
-  NavbarMenuItem,
   NavbarMenuToggle,
-} from '@nextui-org/react';
+  NavbarBrand,
+  NavbarItem,
+  NavbarMenuItem,
+} from "@heroui/navbar";
+import { Button } from "@heroui/button";
+import { Link } from "@heroui/link";
+import { Input } from "@heroui/input";
+import { link as linkStyles } from "@heroui/theme";
+import NextLink from "next/link";
+import clsx from "clsx";
 
-import Image from 'next/image.js';
-import { useRouter } from 'next/navigation';
-import { useState } from 'react';
-import { headerLogo } from '../../../lib/datas/page';
+import { SearchIcon } from "@/components/icons";
+import { siteConfig } from "@/utils/data/page";
+import { headerLogo } from "@/lib/datas/page";
+import Image from "next/image";
 
-const Header = ({ session }) => {
-  const [isMenuOpen, setIsMenuOpen] = useState(false);
-  const router = useRouter();
-
-  const menuItems = [
-    { name: 'Home', link: '/' },
-    { name: 'Pricing', link: '/pricing' },
-    { name: 'Contact', link: '/Contact' },
-    { name: 'About', link: '/About' },
-  ];
+export const Header = ({ session }) => {
+  const searchInput = (
+    <Input
+      aria-label="Search"
+      classNames={{
+        inputWrapper: "bg-default-100",
+        input: "text-sm",
+      }}
+      labelPlacement="outside"
+      placeholder="Search..."
+      startContent={
+        <SearchIcon className="text-base text-default-400 pointer-events-none flex-shrink-0" />
+      }
+      type="search"
+    />
+  );
 
   return (
-    <Navbar isBordered shouldHideOnScroll onMenuOpenChange={setIsMenuOpen}>
-      {/*  For Logo And Name  */}
-      <NavbarContent justify="start">
-        <NavbarMenuToggle
-          aria-label={isMenuOpen ? 'Close menu' : 'Open menu'}
-          className="sm:hidden  text-black "
-        />
-        <NavbarBrand>
-          <div
-            className="flex align-middle justify-center cursor-pointer"
-            onClick={() => router.push('/')}
-          >
+    <HeroUINavbar maxWidth="xl" position="sticky">
+      <NavbarContent className="basis-1/5 sm:basis-full" justify="start">
+        <NavbarBrand as="li" className="gap-3 max-w-fit">
+          <NextLink className="flex justify-start items-center gap-1" href="/">
             <Image
+              onClick={() => router.push("/")}
               style={{
-                height: 'auto',
-                width: 'auto',
+                height: "10%",
+                width: "10%",
               }}
               src={headerLogo}
-              width={30}
-              height={20}
+              width={0}
+              height={0}
               alt="Logo"
               className="mr-2 max-sm:hidden"
             />
-            <p className="font-extrabold text-black max-sm:hidden me-10">
-              EmbroiD
-            </p>
-          </div>
+            <p className="font-bold text-inherit">Embroid</p>
+          </NextLink>
         </NavbarBrand>
+        <ul className="hidden lg:flex gap-4 justify-start ml-2">
+          {siteConfig.navItems.map((item) => (
+            <NavbarItem key={item.href}>
+              <NextLink
+                className={clsx(
+                  linkStyles({ color: "foreground" }),
+                  "data-[active=true]:text-primary data-[active=true]:font-medium"
+                )}
+                color="foreground"
+                href={item.href}
+              >
+                {item.label}
+              </NextLink>
+            </NavbarItem>
+          ))}
+        </ul>
       </NavbarContent>
 
-      <Input
-        style={{ width: '100%' }}
-        isBordered
-        classNames={{
-          base: ' h-10 ',
-          mainWrapper: 'h-full',
-          input: 'text-small',
-          inputWrapper:
-            ' h-full font-normal text-default-500 bg-default-200/20 border',
-        }}
-        placeholder="Type to search..."
-        size="md"
-        startContent={<i className="ri-search-2-line" />}
-        type="search"
-      />
+      <NavbarContent
+        className="hidden sm:flex basis-1/5 sm:basis-full"
+        justify="end"
+      >
+        <NavbarItem className="hidden lg:flex">{searchInput}</NavbarItem>
+        <NavbarItem className="hidden md:flex">
+          {session?.user ? (
+            <div className="items-center" justify="end">
+              <Dropdown placement="bottom-end" className="text-black">
+                <DropdownTrigger>
+                  <Avatar
+                    isBordered
+                    as="button"
+                    className="transition-transform"
+                    color="primary"
+                    name="Jason Hughes"
+                    size="sm"
+                    src={session?.user?.image}
+                  />
+                </DropdownTrigger>
+                <DropdownMenu>
+                  <DropdownItem
+                    isBordered
+                    key="profile"
+                    className="h-14 gap-2 border-dashed"
+                  >
+                    <p className="font-semibold">{session?.user?.name} </p>
+                  </DropdownItem>
+                  <DropdownItem key="logout" isBordered className="p-2">
+                    Log Out
+                  </DropdownItem>
+                </DropdownMenu>
+              </Dropdown>
+            </div>
+          ) : (
+            <NavbarContent justify="end">
+              <NavbarContent className="" justify="end"></NavbarContent>
+              <NavbarItem>
+                <Button
+                  as={Link}
+                  color="primary"
+                  href="/auth/login"
+                  variant="flat"
+                  size="sm"
+                  radius="large"
+                  className="button text-black font-bold"
+                >
+                  Sign In
+                </Button>
+              </NavbarItem>
+            </NavbarContent>
+          )}
+        </NavbarItem>
+      </NavbarContent>
 
-      {/* For Search  */}
+      <NavbarContent className="sm:hidden basis-1 pl-4" justify="end">
+        <NavbarMenuToggle />
+      </NavbarContent>
 
-      {session?.user ? (
-        <div className="items-center" justify="end">
-          <Dropdown placement="bottom-end" className="text-black">
-            <DropdownTrigger>
-              <Avatar
-                isBordered
-                as="button"
-                className="transition-transform"
-                color="primary"
-                name="Jason Hughes"
-                size="sm"
-                src={session?.user?.image}
-              />
-            </DropdownTrigger>
-            <DropdownMenu>
-              <DropdownItem
-                isBordered
-                key="profile"
-                className="h-14 gap-2 border-dashed"
-              >
-                <p className="font-semibold">{session?.user?.name} </p>
-              </DropdownItem>
-              <DropdownItem key="logout" isBordered className="p-2">
-                Log Out
-              </DropdownItem>
-            </DropdownMenu>
-          </Dropdown>
-        </div>
-      ) : (
-        <NavbarContent justify="end">
-          <NavbarContent className="" justify="end"></NavbarContent>
-          <NavbarItem>
-            <Button
-              as={Link}
-              color="primary"
-              href="/auth/login"
-              variant="flat"
-              size="sm"
-              radius="large"
-              className="button text-black font-bold"
-            >
-              Sign In
-            </Button>
-          </NavbarItem>
-        </NavbarContent>
-      )}
-
-      <NavbarMenu className="sm:max-w-[4rem] bg-transparent">
-        <div className="flex">
-          <Link href="/">
-            <Image
-              src={headerLogo}
-              width={30}
-              height={20}
-              alt="Logo"
-              className="mr-2 sm:hidden"
-            />
-            <p className="font-extrabold text-black sm:hidden">
-              Embroi<strong className="text-blue-400">D</strong>
-            </p>
-          </Link>
-        </div>
-        {menuItems.map((item, index) => (
-          <NavbarMenuItem key={index}>
-            <Link className="text-black font-bold" href={item.link}>
-              {item.name}
-            </Link>
+      <NavbarMenu>
+        {searchInput}
+        <div className="mx-4 mt-2 flex flex-col gap-2">
+          {siteConfig.navMenuItems.map((item, index) => (
+            <NavbarMenuItem key={`${item}-${index}`}>
+              <Link color={"foreground"} href={item.href} size="lg">
+                {item.label}
+              </Link>
+            </NavbarMenuItem>
+          ))}
+          <NavbarMenuItem>
+            {session?.user ? (
+              <div>
+                <Dropdown placement="bottom-end" className="text-black">
+                  <DropdownTrigger>
+                    <Avatar
+                      isBordered
+                      as="button"
+                      className="transition-transform"
+                      color="primary"
+                      name="Jason Hughes"
+                      size="sm"
+                      src={session?.user?.image}
+                    />
+                  </DropdownTrigger>
+                  <DropdownMenu>
+                    <DropdownItem
+                      isBordered
+                      key="profile"
+                      className="h-14 gap-2 border-dashed"
+                    >
+                      <p className="font-semibold">{session?.user?.name} </p>
+                    </DropdownItem>
+                    <DropdownItem key="logout" isBordered className="p-2">
+                      Log Out
+                    </DropdownItem>
+                  </DropdownMenu>
+                </Dropdown>
+              </div>
+            ) : (
+              <NavbarContent>
+                <NavbarItem>
+                  <Button
+                    as={Link}
+                    color="primary"
+                    href="/auth/login"
+                    variant="flat"
+                    size="sm"
+                    radius="large"
+                    className="button text-black font-bold"
+                  >
+                    Sign In
+                  </Button>
+                </NavbarItem>
+              </NavbarContent>
+            )}
           </NavbarMenuItem>
-        ))}
+        </div>
       </NavbarMenu>
-    </Navbar>
+    </HeroUINavbar>
   );
 };
-
-export default Header;
