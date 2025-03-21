@@ -11,13 +11,13 @@ export default function AdminSidebar({ isCollapsed, setIsCollapsed }) {
           <Link href={"/admin"} className="sidebar-text">
             <Image
               style={{
-                height: "auto",
-                width: "auto",
+                height: "auto%",
+                width: "10%",
               }}
               src={"/twitter-bird-logo-pictures-0.png"}
               alt="logo"
-              width={20}
-              height={50}
+              width={0}
+              height={0}
             />
           </Link>
         ) : (
@@ -40,7 +40,11 @@ export default function AdminSidebar({ isCollapsed, setIsCollapsed }) {
           onClick={() => setIsCollapsed(!isCollapsed)}
           className="collapse-btn"
         >
-          {isCollapsed ? "→" : "←"}
+          {isCollapsed ? (
+            <i className="ri-menu-unfold-fill"></i>
+          ) : (
+            <i className="ri-menu-fold-fill"></i>
+          )}
         </button>
       </div>
       <ul>

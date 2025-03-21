@@ -4,7 +4,7 @@ import { Card, CardBody, CardHeader, Input } from "@heroui/react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
-import Header from "../../../components/user/HomePage/Header";
+import { Header } from "@/components/user/HomePage/Header";
 
 const Register = () => {
   const [error, setError] = useState("");

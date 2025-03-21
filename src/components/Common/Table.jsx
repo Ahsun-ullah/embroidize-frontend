@@ -1,46 +1,29 @@
-import React from 'react';
+"use client";
 import {
-  Table,
-  TableHeader,
-  TableColumn,
-  TableBody,
-  TableRow,
-  TableCell,
   Input,
-  Button,
-  DropdownTrigger,
-  Dropdown,
-  DropdownMenu,
-  DropdownItem,
-  Chip,
-  User,
   Pagination,
-} from '@heroui/react';
-import { statusColorMap } from '../../utils/colorStatus/page';
-import { capitalize } from '../../utils/functions/page';
-import { PlusIcon, VerticalDotsIcon } from '../icons';
+  Table,
+  TableBody,
+  TableCell,
+  TableColumn,
+  TableHeader,
+  TableRow,
+} from "@heroui/react";
+import { useMemo, useState } from "react";
 
-const UserTable = ({
-  data,
-  columns,
-  actions,
-  pageSize = 5,
-  onSearchChange,
-  onSortChange,
-  onRowSelectChange,
-}) => {
-  const [filterValue, setFilterValue] = React.useState('');
-  const [selectedKeys, setSelectedKeys] = React.useState([]);
-  const [rowsPerPage, setRowsPerPage] = React.useState(pageSize);
-  const [sortDescriptor, setSortDescriptor] = React.useState({
-    column: columns[0]?.uid || 'name',
-    direction: 'ascending',
+const UserTable = ({ data, columns, pageSize, onSearchChange, renderCell }) => {
+  const [filterValue, setFilterValue] = useState("");
+  const [selectedKeys, setSelectedKeys] = useState([]);
+  const [rowsPerPage, setRowsPerPage] = useState(pageSize);
+  const [sortDescriptor, setSortDescriptor] = useState({
+    column: columns[0]?.uid || "name",
+    direction: "ascending",
   });
-  const [page, setPage] = React.useState(1);
+  const [page, setPage] = useState(1);
 
   const hasSearchFilter = Boolean(filterValue);
 
-  const filteredItems = React.useMemo(() => {
+  const filteredItems = useMemo(() => {
     let filteredData = [...data];
 
     if (hasSearchFilter) {
@@ -54,81 +37,21 @@ const UserTable = ({
 
   const pages = Math.ceil(filteredItems.length / rowsPerPage);
 
-  const items = React.useMemo(() => {
+  const items = useMemo(() => {
     const start = (page - 1) * rowsPerPage;
     const end = start + rowsPerPage;
     return filteredItems.slice(start, end);
   }, [page, filteredItems, rowsPerPage]);
 
-  const sortedItems = React.useMemo(() => {
+  const sortedItems = useMemo(() => {
     return [...items].sort((a, b) => {
       const first = a[sortDescriptor.column];
       const second = b[sortDescriptor.column];
       const cmp = first < second ? -1 : first > second ? 1 : 0;
 
-      return sortDescriptor.direction === 'descending' ? -cmp : cmp;
+      return sortDescriptor.direction === "descending" ? -cmp : cmp;
     });
   }, [sortDescriptor, items]);
-
-  const renderCell = React.useCallback(
-    (user, columnKey) => {
-      const cellValue = user[columnKey];
-
-      switch (columnKey) {
-        case 'name':
-          return (
-            <User
-              avatarProps={{ radius: 'lg', src: user.avatar }}
-              description={user.email}
-              name={cellValue}
-            >
-              {user.email}
-            </User>
-          );
-        case 'status':
-          return (
-            <Chip
-              className="capitalize"
-              color={statusColorMap[user.status]}
-              size="sm"
-              variant="flat"
-            >
-              {capitalize(user.status)}
-            </Chip>
-          );
-        case 'actions':
-          return (
-            <div className="relative flex justify-end items-center gap-2">
-              <Dropdown>
-                <DropdownTrigger>
-                  <Button isIconOnly size="sm" variant="light">
-                    <VerticalDotsIcon className="text-default-300" />
-                  </Button>
-                </DropdownTrigger>
-                <DropdownMenu>
-                  {actions?.map((action) => (
-                    <DropdownItem
-                      key={action.key}
-                      onClick={() => action.onClick(user)}
-                    >
-                      {action.label}
-                    </DropdownItem>
-                  ))}
-                </DropdownMenu>
-              </Dropdown>
-            </div>
-          );
-        default:
-          return cellValue;
-      }
-    },
-    [actions]
-  );
-
-  const onRowsPerPageChange = React.useCallback((e) => {
-    setRowsPerPage(Number(e.target.value));
-    setPage(1);
-  }, []);
 
   const onSearch = (value) => {
     setFilterValue(value);
@@ -137,9 +60,9 @@ const UserTable = ({
   };
 
   const onClearSearch = () => {
-    setFilterValue('');
+    setFilterValue("");
     setPage(1);
-    onSearchChange?.('');
+    onSearchChange?.("");
   };
 
   const topContent = (
@@ -153,9 +76,6 @@ const UserTable = ({
           onClear={onClearSearch}
           onValueChange={onSearch}
         />
-        <Button color="primary" endContent={<PlusIcon />}>
-          Add New
-        </Button>
       </div>
     </div>
   );
@@ -175,34 +95,36 @@ const UserTable = ({
   );
 
   return (
-    <Table
-      isHeaderSticky
-      aria-label="Example table with custom cells, pagination and sorting"
-      bottomContent={bottomContent}
-      topContent={topContent}
-      selectedKeys={selectedKeys}
-      selectionMode="multiple"
-      sortDescriptor={sortDescriptor}
-      onSelectionChange={setSelectedKeys}
-      onSortChange={setSortDescriptor}
-    >
-      <TableHeader columns={columns}>
-        {(column) => (
-          <TableColumn key={column.uid} allowsSorting={column.sortable}>
-            {column.name}
-          </TableColumn>
-        )}
-      </TableHeader>
-      <TableBody emptyContent="No users found" items={sortedItems}>
-        {(item) => (
-          <TableRow key={item.id}>
-            {(columnKey) => (
-              <TableCell>{renderCell(item, columnKey)}</TableCell>
-            )}
-          </TableRow>
-        )}
-      </TableBody>
-    </Table>
+    <div className="overflow-x-auto">
+      <Table
+        isHeaderSticky
+        aria-label="Example table with custom cells, pagination, and sorting"
+        bottomContent={bottomContent}
+        topContent={topContent}
+        selectedKeys={selectedKeys}
+        selectionMode="multiple"
+        sortDescriptor={sortDescriptor}
+        onSelectionChange={setSelectedKeys}
+        onSortChange={setSortDescriptor}
+      >
+        <TableHeader columns={columns}>
+          {(column) => (
+            <TableColumn key={column.uid}>{column.name}</TableColumn>
+          )}
+        </TableHeader>
+        <TableBody emptyContent="No users found" items={sortedItems}>
+          {(item) => (
+            <TableRow key={item.id}>
+              {(columnKey) => (
+                <TableCell className="table-cell self-center">
+                  {renderCell(item, columnKey)}
+                </TableCell>
+              )}
+            </TableRow>
+          )}
+        </TableBody>
+      </Table>
+    </div>
   );
 };
 

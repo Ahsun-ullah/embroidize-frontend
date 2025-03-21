@@ -7,7 +7,7 @@ const inter = Inter({ subsets: ["latin"] });
 
 export default function RootLayout({ children }) {
   return (
-    <html suppressHydrationWarning lang="en">
+    <html lang="en">
       <head>
         <title>EmbroID</title>
         <link rel="icon" href="/favicon.ico" />

@@ -32,7 +32,7 @@ const CardSlider = ({ cardData }) => {
     >
       {cardData.map((card, index) => (
         <SwiperSlide className="p-3" key={index}>
-          <Link href={"/user/categoryProducts/singleCategory"}>
+          <Link href={"/user/category-products/single-category"}>
             <div className="flex flex-col items-center justify-center bg-white shadow-medium rounded-lg">
               <div className="relative w-10/12 h-40">
                 <Image

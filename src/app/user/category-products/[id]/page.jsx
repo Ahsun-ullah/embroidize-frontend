@@ -4,8 +4,6 @@ import Image from "next/image";
 import Link from "next/link";
 import React, { useState } from "react";
 import Pagination from "../../../../components/Common/Pagination";
-import Header from "../../../../components/user/HomePage/Header";
-import Footer from "../../../../components/user/HomePage/Footer";
 
 const CategoryProducts = () => {
   const [currentPage, setCurrentPage] = useState(0);
@@ -21,8 +19,6 @@ const CategoryProducts = () => {
 
   return (
     <>
-      <Header />
-
       <div className="min-h-screen flex flex-col justify-between">
         <section className="text-black my-8 py-6 border-b-2">
           <div className="flex items-center justify-center mx-14">
@@ -33,7 +29,7 @@ const CategoryProducts = () => {
                   className="bg-white border rounded-lg shadow-xl"
                 >
                   <div className="p-6 flex items-center justify-center">
-                    <Link href={"/user/productDetails/jsf"}>
+                    <Link href={"/user/product-details/jsf"}>
                       <Image
                         alt="Product image"
                         className="rounded-xl"
@@ -81,8 +77,6 @@ const CategoryProducts = () => {
           </div>
         </section>
       </div>
-
-      <Footer />
     </>
   );
 };

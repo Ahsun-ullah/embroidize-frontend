@@ -1,6 +1,4 @@
-/* eslint-disable react/no-unescaped-entities */
 "use client";
-/* eslint-disable @next/next/no-img-element */
 import {
   BreadcrumbItem,
   Breadcrumbs,
@@ -16,9 +14,7 @@ import {
 import Image from "next/image";
 import React from "react";
 import SecondHeader from "../../../../components/Common/SecondHeader";
-import Header from "../../../../components/user/HomePage/Header";
 import SubscribeSearchSection from "../../../../components/user/HomePage/SubscribeSearchSection";
-import Footer from "../../../../components/user/HomePage/Footer";
 
 const ProductDetails = () => {
   const items = [
@@ -37,7 +33,6 @@ const ProductDetails = () => {
   ];
   return (
     <>
-      <Header />
       <SecondHeader />
       <div className="flex gap-4 mx-16 mt-10 font-medium">
         <Breadcrumbs size="lg" className="flex">
@@ -185,7 +180,6 @@ const ProductDetails = () => {
         </div>
       </div>
       <SubscribeSearchSection />
-      <Footer />
     </>
   );
 };
