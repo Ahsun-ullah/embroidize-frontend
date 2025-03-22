@@ -1,0 +1,34 @@
+{
+  "extends": [
+    "next",
+    "next/core-web-vitals",
+    "eslint:recommended",
+    "plugin:prettier/recommended"
+  ],
+  "rules": {
+    "prettier/prettier": "error",
+    "no-console": "warn",
+    "react/react-in-jsx-scope": "off",
+    "react/no-unknown-property": "warn",
+    "no-undef": "error",
+    "react/prop-types": "error",
+    "react/jsx-uses-react": "off",
+    "import/no-unresolved": "error",
+    "react/jsx-max-props-per-line": ["warn", { "maximum": 3 }]
+  },
+  "env": {
+    "browser": true,
+    "node": true
+  },
+  "overrides": [
+    {
+      "files": ["*.ts", "*.tsx"],
+      "extends": [
+        "plugin:@typescript-eslint/recommended",
+        "plugin:prettier/recommended"
+      ],
+      "parser": "@typescript-eslint/parser",
+      "plugins": ["@typescript-eslint"]
+    }
+  ]
+}

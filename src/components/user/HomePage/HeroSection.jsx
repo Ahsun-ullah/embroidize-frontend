@@ -1,4 +1,4 @@
-import { Input } from "@heroui/react";
+import { Input } from '@heroui/react';
 
 const HeroSection = () => {
   return (
@@ -18,10 +18,10 @@ const HeroSection = () => {
                 radius="full"
                 isBordered
                 classNames={{
-                  base: "max-w-[25rem] max-sm:max-w-[10rem] h-10 ",
-                  mainWrapper: "h-full",
-                  input: "text-small",
-                  inputWrapper: "h-full font-normal text-black bg-white ",
+                  base: 'max-w-[25rem] max-sm:max-w-[10rem] h-10 ',
+                  mainWrapper: 'h-full',
+                  input: 'text-small',
+                  inputWrapper: 'h-full font-normal text-black bg-white ',
                 }}
                 placeholder="Type to search..."
                 size="sm"

@@ -1,5 +1,5 @@
-import React from "react";
-import CategorySelect from "./CategorySelect";
+import React from 'react';
+import CategorySelect from './CategorySelect';
 
 const SecondHeader = () => {
   return (
@@ -7,7 +7,6 @@ const SecondHeader = () => {
       <div>
         <CategorySelect />
       </div>
-      
     </div>
   );
 };

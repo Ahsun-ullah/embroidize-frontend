@@ -1,4 +1,4 @@
-"use client";
+'use client';
 import {
   BreadcrumbItem,
   Breadcrumbs,
@@ -10,25 +10,25 @@ import {
   DropdownItem,
   DropdownMenu,
   DropdownTrigger,
-} from "@heroui/react";
-import Image from "next/image";
-import React from "react";
-import SecondHeader from "../../../../components/Common/SecondHeader";
-import SubscribeSearchSection from "../../../../components/user/HomePage/SubscribeSearchSection";
+} from '@heroui/react';
+import Image from 'next/image';
+import React from 'react';
+import SecondHeader from '../../../../components/Common/SecondHeader';
+import SubscribeSearchSection from '../../../../components/user/HomePage/SubscribeSearchSection';
 
 const ProductDetails = () => {
   const items = [
     {
-      key: "new",
-      label: "New file",
+      key: 'new',
+      label: 'New file',
     },
     {
-      key: "copy",
-      label: "Copy link",
+      key: 'copy',
+      label: 'Copy link',
     },
     {
-      key: "edit",
-      label: "Edit file",
+      key: 'edit',
+      label: 'Edit file',
     },
   ];
   return (
@@ -135,7 +135,7 @@ const ProductDetails = () => {
                 {(item) => (
                   <DropdownItem
                     key={item?.key}
-                    className={item.key === "delete" ? "text-danger" : ""}
+                    className={item.key === 'delete' ? 'text-danger' : ''}
                   >
                     {item?.label}
                   </DropdownItem>

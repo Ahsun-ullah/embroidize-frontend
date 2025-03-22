@@ -1,4 +1,4 @@
-import ProfileDropdown from "../Common/ProfileDropdown";
+import ProfileDropdown from '../Common/ProfileDropdown';
 
 export default function AdminHeader({ isCollapsed }) {
   return (

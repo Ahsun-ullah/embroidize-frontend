@@ -1,34 +1,34 @@
-"use client";
-import { Tooltip } from "@heroui/react";
-import Image from "next/image";
-import Link from "next/link";
+'use client';
+import { Tooltip } from '@heroui/react';
+import Image from 'next/image';
+import Link from 'next/link';
 
 export default function AdminSidebar({ isCollapsed, setIsCollapsed }) {
   return (
-    <div className={`admin-sidebar ${isCollapsed ? "collapsed" : ""}`}>
+    <div className={`admin-sidebar ${isCollapsed ? 'collapsed' : ''}`}>
       <div className="flex items-center justify-between mb-8">
         {!isCollapsed ? (
-          <Link href={"/admin"} className="sidebar-text">
+          <Link href={'/admin'} className="sidebar-text">
             <Image
               style={{
-                height: "auto%",
-                width: "10%",
+                height: 'auto%',
+                width: '10%',
               }}
-              src={"/twitter-bird-logo-pictures-0.png"}
+              src={'/twitter-bird-logo-pictures-0.png'}
               alt="logo"
               width={0}
               height={0}
             />
           </Link>
         ) : (
-          <Tooltip content={"Logo"}>
-            <Link href={"/admin"} className="sidebar-text me-2">
+          <Tooltip content={'Logo'}>
+            <Link href={'/admin'} className="sidebar-text me-2">
               <Image
                 style={{
-                  height: "auto",
-                  width: "auto",
+                  height: 'auto',
+                  width: 'auto',
                 }}
-                src={"/twitter-bird-logo-pictures-0.png"}
+                src={'/twitter-bird-logo-pictures-0.png'}
                 alt="logo"
                 width={20}
                 height={50}
@@ -56,7 +56,7 @@ export default function AdminSidebar({ isCollapsed, setIsCollapsed }) {
                 Dashboard
               </span>
             ) : (
-              <Tooltip content={"Dashboard"}>
+              <Tooltip content={'Dashboard'}>
                 <i className="ri-dashboard-fill "></i>
               </Tooltip>
             )}
@@ -70,7 +70,7 @@ export default function AdminSidebar({ isCollapsed, setIsCollapsed }) {
                 Users
               </span>
             ) : (
-              <Tooltip content={"Users"}>
+              <Tooltip content={'Users'}>
                 <i className="ri-group-fill "></i>
               </Tooltip>
             )}
@@ -84,7 +84,7 @@ export default function AdminSidebar({ isCollapsed, setIsCollapsed }) {
                 Add Product
               </span>
             ) : (
-              <Tooltip content={"Add Products"}>
+              <Tooltip content={'Add Products'}>
                 <i className="ri-add-box-fill"></i>
               </Tooltip>
             )}
@@ -98,7 +98,7 @@ export default function AdminSidebar({ isCollapsed, setIsCollapsed }) {
                 All Product
               </span>
             ) : (
-              <Tooltip content={" All Product"}>
+              <Tooltip content={' All Product'}>
                 <i className="ri-list-check"></i>
               </Tooltip>
             )}
@@ -112,7 +112,7 @@ export default function AdminSidebar({ isCollapsed, setIsCollapsed }) {
                 Settings
               </span>
             ) : (
-              <Tooltip content={"Settings"}>
+              <Tooltip content={'Settings'}>
                 <i className="ri-settings-fill"></i>
               </Tooltip>
             )}

@@ -1,4 +1,4 @@
-import { Input } from "@heroui/react";
+import { Input } from '@heroui/react';
 
 const SubscribeSearchSection = () => {
   return (
@@ -13,10 +13,10 @@ const SubscribeSearchSection = () => {
               radius="full"
               isBordered
               classNames={{
-                base: "h-10",
-                mainWrapper: "h-full",
-                input: "text-small",
-                inputWrapper: "h-full font-normal text-black bg-white",
+                base: 'h-10',
+                mainWrapper: 'h-full',
+                input: 'text-small',
+                inputWrapper: 'h-full font-normal text-black bg-white',
               }}
               placeholder="Type to search..."
               size="sm"

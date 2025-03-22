@@ -1,4 +1,4 @@
-import { Divider } from "@heroui/react";
+import { Divider } from '@heroui/react';
 
 const FaqSection = () => {
   return (
@@ -18,23 +18,23 @@ const FaqSection = () => {
         </div>
         <div className="flex flex-col items-center justify-center mt-6">
           <div className="my-6">
-            {" "}
-            {">"} Can these Embroidery designs be used for Machine Embroidery?
+            {' '}
+            {'>'} Can these Embroidery designs be used for Machine Embroidery?
           </div>
           <Divider className="" />
           <div className="my-6">
-            {" "}
-            {">"} Can these Embroidery designs be used for Machine Embroidery?
+            {' '}
+            {'>'} Can these Embroidery designs be used for Machine Embroidery?
           </div>
           <Divider />
           <div className="my-6">
-            {" "}
-            {">"} Can these Embroidery designs be used for Machine Embroidery?
+            {' '}
+            {'>'} Can these Embroidery designs be used for Machine Embroidery?
           </div>
           <Divider />
           <div className="my-6">
-            {" "}
-            {">"} Can these Embroidery designs be used for Machine Embroidery?
+            {' '}
+            {'>'} Can these Embroidery designs be used for Machine Embroidery?
           </div>
         </div>
       </section>

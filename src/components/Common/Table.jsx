@@ -1,4 +1,4 @@
-"use client";
+'use client';
 import {
   Input,
   Pagination,
@@ -8,16 +8,16 @@ import {
   TableColumn,
   TableHeader,
   TableRow,
-} from "@heroui/react";
-import { useMemo, useState } from "react";
+} from '@heroui/react';
+import { useMemo, useState } from 'react';
 
 const UserTable = ({ data, columns, pageSize, onSearchChange, renderCell }) => {
-  const [filterValue, setFilterValue] = useState("");
+  const [filterValue, setFilterValue] = useState('');
   const [selectedKeys, setSelectedKeys] = useState([]);
   const [rowsPerPage, setRowsPerPage] = useState(pageSize);
   const [sortDescriptor, setSortDescriptor] = useState({
-    column: columns[0]?.uid || "name",
-    direction: "ascending",
+    column: columns[0]?.uid || 'name',
+    direction: 'ascending',
   });
   const [page, setPage] = useState(1);
 
@@ -49,7 +49,7 @@ const UserTable = ({ data, columns, pageSize, onSearchChange, renderCell }) => {
       const second = b[sortDescriptor.column];
       const cmp = first < second ? -1 : first > second ? 1 : 0;
 
-      return sortDescriptor.direction === "descending" ? -cmp : cmp;
+      return sortDescriptor.direction === 'descending' ? -cmp : cmp;
     });
   }, [sortDescriptor, items]);
 
@@ -60,9 +60,9 @@ const UserTable = ({ data, columns, pageSize, onSearchChange, renderCell }) => {
   };
 
   const onClearSearch = () => {
-    setFilterValue("");
+    setFilterValue('');
     setPage(1);
-    onSearchChange?.("");
+    onSearchChange?.('');
   };
 
   const topContent = (

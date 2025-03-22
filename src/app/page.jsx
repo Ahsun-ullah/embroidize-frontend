@@ -1,13 +1,13 @@
-"use client";
+'use client';
 
-import { Header } from "@/components/user/HomePage/Header";
-import BlogSection from "../components/user/HomePage/BlogSection";
-import CategorySection from "../components/user/HomePage/CategorySection";
-import Footer from "../components/user/HomePage/Footer";
-import HeroSection from "../components/user/HomePage/HeroSection";
-import PopularDesign from "../components/user/HomePage/PopularDesign";
-import RecentProductsSection from "../components/user/HomePage/RecentProductsSection";
-import SubscribeSearchSection from "../components/user/HomePage/SubscribeSearchSection";
+import { Header } from '@/components/user/HomePage/Header';
+import BlogSection from '../components/user/HomePage/BlogSection';
+import CategorySection from '../components/user/HomePage/CategorySection';
+import Footer from '../components/user/HomePage/Footer';
+import HeroSection from '../components/user/HomePage/HeroSection';
+import PopularDesign from '../components/user/HomePage/PopularDesign';
+import RecentProductsSection from '../components/user/HomePage/RecentProductsSection';
+import SubscribeSearchSection from '../components/user/HomePage/SubscribeSearchSection';
 
 export default function Home() {
   return (

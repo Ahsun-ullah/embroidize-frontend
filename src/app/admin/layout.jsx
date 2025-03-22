@@ -8,11 +8,11 @@ export default function AdminLayout({ children }) {
   const [isCollapsed, setIsCollapsed] = useState(false);
 
   return (
-    <div className="admin-layout">
+    <div className='admin-layout'>
       <AdminHeader isCollapsed={isCollapsed} />
       <AdminSidebar setIsCollapsed={setIsCollapsed} isCollapsed={isCollapsed} />
-      <div className={`admin-main ${isCollapsed ? 'collapsed' : ''}`}>
-        <main className="admin-content">{children}</main>
+      <div className={`admin-main  ${isCollapsed ? 'collapsed' : ''}`}>
+        <main className='admin-content '>{children}</main>
       </div>
       <AdminFooter isCollapsed={isCollapsed} />
     </div>

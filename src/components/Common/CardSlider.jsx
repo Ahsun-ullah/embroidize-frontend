@@ -1,8 +1,8 @@
-import Image from "next/image";
-import Link from "next/link";
-import "swiper/css";
-import { A11y, Navigation, Pagination, Scrollbar } from "swiper/modules";
-import { Swiper, SwiperSlide } from "swiper/react";
+import Image from 'next/image';
+import Link from 'next/link';
+import 'swiper/css';
+import { A11y, Navigation, Pagination, Scrollbar } from 'swiper/modules';
+import { Swiper, SwiperSlide } from 'swiper/react';
 
 const CardSlider = ({ cardData }) => {
   const slidesPerView = 2;
@@ -32,7 +32,7 @@ const CardSlider = ({ cardData }) => {
     >
       {cardData.map((card, index) => (
         <SwiperSlide className="p-3" key={index}>
-          <Link href={"/user/category-products/single-category"}>
+          <Link href={'/user/category-products/single-category'}>
             <div className="flex flex-col items-center justify-center bg-white shadow-medium rounded-lg">
               <div className="relative w-10/12 h-40">
                 <Image

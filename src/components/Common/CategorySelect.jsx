@@ -4,14 +4,14 @@ import {
   DropdownItem,
   DropdownMenu,
   DropdownTrigger,
-} from "@heroui/react";
-import React, { useMemo, useState } from "react";
+} from '@heroui/react';
+import React, { useMemo, useState } from 'react';
 
 const CategorySelect = () => {
-  const [selectedKeys, setSelectedKeys] = useState(new Set(["All Categories"]));
+  const [selectedKeys, setSelectedKeys] = useState(new Set(['All Categories']));
 
   const selectedValue = useMemo(
-    () => Array.from(selectedKeys).join(", ").replaceAll("_", " "),
+    () => Array.from(selectedKeys).join(', ').replaceAll('_', ' '),
     [selectedKeys]
   );
 

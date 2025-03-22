@@ -1,20 +1,20 @@
-"use client";
-import { Button, Divider } from "@heroui/react";
-import Image from "next/image";
-import Link from "next/link";
-import React, { useState } from "react";
-import Pagination from "../../../../components/Common/Pagination";
+'use client';
+import { Button, Divider } from '@heroui/react';
+import Image from 'next/image';
+import Link from 'next/link';
+import React, { useState } from 'react';
+import Pagination from '../../../../components/Common/Pagination';
 
 const CategoryProducts = () => {
   const [currentPage, setCurrentPage] = useState(0);
   const [perPageData, setPerPageData] = useState(1);
 
   let objectsArray = [
-    { name: "Chair", color: "Brown", material: "Wood" },
-    { name: "Laptop", brand: "Dell", model: "XPS 13" },
-    { fruit: "Apple", color: "Red", origin: "Washington" },
-    { city: "Paris", country: "France", population: 2141000 },
-    { name: "Book", genre: "Fantasy", author: "J.K. Rowling" },
+    { name: 'Chair', color: 'Brown', material: 'Wood' },
+    { name: 'Laptop', brand: 'Dell', model: 'XPS 13' },
+    { fruit: 'Apple', color: 'Red', origin: 'Washington' },
+    { city: 'Paris', country: 'France', population: 2141000 },
+    { name: 'Book', genre: 'Fantasy', author: 'J.K. Rowling' },
   ];
 
   return (
@@ -29,7 +29,7 @@ const CategoryProducts = () => {
                   className="bg-white border rounded-lg shadow-xl"
                 >
                   <div className="p-6 flex items-center justify-center">
-                    <Link href={"/user/product-details/jsf"}>
+                    <Link href={'/user/product-details/jsf'}>
                       <Image
                         alt="Product image"
                         className="rounded-xl"
@@ -65,7 +65,7 @@ const CategoryProducts = () => {
           <div className="flex items-center justify-center mt-6">
             <Pagination
               style={{
-                position: "relative",
+                position: 'relative',
                 bottom: 0,
                 right: 20,
               }}

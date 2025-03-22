@@ -21,7 +21,7 @@ html {
 }
 body {
   position: relative;
-  font-family: "Poppins", sans-serif !important;
+  font-family: 'Poppins', sans-serif !important;
   color: black;
   overflow-x: hidden;
 }
@@ -71,6 +71,8 @@ body {
   height: calc(100% - 10%);
   position: relative;
   transition: left 0.4s ease;
+
+  margin-top: 6%;
 }
 
 .admin-main.collapsed {
@@ -95,7 +97,10 @@ body {
   background-color: #333;
   padding: 1% 16.5% 1% 1%;
   color: white;
-  position: relative;
+  position: fixed;
+  top: 0;
+  z-index: 1000;
+  width: 100%;
   left: 15%;
   transition: left 0.4s ease;
 }

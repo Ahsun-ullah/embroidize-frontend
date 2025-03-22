@@ -1,18 +1,18 @@
 /* eslint-disable react/no-unescaped-entities */
-"use client";
-import { Card, CardBody, CardHeader, Input } from "@heroui/react";
-import Link from "next/link";
-import { useRouter } from "next/navigation";
-import { useState } from "react";
-import { Header } from "@/components/user/HomePage/Header";
+'use client';
+import { Card, CardBody, CardHeader, Input } from '@heroui/react';
+import Link from 'next/link';
+import { useRouter } from 'next/navigation';
+import { useState } from 'react';
+import { Header } from '@/components/user/HomePage/Header';
 
 const Register = () => {
-  const [error, setError] = useState("");
+  const [error, setError] = useState('');
   const router = useRouter();
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    setError("");
+    setError('');
   };
 
   return (
@@ -90,7 +90,7 @@ const Register = () => {
         </Card>
         <div className="text-center">
           <p className="mb-0">
-            &copy; {new Date().getFullYear()} EmbroiD. Crafted with{" "}
+            &copy; {new Date().getFullYear()} EmbroiD. Crafted with{' '}
             <i className="mdi mdi-heart text-red-500"></i> by Ahsun
           </p>
         </div>

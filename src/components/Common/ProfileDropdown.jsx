@@ -6,12 +6,12 @@ import {
   DropdownMenu,
   DropdownTrigger,
   User,
-} from "@heroui/react";
-import Link from "next/link";
+} from '@heroui/react';
+import Link from 'next/link';
 
 const ProfileDropdown = ({ userData }) => {
   return (
-    <Dropdown placement={userData?.isUser ? "bottom-start" : "bottom-end"}>
+    <Dropdown placement={userData?.isUser ? 'bottom-start' : 'bottom-end'}>
       <DropdownTrigger>
         {userData?.isUser ? (
           <User
@@ -34,19 +34,19 @@ const ProfileDropdown = ({ userData }) => {
         )}
       </DropdownTrigger>
       <DropdownMenu
-        aria-label={`${userData?.isUser ? "User" : "Profile"} Actions`}
+        aria-label={`${userData?.isUser ? 'User' : 'Profile'} Actions`}
         variant="flat"
       >
         <DropdownItem key="profile" className="h-14 gap-2">
-          <p className="font-semibold">{userData?.position ?? "User Name"}</p>
-          <p className="font-semibold">{userData?.email ?? "user@gmail.com"}</p>
+          <p className="font-semibold">{userData?.position ?? 'User Name'}</p>
+          <p className="font-semibold">{userData?.email ?? 'user@gmail.com'}</p>
         </DropdownItem>
         <DropdownItem>
           <Divider />
         </DropdownItem>
 
         <DropdownItem key="logout" color="danger">
-          <Link href={"/auth/login"}>
+          <Link href={'/auth/login'}>
             <span className="font-semibold">Log Out</span>
           </Link>
         </DropdownItem>

@@ -1,5 +1,5 @@
-import { Button, Divider } from "@heroui/react";
-import Image from "next/image";
+import { Button, Divider } from '@heroui/react';
+import Image from 'next/image';
 
 const RecentProductsSection = () => {
   return (

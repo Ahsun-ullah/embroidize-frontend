@@ -1,5 +1,5 @@
-import { Divider } from "@heroui/react";
-import Image from "next/image";
+import { Divider } from '@heroui/react';
+import Image from 'next/image';
 
 const BlogSection = () => {
   return (

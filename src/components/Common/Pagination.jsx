@@ -1,4 +1,4 @@
-import React, { useEffect } from "react";
+import React, { useEffect } from 'react';
 
 const Pagination = ({ data, currentPage, setCurrentPage, perPageData }) => {
   const handleClick = (pageNumber) => {
@@ -53,8 +53,8 @@ const Pagination = ({ data, currentPage, setCurrentPage, perPageData }) => {
         key={pageNumber}
         className={
           pageNumber === currentPage + 1
-            ? "active bg-blue-100 px-[6px] py-[2px] border"
-            : "button"
+            ? 'active bg-blue-100 px-[6px] py-[2px] border'
+            : 'button'
         }
         onClick={() => handleClick(pageNumber - 1)}
         role="button"
