@@ -201,6 +201,22 @@ export const users = [
   },
 ];
 
+export const animals = [
+  { value: 'cat', label: 'Cat' },
+  { value: 'dog', label: 'Dog' },
+  { value: 'elephant', label: 'Elephant' },
+  { value: 'lion', label: 'Lion' },
+  { value: 'tiger', label: 'Tiger' },
+  { value: 'giraffe', label: 'Giraffe' },
+  { value: 'dolphin', label: 'Dolphin' },
+  { value: 'penguin', label: 'Penguin' },
+  { value: 'zebra', label: 'Zebra' },
+  { value: 'shark', label: 'Shark' },
+  { value: 'whale', label: 'Whale' },
+  { value: 'otter', label: 'Otter' },
+  { value: 'crocodile', label: 'Crocodile' },
+];
+
 export const siteConfig = {
   name: 'Embroid',
   description: 'Make beautiful websites regardless of your design experience.',
