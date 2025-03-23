@@ -38,7 +38,7 @@ const CategorySection = () => {
             Sign up for 10 free-forever daily downloads and never miss out!
           </h3>
           <Link
-            href={''}
+            href={'#'}
             className="bg-black rounded-md hover:bg-blue-400 text-white font-normal px-4 py-2 text-sm"
           >
             Sign Up For Free

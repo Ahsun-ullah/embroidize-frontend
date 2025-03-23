@@ -216,5 +216,4 @@ export const siteConfig = {
     { label: 'Contact', href: '/Contact' },
     { label: 'About', href: '/About' },
   ],
-  links: {},
 };

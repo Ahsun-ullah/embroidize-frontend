@@ -30,26 +30,27 @@ const CardSlider = ({ cardData }) => {
       pagination={{ clickable: true }}
       scrollbar={{ draggable: true }}
     >
-      {cardData.map((card, index) => (
-        <SwiperSlide className="p-3" key={index}>
-          <Link href={'/user/category-products/single-category'}>
-            <div className="flex flex-col items-center justify-center bg-white shadow-medium rounded-lg">
-              <div className="relative w-10/12 h-40">
-                <Image
-                  src={card?.avatarSrc}
-                  className="absolute inset-0 w-full h-full object-cover rounded-t-lg"
-                  layout="fill"
-                  alt="img"
-                />
+      {cardData?.length > 0 &&
+        cardData.map((card, index) => (
+          <SwiperSlide className='p-3' key={index}>
+            <Link href={'/user/category-products/single-category'}>
+              <div className='flex flex-col items-center justify-center bg-white shadow-medium rounded-lg'>
+                <div className='relative w-10/12 h-40'>
+                  <Image
+                    src={card?.avatarSrc}
+                    className='absolute inset-0 w-full h-full object-cover rounded-t-lg'
+                    layout='fill'
+                    alt='img'
+                  />
+                </div>
+                <hr />
+                <h4 className='font-bold text-lg text-center py-2'>
+                  {card?.title}
+                </h4>
               </div>
-              <hr />
-              <h4 className="font-bold text-lg text-center py-2">
-                {card?.title}
-              </h4>
-            </div>
-          </Link>
-        </SwiperSlide>
-      ))}
+            </Link>
+          </SwiperSlide>
+        ))}
     </Swiper>
   );
 };
