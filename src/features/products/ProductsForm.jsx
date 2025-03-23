@@ -145,11 +145,12 @@ export function ProductsForm({ product }) {
             selectorIcon={<SelectorIcon />}
             aria-label='Category'
           >
-            {animals.map((animal) => (
-              <SelectItem key={animal.key} value={animal.key}>
-                {animal.label}
-              </SelectItem>
-            ))}
+            {animals?.length > 0 &&
+              animals.map((animal) => (
+                <SelectItem key={animal.key} value={animal.key}>
+                  {animal.label}
+                </SelectItem>
+              ))}
           </Select>
           {form.formState.errors.category && (
             <p className='text-red-500 font-light'>
