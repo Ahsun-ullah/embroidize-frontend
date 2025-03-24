@@ -104,7 +104,12 @@ export function ProductsForm({ product }) {
       >
         {/* Product Name */}
         <div>
-          <label htmlFor='name'>Product Name *</label>
+          <label
+            className='text-lg font-medium tracking-tight leading-5'
+            htmlFor='name'
+          >
+            Product Name <span className='text-red-600'>*</span>
+          </label>
           <input
             id='name'
             placeholder='Product Name'
@@ -118,7 +123,12 @@ export function ProductsForm({ product }) {
 
         {/* Category */}
         <div>
-          <label htmlFor='category'>Category *</label>
+          <label
+            className='text-lg font-medium tracking-tight leading-5'
+            htmlFor='category'
+          >
+            Category <span className='text-red-600'>*</span>
+          </label>
           <Controller
             name='category'
             control={control}
@@ -178,7 +188,12 @@ export function ProductsForm({ product }) {
 
         {/* Price */}
         <div>
-          <label htmlFor='price'>Price *</label>
+          <label
+            className='text-lg font-medium tracking-tight leading-5'
+            htmlFor='price'
+          >
+            Price <span className='text-red-600'>*</span>
+          </label>
           <input
             id='price'
             type='number'
@@ -194,7 +209,12 @@ export function ProductsForm({ product }) {
 
         {/* Description */}
         <div data-color-mode='light' className='col-span-3'>
-          <label htmlFor='description'>Product Description *</label>
+          <label
+            className='text-lg font-medium tracking-tight leading-5'
+            htmlFor='description'
+          >
+            Product Description <span className='text-red-600'>*</span>
+          </label>
           <Controller
             name='description'
             control={control}
@@ -227,7 +247,12 @@ export function ProductsForm({ product }) {
 
         {/* Meta Description */}
         <div className='col-span-3'>
-          <label htmlFor='metaDescription'>Meta Description *</label>
+          <label
+            className='text-lg font-medium tracking-tight leading-5'
+            htmlFor='metaDescription'
+          >
+            Meta Description <span className='text-red-600'>*</span>
+          </label>
           <textarea
             rows={8}
             id='metaDescription'
@@ -244,7 +269,12 @@ export function ProductsForm({ product }) {
 
         {/* Product Tags */}
         <div>
-          <label htmlFor='tags'>Product Tags</label>
+          <label
+            className='text-lg font-medium tracking-tight leading-5'
+            htmlFor='tags'
+          >
+            Product Tags <span className='text-red-600'>*</span>
+          </label>
           <Controller
             name='tags'
             control={control}
@@ -262,7 +292,9 @@ export function ProductsForm({ product }) {
 
         {/* Product Image Upload */}
         <div className='col-span-2'>
-          <label>Product Image</label>
+          <label className='text-lg font-medium tracking-tight leading-5'>
+            Product Image <span className='text-red-600'>*</span>
+          </label>
           <ImageFileUpload
             label='Upload product image (.jpg, .png). Min: 580px × 386px, Max: 5000px × 5000px'
             accept={{ 'image/jpeg': [], 'image/png': [] }}
@@ -276,7 +308,9 @@ export function ProductsForm({ product }) {
 
         {/* Design File Upload */}
         <div className='col-span-3'>
-          <label>Design File (Zip only)</label>
+          <label className='text-lg font-medium tracking-tight leading-5'>
+            Design File (Zip only) <span className='text-red-600'>*</span>
+          </label>
           <ZipFileUpload
             label='Upload embroidery files (.zip only)'
             accept={{ 'application/zip': [] }}
