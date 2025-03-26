@@ -7,6 +7,13 @@ export const productSchema = z.object({
   description: z.string().min(1, 'Description is required'),
   metaDescription: z.string().min(1, 'Meta Description is required'),
   tags: z.any().optional(),
-  images: z.any().optional(),
+  image: z.any().optional(),
   designFile: z.any().optional(),
+});
+export const categorySchema = z.object({
+  name: z.string().min(1, 'Product name is required'),
+  description: z.string().min(1, 'Description is required'),
+  metaDescription: z.string().min(1, 'Meta Description is required'),
+  tags: z.any().optional(),
+  image: z.any().optional(),
 });

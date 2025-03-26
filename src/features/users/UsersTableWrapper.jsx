@@ -1,7 +1,7 @@
 'use client';
 import UserTable from '@/components/Common/Table';
-import { PlusIcon, VerticalDotsIcon } from '@/components/icons';
-import { statusColorMap } from '@/utils/colorStatus/page';
+import { VerticalDotsIcon } from '@/components/icons';
+import { userStatusColor } from '@/utils/colorStatus/page';
 import { capitalize } from '@/utils/functions/page';
 import {
   Button,
@@ -12,10 +12,9 @@ import {
   DropdownTrigger,
   User,
 } from '@heroui/react';
-import Link from 'next/link';
 import { useCallback, useState } from 'react';
 
-export default function UserTableWrapper({
+export default function UsersTableWrapper({
   initialData,
   columns,
   pageSize,
@@ -70,7 +69,7 @@ export default function UserTableWrapper({
           return (
             <Chip
               className='capitalize'
-              color={statusColorMap[user.status]}
+              color={userStatusColor[user.status]}
               size='sm'
               variant='flat'
             >
@@ -119,16 +118,7 @@ export default function UserTableWrapper({
   return (
     <>
       <div className='flex justify-between items-center'>
-        <h1>All Products</h1>
-        <Link href='/admin/add-products'>
-          <Button
-            className='bg-foreground text-background'
-            endContent={<PlusIcon />}
-            size='sm'
-          >
-            Add New
-          </Button>
-        </Link>
+        <h1>All Users</h1>
       </div>
       <UserTable
         data={filteredData}

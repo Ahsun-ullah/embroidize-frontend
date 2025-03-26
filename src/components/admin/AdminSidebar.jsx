@@ -12,7 +12,7 @@ export default function AdminSidebar({ isCollapsed, setIsCollapsed }) {
             <Image
               style={{
                 height: 'auto',
-                width: '20%',
+                width: '100%',
               }}
               src={'/twitter-bird-logo-pictures-0.png'}
               alt='logo'
@@ -72,6 +72,20 @@ export default function AdminSidebar({ isCollapsed, setIsCollapsed }) {
             ) : (
               <Tooltip content={'Users'}>
                 <i className='ri-group-fill '></i>
+              </Tooltip>
+            )}
+          </Link>
+        </li>
+        <li>
+          <Link href='/admin/categories'>
+            {!isCollapsed ? (
+              <span className='sidebar-text '>
+                <i className='ri-layout-grid-2-fill me-2'></i>
+                Category & Sub-Category
+              </span>
+            ) : (
+              <Tooltip content={'Categories'}>
+                <i className='ri-layout-grid-2-fill me-2'></i>
               </Tooltip>
             )}
           </Link>

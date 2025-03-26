@@ -31,7 +31,7 @@ export function ProductsForm({ product }) {
       description: '',
       metaDescription: '',
       tags: [],
-      images: null,
+      image: null,
       designFile: null,
     },
   });
@@ -45,7 +45,7 @@ export function ProductsForm({ product }) {
         description: product.description ?? '',
         metaDescription: product.metaDescription ?? '',
         tags: product.tags ?? [],
-        images: product.images ?? null,
+        image: product.image ?? null,
         designFile: product.designFile ?? null,
       });
       setDescription(product.description ?? '');
@@ -58,7 +58,7 @@ export function ProductsForm({ product }) {
       const formData = new FormData();
       Object.entries(data).forEach(([key, value]) => {
         if (value !== null && value !== undefined) {
-          if (key === 'images' || key === 'designFile') {
+          if (key === 'image' || key === 'designFile') {
             if (value instanceof File) {
               formData.append(key, value);
             }
@@ -298,11 +298,9 @@ export function ProductsForm({ product }) {
           <ImageFileUpload
             label='Upload product image (.jpg, .png). Min: 580px × 386px, Max: 5000px × 5000px'
             accept={{ 'image/jpeg': [], 'image/png': [] }}
-            onDrop={(file) =>
-              setValue('images', file, { shouldValidate: true })
-            }
-            error={errors.images?.message}
-            product={product}
+            onDrop={(file) => setValue('image', file, { shouldValidate: true })}
+            error={errors.image?.message}
+            itemData={product}
           />
         </div>
 
