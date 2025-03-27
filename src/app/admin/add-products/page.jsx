@@ -4,19 +4,19 @@ export default function ContactsPage() {
   const dummyProduct = {
     id: '12345',
     name: 'Cozy Cotton Blanket',
-    category: { value: 'zebra', label: 'Zebra' },
+    category: { value: 9, label: 'Zebra' },
+    sub_category: { value: 9, label: 'Zebra' },
     price: 49.99,
     description:
       '## Cozy Cotton Blanket\n\nA soft and warm blanket made from 100% organic cotton. Perfect for chilly nights!',
     metaDescription:
       'Soft, warm, and eco-friendly cotton blanket for your home.',
     tags: ['cotton', 'cozy', 'home-decor'],
-    images: [
-      {
-        url: 'https://images.unsplash.com/photo-1600585154340-be6161a56a0c?ixlib=rb-4.0.3&auto=format&fit=crop&w=300&q=80',
-        alt: 'Cozy Cotton Blanket Preview',
-      },
-    ],
+    image: {
+      url: 'https://images.unsplash.com/photo-1600585154340-be6161a56a0c?ixlib=rb-4.0.3&auto=format&fit=crop&w=300&q=80',
+      alt: 'Cozy Cotton Blanket Preview',
+    },
+
     designFile: {
       name: 'blanket_design.zip',
       url: 'data:application/zip;base64,...',

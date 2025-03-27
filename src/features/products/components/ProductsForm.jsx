@@ -1,7 +1,7 @@
 'use client';
 
 import { productSchema } from '@/lib/zodValidation/productValidation';
-import { animals } from '@/utils/data/page';
+import { category, subCategoryList } from '@/utils/data/page';
 import { Card } from '@heroui/react';
 import { zodResolver } from '@hookform/resolvers/zod';
 import MDEditor from '@uiw/react-md-editor';
@@ -27,6 +27,7 @@ export function ProductsForm({ product }) {
     defaultValues: {
       name: '',
       category: '',
+      sub_category: '',
       price: null,
       description: '',
       metaDescription: '',
@@ -40,7 +41,8 @@ export function ProductsForm({ product }) {
     if (product) {
       reset({
         name: product.name ?? '',
-        category: product.category?.value ?? '',
+        category: product.category ?? '',
+        sub_category: product.sub_category ?? '',
         price: product.price ?? null,
         description: product.description ?? '',
         metaDescription: product.metaDescription ?? '',
@@ -136,16 +138,16 @@ export function ProductsForm({ product }) {
               const currentValue =
                 field.value && typeof field.value === 'object'
                   ? field.value
-                  : { value: field.value, label: field.value };
+                  : { value: field.value, label: field.label };
 
               const options =
                 currentValue?.value &&
-                !animals.some((a) => a.value === currentValue.value)
+                !category.some((a) => a.value === currentValue.value)
                   ? [
-                      ...animals,
+                      ...category,
                       { value: currentValue.value, label: currentValue.label },
                     ]
-                  : animals;
+                  : category;
 
               const selectOptions = options.map((animal) => ({
                 value: animal.value,
@@ -163,7 +165,77 @@ export function ProductsForm({ product }) {
                           label: selectedOption.label,
                         }
                       : selectedOption.value;
-                    field.onChange(newValue?.value);
+
+                    field.onChange(newValue);
+                  }}
+                  value={
+                    selectOptions.find(
+                      (option) => option.value === currentValue?.value,
+                    ) || null
+                  }
+                  placeholder='Select a category'
+                  aria-label='Category'
+                  styles={{
+                    control: (base) => ({
+                      ...base,
+                    }),
+                  }}
+                />
+              );
+            }}
+          />
+          {errors.category && (
+            <p className='text-red-500 font-light'>{errors.category.message}</p>
+          )}
+        </div>
+
+        {/* sub_category */}
+        <div>
+          <label
+            className='text-lg font-medium tracking-tight leading-5'
+            htmlFor='sub_category '
+          >
+            Sub Category <span className='text-red-600'>*</span>
+          </label>
+          <Controller
+            name='sub_category'
+            control={control}
+            render={({ field }) => {
+              const currentValue =
+                field.value && typeof field.value === 'object'
+                  ? field.value
+                  : { value: field.value, label: field.value };
+
+              const options =
+                currentValue?.value &&
+                !subCategoryList.some((a) => a.value === currentValue.value)
+                  ? [
+                      ...subCategoryList,
+                      {
+                        value: currentValue.value,
+                        label: currentValue.label,
+                      },
+                    ]
+                  : subCategoryList;
+
+              const selectOptions = options.map((options) => ({
+                value: options.value,
+                label: options.label,
+              }));
+
+              return (
+                <Select
+                  {...field}
+                  options={selectOptions}
+                  onChange={(selectedOption) => {
+                    const newValue = selectedOption
+                      ? {
+                          value: selectedOption.value,
+                          label: selectedOption.label,
+                        }
+                      : selectedOption.value;
+
+                    field.onChange(newValue);
                   }}
                   value={
                     selectOptions.find(

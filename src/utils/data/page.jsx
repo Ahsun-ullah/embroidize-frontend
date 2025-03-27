@@ -201,20 +201,54 @@ export const users = [
   },
 ];
 
-export const animals = [
-  { value: 'cat', label: 'Cat' },
-  { value: 'dog', label: 'Dog' },
-  { value: 'elephant', label: 'Elephant' },
-  { value: 'lion', label: 'Lion' },
-  { value: 'tiger', label: 'Tiger' },
-  { value: 'giraffe', label: 'Giraffe' },
-  { value: 'dolphin', label: 'Dolphin' },
-  { value: 'penguin', label: 'Penguin' },
-  { value: 'zebra', label: 'Zebra' },
-  { value: 'shark', label: 'Shark' },
-  { value: 'whale', label: 'Whale' },
-  { value: 'otter', label: 'Otter' },
-  { value: 'crocodile', label: 'Crocodile' },
+export const category = [
+  { value: 1, label: 'Cat' },
+  { value: 2, label: 'Dog' },
+  { value: 3, label: 'Elephant' },
+  { value: 4, label: 'Lion' },
+  { value: 5, label: 'Tiger' },
+  { value: 6, label: 'Giraffe' },
+  { value: 7, label: 'Dolphin' },
+  { value: 8, label: 'Penguin' },
+  { value: 9, label: 'Zebra' },
+  { value: 10, label: 'Shark' },
+  { value: 11, label: 'Whale' },
+  { value: 12, label: 'Otter' },
+  { value: 13, label: 'Crocodile' },
+];
+export const subCategoryList = [
+  // From Animals
+  { value: 1, label: 'Mammals' },
+  { value: 2, label: 'Birds' },
+  { value: 3, label: 'Reptiles' },
+  // From Flowers
+  { value: 4, label: 'Roses' },
+  { value: 5, label: 'Lilies' },
+  { value: 6, label: 'Sunflowers' },
+  // From Kvalues
+  { value: 7, label: 'Toys' },
+  { value: 8, label: 'Games' },
+  { value: 9, label: 'Books' },
+  // From Technology
+  { value: 10, label: 'Gadgets' },
+  { value: 11, label: 'Computers' },
+  { value: 12, label: 'Wearables' },
+  // From Food
+  { value: 13, label: 'Desserts' },
+  { value: 14, label: 'Beverages' },
+  { value: 15, label: 'Snacks' },
+  // From Sports
+  { value: 16, label: 'Football' },
+  { value: 17, label: 'Basketball' },
+  { value: 18, label: 'Tennis' },
+  // From Travel
+  { value: 19, label: 'Beaches' },
+  { value: 20, label: 'Mountains' },
+  { value: 21, label: 'Cities' },
+  // From Art
+  { value: 22, label: 'Paintings' },
+  { value: 23, label: 'Sculptures' },
+  { value: 24, label: 'Photography' },
 ];
 
 export const siteConfig = {

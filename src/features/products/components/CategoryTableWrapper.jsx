@@ -15,6 +15,7 @@ import {
 } from '@heroui/react';
 import { useCallback, useState } from 'react';
 import CategoryModal from './CategoryModal';
+import SubCategoryModal from './SubCategoryModal';
 
 export default function CategoryTableWrapper({
   categoryInitialData,
@@ -32,6 +33,11 @@ export default function CategoryTableWrapper({
     subCategoryInitialData,
   );
   const { isOpen, onOpen, onOpenChange } = useDisclosure();
+  const {
+    isOpen: subCategoryIsOpen,
+    onOpen: subCategoryOnOpen,
+    onOpenChange: subCategoryOnOpenChange,
+  } = useDisclosure();
 
   const categoryFilterData = useCallback(
     (value) => {
@@ -259,6 +265,7 @@ export default function CategoryTableWrapper({
             Add Category
           </Button>
           <Button
+            onPress={subCategoryOnOpen}
             className='bg-foreground text-background'
             endContent={<PlusIcon />}
             size='sm'
@@ -267,6 +274,10 @@ export default function CategoryTableWrapper({
           </Button>
         </div>
         <CategoryModal isOpen={isOpen} onOpenChange={onOpenChange} />
+        <SubCategoryModal
+          isOpen={subCategoryIsOpen}
+          onOpenChange={subCategoryOnOpenChange}
+        />
       </div>
       <div className='grid grid-cols-2 gap-4'>
         <UserTable
