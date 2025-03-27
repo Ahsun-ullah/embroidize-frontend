@@ -128,7 +128,7 @@ const Footer = () => {
             </div>
           </div>
           <hr className=" border-blue-500" />
-          <div className="bg-white flex flex-wrap items-center md:justify-between justify-between mt-4">
+          <div className="flex flex-wrap items-center md:justify-between justify-between mt-4">
             <div className=" w-full md:w-4/12 px-4 mx-auto text-center">
               <strong>EmbroID</strong>
               <p>&copy;2024. All rights reserved.</p>
