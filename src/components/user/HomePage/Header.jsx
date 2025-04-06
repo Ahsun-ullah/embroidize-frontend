@@ -37,15 +37,15 @@ export const Header = ({ session }) => {
   );
 
   return (
-    <HeroUINavbar maxWidth='xl' position='sticky'>
+    <HeroUINavbar maxWidth='xl' position='sticky' className='h-[5.5rem]'>
       <NavbarContent className='basis-1/5 sm:basis-full' justify='start'>
         <NavbarBrand as='li' className='gap-3 max-w-fit'>
           <NextLink className='flex justify-start items-center gap-1' href='/'>
             <Image
               onClick={() => router.push('/')}
               style={{
-                height: '10%',
-                width: '10%',
+                height: '20px',
+                width: 'auto',
               }}
               src={headerLogo}
               width={0}
@@ -75,11 +75,13 @@ export const Header = ({ session }) => {
         </ul>
       </NavbarContent>
 
+      <NavbarContent className='hidden sm:flex basis-1/5 sm:basis-full'>
+        {searchInput}
+      </NavbarContent>
       <NavbarContent
         className='hidden sm:flex basis-1/5 sm:basis-full'
         justify='end'
       >
-        <NavbarItem className='hidden lg:flex'>{searchInput}</NavbarItem>
         <NavbarItem className='hidden md:flex'>
           {session?.user ? (
             <div className='items-center' justify='end'>
@@ -119,7 +121,7 @@ export const Header = ({ session }) => {
                   href='/auth/login'
                   variant='flat'
                   size='sm'
-                  radius='large'
+                  radius='full'
                   className='button text-black font-bold'
                 >
                   Sign In

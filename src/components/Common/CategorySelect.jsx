@@ -1,55 +1,73 @@
 import {
-  Button,
   Dropdown,
   DropdownItem,
   DropdownMenu,
   DropdownTrigger,
+  Link,
 } from '@heroui/react';
-import React, { useMemo, useState } from 'react';
+import { useState } from 'react';
 
 const CategorySelect = () => {
-  const [selectedKeys, setSelectedKeys] = useState(new Set(['All Categories']));
+  const categories = [
+    {
+      id: 'cat1',
+      name: 'Clothing',
+      subcategories: [
+        { id: 'sub1', name: 'Shirts', href: '/clothing/shirts' },
+        { id: 'sub2', name: 'Pants', href: '/clothing/pants' },
+        { id: 'sub3', name: 'Jackets', href: '/clothing/jackets' },
+      ],
+    },
+    {
+      id: 'cat2',
+      name: 'Accessories',
+      subcategories: [
+        { id: 'sub4', name: 'Hats', href: '/accessories/hats' },
+        { id: 'sub5', name: 'Bags', href: '/accessories/bags' },
+      ],
+    },
+    {
+      id: 'cat3',
+      name: 'Electronics',
+      subcategories: [
+        { id: 'sub6', name: 'Phones', href: '/electronics/phones' },
+        { id: 'sub7', name: 'Laptops', href: '/electronics/laptops' },
+      ],
+    },
+  ];
 
-  const selectedValue = useMemo(
-    () => Array.from(selectedKeys).join(', ').replaceAll('_', ' '),
-    [selectedKeys]
-  );
+  const [openCategory, setOpenCategory] = useState(null);
 
   return (
-    <Dropdown>
-      <DropdownTrigger>
-        <Button variant="" className="capitalize font-semibold text-white">
-          {selectedValue}
-        </Button>
-      </DropdownTrigger>
-      <DropdownMenu
-        aria-label="Single selection example"
-        variant="flat"
-        disallowEmptySelection
-        selectionMode="single"
-        selectedKeys={selectedKeys}
-        onSelectionChange={setSelectedKeys}
-      >
-        <DropdownItem key="All Categories" className="capitalize">
-          All Categories
-        </DropdownItem>
-        <DropdownItem key="text" className="capitalize">
-          Text
-        </DropdownItem>
-        <DropdownItem key="number" className="capitalize">
-          Number
-        </DropdownItem>
-        <DropdownItem key="date" className="capitalize">
-          Date
-        </DropdownItem>
-        <DropdownItem key="single_date" className="capitalize">
-          Single Date
-        </DropdownItem>
-        <DropdownItem key="iteration" className="capitalize">
-          Iteration
-        </DropdownItem>
-      </DropdownMenu>
-    </Dropdown>
+    <div className='dropdown-container flex gap-4'>
+      {categories.map((category) => (
+        <div
+          key={category.id}
+          className='dropdown-wrapper'
+          onMouseEnter={() => setOpenCategory(category.id)}
+          onMouseLeave={() => setOpenCategory(null)}
+        >
+          <Dropdown isOpen={openCategory === category.id}>
+            <DropdownTrigger>
+              <Link color='foreground' href='#' className='capitalize'>
+                {category.name}
+              </Link>
+            </DropdownTrigger>
+            <DropdownMenu aria-label={`${category.name} Subcategories`}>
+              {category.subcategories.map((subcategory) => (
+                <DropdownItem
+                  key={subcategory.id}
+                  href={subcategory.href}
+                  className='capitalize'
+                >
+                  {subcategory.name}
+                </DropdownItem>
+              ))}
+            </DropdownMenu>
+          </Dropdown>
+        </div>
+      ))}
+    </div>
   );
 };
 

@@ -1,3 +1,6 @@
+import { Button } from '@heroui/react';
+import Link from 'next/link';
+
 const HeroSection = () => {
   return (
     <section
@@ -19,6 +22,16 @@ const HeroSection = () => {
             All you need for your next machine embroidery project. <br /> The
             highest quality for the lowest price.
           </p>
+          <Button
+            as={Link}
+            href='/products'
+            variant='flat'
+            size='lg'
+            radius='full'
+            className=' text-white font-bold  transition duration-300 ease-in-out'
+          >
+            Shop Now
+          </Button>
         </div>
       </div>
     </section>
