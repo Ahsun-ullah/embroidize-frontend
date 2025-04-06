@@ -23,7 +23,7 @@ const PopularDesign = () => {
               >
                 <div
                   style={{
-                    backgroundImage: `url('/Category.jpg')`,
+                    backgroundImage: `url('/category.jpg')`,
                     backgroundSize: 'cover',
                     backgroundPosition: 'center',
                     backgroundRepeat: 'no-repeat',
@@ -31,8 +31,7 @@ const PopularDesign = () => {
                     width: '100%',
                   }}
                   className='p-6 flex items-center justify-center'
-                >
-                </div>
+                ></div>
                 <Divider />
                 <div className='flex flex-col border-default-600 dark:border-default-100 p-4'>
                   <div className='flex items-center justify-between gap-4'>

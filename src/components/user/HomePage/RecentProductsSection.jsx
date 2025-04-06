@@ -23,7 +23,7 @@ const RecentProductsSection = () => {
               >
                 <div
                   style={{
-                    backgroundImage: `url('/Category.jpg')`,
+                    backgroundImage: `url('/category.jpg')`,
                     backgroundSize: 'cover',
                     backgroundPosition: 'center',
                     backgroundRepeat: 'no-repeat',
