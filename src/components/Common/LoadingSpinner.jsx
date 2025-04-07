@@ -2,18 +2,7 @@
 import { Spinner } from '@heroui/react';
 
 const LoadingSpinner = () => {
-  return (
-    <div
-    //   style={{
-    //     display: 'flex',
-    //     justifyContent: 'center',
-    //     alignItems: 'center',
-    //     height: '100vh',
-    //   }}
-    >
-      <Spinner color='warning' label='Loading...' />
-    </div>
-  );
+  return <Spinner color='warning' className='bg-teal-100 p-3 rounded-full' />;
 };
 
 export default LoadingSpinner;

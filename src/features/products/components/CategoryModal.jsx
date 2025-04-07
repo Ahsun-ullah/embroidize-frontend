@@ -1,5 +1,6 @@
 'use client';
 import LoadingSpinner from '@/components/Common/LoadingSpinner';
+import { useAddProductCategoryMutation } from '@/lib/redux/admin/categoryAndSubcategory/categoryAndSubcategorySlice';
 import { categorySchema } from '@/lib/zodValidation/productValidation';
 import { Modal, ModalBody, ModalContent, ModalHeader } from '@heroui/react';
 import { zodResolver } from '@hookform/resolvers/zod';
@@ -11,6 +12,7 @@ import { CreatableTagsInput } from './TagsInput';
 
 export default function CategoryModal({ isOpen, onOpenChange, category }) {
   const [description, setDescription] = useState(category?.description || '');
+  const [addProductCategory] = useAddProductCategoryMutation();
 
   const {
     control,
@@ -45,46 +47,44 @@ export default function CategoryModal({ isOpen, onOpenChange, category }) {
 
   const onSubmit = async (data) => {
     console.log('Submitted Data:', data);
-    // try {
-    //   const formData = new FormData();
-    //   Object.entries(data).forEach(([key, value]) => {
-    //     if (value !== null && value !== undefined) {
-    //       if (key === 'image') {
-    //         if (value instanceof File) {
-    //           formData.append(key, value);
-    //         }
-    //       } else if (key === 'tags') {
-    //         value.forEach((tag, index) => {
-    //           formData.append(`tags[${index}]`, tag);
-    //         });
-    //       } else {
-    //         formData.append(key, value);
-    //       }
-    //     }
-    //   });
+    try {
+      const formData = new FormData();
+      Object.entries(data).forEach(([key, value]) => {
+        if (value !== null && value !== undefined) {
+          if (key === 'image') {
+            if (value instanceof File) {
+              formData.append(key, value);
+            }
+          } else if (key === 'tags') {
+            value.forEach((tag, index) => {
+              formData.append(`tags[${index}]`, tag);
+            });
+          } else {
+            formData.append(key, value);
+          }
+        }
+      });
 
-    //   // If editing, add category ID
-    //   if (category?.id) {
-    //     formData.append('id', category.id);
-    //   }
+      // If editing, add category ID
+      // if (category?.id) {
+      //   formData.append('id', category.id);
+      // }
 
-    //   // Here you would typically make an API call
-    //   // const response = await fetch(category ? '/api/categorys/update' : '/api/categorys/create', {
-    //   //   method: category ? 'PUT' : 'POST',
-    //   //   body: formData,
-    //   // });
+      // Here you would typically make an API call
+      const response = await addProductCategory(formData).unwrap();
+      console.log('API Response:', response);
 
-    //   console.log('Form Data:', Object.fromEntries(formData));
+      console.log('Form Data:', Object.fromEntries(formData));
 
-    //   // Reset form if creating new category
-    //   // if (!category) {
-    //   //   reset();
-    //   //   setDescription('');
-    //   // }
-    // } catch (error) {
-    //   console.error('Error submitting form:', error);
-    //   // You might want to set an error state here to display to the user
-    // }
+      // Reset form if creating new category
+      // if (!category) {
+      //   reset();
+      //   setDescription('');
+      // }
+    } catch (error) {
+      console.error('Error submitting form:', error);
+      // You might want to set an error state here to display to the user
+    }
   };
   return (
     <Modal
@@ -231,24 +231,22 @@ export default function CategoryModal({ isOpen, onOpenChange, category }) {
 
                 {/* Submit Button */}
                 <div className='col-span-3 flex justify-center w-full my-8 '>
-                  <button
-                    type='submit'
-                    disabled={isSubmitting}
-                    className={`w-full md:w-auto px-4 py-2 rounded-md font-medium text-white
+                  {isSubmitting ? (
+                    <LoadingSpinner />
+                  ) : (
+                    <button
+                      type='submit'
+                      disabled={isSubmitting}
+                      className={`w-full md:w-auto px-4 py-2 rounded-md font-medium text-white
              bg-slate-800
               hover:bg-teal-600  hover:shadow-lg
               disabled:from-gray-400 disabled:to-gray-500 disabled:cursor-not-allowed
               transition-all duration-300 ease-in-out
               ${isSubmitting ? 'cursor-wait' : ''}`}
-                  >
-                    {isSubmitting ? (
-                      <LoadingSpinner />
-                    ) : category ? (
-                      'Update Category'
-                    ) : (
-                      'Create Category'
-                    )}
-                  </button>
+                    >
+                      {category ? 'Update Category' : 'Create Category'}
+                    </button>
+                  )}
                 </div>
               </form>
             </ModalBody>

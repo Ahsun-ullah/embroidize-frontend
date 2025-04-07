@@ -29,7 +29,7 @@ export default function ContactsPage() {
       <h1 className='text-lg font-medium tracking-tight leading-5'>
         Product Form
       </h1>
-      <ProductsForm product={dummyProduct} />
+      <ProductsForm product={''} />
     </div>
   );
 }
