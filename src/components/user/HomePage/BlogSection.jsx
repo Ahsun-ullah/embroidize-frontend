@@ -1,4 +1,4 @@
-import { Card, Divider } from '@heroui/react';
+import { Divider } from '@heroui/react';
 
 const BlogSection = () => {
   return (
@@ -15,7 +15,7 @@ const BlogSection = () => {
         <div className='container mx-auto px-4'>
           <div className='grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-10'>
             {Array.from({ length: 3 }).map((_, index) => (
-              <Card
+              <div
                 key={index}
                 className='bg-white border rounded-2xl shadow-xl'
               >
@@ -28,10 +28,10 @@ const BlogSection = () => {
                     height: '200px',
                     width: '100%',
                   }}
-                  className='p-6 flex items-center justify-center'
-                ></div>
+                  className='p-6 flex items-center justify-center rounded-t-2xl'
+                />
                 <Divider />
-                <div className='bg-blue-50 border-default-600 dark:border-default-100 p-4'>
+                <div className='bg-blue-50 border-default-600 dark:border-default-100 p-4 rounded-2xl'>
                   <div className='text-wrap'>
                     <h1 className='text-lg font-bold'>
                       How to Edit a Machine Embroidery Design
@@ -50,7 +50,7 @@ const BlogSection = () => {
                     </button>
                   </div>
                 </div>
-              </Card>
+              </div>
             ))}
           </div>
         </div>

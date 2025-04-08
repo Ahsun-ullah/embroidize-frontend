@@ -1,4 +1,3 @@
-import { Button } from '@heroui/react';
 import Link from 'next/link';
 
 const HeroSection = () => {
@@ -22,16 +21,13 @@ const HeroSection = () => {
             All you need for your next machine embroidery project. <br /> The
             highest quality for the lowest price.
           </p>
-          <Button
-            as={Link}
+          <Link
             href='/products'
-            variant='flat'
-            size='lg'
-            radius='full'
-            className=' text-white font-bold  transition duration-300 ease-in-out'
+            className='bg-white text-black font-bold transition duration-300 ease-in-out hover:opacity-60 focus:opacity-60 px-4 py-1 rounded-full'
+            passHref
           >
-            Shop Now
-          </Button>
+            <span className='text-black'>Shop Now</span>
+          </Link>
         </div>
       </div>
     </section>

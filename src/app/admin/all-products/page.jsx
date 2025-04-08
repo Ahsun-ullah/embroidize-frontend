@@ -2,7 +2,7 @@ import LoadingSpinner from '@/components/Common/LoadingSpinner';
 import ProductsTableWrapper from '@/features/products/components/ProductsTableWrapper';
 import { Suspense } from 'react';
 
-const getProducts = async () => {
+export const getProducts = async () => {
   const productData = [
     {
       _id: '12345',

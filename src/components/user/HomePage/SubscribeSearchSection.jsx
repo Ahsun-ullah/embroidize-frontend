@@ -9,7 +9,7 @@ const SubscribeSearchSection = () => {
         </h1>
         <div className='flex justify-center'>
           <div className='w-full max-w-[25rem] sm:max-w-[20rem] md:max-w-[25rem] lg:max-w-[30rem]'>
-            <Input
+            {/* <Input
               variant={'bordered'}
               radius='full'
               isBordered
@@ -27,7 +27,7 @@ const SubscribeSearchSection = () => {
                 </button>
               }
               type='search'
-            />
+            /> */}
           </div>
         </div>
       </section>
