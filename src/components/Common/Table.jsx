@@ -15,15 +15,17 @@ const UserTable = ({ data, columns, pageSize, renderCell, onSearchChange }) => {
   const [selectedKeys, setSelectedKeys] = useState(new Set([]));
   const [page, setPage] = useState(1);
 
+  // console.log(data);
+
   const selectedKeysArray = Array.from(selectedKeys);
 
   const paginatedItems = useMemo(() => {
     const start = (page - 1) * pageSize;
     const end = start + pageSize;
-    return data.slice(start, end);
+    return data?.slice(start, end);
   }, [data, page, pageSize]);
 
-  const pages = Math.ceil(data.length / pageSize);
+  const pages = Math.ceil(data?.length / pageSize);
 
   const topContent = (
     <div className='flex flex-col gap-4'>

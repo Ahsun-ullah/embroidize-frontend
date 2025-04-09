@@ -13,8 +13,7 @@ import NextLink from 'next/link';
 
 import SearchBox from '@/components/Common/SearchBox';
 import UserProfileDropdown from '@/components/Common/UserProfileDropdown';
-import { headerLogo } from '@/lib/datas/page';
-import { siteConfig } from '@/utils/data/page';
+import { headerLogo, siteConfig } from '@/lib/datas/page';
 import Image from 'next/image';
 
 export const Header = () => {

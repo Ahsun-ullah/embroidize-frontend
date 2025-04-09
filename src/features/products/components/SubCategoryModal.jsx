@@ -1,7 +1,13 @@
 'use client';
+import { ErrorToast } from '@/components/Common/ErrorToast';
 import LoadingSpinner from '@/components/Common/LoadingSpinner';
+import { SuccessToast } from '@/components/Common/SuccessToast';
+import {
+  useAddProductSubCategoryMutation,
+  useGetPublicProductCategoriesQuery,
+  useGetPublicProductSubCategoriesQuery,
+} from '@/lib/redux/admin/categoryAndSubcategory/categoryAndSubcategorySlice';
 import { subCategorySchema } from '@/lib/zodValidation/productValidation';
-import { subCategoryList } from '@/utils/data/page';
 import { Modal, ModalBody, ModalContent, ModalHeader } from '@heroui/react';
 import { zodResolver } from '@hookform/resolvers/zod';
 import MDEditor from '@uiw/react-md-editor';
@@ -19,6 +25,14 @@ export default function SubCategoryModal({
   const [description, setDescription] = useState(
     subCategory?.description || '',
   );
+  const [categoryOption, setCategoryOption] = useState([]);
+
+  const { data: categoryData } = useGetPublicProductCategoriesQuery();
+
+  const [addProductSubCategory] = useAddProductSubCategoryMutation();
+
+  const { refetch: getProductSubCategoryRefetch } =
+    useGetPublicProductSubCategoriesQuery();
 
   const {
     control,
@@ -33,8 +47,9 @@ export default function SubCategoryModal({
       name: '',
       category: '',
       description: '',
-      metaDescription: '',
-      tags: [],
+      meta_title: '',
+      meta_description: '',
+      meta_keywords: [],
       image: null,
     },
   });
@@ -42,92 +57,102 @@ export default function SubCategoryModal({
   useEffect(() => {
     if (subCategory) {
       reset({
-        name: subCategory.name ?? '',
-        category: product.category?.value ?? '',
-        description: subCategory.description ?? '',
-        metaDescription: subCategory.metaDescription ?? '',
-        tags: subCategory.tags ?? [],
-        image: subCategory.image ?? null,
+        name: subCategory.name || '',
+        category: subCategory.category?._id || '',
+        description: subCategory.description || '',
+        meta_title: subCategory.meta_title || '',
+        meta_description: subCategory.meta_description || '',
+        meta_keywords: subCategory.meta_keywords || [],
+        image: subCategory.image || null,
       });
-      setDescription(subCategory.description ?? '');
+      setDescription(subCategory.description || '');
     }
   }, [subCategory, reset]);
 
+  useEffect(() => {
+    if (categoryData?.data?.length > 0) {
+      console.log('categoryData:', categoryData);
+      const formattedCategory = categoryData.data.map((cat) => ({
+        label: cat?.name,
+        value: cat?._id,
+      }));
+      setCategoryOption(formattedCategory);
+    }
+  }, [categoryData]);
+
   const onSubmit = async (data) => {
     console.log('Submitted Data:', data);
-    // try {
-    //   const formData = new FormData();
-    //   Object.entries(data).forEach(([key, value]) => {
-    //     if (value !== null && value !== undefined) {
-    //       if (key === 'image') {
-    //         if (value instanceof File) {
-    //           formData.append(key, value);
-    //         }
-    //       } else if (key === 'tags') {
-    //         value.forEach((tag, index) => {
-    //           formData.append(`tags[${index}]`, tag);
-    //         });
-    //       } else {
-    //         formData.append(key, value);
-    //       }
-    //     }
-    //   });
+    try {
+      const formData = new FormData();
+      formData.append('name', data.name);
+      formData.append('category', data.category);
+      formData.append('description', data.description);
+      formData.append('meta_title', data.meta_title);
+      formData.append('meta_description', data.meta_description);
+      if (data.meta_keywords) {
+        data.meta_keywords.forEach((tag, index) => {
+          formData.append(`meta_keywords[${index}]`, tag);
+        });
+      }
+      if (data.image instanceof File) {
+        formData.append('image', data.image);
+      }
 
-    //   // If editing, add subCategory ID
-    //   if (subCategory?.id) {
-    //     formData.append('id', subCategory.id);
-    //   }
+      const response = await addProductSubCategory(formData).unwrap();
+      console.log('API Response:', response);
 
-    //   // Here you would typically make an API call
-    //   // const response = await fetch(subCategory ? '/api/subCategorys/update' : '/api/subCategorys/create', {
-    //   //   method: subCategory ? 'PUT' : 'POST',
-    //   //   body: formData,
-    //   // });
-
-    //   console.log('Form Data:', Object.fromEntries(formData));
-
-    //   // Reset form if creating new subCategory
-    //   // if (!subCategory) {
-    //   //   reset();
-    //   //   setDescription('');
-    //   // }
-    // } catch (error) {
-    //   console.error('Error submitting form:', error);
-    //   // You might want to set an error state here to display to the user
-    // }
+      if (response.error) {
+        ErrorToast('Error', response.error.data?.message || 'API Error', 3000);
+      } else {
+        SuccessToast(
+          'Success',
+          response.data?.message || 'Subcategory added!',
+          3000,
+        );
+        getProductSubCategoryRefetch();
+        reset();
+        setDescription('');
+        onOpenChange();
+      }
+    } catch (error) {
+      console.error('Error submitting form:', error);
+      ErrorToast('Error', error.message || 'Failed to submit form', 3000);
+    }
   };
+
   return (
     <Modal
       isOpen={isOpen}
       onOpenChange={() => {
-        reset(), onOpenChange();
+        reset();
+        onOpenChange();
       }}
       scrollBehavior='inside'
       placement='center'
-      size={'5xl'}
+      size='5xl'
     >
       <ModalContent>
         {(onClose) => (
           <>
             <ModalHeader className='flex flex-col gap-1'>
-              {subCategory ? 'Update subCategory' : 'Add subCategory'}
+              {subCategory ? 'Update Subcategory' : 'Add Subcategory'}
             </ModalHeader>
             <ModalBody>
               <form
                 onSubmit={handleSubmit(onSubmit)}
                 className='flex flex-col gap-4'
               >
-                {/* subCategory Name */}
+                {/* Subcategory Name */}
                 <div className='flex flex-col gap-2'>
                   <label
                     className='text-lg font-medium tracking-tight leading-5'
                     htmlFor='name'
                   >
-                    subCategory Name <span className='text-red-600'>*</span>
+                    Subcategory Name <span className='text-red-600'>*</span>
                   </label>
                   <input
                     id='name'
-                    placeholder='Category Name'
+                    placeholder='Subcategory Name'
                     {...register('name')}
                     className='flex w-full flex-wrap md:flex-nowrap gap-4 border-[1.8px] rounded-[4px] p-2'
                   />
@@ -149,60 +174,21 @@ export default function SubCategoryModal({
                   <Controller
                     name='category'
                     control={control}
-                    render={({ field }) => {
-                      const currentValue =
-                        field.value && typeof field.value === 'object'
-                          ? field.value
-                          : { value: field.value, label: field.value };
-
-                      const options =
-                        currentValue?.value &&
-                        !subCategoryList.some(
-                          (a) => a.value === currentValue.value,
-                        )
-                          ? [
-                              ...subCategoryList,
-                              {
-                                value: currentValue.value,
-                                label: currentValue.label,
-                              },
-                            ]
-                          : subCategoryList;
-
-                      const selectOptions =
-                        options.map((options) => ({
-                          value: options.value ?? '',
-                          label: options.label ?? '',
-                        })) || [];
-
-                      return (
-                        <Select
-                          {...field}
-                          options={selectOptions}
-                          onChange={(selectedOption) => {
-                            const newValue = selectedOption
-                              ? {
-                                  value: selectedOption.value,
-                                  label: selectedOption.label,
-                                }
-                              : selectedOption.value;
-                            field.onChange(newValue);
-                          }}
-                          value={
-                            selectOptions.find(
-                              (option) => option.value === currentValue?.value,
-                            ) || null
-                          }
-                          placeholder='Select a category'
-                          aria-label='Category'
-                          styles={{
-                            control: (base) => ({
-                              ...base,
-                            }),
-                          }}
-                        />
-                      );
-                    }}
+                    render={({ field }) => (
+                      <Select
+                        options={categoryOption}
+                        onChange={(selected) =>
+                          field.onChange(selected ? selected.value : '')
+                        }
+                        value={
+                          categoryOption.find(
+                            (option) => option.value === field.value,
+                          ) || null
+                        }
+                        placeholder='Select a category'
+                        aria-label='Category'
+                      />
+                    )}
                   />
                   {errors.category && (
                     <p className='text-red-500 font-light'>
@@ -217,7 +203,7 @@ export default function SubCategoryModal({
                     className='text-lg font-medium tracking-tight leading-5'
                     htmlFor='description'
                   >
-                    subCategory Description{' '}
+                    Subcategory Description{' '}
                     <span className='text-red-600'>*</span>
                   </label>
                   <Controller
@@ -225,7 +211,6 @@ export default function SubCategoryModal({
                     control={control}
                     render={({ field }) => (
                       <MDEditor
-                        {...field}
                         value={description}
                         onChange={(value) => {
                           setDescription(value);
@@ -234,11 +219,9 @@ export default function SubCategoryModal({
                         preview='edit'
                         height={300}
                         textareaProps={{
-                          placeholder: 'Enter subCategory Description',
+                          placeholder: 'Enter Subcategory Description',
                         }}
-                        previewOptions={{
-                          disallowedElements: ['style'],
-                        }}
+                        previewOptions={{ disallowedElements: ['style'] }}
                         className='rounded-[4px] p-2 overflow-hidden'
                       />
                     )}
@@ -250,38 +233,59 @@ export default function SubCategoryModal({
                   )}
                 </div>
 
+                {/* Meta Title */}
+                <div className='flex flex-col gap-2'>
+                  <label
+                    className='text-lg font-medium tracking-tight leading-5'
+                    htmlFor='meta_title'
+                  >
+                    Meta Title <span className='text-red-600'>*</span>
+                  </label>
+                  <input
+                    id='meta_title'
+                    placeholder='Meta Title'
+                    {...register('meta_title')}
+                    className='flex w-full flex-wrap md:flex-nowrap gap-4 border-[1.8px] rounded-[4px] p-2'
+                  />
+                  {errors.meta_title && (
+                    <p className='text-red-500 font-light'>
+                      {errors.meta_title.message}
+                    </p>
+                  )}
+                </div>
+
                 {/* Meta Description */}
                 <div className='flex flex-col gap-2'>
                   <label
                     className='text-lg font-medium tracking-tight leading-5'
-                    htmlFor='metaDescription'
+                    htmlFor='meta_description'
                   >
                     Meta Description <span className='text-red-600'>*</span>
                   </label>
                   <textarea
                     rows={8}
-                    id='metaDescription'
+                    id='meta_description'
                     placeholder='Meta description'
-                    {...register('metaDescription')}
+                    {...register('meta_description')}
                     className='flex w-full flex-wrap md:flex-nowrap gap-4 border-[1.8px] rounded-[4px] p-2'
                   />
-                  {errors.metaDescription && (
+                  {errors.meta_description && (
                     <p className='text-red-500 font-light'>
-                      {errors.metaDescription.message}
+                      {errors.meta_description.message}
                     </p>
                   )}
                 </div>
 
-                {/* subCategory Tags */}
+                {/* Subcategory Tags */}
                 <div className='flex flex-col gap-2'>
                   <label
                     className='text-lg font-medium tracking-tight leading-5'
-                    htmlFor='tags'
+                    htmlFor='meta_keywords'
                   >
-                    subCategory Tags <span className='text-red-600'>*</span>
+                    Subcategory Tags <span className='text-red-600'>*</span>
                   </label>
                   <Controller
-                    name='tags'
+                    name='meta_keywords'
                     control={control}
                     render={({ field }) => (
                       <CreatableTagsInput
@@ -290,20 +294,20 @@ export default function SubCategoryModal({
                       />
                     )}
                   />
-                  {errors.tags && (
+                  {errors.meta_keywords && (
                     <p className='text-red-500 font-light'>
-                      {errors.tags.message}
+                      {errors.meta_keywords.message}
                     </p>
                   )}
                 </div>
 
-                {/* subCategory Image Upload */}
+                {/* Subcategory Image Upload */}
                 <div className='flex flex-col gap-2'>
                   <label className='text-lg font-medium tracking-tight leading-5'>
-                    subCategory Image <span className='text-red-600'>*</span>
+                    Subcategory Image <span className='text-red-600'>*</span>
                   </label>
                   <ImageFileUpload
-                    label='Upload subCategory image (.jpg, .png). Min: 580px × 386px, Max: 5000px × 5000px'
+                    label='Upload subcategory image (.jpg, .png). Min: 580px × 386px, Max: 5000px × 5000px'
                     accept={{ 'image/jpeg': [], 'image/png': [] }}
                     onDrop={(file) =>
                       setValue('image', file, { shouldValidate: true })
@@ -314,23 +318,18 @@ export default function SubCategoryModal({
                 </div>
 
                 {/* Submit Button */}
-                <div className='col-span-3 flex justify-center w-full my-8 '>
+                <div className='col-span-3 flex justify-center w-full my-8'>
                   <button
                     type='submit'
                     disabled={isSubmitting}
-                    className={`w-full md:w-auto px-4 py-2 rounded-md font-medium text-white
-             bg-slate-800
-              hover:bg-teal-600  hover:shadow-lg
-              disabled:from-gray-400 disabled:to-gray-500 disabled:cursor-not-allowed
-              transition-all duration-300 ease-in-out
-              ${isSubmitting ? 'cursor-wait' : ''}`}
+                    className={`w-full md:w-auto px-4 py-2 rounded-md font-medium text-white bg-slate-800 hover:bg-teal-600 hover:shadow-lg disabled:from-gray-400 disabled:to-gray-500 disabled:cursor-not-allowed transition-all duration-300 ease-in-out ${isSubmitting ? 'cursor-wait' : ''}`}
                   >
                     {isSubmitting ? (
                       <LoadingSpinner />
                     ) : subCategory ? (
-                      'Update subCategory'
+                      'Update Subcategory'
                     ) : (
-                      'Create subCategory'
+                      'Create Subcategory'
                     )}
                   </button>
                 </div>

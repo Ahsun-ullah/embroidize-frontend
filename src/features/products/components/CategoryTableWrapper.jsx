@@ -1,11 +1,9 @@
 'use client';
 import UserTable from '@/components/Common/Table';
 import { PlusIcon, VerticalDotsIcon } from '@/components/icons';
-import { categoryStatusColor } from '@/utils/colorStatus/page';
-import { capitalize } from '@/utils/functions/page';
+import { useGetSinglePublicProductCategoryQuery } from '@/lib/redux/admin/categoryAndSubcategory/categoryAndSubcategorySlice';
 import {
   Button,
-  Chip,
   Dropdown,
   DropdownItem,
   DropdownMenu,
@@ -13,7 +11,7 @@ import {
   useDisclosure,
   User,
 } from '@heroui/react';
-import { useCallback, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import CategoryModal from './CategoryModal';
 import SubCategoryModal from './SubCategoryModal';
 
@@ -27,11 +25,31 @@ export default function CategoryTableWrapper({
   categorySearchableFieldsName,
   subCategorySearchableFieldsName,
 }) {
-  const [categoryFilteredData, setcategoryFilteredData] =
-    useState(categoryInitialData);
-  const [subCategoryFilteredData, setCategoryFilteredData] = useState(
-    subCategoryInitialData,
+  const [categoryId, setCategoryId] = useState('');
+  const [subCategoryId, setSubCategoryId] = useState('');
+  const [categoryFilteredData, setCategoryFilteredData] = useState(
+    categoryInitialData || [],
   );
+  const [subCategoryFilteredData, setSubCategoryFilteredData] = useState(
+    subCategoryInitialData || [],
+  );
+
+  const { data: getSingleCategoryData, refetch } =
+    useGetSinglePublicProductCategoryQuery(categoryId);
+
+  console.log('categoryId', categoryId);
+  console.log('getSingleCategoryData', getSingleCategoryData);
+
+  useEffect(() => {
+    // console.log('categoryInitialData updated:', categoryInitialData);
+    setCategoryFilteredData(categoryInitialData || []);
+  }, [categoryInitialData]);
+
+  useEffect(() => {
+    // console.log('subCategoryInitialData updated:', subCategoryInitialData);
+    setSubCategoryFilteredData(subCategoryInitialData || []);
+  }, [subCategoryInitialData]);
+
   const { isOpen, onOpen, onOpenChange } = useDisclosure();
   const {
     isOpen: subCategoryIsOpen,
@@ -42,53 +60,58 @@ export default function CategoryTableWrapper({
   const categoryFilterData = useCallback(
     (value) => {
       try {
-        if (!value) {
-          setFilteredData(categoryInitialData);
+        if (!value || value.trim() === '') {
+          setCategoryFilteredData(categoryInitialData || []);
           return;
         }
 
-        const filtered = categoryInitialData.filter((item) => {
+        const filtered = (categoryInitialData || []).filter((item) => {
           const availableFields = categorySearchableFieldsName.filter(
             (field) =>
               item.hasOwnProperty(field) &&
               item[field] !== undefined &&
               item[field] !== null,
           );
+
           return availableFields.some((field) =>
             item[field].toString().toLowerCase().includes(value.toLowerCase()),
           );
         });
-        setcategoryFilteredData(filtered);
+
+        setCategoryFilteredData(filtered);
       } catch (error) {
         console.error('Error filtering data:', error);
-        setcategoryFilteredData(categoryInitialData);
+        setCategoryFilteredData(categoryInitialData || []);
       }
     },
     [categoryInitialData, categorySearchableFieldsName],
   );
+
   const subcategoryFilterData = useCallback(
     (value) => {
       try {
-        if (!value) {
-          setFilteredData(subCategoryInitialData);
+        if (!value || value.trim() === '') {
+          setSubCategoryFilteredData(subCategoryInitialData || []);
           return;
         }
 
-        const filtered = subCategoryInitialData.filter((item) => {
+        const filtered = (subCategoryInitialData || []).filter((item) => {
           const availableFields = subCategorySearchableFieldsName.filter(
             (field) =>
               item.hasOwnProperty(field) &&
               item[field] !== undefined &&
               item[field] !== null,
           );
+
           return availableFields.some((field) =>
             item[field].toString().toLowerCase().includes(value.toLowerCase()),
           );
         });
-        setCategoryFilteredData(filtered);
+
+        setSubCategoryFilteredData(filtered);
       } catch (error) {
         console.error('Error filtering data:', error);
-        setCategoryFilteredData(subCategoryInitialData);
+        setSubCategoryFilteredData(subCategoryInitialData || []);
       }
     },
     [subCategoryInitialData, subCategorySearchableFieldsName],
@@ -104,23 +127,10 @@ export default function CategoryTableWrapper({
             <User
               avatarProps={{ radius: 'lg', src: categoryItem?.image?.url }}
               name={cellValue}
-            ></User>
+            />
           );
         case 'name':
           return <div>{categoryItem.name}</div>;
-
-        case 'status':
-          return (
-            <Chip
-              className='capitalize'
-              color={categoryStatusColor[categoryItem.status]}
-              size='sm'
-              variant='flat'
-            >
-              {capitalize(categoryItem.status)}
-            </Chip>
-          );
-
         case 'actions':
           return (
             <div className='flex justify-start items-center gap-2'>
@@ -130,12 +140,17 @@ export default function CategoryTableWrapper({
                     <VerticalDotsIcon className='text-default-300' />
                   </Button>
                 </DropdownTrigger>
-
                 <DropdownMenu>
-                  <DropdownItem key='edit' onPress={() => {}}>
+                  <DropdownItem
+                    key='edit'
+                    onPress={() => {
+                      setCategoryId(categoryItem?._id);
+                      onOpen();
+                    }}
+                  >
                     Edit
                   </DropdownItem>
-                  {categoryItem?.status === 'active' ? (
+                  {/* {categoryItem?.status === 'active' ? (
                     <DropdownItem
                       key='inactive'
                       onPress={() => {}}
@@ -153,12 +168,11 @@ export default function CategoryTableWrapper({
                     >
                       Active
                     </DropdownItem>
-                  )}
+                  )} */}
                 </DropdownMenu>
               </Dropdown>
             </div>
           );
-
         default:
           return cellValue;
       }
@@ -167,6 +181,7 @@ export default function CategoryTableWrapper({
       return <span>Error</span>;
     }
   }, []);
+
   const subcategoryRenderCell = useCallback(
     (subcategoryItem, subcategoryColumnKey) => {
       try {
@@ -178,30 +193,16 @@ export default function CategoryTableWrapper({
               <User
                 avatarProps={{ radius: 'lg', src: subcategoryItem?.image?.url }}
                 name={cellValue}
-              ></User>
+              />
             );
           case 'name':
             return <div>{subcategoryItem?.name}</div>;
-
           case 'category':
             return (
               <div className='flex flex-col items-start justify-start gap-4'>
                 <div>{subcategoryItem?.category?.name}</div>
               </div>
             );
-
-          case 'status':
-            return (
-              <Chip
-                className='capitalize'
-                color={categoryStatusColor[subcategoryItem.status]}
-                size='sm'
-                variant='flat'
-              >
-                {capitalize(subcategoryItem.status)}
-              </Chip>
-            );
-
           case 'actions':
             return (
               <div className='flex justify-start items-center gap-2'>
@@ -211,7 +212,6 @@ export default function CategoryTableWrapper({
                       <VerticalDotsIcon className='text-default-300' />
                     </Button>
                   </DropdownTrigger>
-
                   <DropdownMenu>
                     <DropdownItem key='edit' onPress={() => {}}>
                       Edit
@@ -239,7 +239,6 @@ export default function CategoryTableWrapper({
                 </Dropdown>
               </div>
             );
-
           default:
             return cellValue;
         }
@@ -250,6 +249,10 @@ export default function CategoryTableWrapper({
     },
     [],
   );
+
+  // Log filtered data before rendering
+  // console.log('Rendering - categoryFilteredData:', categoryFilteredData);
+  // console.log('Rendering - subCategoryFilteredData:', subCategoryFilteredData);
 
   return (
     <div>
@@ -273,7 +276,12 @@ export default function CategoryTableWrapper({
             Add Subcategory
           </Button>
         </div>
-        <CategoryModal isOpen={isOpen} onOpenChange={onOpenChange} />
+        <CategoryModal
+          isOpen={isOpen}
+          onOpenChange={onOpenChange}
+          category={getSingleCategoryData?.data}
+          setCategoryId={setCategoryId}
+        />
         <SubCategoryModal
           isOpen={subCategoryIsOpen}
           onOpenChange={subCategoryOnOpenChange}

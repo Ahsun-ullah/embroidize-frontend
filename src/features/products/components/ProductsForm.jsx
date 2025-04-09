@@ -1,7 +1,10 @@
 'use client';
 
+import {
+  useGetPublicProductCategoriesQuery,
+  useGetPublicProductSubCategoriesQuery,
+} from '@/lib/redux/admin/categoryAndSubcategory/categoryAndSubcategorySlice';
 import { productSchema } from '@/lib/zodValidation/productValidation';
-import { category, subCategoryList } from '@/utils/data/page';
 import { Card } from '@heroui/react';
 import { zodResolver } from '@hookform/resolvers/zod';
 import MDEditor from '@uiw/react-md-editor';
@@ -13,7 +16,12 @@ import { ImageFileUpload } from './ImageDragAndDropInput';
 import { CreatableTagsInput } from './TagsInput';
 
 export function ProductsForm({ product }) {
+  const [categoryOption, setCategoryOption] = useState([]);
+  const [subCategoryOption, setSubCategoryOption] = useState([]);
   const [description, setDescription] = useState(product?.description || '');
+
+  const { data: categoryData } = useGetPublicProductCategoriesQuery();
+  const { data: subCategoryData } = useGetPublicProductSubCategoriesQuery();
 
   const {
     control,
@@ -53,6 +61,25 @@ export function ProductsForm({ product }) {
       setDescription(product.description ?? '');
     }
   }, [product, reset]);
+
+  useEffect(() => {
+    if (categoryData?.data?.length > 0) {
+      console.log('categoryData:', categoryData);
+      const formattedCategory = categoryData.data.map((cat) => ({
+        label: cat?.name,
+        value: cat?._id,
+      }));
+      setCategoryOption(formattedCategory);
+    }
+    if (subCategoryData?.data?.length > 0) {
+      console.log('subCategoryData:', subCategoryData);
+      const formattedSubCategory = categoryData.data.map((subcat) => ({
+        label: subcat?.name,
+        value: subcat?._id,
+      }));
+      setSubCategoryOption(formattedSubCategory);
+    }
+  }, [categoryData]);
 
   const onSubmit = async (data) => {
     console.log('Submitted Data:', data);
@@ -142,12 +169,12 @@ export function ProductsForm({ product }) {
 
               const options =
                 currentValue?.value &&
-                !category.some((a) => a.value === currentValue.value)
+                !categoryOption.some((a) => a.value === currentValue.value)
                   ? [
-                      ...category,
+                      ...categoryOption,
                       { value: currentValue.value, label: currentValue.label },
                     ]
-                  : category;
+                  : categoryOption;
 
               const selectOptions = options.map((animal) => ({
                 value: animal.value,
@@ -208,15 +235,15 @@ export function ProductsForm({ product }) {
 
               const options =
                 currentValue?.value &&
-                !subCategoryList.some((a) => a.value === currentValue.value)
+                !subCategoryOption.some((a) => a.value === currentValue.value)
                   ? [
-                      ...subCategoryList,
+                      ...subCategoryOption,
                       {
                         value: currentValue.value,
                         label: currentValue.label,
                       },
                     ]
-                  : subCategoryList;
+                  : subCategoryOption;
 
               const selectOptions = options.map((options) => ({
                 value: options.value,

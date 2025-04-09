@@ -1,7 +1,14 @@
 'use client';
+import { ErrorToast } from '@/components/Common/ErrorToast';
 import LoadingSpinner from '@/components/Common/LoadingSpinner';
-import { useAddProductCategoryMutation } from '@/lib/redux/admin/categoryAndSubcategory/categoryAndSubcategorySlice';
+import { SuccessToast } from '@/components/Common/SuccessToast';
+import {
+  useAddProductCategoryMutation,
+  useGetPublicProductCategoriesQuery,
+  useUpdateProductCategoryMutation,
+} from '@/lib/redux/admin/categoryAndSubcategory/categoryAndSubcategorySlice';
 import { categorySchema } from '@/lib/zodValidation/productValidation';
+import { convertImageUrlToFile } from '@/utils/functions/page';
 import { Modal, ModalBody, ModalContent, ModalHeader } from '@heroui/react';
 import { zodResolver } from '@hookform/resolvers/zod';
 import MDEditor from '@uiw/react-md-editor';
@@ -10,9 +17,19 @@ import { Controller, useForm } from 'react-hook-form';
 import { ImageFileUpload } from './ImageDragAndDropInput';
 import { CreatableTagsInput } from './TagsInput';
 
-export default function CategoryModal({ isOpen, onOpenChange, category }) {
+export default function CategoryModal({
+  isOpen,
+  onOpenChange,
+  category,
+  setCategoryId,
+}) {
   const [description, setDescription] = useState(category?.description || '');
   const [addProductCategory] = useAddProductCategoryMutation();
+  const [updateProductCategory] = useUpdateProductCategoryMutation();
+  const { refetch: getProductCategoryRefetch } =
+    useGetPublicProductCategoriesQuery();
+
+  // console.log(category?._id);
 
   const {
     control,
@@ -26,23 +43,30 @@ export default function CategoryModal({ isOpen, onOpenChange, category }) {
     defaultValues: {
       name: '',
       description: '',
-      metaDescription: '',
-      tags: [],
+      meta_title: '',
+      meta_description: '',
+      meta_keywords: [],
       image: null,
     },
   });
 
   useEffect(() => {
-    if (category) {
-      reset({
-        name: category.name ?? '',
-        description: category.description ?? '',
-        metaDescription: category.metaDescription ?? '',
-        tags: category.tags ?? [],
-        image: category.image ?? null,
-      });
-      setDescription(category.description ?? '');
+    async function fetchData() {
+      const newImg = await convertImageUrlToFile(category?.image?.url);
+      // console.log(newImg);
+      if (category) {
+        reset({
+          name: category.name ?? '',
+          description: category.description ?? '',
+          meta_title: category.meta_title ?? '',
+          meta_description: category.meta_description ?? '',
+          meta_keywords: category.meta_keywords ?? [],
+          image: newImg ?? null,
+        });
+        setDescription(category.description ?? '');
+      }
     }
+    fetchData();
   }, [category, reset]);
 
   const onSubmit = async (data) => {
@@ -55,9 +79,9 @@ export default function CategoryModal({ isOpen, onOpenChange, category }) {
             if (value instanceof File) {
               formData.append(key, value);
             }
-          } else if (key === 'tags') {
+          } else if (key === 'meta_keywords') {
             value.forEach((tag, index) => {
-              formData.append(`tags[${index}]`, tag);
+              formData.append(`meta_keywords[${index}]`, tag);
             });
           } else {
             formData.append(key, value);
@@ -66,21 +90,45 @@ export default function CategoryModal({ isOpen, onOpenChange, category }) {
       });
 
       // If editing, add category ID
-      // if (category?.id) {
-      //   formData.append('id', category.id);
-      // }
-
-      // Here you would typically make an API call
-      const response = await addProductCategory(formData).unwrap();
-      console.log('API Response:', response);
+      if (category?._id) {
+        formData.append('id', category._id);
+        const response = await updateProductCategory(formData).unwrap();
+        // console.log('API Response:', response);
+        if (response.error) {
+          ErrorToast('Error', response.error.data.message || 'API Error', 3000);
+        } else {
+          SuccessToast(
+            'Success',
+            response.data.message || 'Action successfully done!',
+            3000,
+          );
+          getProductCategoryRefetch();
+          reset();
+          setDescription('');
+          setCategoryId('');
+          onOpenChange();
+        }
+      } else {
+        // Here you would typically make an API call
+        const response = await addProductCategory(formData).unwrap();
+        // console.log('API Response:', response);
+        if (response.error) {
+          ErrorToast('Error', response.error.data.message || 'API Error', 3000);
+        } else {
+          SuccessToast(
+            'Success',
+            response.data.message || 'Action successfully done!',
+            3000,
+          );
+          getProductCategoryRefetch();
+          reset();
+          setDescription('');
+          setCategoryId('');
+          onOpenChange();
+        }
+      }
 
       console.log('Form Data:', Object.fromEntries(formData));
-
-      // Reset form if creating new category
-      // if (!category) {
-      //   reset();
-      //   setDescription('');
-      // }
     } catch (error) {
       console.error('Error submitting form:', error);
       // You might want to set an error state here to display to the user
@@ -90,7 +138,7 @@ export default function CategoryModal({ isOpen, onOpenChange, category }) {
     <Modal
       isOpen={isOpen}
       onOpenChange={() => {
-        reset(), onOpenChange();
+        setCategoryId(''), reset(), onOpenChange();
       }}
       scrollBehavior='inside'
       placement='center'
@@ -165,25 +213,44 @@ export default function CategoryModal({ isOpen, onOpenChange, category }) {
                     </p>
                   )}
                 </div>
-
+                {/* meta_title  */}
+                <div className='flex flex-col gap-2'>
+                  <label
+                    className='text-lg font-medium tracking-tight leading-5'
+                    htmlFor='meta_title'
+                  >
+                    Meta Title <span className='text-red-600'>*</span>
+                  </label>
+                  <input
+                    id='meta_title'
+                    placeholder='Category Name'
+                    {...register('meta_title')}
+                    className='flex w-full flex-wrap md:flex-nowrap gap-4 border-[1.8px] rounded-[4px] p-2'
+                  />
+                  {errors.meta_title && (
+                    <p className='text-red-500 font-light'>
+                      {errors.meta_title.message}
+                    </p>
+                  )}
+                </div>
                 {/* Meta Description */}
                 <div className='flex flex-col gap-2'>
                   <label
                     className='text-lg font-medium tracking-tight leading-5'
-                    htmlFor='metaDescription'
+                    htmlFor='meta_description'
                   >
                     Meta Description <span className='text-red-600'>*</span>
                   </label>
                   <textarea
                     rows={8}
-                    id='metaDescription'
+                    id='meta_description'
                     placeholder='Meta description'
-                    {...register('metaDescription')}
+                    {...register('meta_description')}
                     className='flex w-full flex-wrap md:flex-nowrap gap-4 border-[1.8px] rounded-[4px] p-2'
                   />
-                  {errors.metaDescription && (
+                  {errors.meta_description && (
                     <p className='text-red-500 font-light'>
-                      {errors.metaDescription.message}
+                      {errors.meta_description.message}
                     </p>
                   )}
                 </div>
@@ -192,23 +259,23 @@ export default function CategoryModal({ isOpen, onOpenChange, category }) {
                 <div className='flex flex-col gap-2'>
                   <label
                     className='text-lg font-medium tracking-tight leading-5'
-                    htmlFor='tags'
+                    htmlFor='meta_keywords'
                   >
                     Category Tags <span className='text-red-600'>*</span>
                   </label>
                   <Controller
-                    name='tags'
+                    name='meta_keywords'
                     control={control}
                     render={({ field }) => (
                       <CreatableTagsInput
                         value={field.value || []}
-                        onChange={(tags) => field.onChange(tags)}
+                        onChange={(keyword) => field.onChange(keyword)}
                       />
                     )}
                   />
-                  {errors.tags && (
+                  {errors.meta_keywords && (
                     <p className='text-red-500 font-light'>
-                      {errors.tags.message}
+                      {errors.meta_keywords.message}
                     </p>
                   )}
                 </div>

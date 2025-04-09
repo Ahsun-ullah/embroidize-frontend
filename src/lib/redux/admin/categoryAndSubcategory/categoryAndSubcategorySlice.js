@@ -16,6 +16,7 @@ export const categoryAndSubcategorySlice = createApi({
     },
   }),
   endpoints: (builder) => ({
+    // category add
     addProductCategory: builder.mutation({
       query: (body) => ({
         url: '/product-category',
@@ -23,9 +24,40 @@ export const categoryAndSubcategorySlice = createApi({
         body,
       }),
     }),
-    getPublicGetProductCategories: builder.query({
+    // category add
+    updateProductCategory: builder.mutation({
+      query: (body) => {
+        const id = body.get('id');
+        return {
+          url: `/product-category/${id}`,
+          method: 'PUT',
+          body,
+        };
+      },
+    }),
+    // subcategory add
+    addProductSubCategory: builder.mutation({
+      query: (body) => ({
+        url: '/product-subcategory',
+        method: 'POST',
+        body,
+      }),
+    }),
+    getPublicProductCategories: builder.query({
       query: () => ({
         url: '/public/product-category',
+        method: 'GET',
+      }),
+    }),
+    getSinglePublicProductCategory: builder.query({
+      query: (id) => ({
+        url: `/public/product-category/${id}`,
+        method: 'GET',
+      }),
+    }),
+    getPublicProductSubCategories: builder.query({
+      query: () => ({
+        url: '/public/product-subcategory',
         method: 'GET',
       }),
     }),
@@ -34,5 +66,9 @@ export const categoryAndSubcategorySlice = createApi({
 
 export const {
   useAddProductCategoryMutation,
-  useGetPublicGetProductCategoriesQuery,
+  useUpdateProductCategoryMutation,
+  useAddProductSubCategoryMutation,
+  useGetPublicProductCategoriesQuery,
+  useGetSinglePublicProductCategoryQuery,
+  useGetPublicProductSubCategoriesQuery,
 } = categoryAndSubcategorySlice;

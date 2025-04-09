@@ -3,7 +3,6 @@ import ProfileDropdown from '../Common/ProfileDropdown';
 
 export default function AdminHeader({ isCollapsed }) {
   const { data: userInfoData } = useUserInfoQuery();
-  console.log(userInfoData);
   return (
     <header className={`admin-header ${isCollapsed ? 'collapsed' : ''}`}>
       <div className='logo'>Admin Dashboard</div>
