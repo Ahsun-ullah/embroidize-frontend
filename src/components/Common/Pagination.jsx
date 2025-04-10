@@ -1,4 +1,4 @@
-import React, { useEffect } from 'react';
+import { useEffect } from 'react';
 
 const Pagination = ({ data, currentPage, setCurrentPage, perPageData }) => {
   const handleClick = (pageNumber) => {
@@ -53,11 +53,11 @@ const Pagination = ({ data, currentPage, setCurrentPage, perPageData }) => {
         key={pageNumber}
         className={
           pageNumber === currentPage + 1
-            ? 'active bg-blue-100 px-[6px] py-[2px] border'
+            ? 'active bg-blue-100  border rounded-[5px] py-[3px] px-[10px] cursor-pointer'
             : 'button'
         }
         onClick={() => handleClick(pageNumber - 1)}
-        role="button"
+        role='button'
         tabIndex={0}
       >
         {pageNumber}
@@ -66,13 +66,13 @@ const Pagination = ({ data, currentPage, setCurrentPage, perPageData }) => {
   };
 
   return (
-    <div className="mt-16 me-5 text-lg">
-      <ul className="flex justify-end gap-2">
+    <div className='mt-16 me-5 text-lg'>
+      <ul className='flex justify-end gap-2'>
         {currentPage > 0 && (
           <li
-            className="button"
+            className='button'
             onClick={handlePrevPage}
-            role="button"
+            role='button'
             tabIndex={0}
           >
             &laquo; Previous
@@ -81,9 +81,9 @@ const Pagination = ({ data, currentPage, setCurrentPage, perPageData }) => {
         {renderPageNumbers()}
         {currentPage < totalPages - 1 && (
           <li
-            className="button"
+            className='button'
             onClick={handleNextPage}
-            role="button"
+            role='button'
             tabIndex={0}
           >
             Next &raquo;

@@ -1,4 +1,5 @@
 'use client';
+import { useGetPublicProductCategoriesQuery } from '@/lib/redux/admin/categoryAndSubcategory/categoryAndSubcategorySlice';
 import {
   Dropdown,
   DropdownItem,
@@ -9,61 +10,39 @@ import {
 import { useState } from 'react';
 
 const CategorySelect = () => {
-  const categories = [
-    {
-      id: 'cat1',
-      name: 'Clothing',
-      subcategories: [
-        { id: 'sub1', name: 'Shirts', href: '/clothing/shirts' },
-        { id: 'sub2', name: 'Pants', href: '/clothing/pants' },
-        { id: 'sub3', name: 'Jackets', href: '/clothing/jackets' },
-      ],
-    },
-    {
-      id: 'cat2',
-      name: 'Accessories',
-      subcategories: [
-        { id: 'sub4', name: 'Hats', href: '/accessories/hats' },
-        { id: 'sub5', name: 'Bags', href: '/accessories/bags' },
-      ],
-    },
-    {
-      id: 'cat3',
-      name: 'Electronics',
-      subcategories: [
-        { id: 'sub6', name: 'Phones', href: '/electronics/phones' },
-        { id: 'sub7', name: 'Laptops', href: '/electronics/laptops' },
-      ],
-    },
-  ];
-
   const [openCategory, setOpenCategory] = useState(null);
+  const { data: categoryData } = useGetPublicProductCategoriesQuery();
 
   return (
     <div className='dropdown-container flex gap-4'>
-      {categories.map((category) => (
+      {categoryData?.data.map((category) => (
         <div
-          key={category.id}
+          key={category._id}
           className='dropdown-wrapper'
-          onMouseEnter={() => setOpenCategory(category.id)}
+          onMouseEnter={() => setOpenCategory(category._id)}
           onMouseLeave={() => setOpenCategory(null)}
         >
-          <Dropdown isOpen={openCategory === category.id}>
+          <Dropdown isOpen={openCategory === category._id}>
             <DropdownTrigger>
-              <Link color='foreground' href='#' className='capitalize'>
+              <Link
+                color='foreground'
+                href={`/user/category-products/${category?._id}`}
+                className='capitalize'
+              >
                 {category.name}
               </Link>
             </DropdownTrigger>
             <DropdownMenu aria-label={`${category.name} Subcategories`}>
-              {category.subcategories.map((subcategory) => (
-                <DropdownItem
-                  key={subcategory.id}
-                  href={subcategory.href}
-                  className='capitalize'
-                >
-                  {subcategory.name}
-                </DropdownItem>
-              ))}
+              {category.subcategories &&
+                category.subcategories.map((subcategory) => (
+                  <DropdownItem
+                    key={subcategory._id}
+                    href={subcategory.href}
+                    className='capitalize'
+                  >
+                    {subcategory.name}
+                  </DropdownItem>
+                ))}
             </DropdownMenu>
           </Dropdown>
         </div>

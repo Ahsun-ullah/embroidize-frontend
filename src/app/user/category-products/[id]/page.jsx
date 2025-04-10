@@ -4,6 +4,7 @@ import Image from 'next/image';
 import Link from 'next/link';
 import React, { useState } from 'react';
 import Pagination from '../../../../components/Common/Pagination';
+import ProductCard from '@/components/Common/ProductCard';
 
 const CategoryProducts = () => {
   const [currentPage, setCurrentPage] = useState(0);
@@ -24,41 +25,7 @@ const CategoryProducts = () => {
           <div className="flex items-center justify-center mx-14">
             <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
               {objectsArray.map((item, index) => (
-                <div
-                  key={index}
-                  className="bg-white border rounded-lg shadow-xl"
-                >
-                  <div className="p-6 flex items-center justify-center">
-                    <Link href={'/user/product-details/jsf'}>
-                      <Image
-                        alt="Product image"
-                        className="rounded-xl"
-                        src="/logo.png"
-                        height={200}
-                        width={280}
-                      />
-                    </Link>
-                  </div>
-                  <Divider />
-                  <div className="flex-col border-default-600 dark:border-default-100 p-4">
-                    <div className="flex items-center justify-between gap-4">
-                      <p className="text-black/90 font-medium text-sm">
-                        Your checklist for better sleep Your checklist
-                      </p>
-
-                      <Button
-                        radius="full"
-                        size="sm"
-                        className="bg-black text-white text-lg"
-                      >
-                        Free
-                      </Button>
-                    </div>
-                    <div className="flex items-center justify-between mt-2">
-                      <i className="ri-heart-fill text-red-500"></i>
-                    </div>
-                  </div>
-                </div>
+                 <ProductCard key={index} item={item} />
               ))}
             </div>
           </div>
