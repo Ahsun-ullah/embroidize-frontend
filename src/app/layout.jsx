@@ -21,6 +21,7 @@ export default function RootLayout({ children }) {
             protectedRoutes={['/admin', '/user/category-products']}
             exactProtectedRoutes={[]}
             loginPath='/auth/login'
+            defaultRedirect='/'
           >
             <UiProvider>
               <main className='min-h-screen'>{children}</main>
