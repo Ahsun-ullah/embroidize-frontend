@@ -59,10 +59,9 @@ export default function UsersTableWrapper({
           return (
             <User
               avatarProps={{ radius: 'lg', src: user.avatar }}
-              description={user.email}
               name={cellValue}
             >
-              {user.email}
+              {user.name}
             </User>
           );
         case 'status':
@@ -76,14 +75,10 @@ export default function UsersTableWrapper({
               {capitalize(user.status)}
             </Chip>
           );
-        case 'role':
-          return <span>{capitalize(user.role)}</span>;
-        case 'team':
-          return <span>{capitalize(user.team)}</span>;
+
         case 'email':
           return <a href={`mailto:${user.email}`}>{user.email}</a>;
-        case 'age':
-          return <span>{user.age} years</span>;
+
         case 'id':
           return <span>{user._id}</span>;
         case 'actions':
@@ -96,9 +91,6 @@ export default function UsersTableWrapper({
                   </Button>
                 </DropdownTrigger>
                 <DropdownMenu>
-                  <DropdownItem key='edit' onPress={() => {}}>
-                    Edit
-                  </DropdownItem>
                   <DropdownItem key='delete' onPress={() => {}}>
                     Delete
                   </DropdownItem>

@@ -1,6 +1,6 @@
 'use client';
 
-import GlobalLoadingPage from '@/app/loading';
+import GlobalLoadingPage from '@/components/Common/GlobalLoadingPage';
 import Cookies from 'js-cookie';
 import { usePathname, useRouter } from 'next/navigation';
 import { createContext, useContext, useEffect, useState } from 'react';

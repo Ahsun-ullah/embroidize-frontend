@@ -62,7 +62,7 @@ export default function ProductsTableWrapper({
         case 'name':
           return (
             <User
-              avatarProps={{ radius: 'lg', src: product.images[0].url }}
+              avatarProps={{ radius: 'lg', src: product?.image?.url }}
               name={cellValue}
             >
               {product.name}
@@ -80,13 +80,15 @@ export default function ProductsTableWrapper({
             </Chip>
           );
         case 'category':
-          return <span>{capitalize(product.category?.value)}</span>;
-        case 'tags':
-          return (
-            <span>
-              {product.tags?.map((tag) => capitalize(tag)).join(', ')}
-            </span>
-          );
+          return <span>{capitalize(product?.category?.name)}</span>;
+        case 'sub_category':
+          return <span>{capitalize(product?.sub_category?.name)}</span>;
+        // case 'tags':
+        //   return (
+        //     <span>
+        //       {product.meta_keywords?.map((tag) => capitalize(tag)).join(', ')}
+        //     </span>
+        //   );
 
         case 'actions':
           return (
