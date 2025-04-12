@@ -1,6 +1,7 @@
 import { cookies } from 'next/headers';
 
 export async function getUsers() {
+  'use server';
   try {
     const cookieStore = cookies();
     const token = cookieStore.get('token')?.value;

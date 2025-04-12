@@ -24,7 +24,7 @@ export const categoryAndSubcategorySlice = createApi({
         body,
       }),
     }),
-    // category add
+    // category update
     updateProductCategory: builder.mutation({
       query: (body) => {
         const id = body.get('id');
@@ -42,6 +42,17 @@ export const categoryAndSubcategorySlice = createApi({
         method: 'POST',
         body,
       }),
+    }),
+    // subcategory update
+    updateProductSubCategory: builder.mutation({
+      query: (body) => {
+        const id = body.get('id');
+        return {
+          url: `/product-subcategory/${id}`,
+          method: 'PUT',
+          body,
+        };
+      },
     }),
     getPublicProductCategories: builder.query({
       query: () => ({
@@ -61,6 +72,12 @@ export const categoryAndSubcategorySlice = createApi({
         method: 'GET',
       }),
     }),
+    getSinglePublicProductSubCategory: builder.query({
+      query: (id) => ({
+        url: `/public/product-subcategory/${id}`,
+        method: 'GET',
+      }),
+    }),
   }),
 });
 
@@ -68,7 +85,9 @@ export const {
   useAddProductCategoryMutation,
   useUpdateProductCategoryMutation,
   useAddProductSubCategoryMutation,
+  useUpdateProductSubCategoryMutation,
   useGetPublicProductCategoriesQuery,
   useGetSinglePublicProductCategoryQuery,
   useGetPublicProductSubCategoriesQuery,
+  useGetSinglePublicProductSubCategoryQuery
 } = categoryAndSubcategorySlice;

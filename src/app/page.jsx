@@ -7,6 +7,8 @@ import PopularDesign from '@/components/user/HomePage/PopularDesign';
 import RecentProductsSection from '@/components/user/HomePage/RecentProductsSection';
 import { Divider } from '@heroui/react';
 
+export const dynamic = 'force-dynamic';
+
 export default function Home() {
   return (
     <>

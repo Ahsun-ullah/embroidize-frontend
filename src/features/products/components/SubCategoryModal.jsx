@@ -6,6 +6,7 @@ import {
   useAddProductSubCategoryMutation,
   useGetPublicProductCategoriesQuery,
   useGetPublicProductSubCategoriesQuery,
+  useUpdateProductSubCategoryMutation,
 } from '@/lib/redux/admin/categoryAndSubcategory/categoryAndSubcategorySlice';
 import { subCategorySchema } from '@/lib/zodValidation/productValidation';
 import { Modal, ModalBody, ModalContent, ModalHeader } from '@heroui/react';
@@ -21,6 +22,7 @@ export default function SubCategoryModal({
   isOpen,
   onOpenChange,
   subCategory,
+  setSubCategoryId,
 }) {
   const [description, setDescription] = useState(
     subCategory?.description || '',
@@ -30,7 +32,7 @@ export default function SubCategoryModal({
   const { data: categoryData } = useGetPublicProductCategoriesQuery();
 
   const [addProductSubCategory] = useAddProductSubCategoryMutation();
-
+  const [updateProductSubCategory] = useUpdateProductSubCategoryMutation();
   const { refetch: getProductSubCategoryRefetch } =
     useGetPublicProductSubCategoriesQuery();
 
@@ -98,21 +100,45 @@ export default function SubCategoryModal({
         formData.append('image', data.image);
       }
 
-      const response = await addProductSubCategory(formData).unwrap();
-      console.log('API Response:', response);
-
-      if (response.error) {
-        ErrorToast('Error', response.error.data?.message || 'API Error', 3000);
+      if (subCategory?._id) {
+        formData.append('id', subCategory._id);
+        const response = await updateProductSubCategory(formData).unwrap();
+        // console.log('API Response:', response);
+        if (response.error) {
+          ErrorToast('Error', response.error.data.message || 'API Error', 3000);
+        } else {
+          SuccessToast(
+            'Success',
+            response.data.message || 'Action successfully done!',
+            3000,
+          );
+          getProductSubCategoryRefetch();
+          reset();
+          setDescription('');
+          setSubCategoryId('');
+          onOpenChange();
+        }
       } else {
-        SuccessToast(
-          'Success',
-          response.data?.message || 'Subcategory added!',
-          3000,
-        );
-        getProductSubCategoryRefetch();
-        reset();
-        setDescription('');
-        onOpenChange();
+        const response = await addProductSubCategory(formData).unwrap();
+        console.log('API Response:', response);
+
+        if (response.error) {
+          ErrorToast(
+            'Error',
+            response.error.data?.message || 'API Error',
+            3000,
+          );
+        } else {
+          SuccessToast(
+            'Success',
+            response.data?.message || 'Subcategory added!',
+            3000,
+          );
+          getProductSubCategoryRefetch();
+          reset();
+          setDescription('');
+          onOpenChange();
+        }
       }
     } catch (error) {
       console.error('Error submitting form:', error);
@@ -124,6 +150,7 @@ export default function SubCategoryModal({
     <Modal
       isOpen={isOpen}
       onOpenChange={() => {
+        setSubCategoryId('');
         reset();
         onOpenChange();
       }}

@@ -1,5 +1,6 @@
 import ProductCard from '@/components/Common/ProductCard';
 import { getProducts, getSingleProduct } from '@/lib/apis/public/products';
+import DOMPurify from 'dompurify';
 import { use } from 'react';
 import { BreadCrumb } from './BreadCrumb';
 import ProductDownloadCard from './ProductDownloadCard';
@@ -48,29 +49,7 @@ export const SingleProductComponent = ({ params }) => {
         </div>
         <div className='basis-full lg:basis-2/4 relative'>
           <ProductDownloadCard data={singleProductData?.data} />
-          <div className='flex flex-col w-full p-4 lg:p-10 mt-10'>
-            <h1 className='text-black font-bold mb-8 text-2xl'>Item details</h1>
-            <p className='text-black'>
-              You will receive a zip file with the design in the following
-              formats: ART, CND, DST, EXP, HUS, JEF, PCS, PES, VP3, XXX,
-              <br />
-              <br />
-              Sizes: 4.29" X 6.00” (108.97 X 152.40 mm) 5.01" X 7.00” (127.25 X
-              177.80 mm) 5.72" X 8.00” (145.29 X 203.20 mm) 6.43" X 9.00”
-              (163.32 X 228.60 mm)
-              <br />
-              <br />
-              You can change colors at your sole discretion for your projects.
-              This design includes a production worksheet in a .PDF file.
-              <br />
-              <br />
-              PLEASE NOTE: This is a digital file used for machine embroidery.
-              You must have an embroidery machine and know how to transfer it to
-              your machine. Please note that I am not responsible for the
-              quality of the design if you resize, convert, or edit it in any
-              way.
-            </p>
-          </div>
+
         </div>
       </div>
       {/* <SubscribeSearchSection /> */}

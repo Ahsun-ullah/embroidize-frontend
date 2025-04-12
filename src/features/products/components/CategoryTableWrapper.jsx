@@ -1,7 +1,10 @@
 'use client';
 import UserTable from '@/components/Common/Table';
 import { PlusIcon, VerticalDotsIcon } from '@/components/icons';
-import { useGetSinglePublicProductCategoryQuery } from '@/lib/redux/admin/categoryAndSubcategory/categoryAndSubcategorySlice';
+import {
+  useGetSinglePublicProductCategoryQuery,
+  useGetSinglePublicProductSubCategoryQuery,
+} from '@/lib/redux/admin/categoryAndSubcategory/categoryAndSubcategorySlice';
 import {
   Button,
   Dropdown,
@@ -34,11 +37,14 @@ export default function CategoryTableWrapper({
     subCategoryInitialData || [],
   );
 
-  const { data: getSingleCategoryData, refetch } =
+  const { data: getSingleCategoryData } =
     useGetSinglePublicProductCategoryQuery(categoryId);
 
-  console.log('categoryId', categoryId);
-  console.log('getSingleCategoryData', getSingleCategoryData);
+  const { data: getSingleSubCategoryData } =
+    useGetSinglePublicProductSubCategoryQuery(subCategoryId);
+
+  console.log('subCategoryId', subCategoryId);
+  console.log('getSingleSubCategoryData', getSingleSubCategoryData);
 
   useEffect(() => {
     // console.log('categoryInitialData updated:', categoryInitialData);
@@ -213,10 +219,16 @@ export default function CategoryTableWrapper({
                     </Button>
                   </DropdownTrigger>
                   <DropdownMenu>
-                    <DropdownItem key='edit' onPress={() => {}}>
+                    <DropdownItem
+                      key='edit'
+                      onPress={() => {
+                        setSubCategoryId(subcategoryItem?._id);
+                        subCategoryOnOpen();
+                      }}
+                    >
                       Edit
                     </DropdownItem>
-                    {subcategoryItem?.status === 'active' ? (
+                    {/* {subcategoryItem?.status === 'active' ? (
                       <DropdownItem
                         key='inactive'
                         onPress={() => {}}
@@ -234,7 +246,7 @@ export default function CategoryTableWrapper({
                       >
                         Active
                       </DropdownItem>
-                    )}
+                    )} */}
                   </DropdownMenu>
                 </Dropdown>
               </div>
@@ -285,6 +297,8 @@ export default function CategoryTableWrapper({
         <SubCategoryModal
           isOpen={subCategoryIsOpen}
           onOpenChange={subCategoryOnOpenChange}
+          subCategory={getSingleSubCategoryData?.data}
+          setSubCategoryId={setSubCategoryId}
         />
       </div>
       <div className='grid grid-cols-2 gap-4'>

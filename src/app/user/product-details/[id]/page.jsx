@@ -6,7 +6,6 @@ export default function ProductDetails({ params }) {
   return (
     <>
       <Suspense fallback={<LoadingSpinner />}>
-      
         <SingleProductComponent params={params} />
       </Suspense>
     </>

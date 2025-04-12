@@ -131,7 +131,7 @@ export default function CategoryModal({
       console.log('Form Data:', Object.fromEntries(formData));
     } catch (error) {
       console.error('Error submitting form:', error);
-      // You might want to set an error state here to display to the user
+      ErrorToast('Error', error || 'API Error', 3000);
     }
   };
   return (

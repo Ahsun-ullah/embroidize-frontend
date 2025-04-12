@@ -3,11 +3,8 @@ import Link from 'next/link';
 
 export default function ProductCard({ item, index }) {
   return (
-    <>
-      <Link
-        href={`/user/product-details/${item?._id}`}
-        className='bg-white border rounded-2xl shadow-xl'
-      >
+    <div className='bg-white border rounded-2xl shadow-xl'>
+      <Link href={`/user/product-details/${item?._id}`}>
         <div
           style={{
             backgroundImage: `url(${item?.image?.url || '/category.jpg'})`,
@@ -26,8 +23,7 @@ export default function ProductCard({ item, index }) {
             <p className='text-sm font-medium capitalize'>
               {item?.meta_title ?? ''}
             </p>
-            <Link
-              href='#'
+            <button
               className='bg-black text-white px-3 py-1 rounded-full text-sm text-nowrap'
               style={{
                 transition: 'background-color 0.3s ease',
@@ -35,7 +31,7 @@ export default function ProductCard({ item, index }) {
               passHref
             >
               Get App
-            </Link>
+            </button>
           </div>
           <p className='text-sm text-black '>
             {item?.price === 0 ? 'Free' : (item?.price ?? '')}
@@ -48,6 +44,6 @@ export default function ProductCard({ item, index }) {
           </div>
         </div>
       </Link>
-    </>
+    </div>
   );
 }

@@ -1,27 +1,41 @@
 'use client';
 
+import { ErrorToast } from '@/components/Common/ErrorToast';
+import { SuccessToast } from '@/components/Common/SuccessToast';
 import {
   useGetPublicProductCategoriesQuery,
   useGetPublicProductSubCategoriesQuery,
 } from '@/lib/redux/admin/categoryAndSubcategory/categoryAndSubcategorySlice';
+import {
+  useAddProductMutation,
+  useUpdateProductMutation,
+} from '@/lib/redux/admin/protectedProducts/protectedProductSlice';
+import { useAllProductsQuery } from '@/lib/redux/public/products/productSlice';
 import { productSchema } from '@/lib/zodValidation/productValidation';
 import { Card } from '@heroui/react';
 import { zodResolver } from '@hookform/resolvers/zod';
 import MDEditor from '@uiw/react-md-editor';
+import { useRouter } from 'next/navigation';
 import { useEffect, useState } from 'react';
 import { Controller, useForm } from 'react-hook-form';
 import Select from 'react-select';
 import { ZipFileUpload } from './FileDragAndDropInput';
 import { ImageFileUpload } from './ImageDragAndDropInput';
 import { CreatableTagsInput } from './TagsInput';
+import LoadingSpinner from '@/components/Common/LoadingSpinner';
 
 export function ProductsForm({ product }) {
+  const router = useRouter();
   const [categoryOption, setCategoryOption] = useState([]);
   const [subCategoryOption, setSubCategoryOption] = useState([]);
   const [description, setDescription] = useState(product?.description || '');
 
   const { data: categoryData } = useGetPublicProductCategoriesQuery();
   const { data: subCategoryData } = useGetPublicProductSubCategoriesQuery();
+
+  const [addProduct] = useAddProductMutation();
+  const [updateProduct] = useUpdateProductMutation();
+  const { refetch: allProductRefetch } = useAllProductsQuery();
 
   const {
     control,
@@ -34,14 +48,15 @@ export function ProductsForm({ product }) {
     resolver: zodResolver(productSchema),
     defaultValues: {
       name: '',
-      category: '',
-      sub_category: '',
       price: null,
       description: '',
-      metaDescription: '',
-      tags: [],
+      category: '',
+      sub_category: '',
+      meta_description: '',
+      meta_title: '',
+      meta_keywords: [],
       image: null,
-      designFile: null,
+      file: null,
     },
   });
 
@@ -49,14 +64,15 @@ export function ProductsForm({ product }) {
     if (product) {
       reset({
         name: product.name ?? '',
-        category: product.category ?? '',
+        category: product.category?._id ?? '',
         sub_category: product.sub_category ?? '',
         price: product.price ?? null,
         description: product.description ?? '',
-        metaDescription: product.metaDescription ?? '',
-        tags: product.tags ?? [],
+        meta_title: product.meta_title ?? '',
+        meta_description: product.meta_description ?? '',
+        meta_keywords: product.meta_keywords ?? [],
         image: product.image ?? null,
-        designFile: product.designFile ?? null,
+        file: product.file ?? null,
       });
       setDescription(product.description ?? '');
     }
@@ -73,13 +89,13 @@ export function ProductsForm({ product }) {
     }
     if (subCategoryData?.data?.length > 0) {
       console.log('subCategoryData:', subCategoryData);
-      const formattedSubCategory = categoryData.data.map((subcat) => ({
+      const formattedSubCategory = subCategoryData.data.map((subcat) => ({
         label: subcat?.name,
         value: subcat?._id,
       }));
       setSubCategoryOption(formattedSubCategory);
     }
-  }, [categoryData]);
+  }, [subCategoryData]);
 
   const onSubmit = async (data) => {
     console.log('Submitted Data:', data);
@@ -87,13 +103,13 @@ export function ProductsForm({ product }) {
       const formData = new FormData();
       Object.entries(data).forEach(([key, value]) => {
         if (value !== null && value !== undefined) {
-          if (key === 'image' || key === 'designFile') {
+          if (key === 'image' || key === 'file') {
             if (value instanceof File) {
               formData.append(key, value);
             }
-          } else if (key === 'tags') {
+          } else if (key === 'meta_keywords') {
             value.forEach((tag, index) => {
-              formData.append(`tags[${index}]`, tag);
+              formData.append(`meta_keywords[${index}]`, tag);
             });
           } else {
             formData.append(key, value);
@@ -101,27 +117,44 @@ export function ProductsForm({ product }) {
         }
       });
 
-      // If editing, add product ID
-      if (product?.id) {
-        formData.append('id', product.id);
+      if (product?._id) {
+        formData.append('id', product._id);
+        const response = await updateProduct(formData).unwrap();
+        // console.log('API Response:', response);
+        if (response.error) {
+          ErrorToast('Error', response.error.data.message || 'API Error', 3000);
+        } else {
+          SuccessToast(
+            'Success',
+            response.data.message || 'Action successfully done!',
+            3000,
+          );
+          allProductRefetch();
+          reset();
+          setDescription('');
+          router.push('/admin/all-products');
+        }
+      } else {
+        // Here you would typically make an API call
+        const response = await addProduct(formData).unwrap();
+        // console.log('API Response:', response);
+        if (response.error) {
+          ErrorToast('Error', response.error.data.message || 'API Error', 3000);
+        } else {
+          SuccessToast(
+            'Success',
+            response.data.message || 'Action successfully done!',
+            3000,
+          );
+          allProductRefetch();
+          reset();
+          setDescription('');
+          router.push('/admin/all-products');
+        }
       }
-
-      // Here you would typically make an API call
-      // const response = await fetch(product ? '/api/products/update' : '/api/products/create', {
-      //   method: product ? 'PUT' : 'POST',
-      //   body: formData,
-      // });
-
-      console.log('Form Data:', Object.fromEntries(formData));
-
-      // Reset form if creating new product
-      // if (!product) {
-      //   reset();
-      //   setDescription('');
-      // }
     } catch (error) {
       console.error('Error submitting form:', error);
-      // You might want to set an error state here to display to the user
+      ErrorToast('Error', error || 'API Error', 3000);
     }
   };
 
@@ -161,55 +194,21 @@ export function ProductsForm({ product }) {
           <Controller
             name='category'
             control={control}
-            render={({ field }) => {
-              const currentValue =
-                field.value && typeof field.value === 'object'
-                  ? field.value
-                  : { value: field.value, label: field.label };
-
-              const options =
-                currentValue?.value &&
-                !categoryOption.some((a) => a.value === currentValue.value)
-                  ? [
-                      ...categoryOption,
-                      { value: currentValue.value, label: currentValue.label },
-                    ]
-                  : categoryOption;
-
-              const selectOptions = options.map((animal) => ({
-                value: animal.value,
-                label: animal.label,
-              }));
-
-              return (
-                <Select
-                  {...field}
-                  options={selectOptions}
-                  onChange={(selectedOption) => {
-                    const newValue = selectedOption
-                      ? {
-                          value: selectedOption.value,
-                          label: selectedOption.label,
-                        }
-                      : selectedOption.value;
-
-                    field.onChange(newValue);
-                  }}
-                  value={
-                    selectOptions.find(
-                      (option) => option.value === currentValue?.value,
-                    ) || null
-                  }
-                  placeholder='Select a category'
-                  aria-label='Category'
-                  styles={{
-                    control: (base) => ({
-                      ...base,
-                    }),
-                  }}
-                />
-              );
-            }}
+            render={({ field }) => (
+              <Select
+                options={categoryOption}
+                onChange={(selected) =>
+                  field.onChange(selected ? selected.value : '')
+                }
+                value={
+                  categoryOption.find(
+                    (option) => option.value === field.value,
+                  ) || null
+                }
+                placeholder='Select a category'
+                aria-label='Category'
+              />
+            )}
           />
           {errors.category && (
             <p className='text-red-500 font-light'>{errors.category.message}</p>
@@ -220,68 +219,33 @@ export function ProductsForm({ product }) {
         <div>
           <label
             className='text-lg font-medium tracking-tight leading-5'
-            htmlFor='sub_category '
+            htmlFor='sub_category'
           >
             Sub Category <span className='text-red-600'>*</span>
           </label>
           <Controller
             name='sub_category'
             control={control}
-            render={({ field }) => {
-              const currentValue =
-                field.value && typeof field.value === 'object'
-                  ? field.value
-                  : { value: field.value, label: field.value };
-
-              const options =
-                currentValue?.value &&
-                !subCategoryOption.some((a) => a.value === currentValue.value)
-                  ? [
-                      ...subCategoryOption,
-                      {
-                        value: currentValue.value,
-                        label: currentValue.label,
-                      },
-                    ]
-                  : subCategoryOption;
-
-              const selectOptions = options.map((options) => ({
-                value: options.value,
-                label: options.label,
-              }));
-
-              return (
-                <Select
-                  {...field}
-                  options={selectOptions}
-                  onChange={(selectedOption) => {
-                    const newValue = selectedOption
-                      ? {
-                          value: selectedOption.value,
-                          label: selectedOption.label,
-                        }
-                      : selectedOption.value;
-
-                    field.onChange(newValue);
-                  }}
-                  value={
-                    selectOptions.find(
-                      (option) => option.value === currentValue?.value,
-                    ) || null
-                  }
-                  placeholder='Select a category'
-                  aria-label='Category'
-                  styles={{
-                    control: (base) => ({
-                      ...base,
-                    }),
-                  }}
-                />
-              );
-            }}
+            render={({ field }) => (
+              <Select
+                options={subCategoryOption}
+                onChange={(selected) =>
+                  field.onChange(selected ? selected.value : '')
+                }
+                value={
+                  subCategoryOption.find(
+                    (option) => option.value === field.value,
+                  ) || null
+                }
+                placeholder='Select a category'
+                aria-label='Category'
+              />
+            )}
           />
-          {errors.category && (
-            <p className='text-red-500 font-light'>{errors.category.message}</p>
+          {errors.sub_category && (
+            <p className='text-red-500 font-light'>
+              {errors.sub_category.message}
+            </p>
           )}
         </div>
 
@@ -343,25 +307,44 @@ export function ProductsForm({ product }) {
             </p>
           )}
         </div>
-
+        {/* meta_title  */}
+        <div className='flex flex-col gap-2'>
+          <label
+            className='text-lg font-medium tracking-tight leading-5'
+            htmlFor='meta_title'
+          >
+            Meta Title <span className='text-red-600'>*</span>
+          </label>
+          <input
+            id='meta_title'
+            placeholder='Category Name'
+            {...register('meta_title')}
+            className='flex w-full flex-wrap md:flex-nowrap gap-4 border-[1.8px] rounded-[4px] p-2'
+          />
+          {errors.meta_title && (
+            <p className='text-red-500 font-light'>
+              {errors.meta_title.message}
+            </p>
+          )}
+        </div>
         {/* Meta Description */}
         <div className='col-span-3'>
           <label
             className='text-lg font-medium tracking-tight leading-5'
-            htmlFor='metaDescription'
+            htmlFor='meta_description'
           >
             Meta Description <span className='text-red-600'>*</span>
           </label>
           <textarea
             rows={8}
-            id='metaDescription'
+            id='meta_description'
             placeholder='Meta description'
-            {...register('metaDescription')}
+            {...register('meta_description')}
             className='flex w-full flex-wrap md:flex-nowrap gap-4 border-[1.8px] rounded-[4px] p-2'
           />
-          {errors.metaDescription && (
+          {errors.meta_description && (
             <p className='text-red-500 font-light'>
-              {errors.metaDescription.message}
+              {errors.meta_description.message}
             </p>
           )}
         </div>
@@ -370,12 +353,12 @@ export function ProductsForm({ product }) {
         <div>
           <label
             className='text-lg font-medium tracking-tight leading-5'
-            htmlFor='tags'
+            htmlFor='meta_keywords'
           >
             Product Tags <span className='text-red-600'>*</span>
           </label>
           <Controller
-            name='tags'
+            name='meta_keywords'
             control={control}
             render={({ field }) => (
               <CreatableTagsInput
@@ -384,8 +367,10 @@ export function ProductsForm({ product }) {
               />
             )}
           />
-          {errors.tags && (
-            <p className='text-red-500 font-light'>{errors.tags.message}</p>
+          {errors.meta_keywords && (
+            <p className='text-red-500 font-light'>
+              {errors.meta_keywords.message}
+            </p>
           )}
         </div>
 
@@ -411,10 +396,8 @@ export function ProductsForm({ product }) {
           <ZipFileUpload
             label='Upload embroidery files (.zip only)'
             accept={{ 'application/zip': [] }}
-            onDrop={(file) =>
-              setValue('designFile', file, { shouldValidate: true })
-            }
-            error={errors.designFile?.message}
+            onDrop={(file) => setValue('file', file, { shouldValidate: true })}
+            error={errors.file?.message}
             product={product}
           />
         </div>
@@ -432,7 +415,7 @@ export function ProductsForm({ product }) {
               ${isSubmitting ? 'cursor-wait' : ''}`}
           >
             {isSubmitting
-              ? 'Processing...'
+              ? <LoadingSpinner />
               : product
                 ? 'Update Product'
                 : 'Create Product'}

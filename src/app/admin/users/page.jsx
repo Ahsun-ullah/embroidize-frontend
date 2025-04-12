@@ -1,9 +1,10 @@
-import LoadingSpinner from '@/components/Common/LoadingSpinner';
+'use client';
+import GlobalLoadingPage from '@/components/Common/GlobalLoadingPage';
 import UsersTableWrapper from '@/features/users/UsersTableWrapper';
-import { Suspense } from 'react';
+import { useAllUsersQuery } from '@/lib/redux/admin/users/userSlice';
 
-export default async function AllUsersListPage() {
-  const users = await getUsers();
+export default function AllUsersListPage() {
+  const { data: users, isLoading: usersIsloading } = useAllUsersQuery();
 
   const columns = [
     { name: 'ID', uid: 'id' },
@@ -15,14 +16,16 @@ export default async function AllUsersListPage() {
 
   return (
     <div className='flex flex-col gap-3'>
-      <Suspense fallback={<LoadingSpinner />}>
+      {usersIsloading ? (
+        <GlobalLoadingPage />
+      ) : (
         <UsersTableWrapper
-          initialData={users?.data}
+          initialData={users?.data ?? []}
           columns={columns}
           pageSize={5}
           searchableFieldsName={['name', 'status', 'email']}
         />
-      </Suspense>
+      )}
     </div>
   );
 }
