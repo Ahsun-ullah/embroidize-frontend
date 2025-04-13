@@ -20,27 +20,29 @@ export default function ProductCard({ item, index }) {
         <Divider />
         <div className='flex flex-col border-default-600 dark:border-default-100 p-4'>
           <div className='flex items-center justify-between gap-4'>
-            <p className='text-sm font-medium capitalize'>
+            <p className='text-md font-medium capitalize'>
               {item?.meta_title ?? ''}
             </p>
-            <button
+            {/* <button
               className='bg-black text-white px-3 py-1 rounded-full text-sm text-nowrap'
               style={{
                 transition: 'background-color 0.3s ease',
               }}
-              passHref
             >
               Get App
-            </button>
+            </button> */}
+            <p className='text-md text-black font-semibold'>
+              {item?.price === 0 ? 'Free' : (item?.price ?? '')}
+            </p>
           </div>
-          <p className='text-sm text-black '>
+          {/* <p className='text-sm text-black '>
             {item?.price === 0 ? 'Free' : (item?.price ?? '')}
-          </p>
+          </p> */}
           <div className='flex items-center justify-between mt-2'>
             <p className='text-xs text-black'>
-              {item?.description ?? item?.description.slice(0, 50)}
+              {item?.meta_description && item?.meta_description.slice(0, 200)}
             </p>
-            <i className='ri-heart-fill text-red-500'></i>
+            {/* <i className='ri-heart-fill text-red-500'></i> */}
           </div>
         </div>
       </Link>

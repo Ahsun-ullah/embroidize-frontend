@@ -18,7 +18,7 @@ export default function RootLayout({ children }) {
       <body className={inter.className} suppressHydrationWarning>
         <StoreProvider>
           <AuthProvider
-            protectedRoutes={['/admin', '/user/category-products']}
+            protectedRoutes={['/admin', '/user']}
             exactProtectedRoutes={[]}
             loginPath='/auth/login'
             defaultRedirect='/'
