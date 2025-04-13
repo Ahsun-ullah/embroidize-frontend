@@ -71,54 +71,54 @@ export default function ProductDownloadCard({ data }) {
   };
 
   // for all file download
-  const handleAllFileDownloadZip = async (fileData) => {
-    try {
-      setAllIsLoading(true);
+  // const handleAllFileDownloadZip = async (fileData) => {
+  //   try {
+  //     setAllIsLoading(true);
 
-      const token = Cookies.get('token');
-      const headers = new Headers();
+  //     const token = Cookies.get('token');
+  //     const headers = new Headers();
 
-      if (token) {
-        headers.set('Authorization', `Bearer ${token}`);
-      }
+  //     if (token) {
+  //       headers.set('Authorization', `Bearer ${token}`);
+  //     }
 
-      const res = await fetch(
-        `${process.env.NEXT_PUBLIC_BASE_API_URL_PROD}/download/product/${fileData.id}/extension/${fileData.extension}`,
-        {
-          method: 'GET',
-          headers,
-        },
-      );
+  //     const res = await fetch(
+  //       `${process.env.NEXT_PUBLIC_BASE_API_URL_PROD}/download/product/${fileData.id}/extension/${fileData.extension}`,
+  //       {
+  //         method: 'GET',
+  //         headers,
+  //       },
+  //     );
 
-      if (!res.ok) {
-        throw new Error(`Download failed with status ${res.status}`);
-      }
+  //     if (!res.ok) {
+  //       throw new Error(`Download failed with status ${res.status}`);
+  //     }
 
-      const blob = await res.blob();
+  //     const blob = await res.blob();
 
-      const filename = `From_Embroid_${fileData.extension}.zip`;
+  //     const filename = `From_Embroid_${fileData.extension}.zip`;
 
-      const url = window.URL.createObjectURL(blob);
-      const link = document.createElement('a');
-      link.href = url;
-      link.download = filename;
-      document.body.appendChild(link);
-      link.click();
+  //     const url = window.URL.createObjectURL(blob);
+  //     const link = document.createElement('a');
+  //     link.href = url;
+  //     link.download = filename;
+  //     document.body.appendChild(link);
+  //     link.click();
 
-      // Cleanup
-      window.URL.revokeObjectURL(url);
-      document.body.removeChild(link);
-    } catch (err) {
-      console.error('Download error:', err);
-      ErrorToast(
-        'Download Failed',
-        err?.message || 'Could not download the ZIP file',
-        3000,
-      );
-    } finally {
-      setAllIsLoading(false);
-    }
-  };
+  //     // Cleanup
+  //     window.URL.revokeObjectURL(url);
+  //     document.body.removeChild(link);
+  //   } catch (err) {
+  //     console.error('Download error:', err);
+  //     ErrorToast(
+  //       'Download Failed',
+  //       err?.message || 'Could not download the ZIP file',
+  //       3000,
+  //     );
+  //   } finally {
+  //     setAllIsLoading(false);
+  //   }
+  // };
 
   const rawMarkup = marked(data?.description || '');
   const sanitizedMarkup = DOMPurify.sanitize(rawMarkup);
@@ -129,14 +129,17 @@ export default function ProductDownloadCard({ data }) {
         <h1 className='text-black font-bold mb-8 text-2xl'>
           Machine Embroidery design Machine Embroidery design
         </h1>
-        <h1 className='text-black font-bold mb-2'>Formats</h1>
+        {/* <h1 className='text-black font-bold mb-2'>Select For Download </h1> */}
         {isLoading ? (
           <LoadingSpinner />
         ) : (
-          <Dropdown className='border w-full'>
+          <Dropdown className='border w-full bg-black'>
             <DropdownTrigger>
-              <Button variant='flat' className='border pt-1 w-full'>
-                Select Format
+              <Button
+                variant='flat'
+                className='border w-full bg-black text-white text-xl'
+              >
+                Free Download
               </Button>
             </DropdownTrigger>
             <DropdownMenu aria-label='Dynamic Actions'>
@@ -156,7 +159,7 @@ export default function ProductDownloadCard({ data }) {
             </DropdownMenu>
           </Dropdown>
         )}
-        {allIsLoading ? (
+        {/* {allIsLoading ? (
           <LoadingSpinner />
         ) : (
           <Button
@@ -173,7 +176,7 @@ export default function ProductDownloadCard({ data }) {
           >
             Free Download
           </Button>
-        )}
+        )} */}
       </Card>
       <div className='max-w-3xl mx-auto mt-10'>
         <h1 className='text-black font-bold mb-8 text-2xl'>Item details</h1>

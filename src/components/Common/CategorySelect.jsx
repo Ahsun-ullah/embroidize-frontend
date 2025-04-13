@@ -14,7 +14,7 @@ const CategorySelect = () => {
   const { data: categoryData } = useGetPublicProductCategoriesQuery();
 
   return (
-    <div className='dropdown-container flex gap-4'>
+    <div className='dropdown-container flex gap-10'>
       {categoryData?.data.map((category) => (
         <div
           key={category._id}

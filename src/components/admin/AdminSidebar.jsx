@@ -1,6 +1,5 @@
 'use client';
 import { Tooltip } from '@heroui/react';
-import Image from 'next/image';
 import Link from 'next/link';
 
 export default function AdminSidebar({ isCollapsed, setIsCollapsed }) {
@@ -9,7 +8,7 @@ export default function AdminSidebar({ isCollapsed, setIsCollapsed }) {
       <div className='flex items-center justify-between mb-8'>
         {!isCollapsed ? (
           <Link href={'/admin'} className='sidebar-text'>
-            <Image
+            {/* <Image
               style={{
                 height: 'auto',
                 width: '100%',
@@ -18,12 +17,15 @@ export default function AdminSidebar({ isCollapsed, setIsCollapsed }) {
               alt='logo'
               width={0}
               height={0}
-            />
+            /> */}
+            <i className='ri-centos-fill text-3xl mr-2 text-blue-400'>
+              Embroid
+            </i>
           </Link>
         ) : (
           <Tooltip content={'Logo'}>
             <Link href={'/admin'} className='sidebar-text me-2'>
-              <Image
+              {/* <Image
                 style={{
                   height: 'auto',
                   width: 'auto',
@@ -32,7 +34,8 @@ export default function AdminSidebar({ isCollapsed, setIsCollapsed }) {
                 alt='logo'
                 width={20}
                 height={50}
-              />
+              /> */}
+              <i className='ri-centos-fill text-3xl mr-2 text-blue-400'></i>
             </Link>
           </Tooltip>
         )}

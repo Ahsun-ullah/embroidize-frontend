@@ -1,6 +1,5 @@
 import ProductCard from '@/components/Common/ProductCard';
 import { getProducts, getSingleProduct } from '@/lib/apis/public/products';
-import DOMPurify from 'dompurify';
 import { use } from 'react';
 import { BreadCrumb } from './BreadCrumb';
 import ProductDownloadCard from './ProductDownloadCard';
@@ -14,11 +13,18 @@ export const SingleProductComponent = ({ params }) => {
   console.log(singleProductData?.data);
 
   return (
-    <>
-      <div className='flex gap-4 mx-16 font-medium'>
-        <BreadCrumb />
+    <div className='container'>
+      <div className='flex gap-4 font-medium'>
+        <BreadCrumb
+          items={[
+            { label: 'Home', href: '/' },
+            { label: 'Products', href: '/products' },
+            { label: 'T-Shirts', href: '/products/t-shirts' },
+            { label: 'Cool Tee', href: '/products/t-shirts/cool-tee' },
+          ]}
+        />
       </div>
-      <div className='flex flex-col lg:flex-row justify-center mx-16 my-10 gap-10'>
+      <div className='flex flex-col lg:flex-row justify-center my-10 gap-10'>
         <div className='basis-full lg:basis-3/4 relative'>
           <SingleProductImageCard data={singleProductData?.data} />
           <div className='flex flex-col mt-10'>
@@ -49,10 +55,9 @@ export const SingleProductComponent = ({ params }) => {
         </div>
         <div className='basis-full lg:basis-2/4 relative'>
           <ProductDownloadCard data={singleProductData?.data} />
-
         </div>
       </div>
       {/* <SubscribeSearchSection /> */}
-    </>
+    </div>
   );
 };

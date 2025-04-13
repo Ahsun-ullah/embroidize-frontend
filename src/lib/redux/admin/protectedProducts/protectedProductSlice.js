@@ -30,8 +30,17 @@ export const protectedProductSlice = createApi({
         body,
       }),
     }),
+    deleteProduct: builder.mutation({
+      query: (id) => ({
+        url: `/product/${id}`,
+        method: 'DELETE',
+      }),
+    }),
   }),
 });
 
-export const { useAddProductMutation, useUpdateProductMutation } =
-  protectedProductSlice;
+export const {
+  useAddProductMutation,
+  useUpdateProductMutation,
+  useDeleteProductMutation,
+} = protectedProductSlice;

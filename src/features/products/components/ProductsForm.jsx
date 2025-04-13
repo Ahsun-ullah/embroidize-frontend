@@ -1,6 +1,7 @@
 'use client';
 
 import { ErrorToast } from '@/components/Common/ErrorToast';
+import LoadingSpinner from '@/components/Common/LoadingSpinner';
 import { SuccessToast } from '@/components/Common/SuccessToast';
 import {
   useGetPublicProductCategoriesQuery,
@@ -22,7 +23,6 @@ import Select from 'react-select';
 import { ZipFileUpload } from './FileDragAndDropInput';
 import { ImageFileUpload } from './ImageDragAndDropInput';
 import { CreatableTagsInput } from './TagsInput';
-import LoadingSpinner from '@/components/Common/LoadingSpinner';
 
 export function ProductsForm({ product }) {
   const router = useRouter();
@@ -65,7 +65,7 @@ export function ProductsForm({ product }) {
       reset({
         name: product.name ?? '',
         category: product.category?._id ?? '',
-        sub_category: product.sub_category ?? '',
+        sub_category: product.sub_category?._id ?? '',
         price: product.price ?? null,
         description: product.description ?? '',
         meta_title: product.meta_title ?? '',
@@ -79,23 +79,38 @@ export function ProductsForm({ product }) {
   }, [product, reset]);
 
   useEffect(() => {
-    if (categoryData?.data?.length > 0) {
+    if (categoryData?.data) {
       console.log('categoryData:', categoryData);
-      const formattedCategory = categoryData.data.map((cat) => ({
-        label: cat?.name,
-        value: cat?._id,
-      }));
-      setCategoryOption(formattedCategory);
+
+      if (Array.isArray(categoryData.data) && categoryData.data.length > 0) {
+        const formattedCategory = categoryData.data.map((cat) => ({
+          label: cat.name || 'Unnamed Category',
+          value: cat._id,
+        }));
+        setCategoryOption(formattedCategory);
+      } else {
+        setCategoryOption([]);
+      }
     }
-    if (subCategoryData?.data?.length > 0) {
+
+    if (subCategoryData?.data) {
       console.log('subCategoryData:', subCategoryData);
-      const formattedSubCategory = subCategoryData.data.map((subcat) => ({
-        label: subcat?.name,
-        value: subcat?._id,
-      }));
-      setSubCategoryOption(formattedSubCategory);
+
+      if (
+        Array.isArray(subCategoryData.data) &&
+        subCategoryData.data.length > 0
+      ) {
+        const formattedSubCategory = subCategoryData.data.map((subcat) => ({
+          label: subcat.name || 'Unnamed Subcategory',
+          value: subcat._id,
+          categoryId: subcat.category,
+        }));
+        setSubCategoryOption(formattedSubCategory);
+      } else {
+        setSubCategoryOption([]);
+      }
     }
-  }, [subCategoryData]);
+  }, [categoryData, subCategoryData]);
 
   const onSubmit = async (data) => {
     console.log('Submitted Data:', data);
@@ -117,6 +132,10 @@ export function ProductsForm({ product }) {
         }
       });
 
+      // formData.forEach((value, key) => {
+      //   console.log(`${key}:`, value);
+      // });
+
       if (product?._id) {
         formData.append('id', product._id);
         const response = await updateProduct(formData).unwrap();
@@ -129,10 +148,15 @@ export function ProductsForm({ product }) {
             response.data.message || 'Action successfully done!',
             3000,
           );
-          allProductRefetch();
-          reset();
-          setDescription('');
-          router.push('/admin/all-products');
+          try {
+            await allProductRefetch();
+            reset();
+            setDescription('');
+            router.push('/admin/all-products');
+          } catch (err) {
+            console.error('Refetch failed:', err);
+            ErrorToast('Error', 'Failed to refresh product list.', 3000);
+          }
         }
       } else {
         // Here you would typically make an API call
@@ -414,11 +438,13 @@ export function ProductsForm({ product }) {
               transition-all duration-300 ease-in-out
               ${isSubmitting ? 'cursor-wait' : ''}`}
           >
-            {isSubmitting
-              ? <LoadingSpinner />
-              : product
-                ? 'Update Product'
-                : 'Create Product'}
+            {isSubmitting ? (
+              <LoadingSpinner />
+            ) : product ? (
+              'Update Product'
+            ) : (
+              'Create Product'
+            )}
           </button>
         </div>
       </form>

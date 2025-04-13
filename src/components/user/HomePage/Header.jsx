@@ -13,8 +13,7 @@ import NextLink from 'next/link';
 
 import SearchBox from '@/components/Common/SearchBox';
 import UserProfileDropdown from '@/components/Common/UserProfileDropdown';
-import { headerLogo, siteConfig } from '@/lib/datas/page';
-import Image from 'next/image';
+import { siteConfig } from '@/lib/datas/page';
 
 export const Header = () => {
   return (
@@ -22,7 +21,7 @@ export const Header = () => {
       <NavbarContent justify='start'>
         <NavbarBrand as='li' className='gap-3 max-w-fit'>
           <NextLink className='flex justify-start items-center gap-1' href='/'>
-            <Image
+            {/* <Image
               style={{
                 height: '20px',
                 width: 'auto',
@@ -32,7 +31,8 @@ export const Header = () => {
               height={0}
               alt='Logo'
               className='mr-2 max-sm:hidden'
-            />
+            /> */}
+            <i className='ri-centos-fill text-3xl mr-2'></i>
             <p className='font-bold text-lg'>Embroid</p>
           </NextLink>
         </NavbarBrand>
@@ -41,21 +41,25 @@ export const Header = () => {
         <SearchBox />
         <ul className=' gap-4 justify-start ml-2'>
           {siteConfig?.navItems?.lenght > 0 &&
-            siteConfig?.navItems.map((item) => (
-              console.log(item),
-              <NavbarItem key={item.href}>
-                <NextLink
-                  className={clsx(
-                    linkStyles({ color: 'primary' }),
-                    'data-[active=true]:text-primary data-[active=true]:font-medium',
-                  )}
-                  color='foreground'
-                  href={item.href}
-                >
-                  {item.label}
-                </NextLink>
-              </NavbarItem>
-            ))}
+            siteConfig?.navItems.map(
+              (item) => (
+                console.log(item),
+                (
+                  <NavbarItem key={item.href}>
+                    <NextLink
+                      className={clsx(
+                        linkStyles({ color: 'primary' }),
+                        'data-[active=true]:text-primary data-[active=true]:font-medium',
+                      )}
+                      color='foreground'
+                      href={item.href}
+                    >
+                      {item.label}
+                    </NextLink>
+                  </NavbarItem>
+                )
+              ),
+            )}
         </ul>
       </NavbarContent>
       <NavbarContent justify='end'>
