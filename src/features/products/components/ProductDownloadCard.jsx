@@ -133,7 +133,7 @@ export default function ProductDownloadCard({ data }) {
         {isLoading ? (
           <LoadingSpinner />
         ) : (
-          <Dropdown className='border w-full bg-black'>
+          <Dropdown className='border w-full'>
             <DropdownTrigger>
               <Button
                 variant='flat'
