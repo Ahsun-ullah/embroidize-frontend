@@ -22,6 +22,11 @@ const nextConfig = {
         hostname: 'embro-id.vercel.app',
         pathname: '/**',
       },
+      {
+        protocol: 'https',
+        hostname: 'res.cloudinary.com',
+        pathname: '/**',
+      },
     ],
   },
 };

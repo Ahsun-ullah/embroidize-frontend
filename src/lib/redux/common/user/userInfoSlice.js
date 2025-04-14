@@ -23,7 +23,14 @@ export const userInfoSlice = createApi({
         method: 'GET',
       }),
     }),
+    updateUserInfo: builder.mutation({
+      query: (body) => ({
+        url: `/user/${body.get('id')}`,
+        method: 'PUT',
+        body,
+      }),
+    }),
   }),
 });
 
-export const { useUserInfoQuery } = userInfoSlice;
+export const { useUserInfoQuery, useUpdateUserInfoMutation } = userInfoSlice;

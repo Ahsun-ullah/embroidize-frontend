@@ -18,7 +18,7 @@ const Register = () => {
     // Extract form data
     const formData = new FormData(e.target);
     const data = {
-      username: formData.get('username'),
+      name: formData.get('name'),
       email: formData.get('email'),
       password: formData.get('password'),
     };
@@ -67,12 +67,12 @@ const Register = () => {
         <CardBody className='overflow-visible py-2'>
           <form onSubmit={handleSubmit}>
             <div className='mb-4'>
-              <label htmlFor='username' className='form-label'>
+              <label htmlFor='name' className='form-label'>
                 User Name
               </label>
               <Input
                 type='text'
-                name='username'
+                name='name'
                 className='form-control mt-2'
                 placeholder='Enter your full name'
                 required

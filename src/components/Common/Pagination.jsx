@@ -1,36 +1,41 @@
 'use client';
 
-import { useEffect } from 'react';
+import { useRouter } from 'next/navigation';
 
-const Pagination = ({ data, currentPage, setCurrentPage, perPageData }) => {
+const Pagination = ({
+  data,
+  currentPage,
+  setCurrentPage,
+  perPageData,
+  totalCount,
+}) => {
+  const totalPages = Math.ceil(totalCount / perPageData);
+  const visiblePages = 5;
+
+  const router = useRouter();
+
   const handleClick = (pageNumber) => {
-    setCurrentPage(pageNumber);
+    router.push(`/products?page=${pageNumber}`);
   };
 
   const handlePrevPage = () => {
-    setCurrentPage((prevPage) => Math.max(prevPage - 1, 0));
+    if (currentPage > 0) {
+      router.push(`/user/products?page=${currentPage - 1}`);
+    }
   };
 
   const handleNextPage = () => {
-    setCurrentPage((prevPage) => Math.min(prevPage + 1, totalPages - 1));
-  };
-
-  const totalPages = Math.ceil(data?.length / perPageData);
-  const visiblePages = 15;
-
-  useEffect(() => {
-    if (currentPage < 0) {
-      setCurrentPage(0);
-    } else if (currentPage >= totalPages) {
-      setCurrentPage(totalPages - 1);
+    if (currentPage < totalPages - 1) {
+      router.push(`/user/products?page=${currentPage + 1}`);
     }
-  }, [currentPage, totalPages, setCurrentPage]);
+  };
 
   const renderPageNumbers = () => {
     const pageNumbers = [];
+
     if (totalPages <= visiblePages) {
-      for (let i = 1; i <= totalPages; i++) {
-        pageNumbers.push(i);
+      for (let i = 0; i < totalPages; i++) {
+        pageNumbers.push(i + 1);
       }
     } else {
       const halfVisiblePages = Math.floor(visiblePages / 2);
@@ -53,14 +58,15 @@ const Pagination = ({ data, currentPage, setCurrentPage, perPageData }) => {
     return pageNumbers.map((pageNumber) => (
       <li
         key={pageNumber}
-        className={
+        className={`${
           pageNumber === currentPage + 1
-            ? 'active bg-blue-100  border rounded-[5px] py-[3px] px-[10px] cursor-pointer'
-            : 'button'
-        }
+            ? 'active bg-blue-100 border rounded-[5px] py-[3px] px-[10px] cursor-pointer'
+            : 'button cursor-pointer'
+        }`}
         onClick={() => handleClick(pageNumber - 1)}
         role='button'
         tabIndex={0}
+        aria-label={`Go to page ${pageNumber}`}
       >
         {pageNumber}
       </li>
@@ -72,10 +78,11 @@ const Pagination = ({ data, currentPage, setCurrentPage, perPageData }) => {
       <ul className='flex justify-end gap-2'>
         {currentPage > 0 && (
           <li
-            className='button'
+            className='button cursor-pointer'
             onClick={handlePrevPage}
             role='button'
             tabIndex={0}
+            aria-label='Go to previous page'
           >
             &laquo; Previous
           </li>
@@ -83,10 +90,11 @@ const Pagination = ({ data, currentPage, setCurrentPage, perPageData }) => {
         {renderPageNumbers()}
         {currentPage < totalPages - 1 && (
           <li
-            className='button'
+            className='button cursor-pointer'
             onClick={handleNextPage}
             role='button'
             tabIndex={0}
+            aria-label='Go to next page'
           >
             Next &raquo;
           </li>

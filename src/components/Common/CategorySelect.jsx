@@ -1,12 +1,6 @@
 'use client';
 import { useGetPublicProductCategoriesQuery } from '@/lib/redux/admin/categoryAndSubcategory/categoryAndSubcategorySlice';
-import {
-  Dropdown,
-  DropdownItem,
-  DropdownMenu,
-  DropdownTrigger,
-  Link,
-} from '@heroui/react';
+import { Dropdown, DropdownTrigger, Link } from '@heroui/react';
 import { useState } from 'react';
 
 const CategorySelect = () => {
@@ -14,11 +8,11 @@ const CategorySelect = () => {
   const { data: categoryData } = useGetPublicProductCategoriesQuery();
 
   return (
-    <div className='dropdown-container flex gap-10'>
+    <>
       {categoryData?.data.map((category) => (
         <div
           key={category._id}
-          className='dropdown-wrapper'
+          className=''
           onMouseEnter={() => setOpenCategory(category._id)}
           onMouseLeave={() => setOpenCategory(null)}
         >
@@ -32,7 +26,7 @@ const CategorySelect = () => {
                 {category.name}
               </Link>
             </DropdownTrigger>
-            <DropdownMenu aria-label={`${category.name} Subcategories`}>
+            {/* <DropdownMenu aria-label={`${category.name} Subcategories`}>
               {category.subcategories &&
                 category.subcategories.map((subcategory) => (
                   <DropdownItem
@@ -43,11 +37,11 @@ const CategorySelect = () => {
                     {subcategory.name}
                   </DropdownItem>
                 ))}
-            </DropdownMenu>
+            </DropdownMenu> */}
           </Dropdown>
         </div>
       ))}
-    </div>
+    </>
   );
 };
 

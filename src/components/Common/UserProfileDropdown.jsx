@@ -31,9 +31,8 @@ export default function UserProfileDropdown() {
     isLoading,
     refetch: userInfoRefetch,
   } = useUserInfoQuery(undefined, {
-    skip: !isLoggedIn, 
+    skip: !isLoggedIn,
   });
-
 
   useEffect(() => {
     if (isLoggedIn) {
@@ -56,13 +55,13 @@ export default function UserProfileDropdown() {
   const handleLogout = () => {
     Cookies.remove('token');
     dispatch(userInfoSlice.util.resetApiState());
-
   };
+
   return (
     <div>
       <NavbarMenuItem>
         {isLoggedIn && userInfoData?.email ? (
-          <Dropdown placement='bottom-start' className='text-black'>
+          <Dropdown placement='bottom-start' className='text-black '>
             <DropdownTrigger>
               <Avatar
                 isBordered
@@ -71,17 +70,49 @@ export default function UserProfileDropdown() {
                 color='primary'
                 name={userInfoData?.name}
                 size='sm'
-                src={userInfoData?.image}
+                src={userInfoData?.profile_image?.url}
               />
             </DropdownTrigger>
             <DropdownMenu>
               <DropdownItem
                 isBordered
                 key='profile'
-                className='p-2 gap-2 border-dashed'
+                className='p-3 gap-2 border-dashed '
               >
-                <p className='font-semibold'>{userInfoData?.name}</p>
-                <p className='font-medium'>{userInfoData?.email}</p>
+                <div className='flex items-center gap-x-4 text-base'>
+                  <Avatar
+                    isBordered
+                    as='button'
+                    className='transition-transform'
+                    color='primary'
+                    name={userInfoData?.name}
+                    size='sm'
+                    src={userInfoData?.profile_image?.url}
+                  />
+                  <div>
+                    <p className='font-semibold'>{userInfoData?.name}</p>
+                    <p className='font-medium'>{userInfoData?.email}</p>
+                  </div>
+                </div>
+              </DropdownItem>
+
+              <DropdownItem>
+                <Link
+                  href={`/user/user-details?tabName=account`}
+                  className='flex text-base gap-1 font-medium'
+                >
+                  <i className='ri-account-circle-fill'></i>
+                  Account
+                </Link>
+              </DropdownItem>
+              <DropdownItem>
+                <Link
+                  href={`/user/user-details?tabName=downloads`}
+                  className='flex text-base gap-1 font-medium'
+                >
+                  <i className='ri-download-fill'></i>
+                  Downloads
+                </Link>
               </DropdownItem>
               <DropdownItem>
                 <Divider />
@@ -93,7 +124,9 @@ export default function UserProfileDropdown() {
                 color='danger'
               >
                 <button onClick={handleLogout}>
-                  <span className='font-semibold'>Log Out</span>
+                  <span className='font-semibold flex text-base gap-1'>
+                    Log Out
+                  </span>
                 </button>
               </DropdownItem>
             </DropdownMenu>

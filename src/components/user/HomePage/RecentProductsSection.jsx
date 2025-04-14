@@ -7,12 +7,14 @@ const RecentProductsSection = async () => {
 
   return (
     <>
-      <section className='bg-blue-50 text-black my-8 py-6'>
+      <section className='bg-blue-50 text-black my-8 py-6 mx-2'>
         <div className='flex items-center justify-center'>
-          <h1 className='text-3xl font-bold'>Recent Approved Products</h1>
+          <h1 className='text-3xl font-bold text-center'>
+            Recent Approved Products
+          </h1>
         </div>
         <div className='flex items-center justify-center mt-4'>
-          <h3 className='font-semibold'>
+          <h3 className='font-semibold text-center'>
             Design for every Budget & every Project.
           </h3>
         </div>

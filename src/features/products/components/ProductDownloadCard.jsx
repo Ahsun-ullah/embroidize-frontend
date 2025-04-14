@@ -10,9 +10,8 @@ import {
   DropdownMenu,
   DropdownTrigger,
 } from '@heroui/react';
-import DOMPurify from 'dompurify';
 import Cookies from 'js-cookie';
-import { marked } from 'marked';
+
 import { useParams } from 'next/navigation';
 import { useState } from 'react';
 
@@ -120,9 +119,6 @@ export default function ProductDownloadCard({ data }) {
   //   }
   // };
 
-  const rawMarkup = marked(data?.description || '');
-  const sanitizedMarkup = DOMPurify.sanitize(rawMarkup);
-
   return (
     <>
       <Card isFooterBlurred className='flex flex-col w-full p-4 lg:p-10'>
@@ -142,21 +138,25 @@ export default function ProductDownloadCard({ data }) {
                 Free Download
               </Button>
             </DropdownTrigger>
-            <DropdownMenu aria-label='Dynamic Actions'>
-              {data?.available_file_types?.map((item, index) => (
-                <DropdownItem
-                  onClick={() =>
-                    handleSingleZipFileDownload({
-                      extension: item,
-                      id: router?.id,
-                    })
-                  }
-                  key={index}
-                >
-                  {item}
-                </DropdownItem>
-              ))}
-            </DropdownMenu>
+            {Array.isArray(data?.available_file_types) && (
+              <DropdownMenu aria-label='Download Formats'>
+                {data.available_file_types.map((type) => (
+                  <DropdownItem
+                    key={type}
+                    onClick={() =>
+                      handleSingleZipFileDownload({
+                        extension: type,
+                        id: router?.id,
+                      })
+                    }
+                  >
+                    <small className='capitalize font-semibold text-base'>
+                      {type}
+                    </small>
+                  </DropdownItem>
+                ))}
+              </DropdownMenu>
+            )}
           </Dropdown>
         )}
         {/* {allIsLoading ? (
@@ -178,20 +178,6 @@ export default function ProductDownloadCard({ data }) {
           </Button>
         )} */}
       </Card>
-      <div className='max-w-3xl mx-auto mt-10'>
-        <h1 className='text-black font-bold mb-8 text-2xl'>Item details</h1>
-        <div
-          dangerouslySetInnerHTML={{ __html: sanitizedMarkup }}
-          className='prose max-w-none break-words text-wrap'
-        />
-        {/* <ReactMarkdown>{edDAta}</ReactMarkdown> */}
-        {/* <pre
-          dangerouslySetInnerHTML={{
-            __html: DOMPurify.sanitize(data?.description),
-          }}
-          className='prose max-w-none break-words text-wrap'
-        /> */}
-      </div>
     </>
   );
 }
