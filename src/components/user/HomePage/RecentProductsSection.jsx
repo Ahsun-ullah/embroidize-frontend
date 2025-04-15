@@ -22,7 +22,7 @@ const RecentProductsSection = async () => {
       <section className='text-black my-8 py-6'>
         <div className='container mx-auto px-4'>
           <div className='grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-10'>
-            {allProducts?.data.map((item, index) => (
+            {allProducts?.data?.length > 0 && allProducts?.data.map((item, index) => (
               <ProductCard key={index} item={item} />
             ))}
           </div>
