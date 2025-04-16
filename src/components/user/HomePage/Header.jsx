@@ -57,7 +57,7 @@ export const Header = () => {
       </HeroUINavbar>
 
       {/* Divider and Category Bar */}
-      <Divider className='my-0' />
+      <Divider />
       <div className='flex flex-wrap items-center justify-center gap-x-10 py-3 text-wrap bg-white'>
         <CategorySelect />
       </div>

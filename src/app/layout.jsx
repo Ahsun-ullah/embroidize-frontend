@@ -12,13 +12,13 @@ export default function RootLayout({ children }) {
   return (
     <html lang='en'>
       <head>
-        <title>EmbroID</title>
+        <title>EmbroID-The Free Machine Embroidery Design</title>
         <link rel='icon' href='/favicon.ico' />
       </head>
       <body className={inter.className} suppressHydrationWarning>
         <StoreProvider>
           <AuthProvider
-            protectedRoutes={['/admin', '/user']}
+            protectedRoutes={['/admin']}
             exactProtectedRoutes={[]}
             loginPath='/auth/login'
             defaultRedirect='/'

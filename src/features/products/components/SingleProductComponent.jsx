@@ -17,7 +17,7 @@ export const SingleProductComponent = ({ params }) => {
 
   return (
     <div className='container mx-auto'>
-      <div className='flex gap-4 font-medium'>
+      <div className='flex font-medium mb-4'>
         <BreadCrumb
           items={[
             { label: 'Home', href: '/' },
@@ -33,11 +33,19 @@ export const SingleProductComponent = ({ params }) => {
           ]}
         />
       </div>
-      <div className='flex flex-col lg:flex-row justify-center my-10 gap-10'>
+      <div className='flex flex-col lg:flex-row justify-center gap-10'>
         <div className='basis-full lg:basis-3/4 relative'>
           <Suspense fallback={<LoadingSpinner />}>
             <SingleProductImageCard data={singleProductData?.data} />
           </Suspense>
+
+          <div className='bg-white mt-10 w-full  rounded-2xl p-4 shadow-xl'>
+            <h1 className='text-black font-bold mb-8 text-2xl'>Item details</h1>
+            <pre
+              dangerouslySetInnerHTML={{ __html: rawMarkup }}
+              className='prose max-w-none break-words text-wrap'
+            />
+          </div>
           <div className='flex flex-col mt-10'>
             <h1 className='text-black text-lg font-semibold'>
               Related Keywords
@@ -55,13 +63,6 @@ export const SingleProductComponent = ({ params }) => {
                   ))}
               </div>
             </div>
-          </div>
-          <div className='bg-white mt-10 w-full  rounded-2xl p-4 shadow-xl'>
-            <h1 className='text-black font-bold mb-8 text-2xl'>Item details</h1>
-            <pre
-              dangerouslySetInnerHTML={{ __html: rawMarkup }}
-              className='prose max-w-none break-words text-wrap'
-            />
           </div>
         </div>
         <div className='basis-full lg:basis-2/4 relative'>

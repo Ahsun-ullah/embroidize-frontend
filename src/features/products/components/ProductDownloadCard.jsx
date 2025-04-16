@@ -21,6 +21,7 @@ export default function ProductDownloadCard({ data }) {
   const [allIsLoading, setAllIsLoading] = useState(false);
 
   const handleSingleZipFileDownload = async (fileData) => {
+    
     try {
       setIsLoading(true);
 
