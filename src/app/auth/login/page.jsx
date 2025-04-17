@@ -6,11 +6,16 @@ import { useLogInMutation } from '@/lib/redux/public/auth/authSlice';
 import { Card, CardBody, CardHeader, Input } from '@heroui/react';
 import Cookies from 'js-cookie';
 import Link from 'next/link';
-import { useRouter } from 'next/navigation';
+import { useRouter, useSearchParams } from 'next/navigation';
 
 const Login = () => {
   const router = useRouter();
+  const searchParams = useSearchParams();
   const [logIn, { isLoading }] = useLogInMutation();
+
+  const pathName = searchParams.get('pathName');
+
+  console.log(pathName);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -41,7 +46,7 @@ const Login = () => {
           router.push('/admin');
         } else {
           Cookies.set('token', response?.data?.data?.token);
-          router.push('/');
+          router.push(pathName ? pathName : '/');
         }
         // e.target.reset();
       }

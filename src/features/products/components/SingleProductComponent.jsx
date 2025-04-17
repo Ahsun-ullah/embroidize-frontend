@@ -75,9 +75,12 @@ export const SingleProductComponent = ({ params }) => {
               <button variant='ghost'>See More</button>
             </div>
             <div className='grid gap-4 grid-cols-1 sm:grid-cols-2 lg:grid-cols-2 xl:grid-cols-2'>
-              {allProductData?.data?.map((item, index) => (
-                <ProductCard item={item} key={index} />
-              ))}
+              {allProductData?.data?.length > 0 &&
+                allProductData?.data
+                  ?.slice(0, 8)
+                  .map((item, index) => (
+                    <ProductCard item={item} key={index} />
+                  ))}
             </div>
           </div>
         </div>

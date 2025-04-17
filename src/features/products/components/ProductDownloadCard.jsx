@@ -12,20 +12,26 @@ import {
 } from '@heroui/react';
 import Cookies from 'js-cookie';
 
-import { useParams } from 'next/navigation';
+import { useParams, usePathname } from 'next/navigation';
 import { useState } from 'react';
 
 export default function ProductDownloadCard({ data }) {
   const router = useParams();
+  const pathName = usePathname();
   const [isLoading, setIsLoading] = useState(false);
   const [allIsLoading, setAllIsLoading] = useState(false);
 
+  console.log(pathName);
+
   const handleSingleZipFileDownload = async (fileData) => {
-    
+    const token = Cookies.get('token');
+    if (!token) {
+      window.location.href = `/auth/login?pathName=${pathName}`;
+      return;
+    }
+
     try {
       setIsLoading(true);
-
-      const token = Cookies.get('token');
       const headers = new Headers();
 
       if (token) {
@@ -124,7 +130,7 @@ export default function ProductDownloadCard({ data }) {
     <>
       <Card isFooterBlurred className='flex flex-col w-full p-4 lg:p-10'>
         <h1 className='text-black font-bold mb-8 text-2xl'>
-          Machine Embroidery design Machine Embroidery design
+          Free Embroidery Machine Design
         </h1>
         {/* <h1 className='text-black font-bold mb-2'>Select For Download </h1> */}
         {isLoading ? (
