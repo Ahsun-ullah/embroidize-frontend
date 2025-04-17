@@ -4,6 +4,8 @@ import { getSingleProduct } from '@/lib/apis/public/products';
 export async function generateMetadata({ params }) {
   const { id } = params;
 
+  console.log(id);
+
   try {
     const response = await getSingleProduct(id);
     const product = response?.data;

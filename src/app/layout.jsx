@@ -1,5 +1,3 @@
-// app/layout.jsx
-import { AuthProvider } from '@/lib/providers/AuthProvider';
 import StoreProvider from '@/lib/providers/StoreProvider';
 import UiProvider from '@/lib/providers/UiProvider';
 import { Inter } from 'next/font/google';
@@ -51,16 +49,16 @@ export default function RootLayout({ children }) {
     <html lang='en'>
       <body className={inter.className} suppressHydrationWarning>
         <StoreProvider>
-          <AuthProvider
+          {/* <AuthProvider
             protectedRoutes={['/admin']}
             exactProtectedRoutes={[]}
             loginPath='/auth/login'
             defaultRedirect='/'
-          >
-            <UiProvider>
-              <main className='min-h-screen'>{children}</main>
-            </UiProvider>
-          </AuthProvider>
+          > */}
+          <UiProvider>
+            <main className='min-h-screen'>{children}</main>
+          </UiProvider>
+          {/* </AuthProvider> */}
         </StoreProvider>
       </body>
     </html>

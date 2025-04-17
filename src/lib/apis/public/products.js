@@ -1,7 +1,6 @@
 import { cookies } from 'next/headers';
 
-export async function getProducts() {
-  'use server';
+export async function getProducts(currentPage = 0, perPageData = 8) {
   try {
     const cookieStore = cookies();
     const token = cookieStore.get('token')?.value;
@@ -24,9 +23,21 @@ export async function getProducts() {
       throw new Error(`API request failed with status ${response.status}`);
     }
 
-    return response.json();
+    const allProducts = await response.json();
+
+    // Pagination logic: get data for the current page
+    const startIndex = currentPage * perPageData;
+    const paginatedProducts = allProducts.data.slice(
+      startIndex,
+      startIndex + perPageData,
+    );
+
+    console.log(allProducts);
+    console.log(paginatedProducts);
+
+    return { products: paginatedProducts, totalCount: allProducts.data.length };
   } catch (error) {
-    console.error('Error fetching users:', error);
+    console.error('Error fetching products:', error);
     throw error;
   }
 }

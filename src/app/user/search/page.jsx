@@ -1,50 +1,13 @@
 import Pagination from '@/components/Common/Pagination';
 import ProductCard from '@/components/Common/ProductCard';
-import { cookies } from 'next/headers';
+import { getProducts } from '@/lib/apis/public/products';
+import { use } from 'react';
 
-export async function getProducts(currentPage = 0, perPageData = 8) {
-  try {
-    const cookieStore = cookies();
-    const token = cookieStore.get('token')?.value;
-
-    const headers = new Headers();
-
-    if (token) {
-      headers.set('Authorization', `Bearer ${token}`);
-    }
-
-    const response = await fetch(
-      `${process.env.NEXT_PUBLIC_BASE_API_URL_PROD}/public/product`,
-      {
-        headers,
-        cache: 'no-store',
-      },
-    );
-
-    if (!response.ok) {
-      throw new Error(`API request failed with status ${response.status}`);
-    }
-
-    const allProducts = await response.json();
-
-    const startIndex = currentPage * perPageData;
-    const paginatedProducts = allProducts.data.slice(
-      startIndex,
-      startIndex + perPageData,
-    );
-
-    return { products: paginatedProducts, totalCount: allProducts.data.length };
-  } catch (error) {
-    console.error('Error fetching products:', error);
-    throw error;
-  }
-}
-
-export default async function SearchPage({ searchParams }) {
+export default function SearchPage({ searchParams }) {
   const searchQuery = searchParams.searchQuery || '';
   const currentPage = searchParams.page ? parseInt(searchParams.page, 10) : 0;
   const perPageData = 40;
-  const { products, totalCount } = await getProducts(currentPage, perPageData);
+  const { products, totalCount } = use(getProducts(currentPage, perPageData));
 
   return (
     <div className='container mx-auto py-8'>

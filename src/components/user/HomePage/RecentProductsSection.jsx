@@ -1,9 +1,14 @@
 import ProductCard from '@/components/Common/ProductCard';
 import { getProducts } from '@/lib/apis/public/products';
 import Link from 'next/link';
+import { use } from 'react';
 
-const RecentProductsSection = async () => {
-  const allProducts = await getProducts();
+const RecentProductsSection = ({ searchParams }) => {
+  const currentPage = parseInt(searchParams?.page || '0', 10);
+  const perPageData = 40;
+  const { products: allProducts, totalCount } = use(
+    getProducts(currentPage, perPageData),
+  );
 
   return (
     <>
@@ -22,13 +27,14 @@ const RecentProductsSection = async () => {
       <section className='text-black my-8 py-6'>
         <div className='container mx-auto px-4'>
           <div className='grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-10'>
-            {allProducts?.data?.length > 0 && allProducts?.data.map((item, index) => (
-              <ProductCard key={index} item={item} />
-            ))}
+            {allProducts?.length > 0 &&
+              allProducts.map((item, index) => (
+                <ProductCard key={index} item={item} />
+              ))}
           </div>
           <div className='flex justify-center items-center mt-14'>
             <Link
-              href={'#'}
+              href={'/user/products'}
               className='bg-black rounded-full hover:bg-blue-400 text-white font-medium px-6 py-2'
             >
               View All
