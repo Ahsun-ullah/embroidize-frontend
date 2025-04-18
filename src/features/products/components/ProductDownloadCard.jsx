@@ -128,7 +128,7 @@ export default function ProductDownloadCard({ data }) {
 
   return (
     <>
-      <Card isFooterBlurred className='flex flex-col w-full p-4 lg:p-10'>
+      <Card isFooterBlurred className='flex flex-col  p-8'>
         <h1 className='text-black font-bold mb-8 text-2xl'>
           Free Embroidery Machine Design
         </h1>
@@ -140,7 +140,7 @@ export default function ProductDownloadCard({ data }) {
             <DropdownTrigger>
               <Button
                 variant='flat'
-                className='border w-full bg-black text-white text-xl'
+                className='border w-full bg-black text-white font-semibold text-lg h-12'
               >
                 Free Download
               </Button>
@@ -157,7 +157,7 @@ export default function ProductDownloadCard({ data }) {
                       })
                     }
                   >
-                    <small className='capitalize font-semibold text-base'>
+                    <small className='uppercase font-semibold text-base'>
                       {type}
                     </small>
                   </DropdownItem>

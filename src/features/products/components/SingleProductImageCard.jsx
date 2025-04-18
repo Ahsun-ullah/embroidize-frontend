@@ -6,7 +6,7 @@ export const SingleProductImageCard = ({ data }) => {
   return (
     <Card
       isFooterBlurred
-      className='w-full h-[400px] md:h-[500px] lg:h-[700px]'
+      className='aspect-[3/2] w-full md:w-[688px] md:h-[459px] lg:w-[800px] lg:h-[533px] xl:w-[764px] xl:h-[509px]'
     >
       <img
         alt='Card example background'

@@ -3,7 +3,7 @@ import Link from 'next/link';
 const Footer = () => {
   return (
     <footer className='py-6 container '>
-      <div className='flex flex-wrap text-left lg:text-left bg-slate-300 rounded-lg py-2 px-1'>
+      <div className='flex flex-wrap text-left lg:text-left py-2 px-1'>
         <div className='w-full lg:w-6/12'>
           <Link href={'/'} className='flex items-center justify-start my-4'>
             <i className='ri-centos-fill text-3xl'></i>
@@ -101,7 +101,7 @@ const Footer = () => {
         </div>
       </div>
       <hr className=' border-blue-500 my-2' />
-      <div className='flex flex-wrap items-center md:justify-between justify-between bg-slate-300 rounded-lg py-2 px-1'>
+      <div className='flex flex-wrap items-center md:justify-between justify-between  py-2 px-1'>
         <div className=' w-full md:w-4/12 px-4 mx-auto text-center'>
           <strong>EmbroID</strong>
           <p>&copy;2024. All rights reserved.</p>

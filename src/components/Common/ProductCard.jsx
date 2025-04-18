@@ -6,16 +6,11 @@ export default function ProductCard({ item, index }) {
     <div className='bg-white border rounded-2xl shadow-xl'>
       <Link href={`/user/product-details/${item?._id}`}>
         <div
+          className='aspect-[3/2] w-full bg-cover bg-center bg-no-repeat p-6 flex items-center justify-center rounded-t-2xl'
           style={{
             backgroundImage: `url(${item?.image?.url || '/category.jpg'})`,
-            backgroundSize: 'cover',
-            backgroundPosition: 'center',
-            backgroundRepeat: 'no-repeat',
-            height: '200px',
-            width: '100%',
           }}
-          className='p-6 flex items-center justify-center rounded-t-2xl'
-        />
+        ></div>
 
         <Divider />
         <div className='flex flex-col border-default-600 dark:border-default-100 p-4 gap-y-2'>
@@ -35,12 +30,12 @@ export default function ProductCard({ item, index }) {
             {item?.category?.name ?? ''}
           </p>
           {/* description */}
-          <div className='flex items-center justify-between'>
+          {/* <div className='flex items-center justify-between'>
             <p className='text-xs text-black'>
               {item?.meta_description && item?.meta_description.slice(0, 100)}
             </p>
-            {/* <i className='ri-heart-fill text-red-500'></i> */}
-          </div>
+            <i className='ri-heart-fill text-red-500'></i>
+          </div> */}
         </div>
       </Link>
     </div>

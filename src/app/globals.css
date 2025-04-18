@@ -19,18 +19,29 @@ html {
   margin: 0;
   height: 100%;
 }
-body {
-  position: relative;
-  font-family: 'Poppins', sans-serif !important;
-  color: black;
-  overflow-x: hidden;
-}
 
 body {
-  background-color: #f4f7fc;
+  position: relative;
+  font-family: 'Inter', sans-serif;
+  font-weight: 500;
+  color: #333;
+  overflow-x: hidden;
+  background-color: #f9fafb;
   display: flex;
   flex-direction: column;
   min-height: 100vh;
+  line-height: 1.6;
+}
+
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
+  font-family: 'Montserrat', sans-serif;
+  font-weight: 700;
+  color: #111;
 }
 
 .button {
