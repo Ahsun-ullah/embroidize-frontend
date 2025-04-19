@@ -28,7 +28,7 @@ export const Header = () => {
           <NavbarContent justify='start' className='flex-1'>
             <Link
               href='/'
-              className='w-[120] h-[120]'
+              className='w-[120px] h-[120px]'
               aria-label='Navigate to homepage'
             >
               <Image
