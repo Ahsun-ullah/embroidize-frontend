@@ -98,7 +98,7 @@ export default function UserProfileDropdown() {
 
               <DropdownItem>
                 <Link
-                  href={`/user/user-details?tabName=account`}
+                  href={`/user-details?tabName=account`}
                   className='flex text-base gap-1 font-medium'
                 >
                   <i className='ri-account-circle-fill'></i>
@@ -107,7 +107,7 @@ export default function UserProfileDropdown() {
               </DropdownItem>
               <DropdownItem>
                 <Link
-                  href={`/user/user-details?tabName=downloads`}
+                  href={`/user-details?tabName=downloads`}
                   className='flex text-base gap-1 font-medium'
                 >
                   <i className='ri-download-fill'></i>

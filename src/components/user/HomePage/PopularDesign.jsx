@@ -35,7 +35,7 @@ const PopularDesign = ({ searchParams }) => {
           </div>
           <div className='flex justify-center items-center mt-14'>
             <Link
-              href={'/user/products'}
+              href={'/products'}
               className='bg-black rounded-full hover:bg-blue-400 text-white font-medium px-6 py-2'
             >
               View All

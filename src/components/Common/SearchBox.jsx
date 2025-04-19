@@ -13,7 +13,7 @@ export default function SearchBox() {
     e.preventDefault();
     if (searchQuery.trim()) {
       router.push(
-        `/user/search?searchQuery=${encodeURIComponent(searchQuery)}`,
+        `/search?searchQuery=${encodeURIComponent(searchQuery)}`,
       );
     }
   };

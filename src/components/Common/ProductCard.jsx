@@ -4,7 +4,7 @@ import Link from 'next/link';
 export default function ProductCard({ item, index }) {
   return (
     <div className='bg-white border rounded-2xl shadow-xl'>
-      <Link href={`/user/product-details/${item?._id}`}>
+      <Link href={`/product-details/${item?._id}`}>
         <div
           className='aspect-[3/2] w-full bg-cover bg-center bg-no-repeat p-6 flex items-center justify-center rounded-t-2xl'
           style={{

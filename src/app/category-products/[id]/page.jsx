@@ -1,6 +1,8 @@
 import ProductCard from '@/components/Common/ProductCard';
 
 import Pagination from '@/components/Common/Pagination';
+import Footer from '@/components/user/HomePage/Footer';
+import { Header } from '@/components/user/HomePage/Header';
 import { getSingleCategory } from '@/lib/apis/public/category';
 import { getProducts } from '@/lib/apis/public/products';
 import { use } from 'react';
@@ -40,7 +42,7 @@ export async function generateMetadata({ params }) {
         title: category?.meta_title || category?.name,
         description: category?.meta_description || category?.description,
         images: [
-          category?.image?.url || 'https://embro-id.vercel.app/home-banner.jpg',
+          category?.image?.url || 'https://embro-id.vercel.app/og-banner.jpg',
         ],
       },
     };
@@ -63,26 +65,30 @@ export default function CategoryProducts({ searchParams }) {
   );
 
   return (
-    <div className='min-h-screen flex flex-col justify-between'>
-      <section className='text-black my-8 py-6 border-b-2'>
-        <div className='container mx-auto px-4'>
-          {allProducts.length === 0 ? (
-            <p className='text-center text-gray-600'>
-              No products found in this category.
-            </p>
-          ) : (
-            <div className='grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-10'>
-              {allProducts.map((item, index) => (
-                <ProductCard key={index} item={item} />
-              ))}
-            </div>
-          )}
-        </div>
+    <>
+      <Header />
+      <div className='min-h-screen flex flex-col justify-between'>
+        <section className='text-black my-8 py-6 border-b-2'>
+          <div className='container mx-auto px-4'>
+            {allProducts.length === 0 ? (
+              <p className='text-center text-gray-600'>
+                No products found in this category.
+              </p>
+            ) : (
+              <div className='grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-10'>
+                {allProducts.map((item, index) => (
+                  <ProductCard key={index} item={item} />
+                ))}
+              </div>
+            )}
+          </div>
 
-        <div className='flex items-center justify-center mt-6'>
-          <Pagination data={allProducts} currentPage={0} perPageData={10} />
-        </div>
-      </section>
-    </div>
+          <div className='flex items-center justify-center mt-6'>
+            <Pagination data={allProducts} currentPage={0} perPageData={10} />
+          </div>
+        </section>
+      </div>
+      <Footer />
+    </>
   );
 }

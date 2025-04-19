@@ -20,7 +20,7 @@ const CategorySelect = () => {
             <DropdownTrigger>
               <Link
                 color='foreground'
-                href={`/user/category-products/${category?._id}`}
+                href={`/category-products/${category?._id}`}
                 className='capitalize'
               >
                 {category.name}

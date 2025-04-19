@@ -20,13 +20,13 @@ const Pagination = ({
 
   const handlePrevPage = () => {
     if (currentPage > 0) {
-      router.push(`/user/products?page=${currentPage - 1}`);
+      router.push(`/products?page=${currentPage - 1}`);
     }
   };
 
   const handleNextPage = () => {
     if (currentPage < totalPages - 1) {
-      router.push(`/user/products?page=${currentPage + 1}`);
+      router.push(`/products?page=${currentPage + 1}`);
     }
   };
 

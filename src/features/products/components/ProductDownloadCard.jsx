@@ -129,10 +129,14 @@ export default function ProductDownloadCard({ data }) {
   return (
     <>
       <Card isFooterBlurred className='flex flex-col  p-8'>
-        <h1 className='text-black font-bold mb-8 text-2xl'>
+        <h1 className='text-black font-bold text-2xl'>
           Free Embroidery Machine Design
         </h1>
-        {/* <h1 className='text-black font-bold mb-2'>Select For Download </h1> */}
+        <p className='text-gray-600 my-2'>
+          Download high-quality embroidery machine designs for free. Get
+          creative with our exclusive free collection of embroidery designs.
+        </p>
+        <h1 className='text-black font-bold mb-2'>Select For Free Download </h1>
         {isLoading ? (
           <LoadingSpinner />
         ) : (

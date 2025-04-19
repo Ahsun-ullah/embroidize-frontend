@@ -1,3 +1,5 @@
+import Footer from '@/components/user/HomePage/Footer';
+import Header from '@/components/user/HomePage/Header';
 import { SingleProductComponent } from '@/features/products/components/SingleProductComponent';
 import { getSingleProduct } from '@/lib/apis/public/products';
 
@@ -23,7 +25,7 @@ export async function generateMetadata({ params }) {
           {
             url:
               product?.image?.url ||
-              'https://embro-id.vercel.app/home-banner.jpg',
+              'https://embro-id.vercel.app/og-banner.jpg',
             width: 1200,
             height: 630,
             alt: product?.title || 'Embroidery Design',
@@ -53,7 +55,9 @@ export async function generateMetadata({ params }) {
 export default function ProductDetails({ params }) {
   return (
     <>
+      <Header />
       <SingleProductComponent params={params} />
+      <Footer />
     </>
   );
 }

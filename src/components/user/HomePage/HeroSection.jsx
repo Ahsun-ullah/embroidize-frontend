@@ -13,7 +13,7 @@ const HeroSection = () => {
     >
       <div className='flex justify-end absolute top-0 bottom-0 w-full pe-[10%]'>
         <div className='flex flex-col items-center justify-center text-white'>
-          <h1 className='text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-bold mb-4 text-center'>
+          <h1 className=' text-white text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-bold mb-4 text-center'>
             Machine <br />
             Embroidery Designs
           </h1>

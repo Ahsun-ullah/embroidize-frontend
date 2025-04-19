@@ -3,17 +3,17 @@ import Link from 'next/link';
 const Footer = () => {
   return (
     <footer className='py-6 container '>
-      <div className='flex flex-wrap text-left lg:text-left py-2 px-1'>
+      <div className='flex flex-wrap text-left lg:text-left'>
         <div className='w-full lg:w-6/12'>
           <Link href={'/'} className='flex items-center justify-start my-4'>
             <i className='ri-centos-fill text-3xl'></i>
             <h4 className='text-3xl font-bold text-black'>EmbroID</h4>
           </Link>
-          <h5 className='text-lg mt-0 mb-2 text-blueGray-600'>
+          <p className='text-lg mt-0 mb-2 '>
             EMB provides high-quality design resources for professionals and
             businesses. Hurry! Explore and join our network of over 100K+
             professionals
-          </h5>
+          </p>
           <div className='flex items-center justify-start gap-x-2'>
             <Link
               href={''}
@@ -41,10 +41,10 @@ const Footer = () => {
             </Link>
           </div>
         </div>
-        <div className='w-full lg:w-6/12 px-4'>
+        <div className='w-full lg:w-6/12'>
           <div className='flex flex-wrap items-top mb-6'>
-            <div className='w-full lg:w-4/12 px-4 ml-auto'>
-              <span className='block uppercase text-blueGray-500 text-lg font-bold mb-2'>
+            <div className='w-full lg:w-4/12 ml-auto'>
+              <span className='block capitalize text-blueGray-500 text-lg font-bold mb-2'>
                 Useful Links :
               </span>
               <ul className='list-unstyled'>
@@ -66,8 +66,8 @@ const Footer = () => {
                 </li>
               </ul>
             </div>
-            <div className='w-full lg:w-4/12 px-4'>
-              <span className='block uppercase text-blueGray-500 text-lg font-bold mb-2'>
+            <div className='w-full lg:w-4/12'>
+              <span className='block capitalize text-blueGray-500 text-lg font-bold mb-2'>
                 Other Resources:
               </span>
               <ul className='list-unstyled'>
