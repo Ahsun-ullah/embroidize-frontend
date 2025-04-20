@@ -4,48 +4,48 @@ import Pagination from '@/components/Common/Pagination';
 import Footer from '@/components/user/HomePage/Footer';
 import { Header } from '@/components/user/HomePage/Header';
 import { BreadCrumb } from '@/features/products/components/BreadCrumb';
-import { getSingleCategory } from '@/lib/apis/public/category';
 import { getProducts } from '@/lib/apis/public/products';
+import { getSingleSubCategory } from '@/lib/apis/public/subcategory';
 import { capitalize } from '@/utils/functions/page';
-import Link from 'next/link';
 import { use } from 'react';
 
 export async function generateMetadata({ params }) {
   const { id } = params;
 
   try {
-    const response = await getSingleCategory(id);
-    const category = response?.data;
+    const response = await getSingleSubCategory(id);
+    const subcategory = response?.data;
 
-    console.log(category);
+    console.log(subcategory);
 
     return {
-      title: category?.meta_title || category?.name,
+      title: subcategory?.meta_title || subcategory?.name,
       description:
-        category?.meta_description ||
+        subcategory?.meta_description ||
         'Download high-quality embroidery machine designs for free.',
       openGraph: {
-        title: category?.meta_title || category?.name,
+        title: subcategory?.meta_title || subcategory?.name,
         description:
-          category?.meta_description ||
+          subcategory?.meta_description ||
           'Download high-quality embroidery machine designs for free.',
         images: [
           {
             url:
-              category?.image?.url ||
+              subcategory?.image?.url ||
               'https://embro-id.vercel.app/home-banner.jpg',
             width: 1200,
             height: 630,
-            alt: category?.name || 'Embroidery Design',
+            alt: subcategory?.name || 'Embroidery Design',
           },
         ],
       },
       twitter: {
         card: 'summary_large_image',
-        title: category?.meta_title || category?.name,
-        description: category?.meta_description || category?.description,
+        title: subcategory?.meta_title || subcategory?.name,
+        description: subcategory?.meta_description || subcategory?.description,
         images: [
-          category?.image?.url || 'https://embro-id.vercel.app/og-banner.jpg',
+          subcategory?.image?.url ||
+            'https://embro-id.vercel.app/og-banner.jpg',
         ],
       },
     };
@@ -66,39 +66,33 @@ export default function CategoryProducts({ searchParams, params }) {
   const { products: allProducts, totalCount } = use(
     getProducts(currentPage, perPageData),
   );
-  const { id: categoryId } = use(params);
-  const singleCategoryData = use(getSingleCategory(categoryId));
 
-  console.log(singleCategoryData?.data);
+  const { id: subcategoryId } = use(params);
+  const singleSubCategoryData = use(getSingleSubCategory(subcategoryId));
+
+  console.log(singleSubCategoryData?.data);
 
   return (
     <>
       <Header />
       <div className='container mx-auto px-4 py-6 flex flex-col gap-4'>
         <h5 className='capitalize text-3xl'>
-          {singleCategoryData?.data?.name} Embroidery Designs
+          {singleSubCategoryData?.data?.name} Embroidery Designs
         </h5>
         <BreadCrumb
           items={[
             { label: 'Home', href: '/' },
             { label: 'Product', href: '/products' },
             {
-              label: `${capitalize(singleCategoryData?.data?.name)}`,
-              href: `/category-products/${singleCategoryData?.data?._id}`,
+              label: `${capitalize(singleSubCategoryData?.data?.category?.name)}`,
+              href: `/category/${singleSubCategoryData?.data?.category?._id}`,
+            },
+            {
+              label: `${capitalize(singleSubCategoryData?.data?.name)}`,
+              href: `/category/${singleSubCategoryData?.data?._id}`,
             },
           ]}
         />
-        <div>
-          {singleCategoryData?.data?.subcategories?.map((sub) => (
-            <Link
-              key={sub?._id}
-              href={`/subcategory-products/${encodeURIComponent(sub?._id)}`}
-              className='bg-teal-200 text-gray-800 px-3 py-1 rounded-md text-sm font-medium capitalize hover:bg-gray-200 hover:text-black transition'
-            >
-              {sub?.name}
-            </Link>
-          ))}
-        </div>
       </div>
       <div className=' flex flex-col justify-between'>
         <section className='text-black my-8 py-6 border-b-2'>

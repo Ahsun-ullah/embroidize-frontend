@@ -19,7 +19,7 @@ export default function CategoryMenu({ isMobileMenuOpen }) {
                 className='space-y-4 border-gray-400 border-r-1 pr-4'
               >
                 <Link
-                  href={`/category-products/${category?._id}`}
+                  href={`/category/${category?._id}`}
                   className='font-bold capitalize  '
                 >
                   {category?.name}
@@ -28,7 +28,7 @@ export default function CategoryMenu({ isMobileMenuOpen }) {
                   {category?.subcategories?.map((sub) => (
                     <li key={sub?._id}>
                       <Link
-                        href={`/subcategory-products/${sub?._id}`}
+                        href={`/subcategory/${sub?._id}`}
                         className='hover:underline capitalize'
                       >
                         {sub?.name}
@@ -46,7 +46,7 @@ export default function CategoryMenu({ isMobileMenuOpen }) {
             <Link
               key={category?._id}
               color='foreground'
-              href={`/category-products/${category?._id}`}
+              href={`/category/${category?._id}`}
               className='capitalize'
             >
               {category.name}

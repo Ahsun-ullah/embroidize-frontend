@@ -28,11 +28,11 @@ export const SingleProductComponent = ({ params }) => {
             { label: 'Product', href: '/products' },
             {
               label: `${capitalize(singleProductData?.data?.category?.name)}`,
-              href: `/category-products/${singleProductData?.data?.category?._id}`,
+              href: `/category/${singleProductData?.data?.category?._id}`,
             },
             {
               label: `${capitalize(singleProductData?.data?.name)}`,
-              href: `/product-details/${singleProductData?.data?._id}`,
+              href: `/product/${singleProductData?.data?._id}`,
             },
           ]}
         />
