@@ -30,7 +30,17 @@ export const userInfoSlice = createApi({
         body,
       }),
     }),
+    UserDownloadHistory: builder.query({
+      query: (id) => ({
+        url: `/downloads/user/${id}`,
+        method: 'GET',
+      }),
+    }),
   }),
 });
 
-export const { useUserInfoQuery, useUpdateUserInfoMutation } = userInfoSlice;
+export const {
+  useUserInfoQuery,
+  useUpdateUserInfoMutation,
+  useUserDownloadHistoryQuery,
+} = userInfoSlice;
