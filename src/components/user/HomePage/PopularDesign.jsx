@@ -12,7 +12,7 @@ const PopularDesign = ({ searchParams }) => {
 
   return (
     <>
-      <section className='bg-blue-50 text-black my-8 py-6 mx-2'>
+      <section className='bg-blue-50 text-black my-8 py-6'>
         <div className='flex items-center justify-center'>
           <h1 className='text-3xl font-bold text-center'>
             Popular embroidery designs

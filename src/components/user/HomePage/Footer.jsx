@@ -1,13 +1,26 @@
+import Image from 'next/image';
 import Link from 'next/link';
+import mainLogo from '../../../../public/logo-black.png';
 
 const Footer = () => {
   return (
     <footer className='py-6 container '>
       <div className='flex flex-wrap text-left lg:text-left'>
         <div className='w-full lg:w-6/12'>
-          <Link href={'/'} className='flex items-center justify-start my-4'>
-            <i className='ri-centos-fill text-3xl'></i>
-            <h4 className='text-3xl font-bold text-black'>EmbroID</h4>
+          <Link
+            href='/'
+            className='relative block w-[20px] h-[80px] sm:w-[80px] sm:h-[80px] md:w-[120px] md:h-[120px]'
+            aria-label='Navigate to homepage'
+          >
+            {/* Desktop image (shown on screens `sm` and larger) */}
+            <Image
+              src={mainLogo || '/desktop-placeholder.svg'}
+              alt='Desktop Company Logo'
+              fill
+              sizes='(min-width: 640px) 100px, 120px'
+              priority={true}
+              className='object-contain hidden sm:block'
+            />
           </Link>
           <p className='text-lg mt-0 mb-2 '>
             EMB provides high-quality design resources for professionals and

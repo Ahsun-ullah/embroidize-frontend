@@ -15,13 +15,14 @@ export default function UserDetailsComponent({ defaultTab }) {
 
   return (
     <>
-      <div className='flex w-full flex-col items-start justify-start'>
+      <div className='flex w-full flex-col items-center justify-center bg-blue-50 py-6 rounded-xl'>
         <Tabs
           aria-label='User Details Tabs'
           selectedKey={activeTab}
           onSelectionChange={(key) => setActiveTab(key)}
           color='secondary'
           variant='bordered'
+          size='lg'
         >
           <Tab
             key='account'

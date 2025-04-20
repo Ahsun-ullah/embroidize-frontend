@@ -3,7 +3,6 @@ import UserDetailsComponent from '@/components/user/userDetails/UserDetailsCompo
 export default function UserDetailsPage({ searchParams }) {
   const defaultTab = searchParams?.tabName;
 
-  console.log(defaultTab);
   return (
     <section className='container'>
       <UserDetailsComponent defaultTab={defaultTab} />

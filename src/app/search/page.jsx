@@ -14,15 +14,14 @@ export default function SearchPage({ searchParams }) {
   return (
     <>
       <Header />
-      <div className='container mx-auto py-8'>
-        <h1 className='text-2xl font-bold mb-4'>Search Results</h1>
-        <p>
-          You searched for: <span className='font-medium'>{searchQuery}</span>
-        </p>
+      <div className='container py-8'>
+        <h1 className='text-2xl font-bold mb-4'>
+          Search Results: <span className='font-medium'>{searchQuery}</span>
+        </h1>
 
-        <div className='min-h-screen flex flex-col justify-between'>
+        <div className=' flex flex-col justify-between'>
           <section className='text-black my-8 py-6 border-b-2'>
-            <div className='container mx-auto px-4'>
+            <div>
               <div className='grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-10'>
                 {products.map((item, index) => (
                   <ProductCard key={index} item={item} />

@@ -14,7 +14,10 @@ export default function CategoryMenu({ isMobileMenuOpen }) {
         >
           <div className='grid grid-cols-2 sm:grid-cols-6 md:grid-cols-6 lg:grid-cols-6 xl:grid-cols-6 gap-6 p-6 text-sm'>
             {categoryData?.data?.map((category) => (
-              <div key={category?._id} className='space-y-4 border-gray-400 border-r-1 pr-4'>
+              <div
+                key={category?._id}
+                className='space-y-4 border-gray-400 border-r-1 pr-4'
+              >
                 <Link
                   href={`/category-products/${category?._id}`}
                   className='font-bold capitalize  '
@@ -25,7 +28,7 @@ export default function CategoryMenu({ isMobileMenuOpen }) {
                   {category?.subcategories?.map((sub) => (
                     <li key={sub?._id}>
                       <Link
-                        href={`/category-products/${sub?._id}`}
+                        href={`/subcategory-products/${sub?._id}`}
                         className='hover:underline capitalize'
                       >
                         {sub?.name}

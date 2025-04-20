@@ -37,7 +37,7 @@ export const Header = () => {
                 alt='Mobile Company Logo'
                 fill
                 sizes='(max-width: 640px) 80px'
-                priority
+                priority={true}
                 className='object-contain block sm:hidden'
               />
 
@@ -47,7 +47,7 @@ export const Header = () => {
                 alt='Desktop Company Logo'
                 fill
                 sizes='(min-width: 640px) 100px, 120px'
-                priority
+                priority={true}
                 className='object-contain hidden sm:block'
               />
             </Link>
@@ -56,7 +56,11 @@ export const Header = () => {
                 onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
                 className='flex items-center gap-2 text-gray-800'
               >
-                <i className='ri-menu-2-line' />
+                {isMobileMenuOpen ? (
+                  <i className='ri-menu-2-line' />
+                ) : (
+                  <i className='ri-menu-3-line' />
+                )}
                 <span className='hidden sm:flex'>Categories</span>
               </button>
             </div>
