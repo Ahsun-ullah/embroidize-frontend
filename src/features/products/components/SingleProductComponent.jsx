@@ -52,7 +52,7 @@ export const SingleProductComponent = ({ params }) => {
             <div className='max-w-5xl mx-auto grid grid-cols-1 md:grid-cols-3 gap-10 text-center text-gray-800'>
               <div className='flex flex-col items-center'>
                 <svg
-                  className='w-10 h-10 text-purple-700 mb-4'
+                  className='w-10 h-10 text-black mb-4'
                   fill='currentColor'
                   viewBox='0 0 20 20'
                 >
@@ -67,7 +67,7 @@ export const SingleProductComponent = ({ params }) => {
 
               <div className='flex flex-col items-center'>
                 <svg
-                  className='w-10 h-10 text-purple-700 mb-4'
+                  className='w-10 h-10 text-black mb-4'
                   fill='currentColor'
                   viewBox='0 0 20 20'
                 >
@@ -82,7 +82,7 @@ export const SingleProductComponent = ({ params }) => {
 
               <div className='flex flex-col items-center'>
                 <svg
-                  className='w-10 h-10 text-purple-700 mb-4'
+                  className='w-10 h-10 text-black mb-4'
                   fill='currentColor'
                   viewBox='0 0 24 24'
                 >
@@ -116,7 +116,7 @@ export const SingleProductComponent = ({ params }) => {
               </h1>
               <pre
                 dangerouslySetInnerHTML={{ __html: rawMarkup }}
-                className='prose max-w-none break-words whitespace-pre-wrap'
+                className='prose max-w-none break-words whitespace-pre-wrap font-sans text-lg'
               />
             </div>
           </Suspense>

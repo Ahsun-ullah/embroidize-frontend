@@ -3,13 +3,10 @@ import Link from 'next/link';
 const HeroSection = () => {
   return (
     <section
+      className=' relative w-full aspect-[4/1.8] sm:aspect-[4/1.5] md:aspect-[4/1.5] lg:aspect-[4/1.3] bg-cover bg-center bg-no-repeat flex items-center'
       style={{
         backgroundImage: `url('/home-banner.jpg')`,
-        backgroundSize: 'cover',
-        backgroundPosition: 'center',
-        backgroundRepeat: 'no-repeat',
       }}
-      className='flex items-center min-h-[470px] w-full max-w-full mx-0 px-0 bg-gray-200 relative '
     >
       <div className='flex justify-end absolute top-0 bottom-0 w-full pe-[10%]'>
         <div className='flex flex-col items-center justify-center text-white'>
