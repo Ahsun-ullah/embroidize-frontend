@@ -7,7 +7,7 @@ import Footer from '@/components/user/HomePage/Footer';
 import Header from '@/components/user/HomePage/Header';
 import { useResetPasswordMutation } from '@/lib/redux/common/user/userInfoSlice';
 import { zodResolver } from '@hookform/resolvers/zod';
-import { useRouter, useSearchParams } from 'next/navigation';
+import { useRouter } from 'next/navigation';
 import { useEffect, useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { z } from 'zod';
@@ -24,7 +24,6 @@ const resetPasswordSchema = z
 
 export default function ResetPasswordForm() {
   const router = useRouter();
-  const searchParams = useSearchParams();
   const [token, setToken] = useState(null);
   const [resetPassword, { isLoading }] = useResetPasswordMutation();
 
@@ -47,7 +46,7 @@ export default function ResetPasswordForm() {
         : rawQuery.substring(1);
       setToken(rawToken);
     }
-  }, [searchParams]);
+  }, []);
 
   const onSubmit = async (data) => {
     if (!token) {
