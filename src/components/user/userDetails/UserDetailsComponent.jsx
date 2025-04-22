@@ -1,58 +1,30 @@
 'use client';
 
+import { ErrorToast } from '@/components/Common/ErrorToast';
+import LoadingSpinner from '@/components/Common/LoadingSpinner';
 import {
   useUserDownloadHistoryQuery,
   useUserInfoQuery,
 } from '@/lib/redux/common/user/userInfoSlice';
 import { Tab, Tabs } from '@heroui/react';
-import { useEffect, useState } from 'react';
+import Cookies from 'js-cookie';
+import { useEffect, useMemo, useState } from 'react';
+import ChangePasswordForm from './UserChangePasswordForm';
 import UserProfile from './UserProfile';
 
-export default function UserDetailsComponent({ defaultTab }) {
+export default function UserDetailsComponent({ defaultTab = 'account' }) {
   const [activeTab, setActiveTab] = useState(defaultTab);
+  const [loadingId, setLoadingId] = useState(null);
 
   const { data: userInfo } = useUserInfoQuery();
-  const { data: UserDownloadHistory } = useUserDownloadHistoryQuery(
-    userInfo?._id,
-    {
-      skip: !userInfo?._id,
-      refetchonmountandargchange: true,
-    },
-  );
-  console.log(userInfo);
 
-  // const fetchUserDownloads = async () => {
-  //   try {
-  //     const token = Cookies.get('token');
-  //     const response = await fetch(
-  //       `${process.env.NEXT_PUBLIC_BASE_API_URL_PROD}/downloads/user/${userInfo?._id}`,
-  //       {
-  //         method: 'GET',
-  //         headers: {
-  //           'Content-Type': 'application/json',
-  //           Authorization: `Bearer ${token}`,
-  //         },
-  //       },
-  //     );
+  const userId = userInfo?._id;
 
-  //     if (!response.ok) {
-  //       // Handle API errors
-  //       const errorData = await response.json();
-  //       throw new Error(errorData.message || 'Failed to fetch downloads');
-  //     }
-
-  //     const data = await response.json();
-  //     console.log('User Downloads:', data);
-  //     return data;
-  //   } catch (error) {
-  //     console.error('Error fetching downloads:', error.message);
-  //     return null;
-  //   }
-  // };
-
-  // const result = fetchUserDownloads();
-
-  console.log(UserDownloadHistory);
+  const { data: downloadHistory, isLoading: isDownloadLoading } =
+    useUserDownloadHistoryQuery(userId, {
+      skip: !userId,
+      // refetchOnMountOrArgChange: true,
+    });
 
   useEffect(() => {
     if (defaultTab) {
@@ -60,13 +32,135 @@ export default function UserDetailsComponent({ defaultTab }) {
     }
   }, [defaultTab]);
 
+  const handleSingleZipFileDownload = async ({ id, extension }) => {
+    const token = Cookies.get('token');
+    const headers = new Headers();
+
+    if (token) {
+      headers.set('Authorization', `Bearer ${token}`);
+    }
+
+    try {
+      setLoadingId(id);
+      const res = await fetch(
+        `${process.env.NEXT_PUBLIC_BASE_API_URL_PROD}/redownload/product/${id}/extension/${extension}`,
+        { method: 'GET', headers },
+      );
+
+      if (!res.ok) {
+        throw new Error(`Download failed with status ${res.status}`);
+      }
+
+      const blob = await res.blob();
+      const filename = `From_Embroid_${extension}.zip`;
+
+      const url = window.URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.href = url;
+      link.download = filename;
+      document.body.appendChild(link);
+      link.click();
+
+      window.URL.revokeObjectURL(url);
+      document.body.removeChild(link);
+    } catch (err) {
+      console.error('Download error:', err);
+      ErrorToast(
+        'Download Failed',
+        err?.message || 'Could not download file',
+        3000,
+      );
+    } finally {
+      setLoadingId(null);
+    }
+  };
+
+  const renderDownloadItem = (design) => {
+    const { _id, downloadedAt, fileType, product, user } = design;
+    const imageUrl = product?.image?.url ?? '/fallback-image.png';
+
+    return (
+      <div
+        key={_id}
+        className='flex items-center justify-between bg-white shadow-md rounded-lg p-4 mb-4'
+      >
+        {/* Image and Name */}
+        <div className='flex items-center gap-4 w-1/2'>
+          <img
+            src={imageUrl}
+            alt={product?.name || 'Design'}
+            className='w-24 h-24 object-cover rounded'
+          />
+          <div>
+            <h3 className='text-sm font-semibold text-gray-800'>
+              {product?.name}
+            </h3>
+            <p className='text-sm text-gray-500'>by {user?.email}</p>
+            <p className='text-sm font-semibold text-gray-500'>
+              File:{' '}
+              <span
+                className='
+               uppercase'
+              >
+                {fileType}
+              </span>
+            </p>
+          </div>
+        </div>
+
+        {/* Date */}
+        <div className='text-sm text-gray-500 text-start'>
+          {new Date(downloadedAt).toDateString()}
+        </div>
+
+        {/* Action */}
+        <div className='w-1/4 flex justify-end'>
+          {loadingId === product?._id ? (
+            <LoadingSpinner />
+          ) : (
+            <button
+              onClick={() =>
+                handleSingleZipFileDownload({
+                  extension: fileType,
+                  id: product?._id,
+                })
+              }
+              className='button'
+              disabled={!!loadingId}
+            >
+              <i className='ri-download-fill' /> Download
+            </button>
+          )}
+        </div>
+      </div>
+    );
+  };
+
+  const renderDownloadTab = useMemo(() => {
+    if (isDownloadLoading) return <LoadingSpinner />;
+    if (downloadHistory?.data?.length === 0)
+      return <p className='text-center'>No downloads data found.</p>;
+
+    return (
+      <div className='max-w-4xl mx-auto p-6 bg-blue-50 rounded-lg shadow-md'>
+        <div className='flex justify-between items-center mb-4 text-sm text-gray-500 uppercase'>
+          <h2>Details</h2>
+          <h2>Date</h2>
+          <h2>Actions</h2>
+        </div>
+        {downloadHistory?.data.map(renderDownloadItem)}
+      </div>
+    );
+  }, [downloadHistory, loadingId]);
+
   return (
     <>
+      {/* Tabs */}
       <div className='flex w-full flex-col items-center justify-center bg-blue-50 py-6 rounded-xl'>
         <Tabs
           aria-label='User Details Tabs'
           selectedKey={activeTab}
-          onSelectionChange={(key) => setActiveTab(key)}
+          onSelectionChange={setActiveTab}
           color='secondary'
           variant='bordered'
           size='lg'
@@ -77,6 +171,15 @@ export default function UserDetailsComponent({ defaultTab }) {
               <div className='flex items-center space-x-2'>
                 <i className='ri-account-circle-fill text-xl' />
                 <span>Account</span>
+              </div>
+            }
+          />
+          <Tab
+            key='password'
+            title={
+              <div className='flex items-center space-x-2'>
+                <i className='ri-lock-password-fill text-2xl' />
+                <span>Change Password</span>
               </div>
             }
           />
@@ -95,51 +198,8 @@ export default function UserDetailsComponent({ defaultTab }) {
       {/* Tab Content */}
       <div className='w-full mt-6'>
         {activeTab === 'account' && <UserProfile />}
-        {activeTab === 'downloads' && (
-          <div className='max-w-4xl mx-auto p-6 bg-blue-50 rounded-lg shadow-md  '>
-            {/* Header */}
-            <div className='flex justify-between items-center mb-4'>
-              <h2 className='text-gray-500 uppercase text-sm'>Details</h2>
-              <h2 className='text-gray-500 uppercase text-sm'>Date</h2>
-              <h2 className='text-gray-500 uppercase text-sm'>Actions</h2>
-            </div>
-
-            {/* Design Items */}
-            {UserDownloadHistory?.data.map((design) => (
-              <div
-                key={design.id}
-                className='flex items-center justify-between bg-white shadow-md rounded-lg p-4 mb-4'
-              >
-                <div className='w-24 h-24 mr-4 flex items-center gap-x-4'>
-                  <img
-                    src={design.product?.image?.url}
-                    alt={design.product?.name}
-                    className='w-full h-full object-cover rounded'
-                  />
-                  <div className='flex-1'>
-                    <h3 className='text-sm font-semibold text-gray-800 text-wrap'>
-                      {design.product?.name}
-                    </h3>
-                    <p className='text-sm text-gray-500'>
-                      by {/* {design?.user?.name} */}
-                      <span>{design?.user?.email}</span>
-                    </p>
-                  </div>
-                </div>
-
-                <div className='text-sm text-gray-500 text-center flex items-start justify-start'>
-                  {new Date(design.downloadedAt).toDateString()}
-                </div>
-
-                <div className='flex space-x-2'>
-                  <button className='button'>
-                    <i className='ri-download-fill' /> Download
-                  </button>
-                </div>
-              </div>
-            ))}
-          </div>
-        )}
+        {activeTab === 'downloads' && renderDownloadTab}
+        {activeTab === 'password' && <ChangePasswordForm />}
       </div>
     </>
   );

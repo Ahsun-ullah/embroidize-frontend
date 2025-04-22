@@ -7,7 +7,7 @@ import { use } from 'react';
 
 export default function AllProductsPage({ searchParams }) {
   const currentPage = parseInt(searchParams?.page || '0', 10);
-  const perPageData = 40;
+  const perPageData = 20;
   const { products, totalCount } = use(getProducts(currentPage, perPageData));
 
   return (

@@ -4,8 +4,8 @@ import mainLogo from '../../../../public/logo-black.png';
 
 const Footer = () => {
   return (
-    <footer className='py-6 container '>
-      <div className='flex flex-wrap text-left lg:text-left'>
+    <footer className='py-6  bg-white border-t border-gray-200'>
+      <div className='container flex flex-wrap text-left lg:text-left '>
         <div className='w-full lg:w-6/12'>
           <Link
             href='/'

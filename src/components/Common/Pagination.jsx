@@ -2,31 +2,40 @@
 
 import { useRouter } from 'next/navigation';
 
-const Pagination = ({
-  data,
-  currentPage,
-  setCurrentPage,
-  perPageData,
-  totalCount,
-}) => {
+const Pagination = ({ currentPage, perPageData, totalCount }) => {
   const totalPages = Math.ceil(totalCount / perPageData);
   const visiblePages = 5;
 
   const router = useRouter();
 
   const handleClick = (pageNumber) => {
-    router.push(`/products?page=${pageNumber}`);
+    const searchParams = new URLSearchParams(window.location.search);
+
+    searchParams.set('page', pageNumber);
+    searchParams.set('limit', perPageData);
+
+    router.push(`?${searchParams.toString()}`);
   };
 
   const handlePrevPage = () => {
     if (currentPage > 0) {
-      router.push(`/products?page=${currentPage - 1}`);
+      const searchParams = new URLSearchParams(window.location.search);
+
+      searchParams.set('page', `${currentPage - 1}`);
+      searchParams.set('limit', perPageData);
+
+      router.push(`?${searchParams.toString()}`);
     }
   };
 
   const handleNextPage = () => {
     if (currentPage < totalPages - 1) {
-      router.push(`/products?page=${currentPage + 1}`);
+      const searchParams = new URLSearchParams(window.location.search);
+
+      searchParams.set('page', `${currentPage + 1}`);
+      searchParams.set('limit', perPageData);
+
+      router.push(`?${searchParams.toString()}`);
     }
   };
 
@@ -76,7 +85,7 @@ const Pagination = ({
   return (
     <div className='mt-16 me-5 text-lg'>
       <ul className='flex justify-end gap-2'>
-        {currentPage > 0 && (
+        {/* {currentPage > 0 && ( */}
           <li
             className='button cursor-pointer'
             onClick={handlePrevPage}
@@ -86,9 +95,9 @@ const Pagination = ({
           >
             &laquo; Previous
           </li>
-        )}
+        {/* )} */}
         {renderPageNumbers()}
-        {currentPage < totalPages - 1 && (
+        {/* {currentPage < totalPages - 1 && ( */}
           <li
             className='button cursor-pointer'
             onClick={handleNextPage}
@@ -98,7 +107,7 @@ const Pagination = ({
           >
             Next &raquo;
           </li>
-        )}
+        {/* )} */}
       </ul>
     </div>
   );

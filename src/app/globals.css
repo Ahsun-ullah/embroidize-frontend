@@ -44,6 +44,10 @@ h6 {
   color: #111;
 }
 
+.end-3 {
+  inset-inline-end: 3.75rem;
+}
+
 .button {
   background-color: black;
   color: #ffffff;

@@ -61,15 +61,14 @@ export async function generateMetadata({ params }) {
 }
 
 export default function CategoryProducts({ searchParams, params }) {
+  const searchQuery = searchParams.searchQuery || '';
   const currentPage = parseInt(searchParams?.page || '0', 10);
-  const perPageData = 40;
+  const perPageData = 20;
   const { products: allProducts, totalCount } = use(
-    getProducts(currentPage, perPageData),
+    getProducts(searchQuery, currentPage, perPageData),
   );
   const { id: categoryId } = use(params);
   const singleCategoryData = use(getSingleCategory(categoryId));
-
-  console.log(singleCategoryData?.data);
 
   return (
     <>
@@ -92,7 +91,7 @@ export default function CategoryProducts({ searchParams, params }) {
           {singleCategoryData?.data?.subcategories?.map((sub) => (
             <Link
               key={sub?._id}
-              href={`/subcategory/${encodeURIComponent(sub?._id)}`}
+              href={`/subcategory/${sub?._id}?searchQuery=${sub?.name.split(' ').join('+')}`}
               className='bg-teal-200 text-gray-800 px-3 py-1 rounded-md text-sm font-medium capitalize hover:bg-gray-200 hover:text-black transition'
             >
               {sub?.name}
@@ -117,7 +116,12 @@ export default function CategoryProducts({ searchParams, params }) {
           </div>
 
           <div className='flex items-center justify-center mt-6'>
-            <Pagination data={allProducts} currentPage={0} perPageData={10} />
+            <Pagination
+              data={allProducts}
+              currentPage={currentPage}
+              perPageData={perPageData}
+              totalCount={totalCount}
+            />
           </div>
         </section>
       </div>

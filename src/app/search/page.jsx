@@ -7,9 +7,11 @@ import { use } from 'react';
 
 export default function SearchPage({ searchParams }) {
   const searchQuery = searchParams.searchQuery || '';
-  const currentPage = searchParams.page ? parseInt(searchParams.page, 10) : 0;
+  const currentPage = searchParams.page ? parseInt(searchParams.page, 10) : 1;
   const perPageData = 40;
-  const { products, totalCount } = use(getProducts(currentPage, perPageData));
+  const { products, totalCount } = use(
+    getProducts(searchQuery, currentPage, perPageData),
+  );
 
   return (
     <>
@@ -23,9 +25,17 @@ export default function SearchPage({ searchParams }) {
           <section className='text-black my-8 py-6 border-b-2'>
             <div>
               <div className='grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-10'>
-                {products.map((item, index) => (
-                  <ProductCard key={index} item={item} />
-                ))}
+                {products?.length > 0 ? (
+                  products.map((item, index) => (
+                    <ProductCard key={index} item={item} />
+                  ))
+                ) : (
+                  <div className='col-span-4 text-center '>
+                    <p className='text-lg font-semibold'>
+                      No products found for "{searchQuery}"
+                    </p>
+                  </div>
+                )}
               </div>
             </div>
             <div className='flex items-center justify-center mt-6'>

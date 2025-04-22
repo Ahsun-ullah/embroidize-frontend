@@ -1,5 +1,7 @@
 'use client';
+
 import { ErrorToast } from '@/components/Common/ErrorToast';
+import ForgotPasswordModal from '@/components/Common/ForgotPasswordForm';
 import LoadingSpinner from '@/components/Common/LoadingSpinner';
 import { SuccessToast } from '@/components/Common/SuccessToast';
 import { useLogInMutation } from '@/lib/redux/public/auth/authSlice';
@@ -7,20 +9,20 @@ import { Card, CardBody, CardHeader, Input } from '@heroui/react';
 import Cookies from 'js-cookie';
 import Link from 'next/link';
 import { useRouter, useSearchParams } from 'next/navigation';
+import { useState } from 'react';
 
 const Login = () => {
   const router = useRouter();
+  const [isModalOpen, setIsModalOpen] = useState(false);
+
   const searchParams = useSearchParams();
   const [logIn, { isLoading }] = useLogInMutation();
 
   const pathName = searchParams.get('pathName');
 
-  console.log(pathName);
-
   const handleSubmit = async (e) => {
     e.preventDefault();
 
-    // Extract form data
     const formData = new FormData(e.target);
     const data = {
       email: formData.get('email'),
@@ -29,34 +31,28 @@ const Login = () => {
 
     try {
       const response = await logIn(data);
-      console.log('API Response:', response);
       if (response.error) {
-        ErrorToast('Error', response.error.data.message || 'API Error', 3000);
+        ErrorToast('Error', response.error.data.message || 'Login failed', 3000);
       } else {
-        SuccessToast(
-          'Success',
-          response.data.message || 'Registration successful!',
-          3000,
-        );
-        if (
-          response?.data?.data?.token &&
-          response?.data?.data?.role === 'admin'
-        ) {
-          Cookies.set('token', response?.data?.data?.token);
+        SuccessToast('Success', response.data.message || 'Login successful!', 3000);
+
+        Cookies.set('token', response.data.data.token);
+
+        if (response.data.data.role === 'admin') {
           router.push('/admin');
         } else {
-          Cookies.set('token', response?.data?.data?.token);
           router.push(pathName ? pathName : '/');
         }
-        // e.target.reset();
       }
     } catch (err) {
-      ErrorToast(
-        'Error',
-        err.message || 'Something went wrong. Please try again.',
-        3000,
-      );
+      ErrorToast('Error', err.message || 'Something went wrong', 3000);
     }
+  };
+
+  const openForgotPassword = (e) => {
+    e.preventDefault(); // prevent triggering form submission
+    e.stopPropagation(); // stop bubbling to parent
+    setIsModalOpen(true);
   };
 
   return (
@@ -75,8 +71,10 @@ const Login = () => {
               Sign in to continue to EmbroiD.
             </p>
           </CardHeader>
+
           <CardBody className='overflow-visible py-2'>
             <form onSubmit={handleSubmit}>
+              {/* Email */}
               <div className='mb-4'>
                 <label htmlFor='email' className='form-label'>
                   Email
@@ -89,10 +87,21 @@ const Login = () => {
                   required
                 />
               </div>
+
+              {/* Password & Forgot */}
               <div className='mb-6'>
-                <label className='form-label' htmlFor='password-input'>
-                  Password
-                </label>
+                <div className='flex items-center justify-between'>
+                  <label htmlFor='password-input' className='form-label'>
+                    Password
+                  </label>
+                  <button
+                    onClick={openForgotPassword}
+                    type='button'
+                    className='text-sm text-black hover:underline'
+                  >
+                    Forgot Password?
+                  </button>
+                </div>
                 <Input
                   type='password'
                   name='password'
@@ -102,6 +111,7 @@ const Login = () => {
                 />
               </div>
 
+              {/* Submit */}
               <div className='w-full flex items-center justify-center'>
                 {isLoading ? (
                   <LoadingSpinner />
@@ -114,6 +124,8 @@ const Login = () => {
                 )}
               </div>
             </form>
+
+            {/* Register link */}
             <div className='mt-5 text-center'>
               <p className='mb-0'>
                 Don't have an account?
@@ -125,18 +137,16 @@ const Login = () => {
                 </Link>
               </p>
             </div>
+
+            {/* Forgot Password Modal */}
+            <ForgotPasswordModal
+              isOpen={isModalOpen}
+              onClose={() => setIsModalOpen(false)}
+            />
           </CardBody>
-          {/* <CardFooter className="flex justify-center">
-            <button
-              className="button flex items-center justify-center mx-auto hover:text-black font-bold"
-              type="button"
-              onClick={() => signIn('google')}
-            >
-              <i className="ri-google-fill me-2 text-3xl"></i> Sign In With
-              Google
-            </button>
-          </CardFooter> */}
         </Card>
+
+        {/* Footer */}
         <div className='text-center'>
           <p className='mb-0'>
             &copy; {new Date().getFullYear()} EmbroID. Crafted by Ahsun

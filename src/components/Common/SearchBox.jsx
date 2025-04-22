@@ -12,9 +12,7 @@ export default function SearchBox() {
   const handleSubmit = (e) => {
     e.preventDefault();
     if (searchQuery.trim()) {
-      router.push(
-        `/search?searchQuery=${encodeURIComponent(searchQuery)}`,
-      );
+      router.push(`/search?searchQuery=${searchQuery.split(' ').join('+')}`);
     }
   };
 
@@ -27,9 +25,11 @@ export default function SearchBox() {
           aria-label='Search'
           value={searchQuery}
           onChange={(e) => setSearchQuery(e.target.value)}
-          variant="bordered"
+          variant='bordered'
           className=''
           radius='full'
+          isClearable={true}
+          onClear={() => setSearchQuery('')}
         />
         <button
           type='submit'

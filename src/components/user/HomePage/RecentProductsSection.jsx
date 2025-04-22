@@ -3,12 +3,8 @@ import { getProducts } from '@/lib/apis/public/products';
 import Link from 'next/link';
 import { use } from 'react';
 
-const RecentProductsSection = ({ searchParams }) => {
-  const currentPage = parseInt(searchParams?.page || '0', 10);
-  const perPageData = 40;
-  const { products: allProducts, totalCount } = use(
-    getProducts(currentPage, perPageData),
-  );
+const RecentProductsSection = () => {
+  const { products: allProducts, totalCount } = use(getProducts('', 0, 10));
 
   return (
     <>
