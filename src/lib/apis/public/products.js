@@ -15,11 +15,7 @@ export async function getProducts(
     }
 
     const queryParams = new URLSearchParams();
-
-    if (searchQuery) {
-      queryParams.append('search', searchQuery);
-    }
-
+    if (searchQuery) queryParams.append('search', searchQuery);
     queryParams.append('page', (currentPage + 1).toString());
     queryParams.append('limit', perPageData.toString());
 
@@ -35,10 +31,12 @@ export async function getProducts(
     }
 
     const result = await response.json();
-    console.log(result);
+
     return {
-      products: result.data,
-      totalCount: result.data.length,
+      products: result.data.data,
+      totalCount: result.data.meta.total,
+      page: result.data.meta.page,
+      totalPages: result.data.meta.totalPages,
     };
   } catch (error) {
     console.error('Error fetching products:', error);

@@ -8,7 +8,7 @@ import { use } from 'react';
 export default function AllProductsPage({ searchParams }) {
   const currentPage = parseInt(searchParams?.page || '0', 10);
   const perPageData = 20;
-  const { products, totalCount } = use(getProducts(currentPage, perPageData));
+  const { products, totalCount, totalPages } = use(getProducts('', currentPage || 0, perPageData));
 
   return (
     <>
@@ -27,7 +27,7 @@ export default function AllProductsPage({ searchParams }) {
             <Pagination
               currentPage={currentPage}
               perPageData={perPageData}
-              totalCount={totalCount}
+              totalPages={totalPages}
             />
           </div>
         </section>

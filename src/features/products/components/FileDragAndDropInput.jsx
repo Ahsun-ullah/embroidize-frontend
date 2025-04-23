@@ -1,15 +1,33 @@
-import { useEffect, useState } from 'react';
-import { useDropzone } from 'react-dropzone';
+import { useCallback, useEffect, useState } from 'react';
 
 export const ZipFileUpload = ({ label, accept, onDrop, error, product }) => {
   const [fileName, setFileName] = useState(null);
 
-  const handleDrop = (acceptedFiles) => {
-    if (acceptedFiles.length > 0) {
-      const file = acceptedFiles[0];
+  const handleFile = (file) => {
+    if (file) {
       setFileName(file.name);
       onDrop(file);
     }
+  };
+
+  const handleInputChange = (e) => {
+    const file = e.target.files?.[0];
+    handleFile(file);
+  };
+
+  const handleDrop = useCallback(
+    (e) => {
+      e.preventDefault();
+      e.stopPropagation();
+      const file = e.dataTransfer?.files?.[0];
+      handleFile(file);
+    },
+    [handleFile],
+  );
+
+  const handleDragOver = (e) => {
+    e.preventDefault();
+    e.stopPropagation();
   };
 
   useEffect(() => {
@@ -18,14 +36,10 @@ export const ZipFileUpload = ({ label, accept, onDrop, error, product }) => {
     }
   }, [product]);
 
-  const { getRootProps, getInputProps } = useDropzone({
-    accept: accept || { 'application/zip': ['.zip'] },
-    onDrop: handleDrop,
-  });
-
   return (
     <div
-      {...getRootProps()}
+      onDrop={handleDrop}
+      onDragOver={handleDragOver}
       className='flex items-center justify-center h-full w-full'
     >
       <div
@@ -36,17 +50,27 @@ export const ZipFileUpload = ({ label, accept, onDrop, error, product }) => {
                    min-h-[15rem] md:h-60'
       >
         {/* Upload Section */}
-        <div className='flex-1 min-w-0'>
-          <input {...getInputProps()} />
-          <p className='text-gray-600 text-sm md:text-base'>{label}</p>
-          <button
+        <div className='flex-1 min-w-0 flex flex-col items-center'>
+          <p className='text-gray-600 text-sm md:text-base mb-2'>{label}</p>
+
+          <label
+            htmlFor='zip-upload'
             className='mt-2 bg-gradient-to-r from-blue-500 to-purple-500
-                       text-white px-4 py-2 rounded-md text-sm md:text-base
-                       w-full md:w-auto'
+               text-white px-4 py-2 rounded-md text-sm md:text-base
+               w-full md:w-auto text-center cursor-pointer'
           >
             Drag and Drop Zip File or Browse Files
-          </button>
+          </label>
+
+          <input
+            id='zip-upload'
+            type='file'
+            accept={accept}
+            onChange={handleInputChange}
+            className='hidden'
+          />
         </div>
+
         {/* Zip File Info */}
         {fileName && (
           <div className='mt-1 flex flex-col items-center'>
@@ -57,6 +81,7 @@ export const ZipFileUpload = ({ label, accept, onDrop, error, product }) => {
             </p>
           </div>
         )}
+
         {/* Error Message */}
         {error && (
           <p className='text-red-500 font-light mt-2 text-sm md:text-base w-full text-center'>

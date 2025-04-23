@@ -1,34 +1,46 @@
 import { useEffect, useState } from 'react';
-import { useDropzone } from 'react-dropzone';
 
 export const ImageFileUpload = ({ label, accept, onDrop, error, itemData }) => {
   const [preview, setPreview] = useState(null);
 
   useEffect(() => {
-    if (itemData?.image && itemData.image?.url) {
+    if (itemData?.image?.url) {
       setPreview(itemData.image.url);
     }
   }, [itemData]);
 
-  const handleDrop = (acceptedFiles) => {
-    if (acceptedFiles.length > 0) {
-      const file = acceptedFiles[0];
+  const handleChange = (e) => {
+    const file = e.target.files?.[0];
+    if (file) {
       const previewUrl = URL.createObjectURL(file);
       setPreview(previewUrl);
       onDrop(file);
     }
   };
 
-  const { getRootProps, getInputProps } = useDropzone({
-    accept,
-    onDrop: handleDrop,
-  });
+  const handleDrop = (e) => {
+    e.preventDefault();
+    e.stopPropagation();
+
+    const file = e.dataTransfer.files?.[0];
+    if (file) {
+      const previewUrl = URL.createObjectURL(file);
+      setPreview(previewUrl);
+      onDrop(file);
+    }
+  };
+
+
+  const handleDragOver = (e) => {
+    e.preventDefault();
+    e.stopPropagation();
+  };
 
   return (
     <div
-      {...getRootProps()}
-      className='flex items-center justify-center h-full w-full'
-    >
+    onDrop={handleDrop}
+    onDragOver={handleDragOver}
+    className='flex items-center justify-center h-full w-full'>
       <div
         className='border-2 border-dashed border-gray-300 rounded-lg p-4 text-center
                  w-full max-w-4xl mx-auto
@@ -37,16 +49,25 @@ export const ImageFileUpload = ({ label, accept, onDrop, error, itemData }) => {
                  min-h-[15rem] md:h-60'
       >
         {/* Upload Section */}
-        <div className='flex-1 min-w-0'>
-          <input {...getInputProps()} />
+        <div className='flex-1 min-w-0 flex flex-col items-center'>
           <p className='text-gray-600 text-sm md:text-base'>{label}</p>
-          <button
+
+          <label
+            htmlFor='image-upload'
             className='mt-2 bg-gradient-to-r from-blue-500 to-purple-500
                      text-white px-4 py-2 rounded-md text-sm md:text-base
-                     w-full md:w-auto'
+                     w-full md:w-auto text-center cursor-pointer'
           >
-            Drag and Drop files here or Browse Files
-          </button>
+            Drag and Drop Image or Browse Files
+          </label>
+
+          <input
+            id='image-upload'
+            type='file'
+            accept={accept}
+            onChange={handleChange}
+            className='hidden'
+          />
         </div>
 
         {/* Preview Section */}

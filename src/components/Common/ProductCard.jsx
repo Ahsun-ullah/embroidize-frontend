@@ -17,7 +17,7 @@ export default function ProductCard({ item, index }) {
           <div className='flex items-center justify-between gap-4'>
             {/* Title / Name */}
             <p className='text-md font-semibold capitalize'>
-              {item?.meta_title ?? ''}
+              {item?.name ?? ''}
             </p>
             {/* price / Free */}
             <p className='text-md text-black font-semibold '>

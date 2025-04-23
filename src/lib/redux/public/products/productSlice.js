@@ -17,10 +17,18 @@ export const productSlice = createApi({
   }),
   endpoints: (builder) => ({
     allProducts: builder.query({
-      query: () => ({
-        url: '/public/product',
-        method: 'GET',
-      }),
+      query: ({ search = '', page = 1, limit = 10 } = {}) => {
+        const params = new URLSearchParams();
+
+        if (search) params.append('search', search);
+        params.append('page', String(page));
+        params.append('limit', String(limit));
+
+        return {
+          url: `/public/product?${params.toString()}`,
+          method: 'GET',
+        };
+      },
     }),
   }),
 });

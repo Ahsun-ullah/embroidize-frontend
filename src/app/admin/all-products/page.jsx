@@ -1,6 +1,7 @@
 import ProductsTableWrapper from '@/features/products/components/ProductsTableWrapper';
 
 export default function AllProductsListPage() {
+  
   const columns = [
     { name: 'NAME', uid: 'name' },
     { name: 'CATEGORY', uid: 'category' },
@@ -14,7 +15,7 @@ export default function AllProductsListPage() {
     <div className='flex flex-col gap-3'>
       <ProductsTableWrapper
         columns={columns}
-        pageSize={5}
+        pageSize={10}
         searchableFieldsName={['name', 'category', 'price', 'tags']}
       />
     </div>

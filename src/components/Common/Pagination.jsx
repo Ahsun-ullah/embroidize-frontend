@@ -2,8 +2,7 @@
 
 import { useRouter } from 'next/navigation';
 
-const Pagination = ({ currentPage, perPageData, totalCount }) => {
-  const totalPages = Math.ceil(totalCount / perPageData);
+const Pagination = ({ currentPage, perPageData, totalPages }) => {
   const visiblePages = 5;
 
   const router = useRouter();
@@ -86,27 +85,27 @@ const Pagination = ({ currentPage, perPageData, totalCount }) => {
     <div className='mt-16 me-5 text-lg'>
       <ul className='flex justify-end gap-2'>
         {/* {currentPage > 0 && ( */}
-          <li
-            className='button cursor-pointer'
-            onClick={handlePrevPage}
-            role='button'
-            tabIndex={0}
-            aria-label='Go to previous page'
-          >
-            &laquo; Previous
-          </li>
+        <li
+          className='button cursor-pointer'
+          onClick={handlePrevPage}
+          role='button'
+          tabIndex={0}
+          aria-label='Go to previous page'
+        >
+          &laquo; Previous
+        </li>
         {/* )} */}
         {renderPageNumbers()}
         {/* {currentPage < totalPages - 1 && ( */}
-          <li
-            className='button cursor-pointer'
-            onClick={handleNextPage}
-            role='button'
-            tabIndex={0}
-            aria-label='Go to next page'
-          >
-            Next &raquo;
-          </li>
+        <li
+          className='button cursor-pointer'
+          onClick={handleNextPage}
+          role='button'
+          tabIndex={0}
+          aria-label='Go to next page'
+        >
+          Next &raquo;
+        </li>
         {/* )} */}
       </ul>
     </div>

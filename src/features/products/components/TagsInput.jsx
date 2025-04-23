@@ -11,17 +11,26 @@ export const CreatableTagsInput = ({ value = [], onChange }) => {
 
   const selectValue = value.map((tag) => createOption(tag));
 
+  const addTags = (text) => {
+    const newTags = text
+      .split(',')
+      .map((t) => t.trim())
+      .filter((t) => t.length > 0 && !value.includes(t));
+
+    if (newTags.length) {
+      onChange([...value, ...newTags]);
+    }
+  };
+
   const handleKeyDown = (event) => {
     if (!inputValue) return;
+
     switch (event.key) {
       case 'Enter':
       case 'Tab':
-        const newTag = inputValue.trim();
-        if (newTag) {
-          onChange([...value, newTag]);
-          setInputValue('');
-        }
         event.preventDefault();
+        addTags(inputValue);
+        setInputValue('');
         break;
       default:
         break;
@@ -35,9 +44,7 @@ export const CreatableTagsInput = ({ value = [], onChange }) => {
 
   return (
     <CreatableSelect
-      components={{
-        DropdownIndicator: null,
-      }}
+      components={{ DropdownIndicator: null }}
       inputValue={inputValue}
       isClearable={true}
       isMulti
@@ -45,7 +52,7 @@ export const CreatableTagsInput = ({ value = [], onChange }) => {
       onChange={handleChange}
       onInputChange={setInputValue}
       onKeyDown={handleKeyDown}
-      placeholder='Type something and press enter...'
+      placeholder='Type or paste tags, then press Enter or Tab...'
       value={selectValue}
     />
   );

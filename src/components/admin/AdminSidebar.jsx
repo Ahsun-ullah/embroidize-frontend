@@ -1,5 +1,6 @@
 'use client';
 import { Tooltip } from '@heroui/react';
+import Image from 'next/image';
 import Link from 'next/link';
 
 export default function AdminSidebar({ isCollapsed, setIsCollapsed }) {
@@ -7,35 +8,24 @@ export default function AdminSidebar({ isCollapsed, setIsCollapsed }) {
     <div className={`admin-sidebar ${isCollapsed ? 'collapsed' : ''}`}>
       <div className='flex items-center justify-between mb-8'>
         {!isCollapsed ? (
-          <Link href={'/admin'} className='sidebar-text'>
-            {/* <Image
-              style={{
-                height: 'auto',
-                width: '100%',
-              }}
-              src={'/twitter-bird-logo-pictures-0.png'}
-              alt='logo'
-              width={0}
-              height={0}
-            /> */}
-            <i className='ri-centos-fill text-3xl mr-2 text-blue-400'>
-              Embroid
-            </i>
+          <Link href='/admin' className='sidebar-text'>
+            <div style={{ display: 'block', width: '50%', height: 'auto' }}>
+              <Image src='/logo-black.png' alt='logo' width={150} height={50} />
+            </div>
           </Link>
         ) : (
           <Tooltip content={'Logo'}>
             <Link href={'/admin'} className='sidebar-text me-2'>
-              {/* <Image
+              <Image
                 style={{
                   height: 'auto',
-                  width: 'auto',
+                  width: '100%',
                 }}
-                src={'/twitter-bird-logo-pictures-0.png'}
+                src={'/favicon-white.png'}
                 alt='logo'
-                width={20}
-                height={50}
-              /> */}
-              <i className='ri-centos-fill text-3xl mr-2 text-blue-400'></i>
+                width={0}
+                height={0}
+              />
             </Link>
           </Tooltip>
         )}

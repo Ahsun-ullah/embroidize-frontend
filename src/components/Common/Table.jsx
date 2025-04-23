@@ -22,7 +22,7 @@ const UserTable = ({ data, columns, pageSize, renderCell, onSearchChange }) => {
   const paginatedItems = useMemo(() => {
     const start = (page - 1) * pageSize;
     const end = start + pageSize;
-    return data?.slice(start, end);
+    return Array.isArray(data) ? data.slice(start, end) : [];
   }, [data, page, pageSize]);
 
   const pages = Math.ceil(data?.length / pageSize);
@@ -71,7 +71,7 @@ const UserTable = ({ data, columns, pageSize, renderCell, onSearchChange }) => {
             <TableColumn key={column.uid}>{column.name}</TableColumn>
           )}
         </TableHeader>
-        <TableBody items={paginatedItems} emptyContent='No users found'>
+        <TableBody items={paginatedItems} emptyContent='No data found'>
           {(item) => (
             <TableRow key={item._id}>
               {(columnKey) => (

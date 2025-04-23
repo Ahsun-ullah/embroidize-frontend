@@ -4,8 +4,12 @@ import Link from 'next/link';
 import { use } from 'react';
 
 const PopularDesign = () => {
-  const { products: allProducts, totalCount } = use(getProducts('', 0, 10));
-  console.log(totalCount);
+  const {
+    products: allProducts,
+    totalCount,
+    totalPages,
+  } = use(getProducts('', 0, 10));
+  
   return (
     <>
       <section className='bg-blue-50 text-black my-8 py-6'>

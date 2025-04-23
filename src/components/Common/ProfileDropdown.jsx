@@ -48,7 +48,7 @@ const ProfileDropdown = () => {
             as='button'
             avatarProps={{
               isBordered: true,
-              src: 'https://avatars.githubusercontent.com/u/30373425?v=4',
+              src: '/favicon.png',
             }}
             className='transition-transform gap-4'
             name={userInfoData?.name ?? 'User Name'}

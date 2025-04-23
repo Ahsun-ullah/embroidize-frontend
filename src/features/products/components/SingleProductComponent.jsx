@@ -124,14 +124,14 @@ export const SingleProductComponent = ({ params }) => {
           {/* Related Keywords */}
           <Suspense fallback={<LoadingSpinner />}>
             {Array.isArray(singleProductData?.data?.meta_keywords) && (
-              <div className='mt-10'>
+              <div className='my-10'>
                 <h2 className='text-black text-lg font-semibold mb-4'>
                   Related Keywords
                 </h2>
                 <div className='flex flex-wrap gap-2'>
                   {singleProductData.data.meta_keywords.map((item, index) => (
                     <Link
-                      href={`/search?searchQuery=${encodeURIComponent(item)}`}
+                      href={`/search?searchQuery=${item.split(' ').join('+')}`}
                       key={index}
                       className='bg-gray-200 text-gray-800 px-3 py-1 rounded-full text-sm font-medium capitalize hover:bg-teal-200 hover:text-black transition'
                     >

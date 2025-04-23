@@ -4,7 +4,11 @@ import Link from 'next/link';
 import { use } from 'react';
 
 const RecentProductsSection = () => {
-  const { products: allProducts, totalCount } = use(getProducts('', 0, 10));
+  const {
+    products: allProducts,
+    totalCount,
+    totalPages,
+  } = use(getProducts('', 0, 10));
 
   return (
     <>

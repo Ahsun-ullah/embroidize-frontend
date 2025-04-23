@@ -3,7 +3,7 @@ import { z } from 'zod';
 export const productSchema = z.object({
   name: z.string().min(1, 'Product name is required'),
   category: z.string().min(1, 'Category is required'),
-  sub_category: z.string().min(1, 'Subcategory is required'),
+  sub_category: z.string().optional(),
   price: z.number().min(0, 'Price must be greater than 0'),
   description: z.string().min(1, 'Description is required'),
   meta_title: z.string().min(1, 'Meta Title is required'),

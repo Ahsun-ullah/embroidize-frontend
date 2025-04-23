@@ -29,6 +29,7 @@ export function ProductsForm({ product }) {
   const [categoryOption, setCategoryOption] = useState([]);
   const [subCategoryOption, setSubCategoryOption] = useState([]);
   const [description, setDescription] = useState(product?.description || '');
+  const [selectedCategory, setSelectedCategory] = useState('');
 
   const { data: categoryData } = useGetPublicProductCategoriesQuery();
   const { data: subCategoryData } = useGetPublicProductSubCategoriesQuery();
@@ -45,6 +46,7 @@ export function ProductsForm({ product }) {
     reset,
     setValue,
   } = useForm({
+    mode: 'onSubmit',
     resolver: zodResolver(productSchema),
     defaultValues: {
       name: '',
@@ -75,6 +77,9 @@ export function ProductsForm({ product }) {
         file: product.file ?? null,
       });
       setDescription(product.description ?? '');
+    }
+    if (product?.category?._id) {
+      setSelectedCategory(product.category._id);
     }
   }, [product, reset]);
 
@@ -215,25 +220,29 @@ export function ProductsForm({ product }) {
           >
             Category <span className='text-red-600'>*</span>
           </label>
+
           <Controller
             name='category'
             control={control}
             render={({ field }) => (
               <Select
                 options={categoryOption}
-                onChange={(selected) =>
-                  field.onChange(selected ? selected.value : '')
-                }
+                onChange={(selected) => {
+                  const value = selected ? selected.value : '';
+                  setSelectedCategory(value);
+                  field.onChange(value);
+                  setValue('sub_category', '');
+                }}
                 value={
                   categoryOption.find(
                     (option) => option.value === field.value,
                   ) || null
                 }
                 placeholder='Select a category'
-                aria-label='Category'
               />
             )}
           />
+
           {errors.category && (
             <p className='text-red-500 font-light'>{errors.category.message}</p>
           )}
@@ -247,25 +256,37 @@ export function ProductsForm({ product }) {
           >
             Sub Category <span className='text-red-600'>*</span>
           </label>
+
           <Controller
             name='sub_category'
             control={control}
-            render={({ field }) => (
-              <Select
-                options={subCategoryOption}
-                onChange={(selected) =>
-                  field.onChange(selected ? selected.value : '')
-                }
-                value={
-                  subCategoryOption.find(
-                    (option) => option.value === field.value,
-                  ) || null
-                }
-                placeholder='Select a category'
-                aria-label='Category'
-              />
-            )}
+            render={({ field }) => {
+              const filteredSubCategories = subCategoryOption.filter(
+                (sub) => sub?.categoryId?._id === selectedCategory,
+              );
+
+              return (
+                <Select
+                  options={filteredSubCategories}
+                  onChange={(selected) =>
+                    field.onChange(selected ? selected.value : '')
+                  }
+                  value={
+                    filteredSubCategories.find(
+                      (option) => option.value === field.value,
+                    ) || null
+                  }
+                  placeholder={
+                    selectedCategory
+                      ? 'Select a subcategory'
+                      : 'Please select a category first'
+                  }
+                  isDisabled={!selectedCategory}
+                />
+              );
+            }}
           />
+
           {errors.sub_category && (
             <p className='text-red-500 font-light'>
               {errors.sub_category.message}
@@ -374,7 +395,7 @@ export function ProductsForm({ product }) {
         </div>
 
         {/* Product Tags */}
-        <div>
+        <div className='col-span-3'>
           <label
             className='text-lg font-medium tracking-tight leading-5'
             htmlFor='meta_keywords'
@@ -391,6 +412,7 @@ export function ProductsForm({ product }) {
               />
             )}
           />
+
           {errors.meta_keywords && (
             <p className='text-red-500 font-light'>
               {errors.meta_keywords.message}
@@ -399,14 +421,14 @@ export function ProductsForm({ product }) {
         </div>
 
         {/* Product Image Upload */}
-        <div className='col-span-2'>
+        <div className='col-span-3'>
           <label className='text-lg font-medium tracking-tight leading-5'>
             Product Image <span className='text-red-600'>*</span>
           </label>
           <ImageFileUpload
-            label='Upload product image (.jpg, .png). Min: 580px × 386px, Max: 5000px × 5000px'
-            accept={{ 'image/jpeg': [], 'image/png': [] }}
-            onDrop={(file) => setValue('image', file, { shouldValidate: true })}
+            label='Upload product image (.jpg, .png, .webp). Min: 580px × 386px, Max: 5000px × 5000px'
+            accept={('image/png', 'image/jpg', 'image/webp', 'image/jpeg')}
+            onDrop={(file) => setValue('image', file, { shouldDirty: true })}
             error={errors.image?.message}
             itemData={product}
           />
@@ -419,8 +441,8 @@ export function ProductsForm({ product }) {
           </label>
           <ZipFileUpload
             label='Upload embroidery files (.zip only)'
-            accept={{ 'application/zip': [] }}
-            onDrop={(file) => setValue('file', file, { shouldValidate: true })}
+            accept={'application/zip'}
+            onDrop={(file) => setValue('file', file, { shouldDirty: true })}
             error={errors.file?.message}
             product={product}
           />

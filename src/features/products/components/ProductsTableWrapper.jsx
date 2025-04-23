@@ -34,21 +34,21 @@ export default function ProductsTableWrapper({
   const { data: allProducts, refetch: allProductRefetch } =
     useAllProductsQuery();
 
-  const [filteredData, setFilteredData] = useState(allProducts?.data);
+  const [filteredData, setFilteredData] = useState(allProducts?.data?.data);
 
   useEffect(() => {
-    setFilteredData(allProducts?.data);
-  }, [allProducts?.data]);
+    setFilteredData(allProducts?.data?.data);
+  }, [allProducts?.data?.data]);
 
   const filterData = useCallback(
     (value) => {
       try {
         if (!value) {
-          setFilteredData(allProducts?.data);
+          setFilteredData(allProducts?.data?.data);
           return;
         }
 
-        const filtered = allProducts?.data?.filter((product) => {
+        const filtered = allProducts?.data?.data?.filter((product) => {
           const availableFields = searchableFieldsName.filter(
             (field) =>
               product.hasOwnProperty(field) &&
@@ -65,10 +65,10 @@ export default function ProductsTableWrapper({
         setFilteredData(filtered);
       } catch (error) {
         console.error('Error filtering data:', error);
-        setFilteredData(allProducts?.data);
+        setFilteredData(allProducts?.data?.data);
       }
     },
-    [allProducts?.data, searchableFieldsName],
+    [allProducts?.data?.data, searchableFieldsName],
   );
 
   const renderCell = useCallback(

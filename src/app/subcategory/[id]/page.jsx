@@ -63,9 +63,9 @@ export async function generateMetadata({ params }) {
 export default function CategoryProducts({ searchParams, params }) {
   const searchQuery = searchParams.searchQuery || '';
   const currentPage = parseInt(searchParams?.page || '0', 10);
-  const perPageData = 40;
+  const perPageData = 20;
   const { products: allProducts, totalCount } = use(
-    getProducts(searchQuery,currentPage, perPageData),
+    getProducts(searchQuery, currentPage || 0, perPageData),
   );
 
   const { id: subcategoryId } = use(params);
@@ -113,10 +113,9 @@ export default function CategoryProducts({ searchParams, params }) {
 
           <div className='flex items-center justify-center mt-6'>
             <Pagination
-              data={allProducts}
               currentPage={currentPage}
               perPageData={perPageData}
-              totalCount={totalCount}
+              totalPages={totalPages}
             />
           </div>
         </section>
