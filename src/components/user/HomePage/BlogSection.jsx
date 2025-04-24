@@ -1,6 +1,5 @@
 import BlogCard from '@/components/Common/BlogCard';
 import { getBlogs } from '@/lib/apis/public/blog';
-import Link from 'next/link';
 import { use } from 'react';
 
 const BlogSection = () => {
@@ -24,14 +23,6 @@ const BlogSection = () => {
             ))}
           </div>
         </div>
-        <div className='flex justify-center items-center mt-14'>
-            <Link
-              href={'/blog'}
-              className='bg-black rounded-full hover:bg-blue-400 text-white font-medium px-6 py-2'
-            >
-              View All
-            </Link>
-          </div>
       </section>
     </>
   );

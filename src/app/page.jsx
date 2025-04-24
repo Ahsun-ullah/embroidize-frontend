@@ -4,6 +4,7 @@ import { Header } from '@/components/user/HomePage/Header';
 import HeroSection from '@/components/user/HomePage/HeroSection';
 import PopularDesign from '@/components/user/HomePage/PopularDesign';
 import RecentProductsSection from '@/components/user/HomePage/RecentProductsSection';
+import Link from 'next/link';
 
 export const dynamic = 'force-dynamic';
 
@@ -58,6 +59,14 @@ export default function Home() {
       <RecentProductsSection />
       {/* for Blog  Part  */}
       <BlogSection />
+      <div className='flex justify-center items-center my-10'>
+        <Link
+          href={'/blog'}
+          className='bg-black rounded-full hover:bg-blue-400 text-white font-medium px-6 py-2'
+        >
+          View All
+        </Link>
+      </div>
       {/* FAq section */}
       {/* <FaqSection /> */}
       {/* subscribe search  */}

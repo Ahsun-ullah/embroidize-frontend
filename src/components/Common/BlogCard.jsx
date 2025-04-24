@@ -9,7 +9,7 @@ const BlogCard = ({ data }) => {
       className='bg-white border rounded-2xl shadow-xl'
     >
       <div
-        className='aspect-[3/2] w-full bg-cover bg-center bg-no-repeat p-6 flex items-center justify-center rounded-t-2xl'
+        className='aspect-[4/3] w-full bg-cover bg-center bg-no-repeat p-6 flex items-center justify-center rounded-t-2xl'
         style={{
           backgroundImage: `url(${data?.image?.url || '/images.jpg'})`,
         }}

@@ -1,8 +1,7 @@
-import BlogCard from '@/components/Common/BlogCard';
+import BlogSection from '@/components/user/HomePage/BlogSection';
 import Footer from '@/components/user/HomePage/Footer';
 import Header from '@/components/user/HomePage/Header';
-import { getBlogs } from '@/lib/apis/public/blog';
-import { use } from 'react';
+import Link from 'next/link';
 
 export const metadata = {
   title: 'Blog | Embroidize',
@@ -33,24 +32,12 @@ export const metadata = {
 };
 
 export default function AllBlogsPageInFrontSite() {
-  const { blogs } = use(getBlogs());
-
-  console.log(blogs);
   return (
-    <div>
+    <>
       <Header />
-
-      <section className='text-black my-8 py-6'>
-        <div className='container mx-auto px-4'>
-          <div className='grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-10'>
-            {blogs.map((item, index) => (
-              <BlogCard key={item?._id} data={item} />
-            ))}
-          </div>
-        </div>
-      </section>
-
+      <BlogSection />
+     
       <Footer />
-    </div>
+    </>
   );
 }

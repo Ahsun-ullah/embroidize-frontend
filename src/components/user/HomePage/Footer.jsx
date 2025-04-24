@@ -5,11 +5,11 @@ import mainLogo from '../../../../public/logo-black.png';
 const Footer = () => {
   return (
     <footer className='py-6  bg-white border-t border-gray-200'>
-      <div className='container flex flex-wrap text-left lg:text-left '>
-        <div className='w-full lg:w-6/12'>
+      <div className='container flex flex-wrap text-left lg:text-left'>
+        <div className='w-full lg:w-6/12 pb-6'>
           <Link
             href='/'
-            className='relative block w-[20px] h-[80px] sm:w-[80px] sm:h-[80px] md:w-[120px] md:h-[120px]'
+            className='relative block w-[160px] h-[80px] sm:w-[120px] sm:h-[60px] md:w-[160px] md:h-[80px]'
             aria-label='Navigate to homepage'
           >
             {/* Desktop image (shown on screens `sm` and larger) */}
@@ -19,7 +19,7 @@ const Footer = () => {
               fill
               sizes='(min-width: 640px) 100px, 120px'
               priority={true}
-              className='object-contain hidden sm:block'
+              className='object-contain '
             />
           </Link>
           <p className='text-lg mt-0 mb-2 '>
@@ -27,30 +27,15 @@ const Footer = () => {
             businesses. Hurry! Explore and join our network of over 100K+
             professionals
           </p>
-          <div className='flex items-center justify-start gap-x-2'>
-            <Link
-              href={''}
-              className='bg-black text-white shadow-lg font-normal p-3 rounded-full outline-none focus:outline-none '
-              type='button'
-              aria-label='twitter-button'
-            >
-              <i className='ri-twitter-x-fill'></i>
+          <div className='flex items-center justify-start gap-x-[6]'>
+            <Link href={''} type='button' aria-label='twitter-button'>
+              <i className='ri-twitter-x-fill rounded-full bg-black text-white p-2 text-base'></i>
             </Link>
-            <Link
-              href={''}
-              className='bg-black text-white shadow-lg font-normal p-3 rounded-full outline-none focus:outline-none '
-              type='button'
-              aria-label='facebook-button'
-            >
-              <i className='ri-facebook-circle-fill'></i>
+            <Link href={''} type='button' aria-label='facebook-button'>
+              <i className='ri-facebook-circle-fill rounded-full bg-black text-white p-2 text-base'></i>
             </Link>
-            <Link
-              href={''}
-              className='bg-black text-white shadow-lg font-normal p-3 rounded-full outline-none focus:outline-none '
-              type='button'
-              aria-label='instagram-button'
-            >
-              <i className='ri-instagram-fill'></i>
+            <Link href={''} type='button' aria-label='instagram-button'>
+              <i className='ri-instagram-fill rounded-full bg-black text-white p-2 text-base'></i>
             </Link>
           </div>
         </div>

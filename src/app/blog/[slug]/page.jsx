@@ -48,10 +48,10 @@ export default async function SingleBlogPage({ searchParams }) {
   const rawMarkup = marked(blog?.description || '');
 
   return (
-    <div className='bg-white text-gray-900 min-h-screen'>
+    <>
       <Header />
 
-      <div className='prose prose-lg max-w-3xl mx-auto py-12 px-4'>
+      <div className='container prose prose-lg mx-auto py-12'>
         <button className='mb-6'>
           <Link href='/blog' className='button'>
             ← Back to Blog
@@ -85,6 +85,6 @@ export default async function SingleBlogPage({ searchParams }) {
       </div>
 
       <Footer />
-    </div>
+    </>
   );
 }
