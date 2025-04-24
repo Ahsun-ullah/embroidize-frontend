@@ -8,7 +8,7 @@ const RecentProductsSection = () => {
     products: allProducts,
     totalCount,
     totalPages,
-  } = use(getProducts('', 0, 10));
+  } = use(getProducts('', 0, 8));
 
   return (
     <>

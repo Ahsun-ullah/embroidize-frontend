@@ -8,8 +8,8 @@ const PopularDesign = () => {
     products: allProducts,
     totalCount,
     totalPages,
-  } = use(getProducts('', 0, 10));
-  
+  } = use(getProducts('', 0, 8));
+
   return (
     <>
       <section className='bg-blue-50 text-black my-8 py-6'>
