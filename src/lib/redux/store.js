@@ -1,5 +1,6 @@
 import { configureStore } from '@reduxjs/toolkit';
 import { setupListeners } from '@reduxjs/toolkit/query';
+import { blogsSlice } from './admin/blogs/blogsSlice';
 import { categoryAndSubcategorySlice } from './admin/categoryAndSubcategory/categoryAndSubcategorySlice';
 import { protectedProductSlice } from './admin/protectedProducts/protectedProductSlice';
 import { userSlice } from './admin/users/userSlice';
@@ -19,6 +20,7 @@ export const makeStore = () => {
       [productSlice.reducerPath]: productSlice.reducer,
       [protectedProductSlice.reducerPath]: protectedProductSlice.reducer,
       [productCommonSlice.reducerPath]: productCommonSlice.reducer,
+      [blogsSlice.reducerPath]: blogsSlice.reducer,
     },
     middleware: (getDefaultMiddleware) =>
       getDefaultMiddleware()
@@ -28,6 +30,7 @@ export const makeStore = () => {
         .concat(productSlice.middleware)
         .concat(protectedProductSlice.middleware)
         .concat(productCommonSlice.middleware)
+        .concat(blogsSlice.middleware)
         .concat(authSlice.middleware),
     devTools: process.env.NODE_ENV !== 'production',
   });

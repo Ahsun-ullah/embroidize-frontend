@@ -9,8 +9,8 @@ export default function AdminSidebar({ isCollapsed, setIsCollapsed }) {
       <div className='flex items-center justify-between mb-8'>
         {!isCollapsed ? (
           <Link href='/admin' className='sidebar-text'>
-            <div style={{ display: 'block', width: '50%', height: 'auto' }}>
-              <Image src='/logo-black.png' alt='logo' width={150} height={50} />
+            <div style={{ display: 'block', width: '100%', height: 'auto' }}>
+              <Image src='/logo-white.png' alt='logo' width={100} height={50} />
             </div>
           </Link>
         ) : (
@@ -23,8 +23,8 @@ export default function AdminSidebar({ isCollapsed, setIsCollapsed }) {
                 }}
                 src={'/favicon-white.png'}
                 alt='logo'
-                width={0}
-                height={0}
+                width={150}
+                height={150}
               />
             </Link>
           </Tooltip>
@@ -107,6 +107,20 @@ export default function AdminSidebar({ isCollapsed, setIsCollapsed }) {
             ) : (
               <Tooltip content={' All Product'}>
                 <i className='ri-list-check'></i>
+              </Tooltip>
+            )}
+          </Link>
+        </li>
+        <li>
+          <Link href='/admin/all-blogs'>
+            {!isCollapsed ? (
+              <span className='sidebar-text '>
+                <i className='ri-news-line me-2'></i>
+                Blogs
+              </span>
+            ) : (
+              <Tooltip content={' All Blogs'}>
+                <i className='ri-news-line'></i>
               </Tooltip>
             )}
           </Link>
