@@ -2,7 +2,6 @@ import { Divider } from '@heroui/react';
 import Link from 'next/link';
 
 const BlogCard = ({ data }) => {
-  console.log(data);
   return (
     <Link
       href={`/blog/${data?.title.split(' ').join('-')}?id=${data?._id}`}

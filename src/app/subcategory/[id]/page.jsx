@@ -9,8 +9,8 @@ import { getSingleSubCategory } from '@/lib/apis/public/subcategory';
 import { capitalize } from '@/utils/functions/page';
 import { use } from 'react';
 
-export async function generateMetadata({ params }) {
-  const { id } = params;
+export async function generateMetadata({ searchParams }) {
+  const { id } = await searchParams;
 
   try {
     const response = await getSingleSubCategory(id);
@@ -60,18 +60,15 @@ export async function generateMetadata({ params }) {
   }
 }
 
-export default function CategoryProducts({ searchParams, params }) {
-  const searchQuery = searchParams.searchQuery || '';
+export default function CategoryProducts({ searchParams }) {
   const currentPage = parseInt(searchParams?.page || '0', 10);
   const perPageData = 20;
-  const { products: allProducts, totalCount } = use(
-    getProducts(searchQuery, currentPage || 0, perPageData),
+  const searchParamsData = use(searchParams);
+  const { products: allProducts, totalPages } = use(
+    getProducts(searchParamsData?.searchQuery, currentPage || 0, perPageData),
   );
 
-  const { id: subcategoryId } = use(params);
-  const singleSubCategoryData = use(getSingleSubCategory(subcategoryId));
-
-  console.log(singleSubCategoryData?.data);
+  const singleSubCategoryData = use(getSingleSubCategory(searchParamsData?.id));
 
   return (
     <>
@@ -86,7 +83,7 @@ export default function CategoryProducts({ searchParams, params }) {
             { label: 'Product', href: '/products' },
             {
               label: `${capitalize(singleSubCategoryData?.data?.category?.name)}`,
-              href: `/category/${singleSubCategoryData?.data?.category?._id}?searchQuery=${singleSubCategoryData?.data?.category?.name.split(' ').join('+')}`,
+              href: `/category/${singleSubCategoryData?.data?.category?.name.split(' ').join('-')}?id=${singleSubCategoryData?.data?.category?._id}&searchQuery=${singleSubCategoryData?.data?.category?.name.split(' ').join('+')}`,
             },
             {
               label: `${capitalize(singleSubCategoryData?.data?.name)}`,

@@ -55,6 +55,8 @@ export async function getSingleProduct(productId) {
       headers.set('Authorization', `Bearer ${token}`);
     }
 
+    console.log(productId);
+
     const response = await fetch(
       `${process.env.NEXT_PUBLIC_BASE_API_URL_PROD}/public/product/${productId}`,
       {

@@ -1,6 +1,5 @@
-import ProductCard from '@/components/Common/ProductCard';
-
 import Pagination from '@/components/Common/Pagination';
+import ProductCard from '@/components/Common/ProductCard';
 import Footer from '@/components/user/HomePage/Footer';
 import { Header } from '@/components/user/HomePage/Header';
 import { BreadCrumb } from '@/features/products/components/BreadCrumb';
@@ -10,14 +9,12 @@ import { capitalize } from '@/utils/functions/page';
 import Link from 'next/link';
 import { use } from 'react';
 
-export async function generateMetadata({ params }) {
-  const { id } = params;
+export async function generateMetadata({ searchParams }) {
+  const { id } = await searchParams;
 
   try {
     const response = await getSingleCategory(id);
     const category = response?.data;
-
-    console.log(category);
 
     return {
       title: category?.meta_title || category?.name,
@@ -60,17 +57,14 @@ export async function generateMetadata({ params }) {
   }
 }
 
-export default function CategoryProducts({ searchParams, params }) {
-  const searchQuery = searchParams.searchQuery || '';
+export default function CategoryProducts({ searchParams }) {
   const currentPage = parseInt(searchParams?.page || '0', 10);
   const perPageData = 20;
-  const {
-    products: allProducts,
-    totalCount,
-    totalPages,
-  } = use(getProducts(searchQuery, currentPage || 0, perPageData));
-  const { id: categoryId } = use(params);
-  const singleCategoryData = use(getSingleCategory(categoryId));
+  const searchParamsData = use(searchParams);
+  const { products: allProducts, totalPages } = use(
+    getProducts(searchParamsData?.searchQuery, currentPage || 0, perPageData),
+  );
+  const singleCategoryData = use(getSingleCategory(searchParamsData?.id));
 
   return (
     <>
@@ -93,7 +87,7 @@ export default function CategoryProducts({ searchParams, params }) {
           {singleCategoryData?.data?.subcategories?.map((sub) => (
             <Link
               key={sub?._id}
-              href={`/subcategory/${sub?._id}?searchQuery=${sub?.name.split(' ').join('+')}`}
+              href={`/subcategory/${sub?.name.split(' ').join('-')}?id=${sub?._id}&searchQuery=${sub?.name.split(' ').join('+')}`}
               className='bg-teal-200 text-gray-800 px-3 py-1 rounded-md text-sm font-medium capitalize hover:bg-gray-200 hover:text-black transition'
             >
               {sub?.name}

@@ -1,7 +1,6 @@
 import BlogSection from '@/components/user/HomePage/BlogSection';
 import Footer from '@/components/user/HomePage/Footer';
 import Header from '@/components/user/HomePage/Header';
-import Link from 'next/link';
 
 export const metadata = {
   title: 'Blog | Embroidize',
@@ -36,7 +35,7 @@ export default function AllBlogsPageInFrontSite() {
     <>
       <Header />
       <BlogSection />
-     
+
       <Footer />
     </>
   );

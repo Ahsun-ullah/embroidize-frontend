@@ -19,7 +19,7 @@ export default function CategoryMenu({ isMobileMenuOpen }) {
                 className='space-y-4 border-gray-400 border-r-1 pr-4'
               >
                 <Link
-                  href={`/category/${category?._id}?searchQuery=${category?.name.split(' ').join('+')}`}
+                  href={`/category/${category?.name.split(' ').join('-')}?id=${category?._id}&searchQuery=${category?.name.split(' ').join('+')}`}
                   className='font-bold capitalize  '
                 >
                   {category?.name}
@@ -28,7 +28,7 @@ export default function CategoryMenu({ isMobileMenuOpen }) {
                   {category?.subcategories?.map((sub) => (
                     <li key={sub?._id}>
                       <Link
-                        href={`/subcategory/${sub?._id}?searchQuery=${sub?.name.split(' ').join('+')}`}
+                        href={`/subcategory/${sub?.name.split(' ').join('-')}?id=${sub?._id}&searchQuery=${sub?.name.split(' ').join('+')}`}
                         className='hover:underline capitalize'
                       >
                         {sub?.name}
@@ -46,7 +46,7 @@ export default function CategoryMenu({ isMobileMenuOpen }) {
             <Link
               key={category?._id}
               color='foreground'
-              href={`/category/${category?._id}?searchQuery=${category?.name.split(' ').join('+')}`}
+              href={`/category/${category?.name.split(' ').join('-')}?id=${category?._id}&searchQuery=${category?.name.split(' ').join('+')}`}
               className='capitalize'
             >
               {category.name}

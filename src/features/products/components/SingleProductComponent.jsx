@@ -1,23 +1,19 @@
 import LoadingSpinner from '@/components/Common/LoadingSpinner';
 import ProductCard from '@/components/Common/ProductCard';
-import { getProducts, getSingleProduct } from '@/lib/apis/public/products';
 import { capitalize } from '@/utils/functions/page';
 import { marked } from 'marked';
 import Link from 'next/link';
-import { Suspense, use } from 'react';
+import { Suspense } from 'react';
 import { BreadCrumb } from './BreadCrumb';
 import ProductDownloadCard from './ProductDownloadCard';
 import { SingleProductImageCard } from './SingleProductImageCard';
 
-export const SingleProductComponent = ({ params }) => {
-  const { id } = use(params);
-  const singleProductData = use(getSingleProduct(id));
-  const { products: allProductData } = use(getProducts());
-
-  const rawMarkup = marked(singleProductData?.data?.description || '');
-
-  console.log(allProductData);
-
+export const SingleProductComponent = async ({
+  singleProductData,
+  allProductData,
+}) => {
+  console.log(singleProductData);
+  const rawMarkup = marked(singleProductData?.description || '');
   return (
     <div className='container mx-auto px-4'>
       {/* Breadcrumb */}
@@ -27,12 +23,12 @@ export const SingleProductComponent = ({ params }) => {
             { label: 'Home', href: '/' },
             { label: 'Product', href: '/products' },
             {
-              label: `${capitalize(singleProductData?.data?.category?.name)}`,
-              href: `/category/${singleProductData?.data?.category?._id}`,
+              label: `${capitalize(singleProductData?.category?.name)}`,
+              href: `/category/${singleProductData?.category?.name.split(' ').join('-')}?id=${singleProductData?.category?._id}&searchQuery=${singleProductData?.category?.name.split(' ').join('+')}`,
             },
             {
-              label: `${capitalize(singleProductData?.data?.name)}`,
-              href: `/product/${singleProductData?.data?._id}`,
+              label: `${capitalize(singleProductData?.name)}`,
+              href: `/product/${singleProductData?._id}`,
             },
           ]}
         />
@@ -42,12 +38,12 @@ export const SingleProductComponent = ({ params }) => {
       <div className='flex flex-col lg:flex-row gap-10'>
         <div>
           <Suspense fallback={<LoadingSpinner />}>
-            <SingleProductImageCard data={singleProductData?.data} />
+            <SingleProductImageCard data={singleProductData} />
           </Suspense>
         </div>
 
         <div className='flex flex-col gap-10 w-full'>
-          <ProductDownloadCard data={singleProductData?.data} />
+          <ProductDownloadCard data={singleProductData} />
           <div className='bg-white py-10 px-4 md:px-8 rounded-2xl shadow-lg'>
             <div className='max-w-5xl mx-auto grid grid-cols-1 md:grid-cols-3 gap-10 text-center text-gray-800'>
               <div className='flex flex-col items-center'>
@@ -105,7 +101,7 @@ export const SingleProductComponent = ({ params }) => {
       </div>
 
       {/* Details & Related Section */}
-      <div className='flex flex-col lg:flex-row gap-10 mt-12'>
+      <div className='flex flex-col lg:flex-row gap-10 my-12'>
         {/* Left: Description & Keywords */}
         <div className='w-full lg:w-3/4'>
           {/* Product Details */}
@@ -152,13 +148,16 @@ export const SingleProductComponent = ({ params }) => {
                 <h2 className='text-black text-lg font-semibold'>
                   You May Also Like
                 </h2>
-                <button className='text-sm text-blue-600 hover:underline'>
+                <Link
+                  href={'/products'}
+                  className='text-sm text-blue-600 hover:underline'
+                >
                   See More
-                </button>
+                </Link>
               </div>
 
               <div className='grid grid-cols-1 sm:grid-cols-2 gap-4'>
-                {allProductData?.slice(0, 8).map((item, index) => (
+                {allProductData?.slice(0, 4).map((item, index) => (
                   <ProductCard item={item} key={index} />
                 ))}
               </div>
