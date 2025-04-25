@@ -19,7 +19,7 @@ const Register = () => {
     const formData = new FormData(e.target);
     const data = {
       name: formData.get('name'),
-      email: formData.get('email'),
+      email: formData.get('email').toLowerCase(),
       password: formData.get('password'),
     };
 

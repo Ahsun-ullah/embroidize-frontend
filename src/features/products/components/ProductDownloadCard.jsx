@@ -12,21 +12,21 @@ import {
 } from '@heroui/react';
 import Cookies from 'js-cookie';
 
-import { useParams, usePathname } from 'next/navigation';
+import { usePathname, useSearchParams } from 'next/navigation';
 import { useState } from 'react';
 
 export default function ProductDownloadCard({ data }) {
-  const router = useParams();
+  const router = useSearchParams();
   const pathName = usePathname();
   const [isLoading, setIsLoading] = useState(false);
   const [allIsLoading, setAllIsLoading] = useState(false);
 
-  console.log(pathName);
+  const productId = router.get('id');
 
   const handleSingleZipFileDownload = async (fileData) => {
     const token = Cookies.get('token');
     if (!token) {
-      window.location.href = `/auth/login?pathName=${pathName}`;
+      window.location.href = `/auth/login?pathName=${pathName}?id=${productId}`;
       return;
     }
 
@@ -157,7 +157,7 @@ export default function ProductDownloadCard({ data }) {
                     onClick={() =>
                       handleSingleZipFileDownload({
                         extension: type,
-                        id: router?.id,
+                        id: productId,
                       })
                     }
                   >

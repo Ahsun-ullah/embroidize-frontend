@@ -25,16 +25,24 @@ const Login = () => {
 
     const formData = new FormData(e.target);
     const data = {
-      email: formData.get('email'),
+      email: formData.get('email').toLowerCase(),
       password: formData.get('password'),
     };
 
     try {
       const response = await logIn(data);
       if (response.error) {
-        ErrorToast('Error', response.error.data.message || 'Login failed', 3000);
+        ErrorToast(
+          'Error',
+          response.error.data.message || 'Login failed',
+          3000,
+        );
       } else {
-        SuccessToast('Success', response.data.message || 'Login successful!', 3000);
+        SuccessToast(
+          'Success',
+          response.data.message || 'Login successful!',
+          3000,
+        );
 
         Cookies.set('token', response.data.data.token);
 
