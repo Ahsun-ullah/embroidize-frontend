@@ -1,14 +1,7 @@
-import { cookies } from 'next/headers';
-
 export async function getBlogs(searchQuery, currentPage = 0, perPageData = 8) {
   try {
-    const cookieStore = cookies();
-    const token = cookieStore.get('token')?.value;
-
     const headers = new Headers();
-    if (token) {
-      headers.set('Authorization', `Bearer ${token}`);
-    }
+    headers.set('Authorization', 'Bearer some-static-token');
 
     const queryParams = new URLSearchParams();
     if (searchQuery) queryParams.append('search', searchQuery);
@@ -42,14 +35,8 @@ export async function getBlogs(searchQuery, currentPage = 0, perPageData = 8) {
 
 export async function getSingleBlog(blogId) {
   try {
-    const cookieStore = cookies();
-    const token = cookieStore.get('token')?.value;
-
     const headers = new Headers();
-
-    if (token) {
-      headers.set('Authorization', `Bearer ${token}`);
-    }
+    headers.set('Authorization', 'Bearer some-static-token');
 
     const response = await fetch(
       `${process.env.NEXT_PUBLIC_BASE_API_URL_PROD}/public/blog/${blogId}`,

@@ -1,7 +1,6 @@
 import ProductsTableWrapper from '@/features/products/components/ProductsTableWrapper';
 
 export default function AllProductsListPage() {
-  
   const columns = [
     { name: 'NAME', uid: 'name' },
     { name: 'CATEGORY', uid: 'category' },

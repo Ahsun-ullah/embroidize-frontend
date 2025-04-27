@@ -1,26 +1,22 @@
 'use client';
 
-import {
-  Navbar as HeroUINavbar,
-  NavbarContent,
-  NavbarMenu,
-  NavbarMenuItem,
-} from '@heroui/navbar';
+import { Navbar as HeroUINavbar, NavbarContent } from '@heroui/navbar';
 import { Divider } from '@heroui/react';
 import Link from 'next/link';
 
 import CategoryMenu from '@/components/Common/CategoryMenu';
 import SearchBox from '@/components/Common/SearchBox';
 import UserProfileDropdown from '@/components/Common/UserProfileDropdown';
-import { siteConfig } from '@/lib/datas/page';
 import Image from 'next/image';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import mobileLogo from '../../../../public/favicon.png';
 import mainLogo from '../../../../public/logo-black.png';
 
 export const Header = () => {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
-
+  useEffect(() => {
+    // console.log('useEffect: Component mounted on the client side');
+  }, []);
   return (
     <>
       <HeroUINavbar maxWidth='full' className='h-[5.5rem] z-50'>
@@ -73,28 +69,6 @@ export const Header = () => {
           <NavbarContent justify='end' className='flex-1'>
             <UserProfileDropdown />
           </NavbarContent>
-
-          <NavbarMenu>
-            <div className='px-4 py-2 flex flex-col gap-3'>
-              <SearchBox />
-              {siteConfig?.navMenuItems?.length > 0 ? (
-                siteConfig.navMenuItems.map((item, index) => (
-                  <NavbarMenuItem key={`${item.href}-${index}`}>
-                    <Link
-                      href={item.href}
-                      className='text-base hover:underline'
-                      aria-current={item.href === '/' ? 'page' : undefined}
-                    >
-                      {item.label}
-                    </Link>
-                  </NavbarMenuItem>
-                ))
-              ) : (
-                <div>No menu items available</div>
-              )}
-              <UserProfileDropdown />
-            </div>
-          </NavbarMenu>
         </div>
       </HeroUINavbar>
 

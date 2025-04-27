@@ -1,7 +1,8 @@
 export function GET() {
   return new Response(
     `User-agent: *
-  Allow: /
+    Disallow: /api/
+    Allow: /
 
 
   Sitemap: https://embro-id.vercel.app/sitemap.xml`,

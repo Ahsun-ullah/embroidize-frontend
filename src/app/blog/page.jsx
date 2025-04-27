@@ -35,7 +35,6 @@ export default function AllBlogsPageInFrontSite() {
     <>
       <Header />
       <BlogSection />
-
       <Footer />
     </>
   );

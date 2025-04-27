@@ -4,7 +4,9 @@ import { Inter } from 'next/font/google';
 import 'remixicon/fonts/remixicon.css';
 import './globals.css';
 
-const inter = Inter({ subsets: ['latin'] });
+const inter = Inter({ subsets: ['latin'], display: 'swap' });
+
+
 export const metadata = {
   title: 'Free Embroidery Machine Designs - Download High-Quality Patterns',
   description:
@@ -44,6 +46,7 @@ export const metadata = {
     images: ['https://embro-id.vercel.app/home-banner.jpg'],
   },
 };
+
 export default function RootLayout({ children }) {
   return (
     <html lang='en'>
