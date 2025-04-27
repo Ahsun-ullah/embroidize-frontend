@@ -28,7 +28,7 @@ export async function getBlogs(searchQuery, currentPage = 0, perPageData = 8) {
       //   totalPages: result.data.meta.totalPages,
     };
   } catch (error) {
-    console.error('Error fetching products:', error);
+    console.error('Error fetching blogs:', error);
     throw error;
   }
 }

@@ -58,7 +58,8 @@ const nextConfig = {
     ],
   },
   experimental: {
-    optimizeCss: true,
+    optimizeCss: true, // CSS optimization enabled
+   
   },
   async headers() {
     return [
