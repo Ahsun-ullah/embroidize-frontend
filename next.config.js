@@ -37,7 +37,6 @@
 const nextConfig = {
   reactStrictMode: true,
   compress: true,
-  assetPrefix: '.',
   images: {
     formats: ['image/avif', 'image/webp'],
     remotePatterns: [
@@ -59,8 +58,7 @@ const nextConfig = {
     ],
   },
   experimental: {
-    optimizeCss: true, // CSS optimization enabled
-
+    optimizeCss: true, // Enable CSS optimization
   },
   async headers() {
     return [
