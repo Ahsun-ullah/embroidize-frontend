@@ -26,11 +26,11 @@ export const metadata = {
     title: 'Free Embroidery Machine Designs - Download High-Quality Patterns',
     description:
       'Download free embroidery machine designs with high-quality patterns for various fabric types.',
-    url: 'https://embro-id.vercel.app/',
-    siteName: 'Your Site Name',
+    url: 'https://embroidize.com/',
+    siteName: 'embroidize.com',
     images: [
       {
-        url: 'https://embro-id.vercel.app/og-banner.jpg',
+        url: 'https://embroidize.com/og-banner.jpg',
         width: 1200,
         height: 630,
         alt: 'Free Embroidery Machine Designs',
@@ -43,7 +43,7 @@ export const metadata = {
     title: 'Free Embroidery Machine Designs',
     description:
       'Download free embroidery machine designs with high-quality patterns.',
-    images: ['https://embro-id.vercel.app/home-banner.jpg'],
+    images: ['https://embroidize.com/home-banner.jpg'],
   },
 };
 

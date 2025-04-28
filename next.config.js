@@ -52,11 +52,17 @@ const nextConfig = {
       },
       {
         protocol: 'https',
+        hostname: 'embroidize-assets.nyc3.digitaloceanspaces.com',
+        pathname: '/**',
+      },
+      {
+        protocol: 'https',
         hostname: 'res.cloudinary.com',
         pathname: '/**',
       },
     ],
   },
+
   experimental: {
     optimizeCss: true, // Enable CSS optimization
   },

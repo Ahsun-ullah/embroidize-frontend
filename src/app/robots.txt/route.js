@@ -5,7 +5,7 @@ export function GET() {
     Allow: /
 
 
-  Sitemap: https://embro-id.vercel.app/sitemap.xml`,
+  Sitemap: https://embroidize.com/sitemap.xml`,
     {
       headers: {
         'Content-Type': 'text/plain',

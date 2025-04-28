@@ -7,7 +7,6 @@ import { getSingleCategory } from '@/lib/apis/public/category';
 import { getProducts } from '@/lib/apis/public/products';
 import { capitalize } from '@/utils/functions/page';
 import Link from 'next/link';
-import { use } from 'react';
 
 export async function generateMetadata({ searchParams }) {
   const { id } = await searchParams;
@@ -29,8 +28,7 @@ export async function generateMetadata({ searchParams }) {
         images: [
           {
             url:
-              category?.image?.url ||
-              'https://embro-id.vercel.app/home-banner.jpg',
+              category?.image?.url || 'https://embroidize.com/home-banner.jpg',
             width: 1200,
             height: 630,
             alt: category?.name || 'Embroidery Design',
@@ -42,7 +40,7 @@ export async function generateMetadata({ searchParams }) {
         title: category?.meta_title || category?.name,
         description: category?.meta_description || category?.description,
         images: [
-          category?.image?.url || 'https://embro-id.vercel.app/og-banner.jpg',
+          category?.image?.url || 'https://embroidize.com/og-banner.jpg',
         ],
       },
     };
@@ -57,14 +55,16 @@ export async function generateMetadata({ searchParams }) {
   }
 }
 
-export default function CategoryProducts({ searchParams }) {
-  const currentPage = parseInt(searchParams?.page || '0', 10);
+export default async function CategoryProducts({ searchParams }) {
+  const currentPage = await searchParams;
   const perPageData = 20;
-  const searchParamsData = use(searchParams);
-  const { products: allProducts, totalPages } = use(
-    getProducts(searchParamsData?.searchQuery, currentPage || 0, perPageData),
+  const searchParamsData = await searchParams;
+  const { products: allProducts, totalPages } = await getProducts(
+    searchParamsData?.searchQuery,
+    currentPage || 0,
+    perPageData,
   );
-  const singleCategoryData = use(getSingleCategory(searchParamsData?.id));
+  const singleCategoryData = await getSingleCategory(searchParamsData?.id);
 
   return (
     <>
@@ -113,7 +113,7 @@ export default function CategoryProducts({ searchParams }) {
 
           <div className='flex items-center justify-center mt-6'>
             <Pagination
-              currentPage={currentPage}
+              currentPage={currentPage?.page}
               perPageData={perPageData}
               totalPages={totalPages}
             />

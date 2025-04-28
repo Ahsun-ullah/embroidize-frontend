@@ -21,7 +21,7 @@ export async function generateMetadata({ searchParams }) {
       description: blog?.meta_description,
       images: [
         {
-          url: blog?.image?.url || 'https://embro-id.vercel.app/og-banner.jpg',
+          url: blog?.image?.url || 'https://embroidize.com/og-banner.jpg',
           width: 1200,
           height: 630,
           alt: blog?.title || 'Embroidery Design',
@@ -33,7 +33,7 @@ export async function generateMetadata({ searchParams }) {
       title: blog?.meta_title || blog?.title,
       description: blog?.meta_description || blog?.description,
       images: [
-        blog?.image?.url || 'https://embro-id.vercel.app/home-banner.jpg',
+        blog?.image?.url || 'https://embroidize.com/home-banner.jpg',
       ],
     },
   };

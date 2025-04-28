@@ -32,7 +32,7 @@ export async function generateMetadata({ searchParams }) {
           {
             url:
               subcategory?.image?.url ||
-              'https://embro-id.vercel.app/home-banner.jpg',
+              'https://embroidize.com/home-banner.jpg',
             width: 1200,
             height: 630,
             alt: subcategory?.name || 'Embroidery Design',
@@ -45,7 +45,7 @@ export async function generateMetadata({ searchParams }) {
         description: subcategory?.meta_description || subcategory?.description,
         images: [
           subcategory?.image?.url ||
-            'https://embro-id.vercel.app/og-banner.jpg',
+            'https://embroidize.com/og-banner.jpg',
         ],
       },
     };

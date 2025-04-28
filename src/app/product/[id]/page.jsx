@@ -24,7 +24,7 @@ export async function generateMetadata({ searchParams }) {
         images: [
           {
             url:
-              product.image?.url || 'https://embro-id.vercel.app/og-banner.jpg',
+              product.image?.url || 'https://embroidize.com/og-banner.jpg',
             width: 1200,
             height: 630,
             alt: product.title || 'Embroidery Design',
@@ -36,7 +36,7 @@ export async function generateMetadata({ searchParams }) {
         title: product.meta_title || product.title,
         description: product.meta_description || product.description,
         images: [
-          product.image?.url || 'https://embro-id.vercel.app/home-banner.jpg',
+          product.image?.url || 'https://embroidize.com/home-banner.jpg',
         ],
       },
     };
@@ -72,7 +72,7 @@ export default function ProductDetails({ searchParams }) {
             description: product.meta_description || product.description,
             offers: {
               '@type': 'Offer',
-              url: `https://embro-id.vercel.app/product/${product.name.split(' ').join('-')}?id=${product?._id}`,
+              url: `https://embroidize.com/product/${product.name.split(' ').join('-')}?id=${product?._id}`,
               priceCurrency: 'USD',
               price: product.price,
               availability: 'InStock',

@@ -2,21 +2,20 @@
 
 import { Navbar as HeroUINavbar, NavbarContent } from '@heroui/navbar';
 import { Divider } from '@heroui/react';
+import Image from 'next/image';
 import Link from 'next/link';
+import { useState } from 'react';
 
 import CategoryMenu from '@/components/Common/CategoryMenu';
 import SearchBox from '@/components/Common/SearchBox';
 import UserProfileDropdown from '@/components/Common/UserProfileDropdown';
-import Image from 'next/image';
-import { useEffect, useState } from 'react';
+
 import mobileLogo from '../../../../public/favicon.png';
 import mainLogo from '../../../../public/logo-black.png';
 
 export const Header = () => {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
-  useEffect(() => {
-    // console.log('useEffect: Component mounted on the client side');
-  }, []);
+
   return (
     <>
       <HeroUINavbar maxWidth='full' className='h-[5.5rem] z-50'>
@@ -27,26 +26,25 @@ export const Header = () => {
               className='relative block w-[20px] h-[80px] sm:w-[80px] sm:h-[80px] md:w-[120px] md:h-[120px]'
               aria-label='Navigate to homepage'
             >
-              {/* Mobile image (shown on screens smaller than `sm`) */}
               <Image
-                src={mobileLogo || '/mobile-placeholder.svg'}
+                src={mobileLogo}
                 alt='Mobile Company Logo'
                 fill
                 sizes='(max-width: 640px) 80px'
-                priority={true}
+                priority
                 className='object-contain block sm:hidden'
               />
-
-              {/* Desktop image (shown on screens `sm` and larger) */}
               <Image
-                src={mainLogo || '/desktop-placeholder.svg'}
+                src={mainLogo}
                 alt='Desktop Company Logo'
                 fill
                 sizes='(min-width: 640px) 100px, 120px'
-                priority={true}
+                priority
                 className='object-contain hidden sm:block'
               />
             </Link>
+
+            {/* Toggle Category Menu Button */}
             <div className='sm:flex items-center gap-x-2 text-base font-semibold text-gray-700'>
               <button
                 onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
@@ -72,11 +70,17 @@ export const Header = () => {
         </div>
       </HeroUINavbar>
 
-      {/* Divider and Category Bar */}
       <Divider className='bg-gray-300' />
-      <div className='bg-white '>
+
+      <div
+        className='bg-white overflow-hidden transition-all ease-out duration-500 transform'
+        style={{
+          maxHeight: '1000px',
+        }}
+      >
         <CategoryMenu isMobileMenuOpen={isMobileMenuOpen} />
       </div>
+
       <Divider className='bg-gray-300' />
     </>
   );

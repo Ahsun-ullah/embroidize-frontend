@@ -10,11 +10,11 @@ export const metadata = {
     title: 'Blog | Embro ID',
     description:
       'Explore the latest embroidery design tutorials, tips, and updates from the Embro ID team.',
-    url: 'https://embro-id.vercel.app/blog',
+    url: 'https://embroidize.com/blog',
     type: 'website',
     images: [
       {
-        url: 'https://embro-id.vercel.app/og-banner.jpg',
+        url: 'https://embroidize.com/og-banner.jpg',
         width: 1200,
         height: 630,
         alt: 'Embro ID Blog',
@@ -26,7 +26,7 @@ export const metadata = {
     title: 'Blog | Embro ID',
     description:
       'Explore the latest embroidery design tutorials, tips, and updates from the Embro ID team.',
-    images: ['https://embro-id.vercel.app/og-banner.jpg'],
+    images: ['https://embroidize.com/og-banner.jpg'],
   },
 };
 
