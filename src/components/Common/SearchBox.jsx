@@ -17,9 +17,12 @@ export default function SearchBox() {
   };
 
   return (
-    <div className='flex justify-center w-[180px] sm:w-[460px] md:w-[500px] lg:w-[600px] xl:w-[650px] '>
+    <div className='flex justify-center w-[200px] sm:w-[370px] md:w-[440px] lg:w-[600px] xl:w-[650px] '>
       <form onSubmit={handleSubmit} className='relative w-full '>
         <Input
+          style={{
+            paddingInlineEnd: '4rem',
+          }}
           type='search'
           placeholder='Search...'
           aria-label='Search'

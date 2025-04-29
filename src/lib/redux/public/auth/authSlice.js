@@ -23,6 +23,20 @@ export const authSlice = createApi({
         body,
       }),
     }),
+    generateOtp: builder.mutation({
+      query: (body) => ({
+        url: '/public/otp',
+        method: 'POST',
+        body,
+      }),
+    }),
+    verifyOtp: builder.mutation({
+      query: (body) => ({
+        url: '/public/otp/verify',
+        method: 'POST',
+        body,
+      }),
+    }),
     logIn: builder.mutation({
       query: (body) => {
         return {
@@ -58,4 +72,6 @@ export const {
   useUserRegisterMutation,
   useForgetPasswordMutation,
   useResetPasswordMutation,
+  useGenerateOtpMutation,
+  useVerifyOtpMutation,
 } = authSlice;

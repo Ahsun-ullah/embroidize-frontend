@@ -58,8 +58,8 @@ const Login = () => {
   };
 
   const openForgotPassword = (e) => {
-    e.preventDefault(); // prevent triggering form submission
-    e.stopPropagation(); // stop bubbling to parent
+    e.preventDefault(); 
+    e.stopPropagation();
     setIsModalOpen(true);
   };
 

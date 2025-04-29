@@ -41,8 +41,8 @@ export default function CategoryMenu({ isMobileMenuOpen }) {
           </div>
         </div>
       ) : (
-        <div className='flex flex-wrap items-center justify-center gap-x-10 py-4'>
-          {categoryData?.data?.map((category) => (
+        <div className='container hidden sm:flex flex-wrap items-center justify-center gap-x-10 py-4'>
+          {categoryData?.data?.slice(0, 8).map((category) => (
             <Link
               key={category?._id}
               color='foreground'
