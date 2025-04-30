@@ -25,18 +25,19 @@ export default function ProductDownloadCard({ data }) {
 
   const handleSingleZipFileDownload = async (fileData) => {
     const token = Cookies.get('token');
+    const redirectPath = `/auth/login?pathName=${pathName}?id=${productId}`;
+
     if (!token) {
-      window.location.href = `/auth/login?pathName=${pathName}?id=${productId}`;
+      window.location.href = redirectPath;
       return;
     }
 
     try {
       setIsLoading(true);
-      const headers = new Headers();
 
-      if (token) {
-        headers.set('Authorization', `Bearer ${token}`);
-      }
+      const headers = new Headers({
+        Authorization: `Bearer ${token}`,
+      });
 
       const res = await fetch(
         `${process.env.NEXT_PUBLIC_BASE_API_URL_PROD}/download/product/${fileData.id}/extension/${fileData.extension}`,
@@ -47,12 +48,27 @@ export default function ProductDownloadCard({ data }) {
       );
 
       if (!res.ok) {
-        throw new Error(`Download failed with status ${res.status}`);
+        let errorMessage = 'Could not download the ZIP file';
+        let errorTitle = 'Download Failed';
+        try {
+          const errorJson = await res.json();
+          errorMessage = errorJson?.error?.message || errorMessage;
+          errorTitle = errorJson?.message;
+        } catch {
+          const errorText = await res.text();
+          errorMessage = errorText || errorMessage;
+        }
+
+        ErrorToast(`${errorTitle}`, errorMessage, 3000);
+        return;
       }
 
       const blob = await res.blob();
 
-      const filename = `From_Embroid_${fileData.extension}.zip`;
+      const filename =
+        `From_Embroid_${fileData.extension}.zip` ||
+        res.headers.get('Content-Disposition')?.split('filename=')[1] ||
+        'download.zip';
 
       const url = window.URL.createObjectURL(blob);
       const link = document.createElement('a');
