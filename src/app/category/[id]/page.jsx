@@ -6,6 +6,7 @@ import { BreadCrumb } from '@/features/products/components/BreadCrumb';
 import { getSingleCategory } from '@/lib/apis/public/category';
 import { getProducts } from '@/lib/apis/public/products';
 import { capitalize } from '@/utils/functions/page';
+import { marked } from 'marked';
 import Link from 'next/link';
 
 export async function generateMetadata({ searchParams }) {
@@ -66,6 +67,8 @@ export default async function CategoryProducts({ searchParams }) {
   );
   const singleCategoryData = await getSingleCategory(searchParamsData?.id);
 
+  const rawMarkup = marked(singleCategoryData?.data?.description || '');
+
   return (
     <>
       <Header />
@@ -83,11 +86,11 @@ export default async function CategoryProducts({ searchParams }) {
             },
           ]}
         />
-        <div>
+        <div className='flex items-center gap-3'>
           {singleCategoryData?.data?.subcategories?.map((sub) => (
             <Link
               key={sub?._id}
-              href={`/subcategory/${sub?.name.split(' ').join('-')}?id=${sub?._id}&searchQuery=${sub?.name.split(' ').join('+')}`}
+              href={`/${singleCategoryData?.data?.name?.split(' ').join('-')}/${sub?.name.split(' ').join('-')}?id=${sub?._id}&searchQuery=${sub?.name.split(' ').join('+')}`}
               className='bg-teal-200 text-gray-800 px-3 py-1 rounded-md text-sm font-medium capitalize hover:bg-gray-200 hover:text-black transition'
             >
               {sub?.name}
@@ -111,14 +114,22 @@ export default async function CategoryProducts({ searchParams }) {
             )}
           </div>
 
-          <div className='flex items-center justify-center mt-6'>
-            <Pagination
-              currentPage={currentPage?.page}
-              perPageData={perPageData}
-              totalPages={totalPages}
-            />
-          </div>
+          {allProducts.length > 0 && (
+            <div className='flex items-center justify-center mt-6'>
+              <Pagination
+                currentPage={currentPage?.page}
+                perPageData={perPageData}
+                totalPages={totalPages}
+              />
+            </div>
+          )}
         </section>
+        <div className='container'>
+          <pre
+            dangerouslySetInnerHTML={{ __html: rawMarkup }}
+            className='prose max-w-none break-words whitespace-pre-wrap font-sans text-lg'
+          />
+        </div>
       </div>
       <Footer />
     </>

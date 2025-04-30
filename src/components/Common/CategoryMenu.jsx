@@ -28,7 +28,7 @@ export default function CategoryMenu({ isMobileMenuOpen }) {
                   {category?.subcategories?.map((sub) => (
                     <li key={sub?._id}>
                       <Link
-                        href={`/subcategory/${sub?.name.split(' ').join('-')}?id=${sub?._id}&searchQuery=${sub?.name.split(' ').join('+')}`}
+                        href={`/${category?.name.split(' ').join('-')}/${sub?.name.split(' ').join('-')}?id=${sub?._id}&searchQuery=${sub?.name.split(' ').join('+')}`}
                         className='hover:underline capitalize'
                       >
                         {sub?.name}
