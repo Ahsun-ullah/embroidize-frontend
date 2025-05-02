@@ -44,18 +44,13 @@ export default function AboutUsPage() {
                 modern embroidery machines, we help preserve the beauty of
                 tradition while embracing the convenience of technology.
               </p>
-              <p className='text-gray-700 leading-relaxed'>
-                Embroidize is more than a design platform — it’s a growing
-                community of creators who inspire and support one another. We
-                listen to our users and evolve our collections based on your
-                feedback and creative needs.
-              </p>
+
             </div>
             <div>
               <img
                 src='https://embroidize.com/og-banner.jpg'
                 alt='Embroidery Designs'
-                className='rounded-2xl shadow-2xl my-4'
+                className='rounded-2xl shadow-2xl w-full'
               />
             </div>
           </section>

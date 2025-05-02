@@ -14,9 +14,9 @@ export async function GET() {
 
     const routes = [
       '',
-      'about-us',
-      'privacy-policy',
-      'terms-and-conditions',
+      '/about-us',
+      '/privacy-policy',
+      '/terms-and-conditions',
       '/products',
       ...products.map(
         (product) =>
