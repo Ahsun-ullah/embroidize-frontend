@@ -14,6 +14,9 @@ export async function GET() {
 
     const routes = [
       '',
+      'about-us',
+      'privacy-policy',
+      'terms-and-conditions',
       '/products',
       ...products.map(
         (product) =>
@@ -25,7 +28,7 @@ export async function GET() {
       ),
       ...subCategories.map(
         (subCategory) =>
-          `/subcategory/${subCategory.name.split(' ').join('-')}?id=${subCategory._id}`,
+          `/${subCategory?.category?.name.split(' ').join('-')}/${subCategory.name.split(' ').join('-')}?id=${subCategory._id}`,
       ),
       '/blog',
       ...blogs.map(

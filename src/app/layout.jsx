@@ -6,28 +6,24 @@ import './globals.css';
 
 const inter = Inter({ subsets: ['latin'], display: 'swap' });
 
-
 export const metadata = {
-  title: 'Free Embroidery Machine Designs - Download High-Quality Patterns',
+  title: 'Free Machine Embroidery Designs - Embroidize',
   description:
-    'Download free embroidery machine designs with high-quality patterns for various fabric types. Get creative with our exclusive free collection of embroidery designs.',
+    'Download free embroidery designs instantly – Browse unlimited machine embroidery Design in multiple categories and styles. All designs are tested and come in the most popular formats',
   keywords: [
     'free embroidery machine designs',
-    'free embroidery patterns',
-    'download embroidery designs',
-    'machine embroidery designs',
-    'embroidery patterns',
+    'Embroidery design',
+    'Machine embroidery designs',
+    'machine embroidery file',
+    'Machine embroidery patterns',
     'free embroidery files',
   ],
-  icons: {
-    icon: '/favicon.ico',
-  },
   openGraph: {
-    title: 'Free Embroidery Machine Designs - Download High-Quality Patterns',
+    title: 'Free Machine Embroidery Designs - Embroidize',
     description:
-      'Download free embroidery machine designs with high-quality patterns for various fabric types.',
+      'Download free embroidery designs instantly – Browse unlimited machine embroidery Design in multiple categories and styles. All designs are tested and come in the most popular formats',
     url: 'https://embroidize.com/',
-    siteName: 'embroidize.com',
+    siteName: 'Embroid',
     images: [
       {
         url: 'https://embroidize.com/og-banner.jpg',
@@ -42,8 +38,8 @@ export const metadata = {
     card: 'summary_large_image',
     title: 'Free Embroidery Machine Designs',
     description:
-      'Download free embroidery machine designs with high-quality patterns.',
-    images: ['https://embroidize.com/home-banner.jpg'],
+      'Download free embroidery designs instantly – Browse unlimited machine embroidery Design in multiple categories and styles. All designs are tested and come in the most popular formats.',
+    images: ['https://embroidize.com/og-banner.jpg'],
   },
 };
 
