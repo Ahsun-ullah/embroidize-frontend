@@ -1,12 +1,11 @@
-import Head from 'next/head';
 import Link from 'next/link';
 
+import BlogSection from '@/components/user/HomePage/BlogSection';
+import Footer from '@/components/user/HomePage/Footer';
 import { Header } from '@/components/user/HomePage/Header';
 import HeroSection from '@/components/user/HomePage/HeroSection';
 import PopularDesign from '@/components/user/HomePage/PopularDesign';
 import RecentProductsSection from '@/components/user/HomePage/RecentProductsSection';
-import BlogSection from '@/components/user/HomePage/BlogSection';
-import Footer from '@/components/user/HomePage/Footer';
 
 export const dynamic = 'force-dynamic';
 
@@ -50,33 +49,16 @@ export const metadata = {
 export default function Home() {
   return (
     <>
-      <Head>
-        <meta name="p:domain_verify" content="a417c3036823eb607157878ef76fc2b0" />
-        <title>{metadata.title}</title>
-        <meta name="description" content={metadata.description} />
-        <meta name="keywords" content={metadata.keywords.join(', ')} />
-        <meta property="og:title" content={metadata.openGraph.title} />
-        <meta property="og:description" content={metadata.openGraph.description} />
-        <meta property="og:url" content={metadata.openGraph.url} />
-        <meta property="og:site_name" content={metadata.openGraph.siteName} />
-        <meta property="og:image" content={metadata.openGraph.images[0].url} />
-        <meta property="og:type" content={metadata.openGraph.type} />
-        <meta name="twitter:card" content={metadata.twitter.card} />
-        <meta name="twitter:title" content={metadata.twitter.title} />
-        <meta name="twitter:description" content={metadata.twitter.description} />
-        <meta name="twitter:image" content={metadata.twitter.images[0]} />
-      </Head>
-
       <Header />
       <HeroSection />
       <PopularDesign />
       <RecentProductsSection />
       <BlogSection />
 
-      <div className="flex justify-center items-center my-10">
+      <div className='flex justify-center items-center my-10'>
         <Link
-          href="/blog"
-          className="bg-black rounded-full hover:bg-blue-400 transition-colors text-white font-medium px-6 py-2"
+          href='/blog'
+          className='bg-black rounded-full hover:bg-blue-400 transition-colors text-white font-medium px-6 py-2'
         >
           View All
         </Link>
