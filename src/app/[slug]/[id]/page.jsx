@@ -5,7 +5,7 @@ import { Header } from '@/components/user/HomePage/Header';
 import { BreadCrumb } from '@/features/products/components/BreadCrumb';
 import { getProducts } from '@/lib/apis/public/products';
 import { getSingleSubCategory } from '@/lib/apis/public/subcategory';
-import { capitalize } from '@/utils/functions/page';
+import { capitalize, queryString, slugify } from '@/utils/functions/page';
 import { marked } from 'marked';
 
 export async function generateMetadata({ searchParams }) {
@@ -92,7 +92,7 @@ export default async function CategoryProducts({ searchParams }) {
             { label: 'Product', href: '/products' },
             {
               label: capitalize(subCategory?.category?.name),
-              href: `/category/${subCategory?.category?.name.split(' ').join('-')}?id=${subCategory?.category?._id}&searchQuery=${subCategory?.category?.name.split(' ').join('+')}`,
+              href: `/category/${slugify(subCategory?.category?.name)}?id=${subCategory?.category?._id}&searchQuery=${queryString(subCategory?.category?.name)}`,
             },
             {
               label: capitalize(subCategory?.name),

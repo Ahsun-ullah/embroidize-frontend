@@ -1,3 +1,4 @@
+import { slugify } from '@/utils/functions/page';
 import { Divider } from '@heroui/react';
 import Image from 'next/image';
 import Link from 'next/link';
@@ -7,7 +8,7 @@ const BlogCard = ({ data }) => {
 
   return (
     <Link
-      href={`/blog/${data?.title?.split(' ').join('-') ?? 'blog'}?id=${data?._id}`}
+      href={`/blog/${slugify(data?.title) ?? 'blog'}?id=${data?._id}`}
       className='bg-white border rounded-2xl shadow-xl overflow-hidden group'
     >
       {/* Blog Image */}

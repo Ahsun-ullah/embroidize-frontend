@@ -1,6 +1,6 @@
 import LoadingSpinner from '@/components/Common/LoadingSpinner';
 import ProductCard from '@/components/Common/ProductCard';
-import { capitalize } from '@/utils/functions/page';
+import { capitalize, queryString, slugify } from '@/utils/functions/page';
 import { marked } from 'marked';
 import Link from 'next/link';
 import { Suspense } from 'react';
@@ -24,7 +24,7 @@ export const SingleProductComponent = async ({
             { label: 'Product', href: '/products' },
             {
               label: `${capitalize(singleProductData?.category?.name)}`,
-              href: `/category/${singleProductData?.category?.name.split(' ').join('-')}?id=${singleProductData?.category?._id}&searchQuery=${singleProductData?.category?.name.split(' ').join('+')}`,
+              href: `/category/${slugify(singleProductData?.category?.name)}?id=${singleProductData?.category?._id}&searchQuery=${queryString(singleProductData?.category?.name)}`,
             },
             {
               label: `${capitalize(singleProductData?.name)}`,
@@ -107,8 +107,8 @@ export const SingleProductComponent = async ({
           {/* Product Details */}
           <Suspense fallback={<LoadingSpinner />}>
             <div className='mb-10'>
-              <h1 className='text-black font-bold text-2xl mb-6'>
-                Item details
+              <h1 className='text-black font-bold text-2xl mb-6 capitalize'>
+               About {singleProductData?.name}
               </h1>
               <pre
                 dangerouslySetInnerHTML={{ __html: rawMarkup }}

@@ -2,6 +2,7 @@ import { getBlogs } from '@/lib/apis/public/blog';
 import { getCategories } from '@/lib/apis/public/category';
 import { getProducts } from '@/lib/apis/public/products';
 import { getSubCategories } from '@/lib/apis/public/subcategory';
+import { slugify } from '@/utils/functions/page';
 
 export async function GET() {
   try {
@@ -19,21 +20,17 @@ export async function GET() {
       '/terms-and-conditions',
       '/products',
       ...products.map(
-        (product) =>
-          `/product/${product.name.split(' ').join('-')}?id=${product._id}`,
+        (product) => `/product/${slugify(product.name)}?id=${product._id}`,
       ),
       ...categories.map(
-        (category) =>
-          `/category/${category.name.split(' ').join('-')}?id=${category._id}`,
+        (category) => `/category/${slugify(category.name)}?id=${category._id}`,
       ),
       ...subCategories.map(
         (subCategory) =>
-          `/${subCategory?.category?.name.split(' ').join('-')}/${subCategory.name.split(' ').join('-')}?id=${subCategory._id}`,
+          `/${slugify(subCategory?.category?.name)}/${slugify(subCategory.name)}?id=${subCategory._id}`,
       ),
       '/blog',
-      ...blogs.map(
-        (blog) => `/blog/${blog.title.split(' ').join('-')}?id=${blog._id}`,
-      ),
+      ...blogs.map((blog) => `/blog/${slugify(blog.title)}?id=${blog._id}`),
     ];
 
     function escapeXml(str) {

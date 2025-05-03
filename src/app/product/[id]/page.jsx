@@ -2,6 +2,7 @@ import Footer from '@/components/user/HomePage/Footer';
 import Header from '@/components/user/HomePage/Header';
 import { SingleProductComponent } from '@/features/products/components/SingleProductComponent';
 import { getProducts, getSingleProduct } from '@/lib/apis/public/products';
+import { slugify } from '@/utils/functions/page';
 import { use } from 'react';
 
 export async function generateMetadata({ searchParams }) {
@@ -72,7 +73,7 @@ export default function ProductDetails({ searchParams }) {
             description: product.meta_description || product.description,
             offers: {
               '@type': 'Offer',
-              url: `https://embroidize.com/product/${product.name.split(' ').join('-')}?id=${product?._id}`,
+              url: `https://embroidize.com/product/${slugify(product.name)}?id=${product?._id}`,
               priceCurrency: 'USD',
               price: product.price,
               availability: 'InStock',

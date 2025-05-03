@@ -45,7 +45,7 @@ export const Header = () => {
             </Link>
 
             {/* Toggle Category Menu Button */}
-            <div className='sm:flex items-center gap-x-2 text-base font-semibold text-gray-700'>
+            <div className='sm:flex items-center gap-x-2 text-base font-semibold text-gray-700 ms-8'>
               <button
                 onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
                 className='flex items-center gap-2 text-gray-800'

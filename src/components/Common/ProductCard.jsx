@@ -1,3 +1,4 @@
+import { slugify } from '@/utils/functions/page';
 import { Divider } from '@heroui/react';
 import Image from 'next/image';
 import Link from 'next/link';
@@ -8,7 +9,7 @@ export default function ProductCard({ item, index }) {
   return (
     <div className='bg-white border rounded-2xl shadow-xl overflow-hidden'>
       <Link
-        href={`/product/${item?.name?.split(' ').join('-')}?id=${item?._id}`}
+        href={`/product/${slugify(item?.name)}?id=${item?._id}`}
         className='block group'
       >
         {/* Image container */}
@@ -34,7 +35,7 @@ export default function ProductCard({ item, index }) {
               {item?.name ?? ''}
             </p>
             <p
-              className={`text-md font-semibold ${item.price === 0 ? 'text-green-900' : 'text-black'}`}
+              className={`text-md font-semibold border-1 rounded-xl px-2 shadow-md ${item.price === 0 ? 'text-green-900 font-extrabold' : 'text-black'}`}
             >
               {item.price === 0 ? 'Free' : `$${item.price.toFixed(2)}`}
             </p>

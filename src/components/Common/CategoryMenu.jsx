@@ -1,6 +1,7 @@
 'use client';
 
 import { useGetPublicProductCategoriesQuery } from '@/lib/redux/admin/categoryAndSubcategory/categoryAndSubcategorySlice';
+import { queryString, slugify } from '@/utils/functions/page';
 import Link from 'next/link';
 
 export default function CategoryMenu({ isMobileMenuOpen }) {
@@ -19,8 +20,8 @@ export default function CategoryMenu({ isMobileMenuOpen }) {
                 className='space-y-4 border-gray-400 border-r-1 pr-4'
               >
                 <Link
-                  href={`/category/${category?.name.split(' ').join('-')}?id=${category?._id}&searchQuery=${category?.name.split(' ').join('+')}`}
-                  className='font-bold capitalize  '
+                  href={`/category/${slugify(category?.name)}?id=${category?._id}&searchQuery=${queryString(category?.name)}`}
+                  className='font-bold capitalize'
                 >
                   {category?.name}
                 </Link>
@@ -28,7 +29,7 @@ export default function CategoryMenu({ isMobileMenuOpen }) {
                   {category?.subcategories?.map((sub) => (
                     <li key={sub?._id}>
                       <Link
-                        href={`/${category?.name.split(' ').join('-')}/${sub?.name.split(' ').join('-')}?id=${sub?._id}&searchQuery=${sub?.name.split(' ').join('+')}`}
+                        href={`/${slugify(category?.name)}/${slugify(sub?.name)}?id=${sub?._id}&searchQuery=${queryString(sub?.name)}`}
                         className='hover:underline capitalize'
                       >
                         {sub?.name}
@@ -46,7 +47,7 @@ export default function CategoryMenu({ isMobileMenuOpen }) {
             <Link
               key={category?._id}
               color='foreground'
-              href={`/category/${category?.name.split(' ').join('-')}?id=${category?._id}&searchQuery=${category?.name.split(' ').join('+')}`}
+              href={`/category/${slugify(category?.name)}?id=${category?._id}&searchQuery=${queryString(category?.name)}`}
               className='capitalize'
             >
               {category.name}

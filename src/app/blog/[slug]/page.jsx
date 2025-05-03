@@ -1,4 +1,3 @@
-// app/blog/[slug]/page.tsx
 import Footer from '@/components/user/HomePage/Footer';
 import Header from '@/components/user/HomePage/Header';
 import { getSingleBlog } from '@/lib/apis/public/blog';
@@ -33,7 +32,7 @@ export async function generateMetadata({ searchParams }) {
       title: blog?.meta_title || blog?.title,
       description: blog?.meta_description || blog?.description,
       images: [
-        blog?.image?.url || 'https://embroidize.com/home-banner.jpg',
+        blog?.image?.url || 'https://embroidize.com/og-banner.jpg',
       ],
     },
   };

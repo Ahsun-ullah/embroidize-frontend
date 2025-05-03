@@ -23,20 +23,39 @@ const Footer = () => {
             />
           </Link>
           <p className='text-lg mt-0 mb-4'>
-            EMB provides high-quality design resources for professionals and
-            businesses. Hurry! Explore and join our network of over 100K+
-            professionals.
+            Download free embroidery designs instantly – Browse unlimited
+            machine embroidery Design in multiple categories and styles. All
+            designs are tested and come in the most popular formats
           </p>
           <div className='flex items-center justify-start gap-x-2'>
             {/* Social Media Links */}
-            <Link href='#' aria-label='twitter-button'>
-              <i className='ri-twitter-x-fill rounded-full bg-black text-white p-2 text-base'></i>
+            <Link
+              href='https://www.pinterest.com/embroidize/'
+              target='_blank'
+              aria-label='pinterest-button'
+            >
+              <i className='ri-pinterest-fill rounded-full bg-black text-white p-2 text-base'></i>
             </Link>
-            <Link href='#' aria-label='facebook-button'>
+            <Link
+              href='https://www.facebook.com/profile.php?id=61575701980267'
+              target='_blank'
+              aria-label='facebook-button'
+            >
               <i className='ri-facebook-circle-fill rounded-full bg-black text-white p-2 text-base'></i>
             </Link>
-            <Link href='#' aria-label='instagram-button'>
+            <Link
+              href='https://www.instagram.com/embroidize/'
+              target='_blank'
+              aria-label='instagram-button'
+            >
               <i className='ri-instagram-fill rounded-full bg-black text-white p-2 text-base'></i>
+            </Link>
+            <Link
+              href='https://www.youtube.com/channel/UCVCNRSIGLqdBG6O9D1xHGpQ'
+              target='_blank'
+              aria-label='youtube-button'
+            >
+              <i className='ri-youtube-fill rounded-full bg-black text-white p-2 text-base'></i>
             </Link>
           </div>
         </div>
@@ -53,9 +72,17 @@ const Footer = () => {
                 <li>
                   <Link
                     className='text-blueGray-600 hover:text-blueGray-800 font-semibold block pb-2 text-sm'
-                    href='/about-us'
+                    href='/'
                   >
-                    About Us
+                    Home
+                  </Link>
+                </li>
+                <li>
+                  <Link
+                    className='text-blueGray-600 hover:text-blueGray-800 font-semibold block pb-2 text-sm'
+                    href='/products'
+                  >
+                    Products
                   </Link>
                 </li>
                 <li>
@@ -89,6 +116,14 @@ const Footer = () => {
                     href='/privacy-policy'
                   >
                     Privacy Policy
+                  </Link>
+                </li>
+                <li>
+                  <Link
+                    className='text-blueGray-600 hover:text-blueGray-800 font-semibold block pb-2 text-sm'
+                    href='/about-us'
+                  >
+                    About Us
                   </Link>
                 </li>
                 {/* <li>

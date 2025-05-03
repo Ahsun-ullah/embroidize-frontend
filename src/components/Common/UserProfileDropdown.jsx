@@ -139,9 +139,9 @@ export default function UserProfileDropdown() {
                 color='primary'
                 href='/auth/login'
                 variant='flat'
-                size='sm'
-                radius='md'
-                className='bg-black text-white hover:bg-slate-700 font-bold px-4 text-sm'
+                size='md'
+                radius='full'
+                className='bg-black text-white hover:bg-slate-700 font-bold px-4 text-base'
               >
                 Sign In
               </Button>

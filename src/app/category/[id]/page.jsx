@@ -5,7 +5,7 @@ import { Header } from '@/components/user/HomePage/Header';
 import { BreadCrumb } from '@/features/products/components/BreadCrumb';
 import { getSingleCategory } from '@/lib/apis/public/category';
 import { getProducts } from '@/lib/apis/public/products';
-import { capitalize } from '@/utils/functions/page';
+import { capitalize, queryString, slugify } from '@/utils/functions/page';
 import { marked } from 'marked';
 import Link from 'next/link';
 
@@ -90,7 +90,7 @@ export default async function CategoryProducts({ searchParams }) {
           {singleCategoryData?.data?.subcategories?.map((sub) => (
             <Link
               key={sub?._id}
-              href={`/${singleCategoryData?.data?.name?.split(' ').join('-')}/${sub?.name.split(' ').join('-')}?id=${sub?._id}&searchQuery=${sub?.name.split(' ').join('+')}`}
+              href={`/${slugify(singleCategoryData?.data?.name)}/${slugify(sub?.name)}?id=${sub?._id}&searchQuery=${queryString(sub?.name)}`}
               className='bg-teal-200 text-gray-800 px-3 py-1 rounded-md text-sm font-medium capitalize hover:bg-gray-200 hover:text-black transition'
             >
               {sub?.name}
