@@ -119,13 +119,13 @@ export const SingleProductComponent = async ({
 
           {/* Related Keywords */}
           <Suspense fallback={<LoadingSpinner />}>
-            {Array.isArray(singleProductData?.data?.meta_keywords) && (
+            {Array.isArray(singleProductData?.meta_keywords) && (
               <div className='my-10'>
                 <h2 className='text-black text-lg font-semibold mb-4'>
                   Related Keywords
                 </h2>
                 <div className='flex flex-wrap gap-2'>
-                  {singleProductData.data.meta_keywords.map((item, index) => (
+                  {singleProductData?.meta_keywords.map((item, index) => (
                     <Link
                       href={`/search?searchQuery=${item.split(' ').join('+')}`}
                       key={index}
