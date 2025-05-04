@@ -7,9 +7,11 @@ import { SuccessToast } from '@/components/Common/SuccessToast';
 import { useLogInMutation } from '@/lib/redux/public/auth/authSlice';
 import { Card, CardBody, CardHeader, Input } from '@heroui/react';
 import Cookies from 'js-cookie';
+import Image from 'next/image';
 import Link from 'next/link';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { useState } from 'react';
+import mainLogo from '../../../../public/logo-black.png';
 
 const Login = () => {
   const router = useRouter();
@@ -58,7 +60,7 @@ const Login = () => {
   };
 
   const openForgotPassword = (e) => {
-    e.preventDefault(); 
+    e.preventDefault();
     e.stopPropagation();
     setIsModalOpen(true);
   };
@@ -67,16 +69,25 @@ const Login = () => {
     <>
       <div className='flex flex-col h-screen items-center justify-center gap-10 px-4 sm:px-6 lg:px-8'>
         <Card className='w-full max-w-md p-6 sm:w-3/4 md:w-2/3 lg:w-1/2 xl:w-1/3'>
-          <CardHeader className='flex flex-col items-start'>
-            <h4 className='font-bold text-xl mb-3'>
-              Welcome To{' '}
-              <Link href='/' className='font-bold ml-1 text-blue-500 '>
-                Embroid
+          <CardHeader className='flex flex-col items-center'>
+            <div>
+              <Link
+                href='/'
+                className='relative block'
+                aria-label='Navigate to homepage'
+              >
+                <Image
+                  src={mainLogo}
+                  alt='Company Logo'
+                  priority
+                  height={150}
+                  width={150}
+                />
               </Link>
-              !
-            </h4>
-            <p className='text-sm uppercase font-bold'>
-              Sign in to continue to EmbroiD.
+            </div>
+
+            <p className='text-base  font-bold text-center'>
+              Sign in to continue to Embroidize.
             </p>
           </CardHeader>
 
@@ -127,7 +138,10 @@ const Login = () => {
                   <input
                     type='submit'
                     value='Login'
-                    className='button hover:bg-blue-500 text-white hover:text-white w-full h-10 rounded-md'
+                    style={{
+                      borderRadius: '20px',
+                    }}
+                    className='button hover:bg-blue-500 text-white hover:text-white w-full h-10'
                   />
                 )}
               </div>
@@ -157,7 +171,7 @@ const Login = () => {
         {/* Footer */}
         <div className='text-center'>
           <p className='mb-0'>
-            &copy; {new Date().getFullYear()} EmbroID. Crafted by Ahsun
+            &copy; {new Date().getFullYear()} Embroidize. Crafted by Ahsun
           </p>
         </div>
       </div>

@@ -9,8 +9,9 @@ import { ErrorToast } from '@/components/Common/ErrorToast';
 import LoadingSpinner from '@/components/Common/LoadingSpinner';
 import { SuccessToast } from '@/components/Common/SuccessToast';
 import { useGenerateOtpMutation } from '@/lib/redux/public/auth/authSlice';
-
+import mainLogo from '../../../../public/logo-black.png';
 import { Card, CardBody, CardHeader, Input } from '@heroui/react';
+import Image from 'next/image';
 
 const Register = () => {
   const router = useRouter();
@@ -47,20 +48,28 @@ const Register = () => {
     <div className='flex flex-col h-screen items-center justify-center gap-10 px-4 sm:px-6 lg:px-8'>
       {step === 1 && (
         <Card className='w-full max-w-md p-6 sm:w-3/4 md:w-2/3 lg:w-1/2 xl:w-1/3'>
-          <CardHeader className='flex flex-col items-start'>
-            <div className='flex items-center justify-between font-bold text-xl mb-3'>
-              <span>Hello From</span>
-              <Link
-                href='/'
-                className='hover:text-blue-700 font-semibold ml-1 text-blue-500'
-              >
-                Embroid
-              </Link>
-            </div>
-            <p className='text-sm uppercase font-bold'>
-              Please fill all fields for registration.
-            </p>
-          </CardHeader>
+           <CardHeader className='flex flex-col items-center'>
+                      <div>
+                        <Link
+                          href='/'
+                          className='relative block'
+                          aria-label='Navigate to homepage'
+                        >
+                          <Image
+                            src={mainLogo}
+                            alt='Company Logo'
+                            priority
+                            height={150}
+                            width={150}
+                          />
+                        </Link>
+                      </div>
+
+                      <p className='text-base  font-bold text-center'>
+                      Please fill the all fields for registration.
+                      </p>
+                    </CardHeader>
+
           <CardBody className='overflow-visible py-2'>
             <form onSubmit={handleSubmit}>
               <div className='mb-4'>
@@ -111,14 +120,17 @@ const Register = () => {
                 </Link>
               </p>
 
-              <div className='w-full flex items-center justify-center'>
+              <div className='w-full flex items-center justify-center '>
                 {otpGenerateIsLoading ? (
                   <LoadingSpinner />
                 ) : (
                   <input
                     type='submit'
                     value='Register'
-                    className='button hover:bg-blue-500 text-white hover:text-white w-full h-10 rounded-md'
+                    style={{
+                      borderRadius:'20px'
+                    }}
+                    className='button hover:bg-blue-500 text-white hover:text-white w-full h-10 '
                   />
                 )}
               </div>
@@ -149,7 +161,7 @@ const Register = () => {
 
       <div className='text-center'>
         <p className='mb-0'>
-          &copy; {new Date().getFullYear()} EmbroiD. Crafted with{' '}
+          &copy; {new Date().getFullYear()} Embroidize. Crafted with{' '}
           <i className='mdi mdi-heart text-red-500'></i> by Ahsun
         </p>
       </div>

@@ -86,12 +86,12 @@ export default async function CategoryProducts({ searchParams }) {
             },
           ]}
         />
-        <div className='flex items-center gap-3'>
+        <div className='flex items-center gap-3 flex-wrap '>
           {singleCategoryData?.data?.subcategories?.map((sub) => (
             <Link
               key={sub?._id}
               href={`/${slugify(singleCategoryData?.data?.name)}/${slugify(sub?.name)}?id=${sub?._id}&searchQuery=${queryString(sub?.name)}`}
-              className='bg-teal-200 text-gray-800 px-3 py-1 rounded-md text-sm font-medium capitalize hover:bg-gray-200 hover:text-black transition'
+              className='bg-white text-gray-800 px-3 py-1 rounded-md text-sm font-medium capitalize hover:bg-black hover:text-white transition shadow-2xl'
             >
               {sub?.name}
             </Link>
