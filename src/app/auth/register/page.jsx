@@ -9,9 +9,9 @@ import { ErrorToast } from '@/components/Common/ErrorToast';
 import LoadingSpinner from '@/components/Common/LoadingSpinner';
 import { SuccessToast } from '@/components/Common/SuccessToast';
 import { useGenerateOtpMutation } from '@/lib/redux/public/auth/authSlice';
-import mainLogo from '../../../../public/logo-black.png';
 import { Card, CardBody, CardHeader, Input } from '@heroui/react';
 import Image from 'next/image';
+import mainLogo from '../../../../public/logo-black.png';
 
 const Register = () => {
   const router = useRouter();
@@ -48,27 +48,27 @@ const Register = () => {
     <div className='flex flex-col h-screen items-center justify-center gap-10 px-4 sm:px-6 lg:px-8'>
       {step === 1 && (
         <Card className='w-full max-w-md p-6 sm:w-3/4 md:w-2/3 lg:w-1/2 xl:w-1/3'>
-           <CardHeader className='flex flex-col items-center'>
-                      <div>
-                        <Link
-                          href='/'
-                          className='relative block'
-                          aria-label='Navigate to homepage'
-                        >
-                          <Image
-                            src={mainLogo}
-                            alt='Company Logo'
-                            priority
-                            height={150}
-                            width={150}
-                          />
-                        </Link>
-                      </div>
+          <CardHeader className='flex flex-col items-center'>
+            <div>
+              <Link
+                href='/'
+                className='relative block'
+                aria-label='Navigate to homepage'
+              >
+                <Image
+                  src={mainLogo}
+                  alt='Company Logo'
+                  priority
+                  height={150}
+                  width={150}
+                />
+              </Link>
+            </div>
 
-                      <p className='text-base  font-bold text-center'>
-                      Please fill the all fields for registration.
-                      </p>
-                    </CardHeader>
+            <p className='text-base  font-bold text-center'>
+              Please fill the all fields for registration.
+            </p>
+          </CardHeader>
 
           <CardBody className='overflow-visible py-2'>
             <form onSubmit={handleSubmit}>
@@ -111,11 +111,19 @@ const Register = () => {
 
               <p className='text-sm text-gray-500 mb-2'>
                 By registering, you agree to our{' '}
-                <Link href='/terms' className='text-blue-500 underline'>
+                <Link
+                  target='_blank'
+                  href='/terms-and-conditions'
+                  className='text-blue-500 underline'
+                >
                   Terms of Service
                 </Link>{' '}
                 and{' '}
-                <Link href='/privacy' className='text-blue-500 underline'>
+                <Link
+                  target='_blank'
+                  href='/privacy-policy'
+                  className='text-blue-500 underline'
+                >
                   Privacy Policy
                 </Link>
               </p>
@@ -128,7 +136,7 @@ const Register = () => {
                     type='submit'
                     value='Register'
                     style={{
-                      borderRadius:'20px'
+                      borderRadius: '20px',
                     }}
                     className='button hover:bg-blue-500 text-white hover:text-white w-full h-10 '
                   />
