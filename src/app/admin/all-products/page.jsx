@@ -6,17 +6,16 @@ export default function AllProductsListPage() {
     { name: 'CATEGORY', uid: 'category' },
     { name: 'SUB CATEGORY', uid: 'sub_category' },
     { name: 'PRICE', uid: 'price' },
-    { name: 'DESCRIPTION', uid: 'description' },
     { name: 'ACTIONS', uid: 'actions' },
   ];
 
   return (
-    <div className='flex flex-col gap-3'>
+    <>
       <ProductsTableWrapper
         columns={columns}
         pageSize={10}
-        searchableFieldsName={['name', 'category', 'price', 'tags']}
+        searchableFieldsName={['name', 'category', 'price', 'sub_category']}
       />
-    </div>
+    </>
   );
 }

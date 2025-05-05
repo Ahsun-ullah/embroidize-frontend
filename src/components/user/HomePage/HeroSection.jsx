@@ -3,7 +3,7 @@ import Link from 'next/link';
 
 const HeroSection = () => {
   return (
-    <section className='relative w-full aspect-[4/1.9] sm:aspect-[4/1.8] md:aspect-[4/1.5] lg:aspect-[4/1.3] flex items-center overflow-hidden'>
+    <section className='relative w-full aspect-[6/2.5] sm:aspect-[4/1.8] md:aspect-[4/1.5] lg:aspect-[4/1.3] flex items-center overflow-hidden'>
       {/* Background Image */}
       <Image
         src='https://embroidize-assets.nyc3.cdn.digitaloceanspaces.com/home-banner.png'

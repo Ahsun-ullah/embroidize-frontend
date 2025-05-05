@@ -24,8 +24,7 @@ export async function generateMetadata({ searchParams }) {
         description: product.meta_description,
         images: [
           {
-            url:
-              product.image?.url || 'https://embroidize.com/og-banner.jpg',
+            url: product.image?.url || 'https://embroidize.com/og-banner.jpg',
             width: 1200,
             height: 630,
             alt: product.title || 'Embroidery Design',
@@ -55,7 +54,11 @@ export default function ProductDetails({ searchParams }) {
   const { id } = use(searchParams);
 
   const response = use(getSingleProduct(id));
-  const { products } = use(getProducts('', 0, 10));
+  const categoryName = (response?.data?.category?.name.split('-').join('+'));
+
+  const { products } = use(
+    getProducts(categoryName, 0, 10),
+  );
   const product = response?.data;
 
   if (!product) return notFound();

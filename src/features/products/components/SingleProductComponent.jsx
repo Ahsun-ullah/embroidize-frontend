@@ -157,7 +157,7 @@ export const SingleProductComponent = async ({
               </div>
 
               <div className='grid grid-cols-1 sm:grid-cols-2 gap-4'>
-                {allProductData?.slice(0, 4).map((item, index) => (
+                {allProductData?.slice(0, 8).map((item, index) => (
                   <ProductCard item={item} key={index} />
                 ))}
               </div>

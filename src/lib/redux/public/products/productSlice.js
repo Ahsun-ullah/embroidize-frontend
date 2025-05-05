@@ -25,7 +25,8 @@ export const productSlice = createApi({
         params.append('limit', String(limit));
 
         return {
-          url: `/public/product?${params.toString()}`,
+          url: `/public/product`,
+          // ?${params.toString()}
           method: 'GET',
         };
       },

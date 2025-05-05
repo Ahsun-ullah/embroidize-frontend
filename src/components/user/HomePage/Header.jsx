@@ -45,7 +45,7 @@ export const Header = () => {
             </Link>
 
             {/* Toggle Category Menu Button */}
-            <div className='sm:flex items-center gap-x-2 text-base font-semibold text-gray-700 ms-8'>
+            <div className='sm:flex items-center gap-x-2 text-base font-semibold text-gray-700  sm:ms-6 md:ms-8'>
               <button
                 onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
                 className='flex items-center gap-2 text-gray-800'
@@ -72,12 +72,7 @@ export const Header = () => {
 
       <Divider className='bg-gray-300' />
 
-      <div
-        className='bg-white overflow-hidden transition-all ease-out duration-500 transform'
-        style={{
-          maxHeight: '1000px',
-        }}
-      >
+      <div className='bg-white overflow-auto transition-all ease-out duration-500 transform'>
         <CategoryMenu isMobileMenuOpen={isMobileMenuOpen} />
       </div>
 

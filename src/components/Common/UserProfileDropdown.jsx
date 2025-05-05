@@ -46,7 +46,10 @@ export default function UserProfileDropdown() {
 
   if (userInfoData?.role === 'admin') {
     return (
-      <Link href={'/admin'} className='button'>
+      <Link
+        href={'/admin'}
+        className='button text-sm sm:text-sm md:text-lg xl:text-xl'
+      >
         dashboard
       </Link>
     );

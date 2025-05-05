@@ -56,7 +56,7 @@ const UserTable = ({ data, columns, pageSize, renderCell, onSearchChange }) => {
   );
 
   return (
-    <div className='overflow-x-auto'>
+    <>
       <Table
         isHeaderSticky
         aria-label='Example table with custom cells, pagination, and sorting'
@@ -83,7 +83,7 @@ const UserTable = ({ data, columns, pageSize, renderCell, onSearchChange }) => {
           )}
         </TableBody>
       </Table>
-    </div>
+    </>
   );
 };
 

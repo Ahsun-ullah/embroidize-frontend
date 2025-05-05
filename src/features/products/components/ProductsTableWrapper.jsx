@@ -184,7 +184,7 @@ export default function ProductsTableWrapper({
   );
 
   return (
-    <div>
+    <>
       <div className='flex justify-between items-center mb-4'>
         <h1>All Products</h1>
         <Link href='/admin/add-products'>
@@ -205,6 +205,6 @@ export default function ProductsTableWrapper({
         searchableFieldsName={searchableFieldsName}
         onSearchChange={filterData}
       />
-    </div>
+    </>
   );
 }

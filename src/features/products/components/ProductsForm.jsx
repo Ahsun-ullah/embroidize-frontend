@@ -194,7 +194,7 @@ export function ProductsForm({ product }) {
         className='grid grid-cols-3 gap-4'
       >
         {/* Product Name */}
-        <div>
+        <div className='col-span-3'>
           <label
             className='text-lg font-medium tracking-tight leading-5'
             htmlFor='name'
@@ -353,7 +353,7 @@ export function ProductsForm({ product }) {
           )}
         </div>
         {/* meta_title  */}
-        <div className='flex flex-col gap-2'>
+        <div  className='col-span-3'>
           <label
             className='text-lg font-medium tracking-tight leading-5'
             htmlFor='meta_title'
