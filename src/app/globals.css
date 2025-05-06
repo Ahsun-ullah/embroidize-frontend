@@ -222,6 +222,12 @@ h6 {
   width: 80%;
 }
 
+
+.bg-secondary {
+  --tw-bg-opacity: 1;
+  background-color: black !important;
+}
+
 /* Responsive Design */
 @media (max-width: 343px) {
   .admin-sidebar {

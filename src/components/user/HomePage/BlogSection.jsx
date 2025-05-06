@@ -9,10 +9,10 @@ const BlogSection = () => {
     <>
       <section className='bg-blue-50 text-black my-8 py-6'>
         <div className='flex items-center justify-center'>
-          <h1 className='text-3xl font-bold'>Latest News</h1>
+          <h1 className='text-3xl font-bold'>Latest From Blog</h1>
         </div>
         <div className='flex items-center justify-center mt-4'>
-          <h3 className='font-bold text-3xl'>Latest from Blog</h3>
+          <h3 className='font-bold text-3xl'>Tips, Trends & Tutorials You’ll Love</h3>
         </div>
       </section>
       <section className='text-black my-8 py-6'>

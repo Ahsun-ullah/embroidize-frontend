@@ -157,7 +157,7 @@ export default function UserDetailsComponent({ defaultTab = 'account' }) {
           variant='bordered'
           size='sm'
           placement='top'
-          className='bg-blue-50 rounded-xl'
+          className='bg-white !border-black '
         >
           <Tab
             key='account'

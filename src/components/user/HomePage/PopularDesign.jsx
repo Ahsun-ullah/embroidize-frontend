@@ -21,7 +21,7 @@ const PopularDesign = async () => {
         </div>
         <div className='flex items-center justify-center mt-4'>
           <h3 className='font-semibold text-center'>
-            Design for every Budget & every Project.
+            Browse Our Most Loved Designs.
           </h3>
         </div>
       </section>

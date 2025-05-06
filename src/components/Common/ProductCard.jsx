@@ -40,10 +40,19 @@ export default function ProductCard({ item, index }) {
               {item.price === 0 ? 'Free' : `$${item.price.toFixed(2)}`}
             </p>
           </div>
-
+          <div className='flex items-center justify-between gap-4'>
           <p className='text-sm text-black capitalize font-medium truncate'>
             {item?.category?.name ?? ''}
           </p>
+            <p
+              className={`text-md font-semibold px-2`}
+            >
+              <i className="ri-download-2-line me-1"></i>
+              {item.downloadCount}
+            </p>
+          </div>
+
+
         </div>
       </Link>
     </div>

@@ -20,7 +20,8 @@ const RecentProductsSection = () => {
         </div>
         <div className='flex items-center justify-center mt-4'>
           <h3 className='font-semibold text-center'>
-            Design for every Budget & every Project.
+          Our Newest Creations, Just for You.
+
           </h3>
         </div>
       </section>
