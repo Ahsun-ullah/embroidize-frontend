@@ -92,7 +92,8 @@ const Pagination = ({ currentPage, perPageData, totalPages }) => {
           tabIndex={0}
           aria-label='Go to previous page'
         >
-          &laquo; Previous
+          &laquo;
+          {/* Previous */}
         </li>
         {/* )} */}
         {renderPageNumbers()}
@@ -104,7 +105,8 @@ const Pagination = ({ currentPage, perPageData, totalPages }) => {
           tabIndex={0}
           aria-label='Go to next page'
         >
-          Next &raquo;
+          {/* Next */}
+          &raquo;
         </li>
         {/* )} */}
       </ul>

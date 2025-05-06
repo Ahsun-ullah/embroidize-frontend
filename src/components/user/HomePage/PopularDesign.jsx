@@ -1,14 +1,15 @@
 import ProductCard from '@/components/Common/ProductCard';
-import { getProducts } from '@/lib/apis/public/products';
+import { getPopularProducts } from '@/lib/apis/public/products';
 import Link from 'next/link';
-import { use } from 'react';
 
-const PopularDesign = () => {
+const PopularDesign = async () => {
   const {
     products: allProducts,
     totalCount,
     totalPages,
-  } = use(getProducts('', 0, 8));
+  } = await getPopularProducts('', 0, 8);
+
+  console.log(allProducts);
 
   return (
     <>
@@ -30,12 +31,12 @@ const PopularDesign = () => {
           <div className='grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6'>
             {allProducts?.length > 0 &&
               allProducts.map((item, index) => (
-                <ProductCard key={index} item={item} />
+                <ProductCard key={item._id || index} item={item} />
               ))}
           </div>
           <div className='flex justify-center items-center mt-14'>
             <Link
-              href={'/products'}
+              href='/products?filter=popular'
               className='bg-black rounded-full hover:bg-blue-400 text-white font-medium px-6 py-2'
             >
               View All
