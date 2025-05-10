@@ -26,7 +26,7 @@ export const metadata = {
     description:
       'Download free embroidery designs instantly – Browse unlimited machine embroidery Design in multiple categories and styles. All designs are tested and come in the most popular formats.',
     url: 'https://embroidize.com/',
-    siteName: 'Embroid',
+    siteName: 'Embroidize',
     images: [
       {
         url: 'https://embroidize.com/og-banner.jpg',

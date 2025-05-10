@@ -12,7 +12,7 @@ const BlogSection = () => {
           <h1 className='text-3xl font-bold'>Latest From Blog</h1>
         </div>
         <div className='flex items-center justify-center mt-4'>
-          <h3 className='font-bold text-3xl'>Tips, Trends & Tutorials You’ll Love</h3>
+          <p className='font-bold text-lg text-center'>Tips, Trends & Tutorials You’ll Love</p>
         </div>
       </section>
       <section className='text-black my-8 py-6'>

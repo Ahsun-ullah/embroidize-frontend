@@ -1,7 +1,7 @@
 const headerLogo = '/twitter-bird-logo-pictures-0.png';
 
 const siteConfig = {
-  name: 'Embroid',
+  name: 'Embroidize',
   description: 'Make beautiful websites regardless of your design experience.',
   navItems: [
     { label: 'Home', href: '/' },
