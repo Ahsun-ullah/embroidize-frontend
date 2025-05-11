@@ -87,10 +87,13 @@ export default function UserDetailsComponent({ defaultTab = 'account' }) {
             <h3 className='text-base font-semibold text-gray-800 sm:text-xs sm:gap-2'>
               {product?.name}
             </h3>
-            {/* <p className="text-sm text-gray-500 text-wrap sm:text-xs sm:gap-2">{user?.email}</p> */}
-            <p className='text-sm text-gray-500 text-wrap sm:text-xs sm:gap-2'>
-              {user?.name}
+            <p className='text-sm font-semibold text-gray-500'>
+              {product?.price === 0 ? 'Free' : `$${product?.price.toFixed(2)}`}
             </p>
+
+            {/* <p className='text-sm text-gray-500 text-wrap sm:text-xs sm:gap-2'>
+              {user?.name}
+            </p> */}
             <p className='text-sm font-semibold text-gray-500'>
               File: <span className='uppercase'>{fileType}</span>
             </p>
