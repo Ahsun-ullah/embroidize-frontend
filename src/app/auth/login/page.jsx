@@ -171,7 +171,7 @@ const Login = () => {
         {/* Footer */}
         <div className='text-center'>
           <p className='mb-0'>
-            &copy; {new Date().getFullYear()} Embroidize. Crafted by Ahsun
+            &copy; {new Date().getFullYear()} Embroidize.
           </p>
         </div>
       </div>

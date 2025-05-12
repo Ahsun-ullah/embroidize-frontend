@@ -169,8 +169,7 @@ const Register = () => {
 
       <div className='text-center'>
         <p className='mb-0'>
-          &copy; {new Date().getFullYear()} Embroidize. Crafted with{' '}
-          <i className='mdi mdi-heart text-red-500'></i> by Ahsun
+          &copy; {new Date().getFullYear()} Embroidize.
         </p>
       </div>
     </div>

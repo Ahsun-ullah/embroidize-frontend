@@ -86,7 +86,7 @@ export default async function CategoryProducts({ searchParams }) {
             },
           ]}
         />
-        <div className='flex items-center gap-3 flex-wrap '>
+        <div className='flex items-center gap-3 flex-wrap'>
           {singleCategoryData?.data?.subcategories?.map((sub) => (
             <Link
               key={sub?._id}
@@ -98,7 +98,7 @@ export default async function CategoryProducts({ searchParams }) {
           ))}
         </div>
       </div>
-      <div className=' flex flex-col justify-between'>
+      <div className='flex flex-col justify-between'>
         <section className='text-black my-8 py-6 border-b-2'>
           <div className='container mx-auto px-4'>
             {allProducts.length === 0 ? (
@@ -106,7 +106,7 @@ export default async function CategoryProducts({ searchParams }) {
                 No products found in this category.
               </p>
             ) : (
-              <div className='grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-10'>
+              <div className='grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6'>
                 {allProducts.map((item, index) => (
                   <ProductCard key={index} item={item} />
                 ))}
