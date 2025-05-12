@@ -1,5 +1,11 @@
 'use client';
 
+import { Elements } from '@stripe/react-stripe-js';
+import { loadStripe } from '@stripe/stripe-js';
+import Cookies from 'js-cookie';
+import { useRouter, useSearchParams } from 'next/navigation';
+import { useCallback, useEffect, useMemo, useState } from 'react';
+
 import { ErrorToast } from '@/components/Common/ErrorToast';
 import { useUserInfoQuery } from '@/lib/redux/common/user/userInfoSlice';
 import {
@@ -10,163 +16,161 @@ import {
   DropdownMenu,
   DropdownTrigger,
 } from '@heroui/react';
-import { Elements } from '@stripe/react-stripe-js';
-import { loadStripe } from '@stripe/stripe-js';
-import Cookies from 'js-cookie';
-import { useSearchParams } from 'next/navigation';
-import { useCallback, useState } from 'react';
 import CheckoutForm from './CheckoutForm';
 
 const stripePromise = loadStripe(
   process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY,
 );
 
-function FormatDropdown({ label, isLoading, options, onSelect }) {
-  return (
-    <Dropdown className='w-full'>
-      <DropdownTrigger>
-        <Button
-          variant='flat'
-          className='w-full bg-black text-white font-semibold text-lg h-12'
-          isLoading={isLoading}
-          aria-label={label}
-        >
-          {label}
-        </Button>
-      </DropdownTrigger>
-      <DropdownMenu aria-label={`${label} Formats`}>
-        {options.map((type) => (
-          <DropdownItem
-            textValue={type.toUpperCase()}
-            key={type}
-            onPress={() => onSelect(type)}
-          >
-            <span className='uppercase font-semibold text-base'>{type}</span>
-          </DropdownItem>
-        ))}
-      </DropdownMenu>
-    </Dropdown>
-  );
-}
+const FormatDropdown = ({ label, isLoading, options, onSelect }) => (
+  <Dropdown className='w-full'>
+    <DropdownTrigger>
+      <Button
+        variant='flat'
+        className='w-full bg-black text-white font-semibold text-lg h-12'
+        isLoading={isLoading}
+      >
+        {label}
+      </Button>
+    </DropdownTrigger>
+    <DropdownMenu>
+      {options.map((ext) => (
+        <DropdownItem key={ext} onPress={() => onSelect(ext)}>
+          <span className='uppercase font-semibold text-base'>{ext}</span>
+        </DropdownItem>
+      ))}
+    </DropdownMenu>
+  </Dropdown>
+);
 
 export default function ProductDownloadCard({ data }) {
   const [isLoading, setIsLoading] = useState(false);
-  const [showModal, setShowModal] = useState(false);
-  const [clientSecret, setClientSecret] = useState(null);
   const [buyLoading, setBuyLoading] = useState(false);
-  const [downloadExtension, setDownloadExtension] = useState('');
-  const productId = useSearchParams().get('id');
-  const token = Cookies.get('token');
+  const [checkPurchaseLoading, setCheckPurchaseLoading] = useState(false);
+  const [clientSecret, setClientSecret] = useState(null);
+  const [showModal, setShowModal] = useState(false);
+  const [hasPurchased, setHasPurchased] = useState(false);
+  const router = useRouter();
+  const token = useMemo(() => Cookies.get('token'), []);
   const apiBase = process.env.NEXT_PUBLIC_BASE_API_URL_PROD;
-  const { data: userInfoData } = useUserInfoQuery();
+  const productId = useSearchParams().get('id');
+  const { data: userInfoData, isLoading: fetchUserInfoLoading } =
+    useUserInfoQuery();
 
-  const handleSingleZipFileDownload = useCallback(
-    async ({ id, extension }) => {
-      const token = Cookies.get('token');
-      if (!token) {
-        window.location.href = `/auth/login?pathName=${window.location.pathname}?id=${id}`;
-        return;
-      }
+  const userId = userInfoData?._id;
 
-      try {
-        setIsLoading(true);
-        const res = await fetch(
-          `${apiBase}/download/product/${id}/extension/${extension}`,
-          {
-            headers: {
-              Authorization: `Bearer ${token}`,
-            },
-          },
-        );
+  const refetchPurchases = useCallback(async () => {
+    if (!userId || !productId) return false;
+    setCheckPurchaseLoading(true);
+    try {
+      const res = await fetch(`${apiBase}/product-access/${data?._id}`, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      const json = await res.json();
+      return json.hasAccess;
+    } catch (err) {
+      console.error('Error checking purchase status:', err);
+      return false;
+    } finally {
+      setCheckPurchaseLoading(false);
+    }
+  }, [apiBase, userId, productId, data?._id, token]);
 
-        if (!res.ok) {
-          const errorJson = await res.json().catch(() => ({}));
-          ErrorToast(
-            errorJson?.message || 'Download Failed',
-            errorJson?.error?.message || 'Could not download the ZIP file',
-            3000,
-          );
-          return;
-        }
+  useEffect(() => {
+    refetchPurchases().then(setHasPurchased);
+  }, [refetchPurchases]);
 
-        const blob = await res.blob();
-        const filename = `From_Embroid_${extension}.zip`;
-        const url = window.URL.createObjectURL(blob);
-        const link = document.createElement('a');
-        link.href = url;
-        link.download = filename;
-        document.body.appendChild(link);
-        link.click();
-        window.URL.revokeObjectURL(url);
-        document.body.removeChild(link);
-      } catch (err) {
-        ErrorToast(
-          'Download Failed',
-          err?.message || 'Could not download the ZIP file',
-          3000,
-        );
-      } finally {
-        setIsLoading(false);
+  const downloadFile = async ({ id, extension }) => {
+    if (!token) {
+      window.location.href = `/auth/login?pathName=${window.location.pathname}?id=${id}`;
+      return;
+    }
+
+    setIsLoading(true);
+    try {
+      const res = await fetch(
+        `${apiBase}/download/product/${id}/extension/${extension}`,
+        {
+          headers: { Authorization: `Bearer ${token}` },
+        },
+      );
+
+      if (!res.ok)
+        throw new Error((await res.json())?.message || 'Download failed');
+
+      const blob = await res.blob();
+      const link = document.createElement('a');
+      link.href = window.URL.createObjectURL(blob);
+      link.download = `From_Embroid_${extension}.zip`;
+      document.body.appendChild(link);
+      link.click();
+      window.URL.revokeObjectURL(link.href);
+      document.body.removeChild(link);
+    } catch (err) {
+      ErrorToast('Download Failed', err.message, 3000);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const handleBuyNow = async () => {
+    if (!token) {
+      window.location.href = `/auth/login?pathName=${window.location.pathname}?id=${productId}`;
+      return;
+    }
+
+    setBuyLoading(true);
+    try {
+      const amount = Math.round(data.price * 100);
+      if (amount < 1) throw new Error('Amount must be at least $0.01');
+
+      const res = await fetch(`${apiBase}/create-payment-intent`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify({
+          userId: userId,
+          productId: data._id,
+          amount,
+          currency: 'usd',
+          metadata: { userId: userId, productId: data._id },
+        }),
+      });
+
+      const json = await res.json();
+      if (json.error) throw new Error(json.error.message);
+
+      setClientSecret(json.clientSecret);
+      setShowModal(true);
+    } catch (err) {
+      ErrorToast('Payment Error', err.message, 3000);
+    } finally {
+      setBuyLoading(false);
+    }
+  };
+
+  const dropdownLabel = useMemo(() => {
+    if (data?.price === 0) return 'Free Download';
+    if (hasPurchased) return 'Download Now';
+    return `Buy Now – $${data.price.toFixed(2)}`;
+  }, [data?.price, hasPurchased]);
+
+  const onSelectExtension = useCallback(
+    (ext) => {
+      if (data?.price === 0) {
+        downloadFile({ id: productId, extension: ext });
+      } else if (hasPurchased) {
+        downloadFile({ id: productId, extension: ext });
       }
     },
-    [apiBase],
-  );
-
-  const handleBuyNow = useCallback(
-    async (extension) => {
-      if (!token) {
-        window.location.href = `/auth/login?pathName=${window.location.pathname}?id=${productId}`;
-        return;
-      }
-
-      setBuyLoading(true);
-      try {
-        const amount = Math.round(data.price * 100);
-
-        if (amount < 1) {
-          ErrorToast('Invalid Amount', 'Amount must be at least $0.01', 3000);
-          return;
-        }
-
-        const res = await fetch(`${apiBase}/create-payment-intent`, {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-            Authorization: `Bearer ${token}`,
-          },
-          body: JSON.stringify({
-            userId: userInfoData?._id,
-            productId: data?._id,
-            amount,
-            currency: 'usd',
-            metadata: { productId: data?._id },
-          }),
-        });
-
-        const json = await res.json();
-        if (json.error) {
-          ErrorToast('Payment Error', json.error.message, 3000);
-          return;
-        }
-
-        setClientSecret(json.clientSecret);
-        setDownloadExtension(extension);
-        setShowModal(true);
-      } catch (err) {
-        ErrorToast('Payment Error', err.message, 3000);
-      } finally {
-        setBuyLoading(false);
-      }
-    },
-    [apiBase, data?._id, token, userInfoData?._id, productId],
+    [data?.price, hasPurchased, productId],
   );
 
   return (
     <>
-      <Card
-        isFooterBlurred
-        className='flex flex-col gap-4 p-6 w-full max-w-xl mx-auto'
-      >
+      <Card className='flex flex-col gap-4 p-6 w-full max-w-xl mx-auto'>
         <h1 className='text-black font-bold text-2xl'>
           Download Embroidery Machine Design
         </h1>
@@ -175,45 +179,49 @@ export default function ProductDownloadCard({ data }) {
           creative with our exclusive free collection of embroidery designs.
         </p>
 
-        {data?.price > 0 ? (
+        {fetchUserInfoLoading || checkPurchaseLoading ? (
+          <Button
+            isLoading
+            variant='flat'
+            className='w-full bg-black text-white font-semibold text-lg h-12'
+          >
+            Loading...
+          </Button>
+        ) : data?.price === 0 || hasPurchased ? (
           <FormatDropdown
-            label={`Buy Now – $${(data.price).toFixed(2)}`}
-            isLoading={buyLoading}
+            label={dropdownLabel}
+            isLoading={isLoading || buyLoading}
             options={data?.available_file_types || []}
-            onSelect={(type) => handleBuyNow(type)}
+            onSelect={onSelectExtension}
           />
         ) : (
-          <FormatDropdown
-            label='Free Download'
-            isLoading={isLoading}
-            options={data?.available_file_types || []}
-            onSelect={(type) =>
-              handleSingleZipFileDownload({ id: productId, extension: type })
-            }
-          />
+          <Button
+            onPress={() => handleBuyNow()}
+            isLoading={buyLoading}
+            variant='flat'
+            className='w-full bg-black text-white font-semibold text-lg h-12'
+          >
+            {dropdownLabel}
+          </Button>
         )}
       </Card>
 
       {showModal && clientSecret && (
         <div className='fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50'>
           <Card className='w-full max-w-[840px] max-h-[90vh] overflow-y-auto p-4 sm:p-6'>
-            <h2 className='text-lg sm:text-xl md:text-2xl font-bold mb-4'>
-              Complete Your Purchase
-            </h2>
+            <h2 className='text-xl font-bold mb-4'>Complete Your Purchase</h2>
             <Elements stripe={stripePromise} options={{ clientSecret }}>
               <CheckoutForm
                 clientSecret={clientSecret}
-                onSuccess={() => {
-                  setShowModal(false);
-                  handleSingleZipFileDownload({
-                    id: productId,
-                    extension: downloadExtension,
-                  });
+                onSuccess={async () => {
+                  // setShowModal(false);
+                  router.push(
+                    `/payment-confirmation?name=${data?.name.split('-').join('+')}&productId=${productId}`,
+                  );
                 }}
                 onCancel={() => setShowModal(false)}
                 priceCents={Math.round(data.price * 100)}
                 productName={data?.name}
-                downloadExtension={downloadExtension}
                 productId={productId}
               />
             </Elements>

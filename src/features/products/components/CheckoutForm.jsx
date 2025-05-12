@@ -18,8 +18,6 @@ export default function CheckoutForm({
   priceCents,
   onSuccess,
   onCancel,
-  downloadExtension,
-  productId,
 }) {
   const stripe = useStripe();
   const elements = useElements();
