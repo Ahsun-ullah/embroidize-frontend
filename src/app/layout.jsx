@@ -15,9 +15,9 @@ export default function RootLayout({ children }) {
           name='p:domain_verify'
           content='a417c3036823eb607157878ef76fc2b0'
         />
-        <title>{metadata.title}</title>
-        <meta name='description' content={metadata.description} />
-        <meta name='keywords' content={metadata.keywords.join(', ')} />
+        <title>{'Free Machine Embroidery Designs - Embroidize'}</title>
+        {/* <meta name='description' content={metadata.description} /> */}
+        {/* <meta name='keywords' content={metadata.keywords.join(', ')} /> */}
         <meta property='og:title' content={metadata.openGraph.title} />
         <meta
           property='og:description'

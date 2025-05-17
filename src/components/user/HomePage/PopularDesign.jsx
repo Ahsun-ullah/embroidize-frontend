@@ -1,3 +1,4 @@
+import ProductUpdates from '@/app/products/ProductUpdates';
 import ProductCard from '@/components/Common/ProductCard';
 import { getPopularProducts } from '@/lib/apis/public/products';
 import Link from 'next/link';
@@ -13,6 +14,7 @@ const PopularDesign = async () => {
 
   return (
     <>
+      <ProductUpdates />
       <section className='bg-blue-50 text-black my-8 py-6'>
         <div className='flex items-center justify-center'>
           <h1 className='text-3xl font-bold text-center'>

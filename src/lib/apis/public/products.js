@@ -36,6 +36,7 @@ export async function getProducts(
     throw error;
   }
 }
+
 export async function getPopularProducts(
   searchQuery,
   currentPage = 0,

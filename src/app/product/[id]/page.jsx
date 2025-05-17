@@ -15,26 +15,24 @@ export async function generateMetadata({ searchParams }) {
     if (!product) return {};
 
     return {
-      title: product.meta_title || product.title,
-      description:
-        product.meta_description ||
-        'Download high-quality embroidery machine designs for free.',
+      title: product.meta_title,
+      description: product.meta_description,
       openGraph: {
-        title: product.meta_title || product.title,
+        title: product.meta_title,
         description: product.meta_description,
         images: [
           {
             url: product.image?.url || 'https://embroidize.com/og-banner.jpg',
             width: 1200,
             height: 630,
-            alt: product.title || 'Embroidery Design',
+            alt: product.title,
           },
         ],
       },
       twitter: {
         card: 'summary_large_image',
-        title: product.meta_title || product.title,
-        description: product.meta_description || product.description,
+        title: product.meta_title,
+        description: product.meta_description,
         images: [
           product.image?.url || 'https://embroidize.com/home-banner.jpg',
         ],
@@ -54,11 +52,9 @@ export default function ProductDetails({ searchParams }) {
   const { id } = use(searchParams);
 
   const response = use(getSingleProduct(id));
-  const categoryName = (response?.data?.category?.name.split('-').join('+'));
+  const categoryName = response?.data?.category?.name.split('-').join('+');
 
-  const { products } = use(
-    getProducts(categoryName, 0, 10),
-  );
+  const { products } = use(getProducts(categoryName, 0, 10));
   const product = response?.data;
 
   if (!product) return notFound();
