@@ -54,12 +54,24 @@ export const categoryAndSubcategorySlice = createApi({
         };
       },
     }),
+    // getPublicProductCategories: builder.query({
+    //   query: () => ({
+    //     url: '/public/product-category',
+    //     method: 'GET',
+    //   }),
+    // }),
     getPublicProductCategories: builder.query({
       query: () => ({
         url: '/public/product-category',
         method: 'GET',
       }),
+      // Cache the data for 24 hours (in seconds)
+      keepUnusedDataFor: 86400,
+      // Don't auto-refetch on mount or arg change
+      refetchOnMountOrArgChange: false,
+      refetchOnReconnect: false,
     }),
+
     getSinglePublicProductCategory: builder.query({
       query: (id) => ({
         url: `/public/product-category/${id}`,
@@ -89,5 +101,5 @@ export const {
   useGetPublicProductCategoriesQuery,
   useGetSinglePublicProductCategoryQuery,
   useGetPublicProductSubCategoriesQuery,
-  useGetSinglePublicProductSubCategoryQuery
+  useGetSinglePublicProductSubCategoryQuery,
 } = categoryAndSubcategorySlice;

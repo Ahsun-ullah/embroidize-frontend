@@ -108,7 +108,7 @@ export const SingleProductComponent = async ({
           <Suspense fallback={<LoadingSpinner />}>
             <div className='mb-10'>
               <h1 className='text-black font-bold text-2xl mb-6 capitalize'>
-               About {singleProductData?.name}
+                About {singleProductData?.name}
               </h1>
               <pre
                 dangerouslySetInnerHTML={{ __html: rawMarkup }}
@@ -129,7 +129,7 @@ export const SingleProductComponent = async ({
                     <Link
                       href={`/search?searchQuery=${item.split(' ').join('+')}`}
                       key={index}
-                      className='bg-gray-200 text-gray-800 px-3 py-1 rounded-full text-sm font-medium capitalize hover:bg-teal-200 hover:text-black transition'
+                      className='bg-gray-200 text-gray-800 px-3 py-1 rounded-full text-sm font-medium capitalize hover:bg-black hover:text-white transition'
                     >
                       {item}
                     </Link>

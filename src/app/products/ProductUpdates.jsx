@@ -53,13 +53,13 @@ export default function ProductUpdates({
 
   return (
     <>
-      {status !== 'open' && (
+      {/* {status !== 'open' && (
         <div className='fixed top-16 left-1/2 transform -translate-x-1/2 bg-yellow-600 text-white px-3 py-1 rounded shadow'>
           {status === 'connecting' && 'Connecting real‑time updates...'}
           {status === 'error' && 'Connection lost. Reconnecting...'}
           {status === 'reconnecting' && 'Reconnecting...'}
         </div>
-      )}
+      )} */}
     </>
   );
 }

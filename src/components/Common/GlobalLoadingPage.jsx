@@ -11,7 +11,7 @@ const GlobalLoadingPage = () => {
         height: '100vh',
       }}
     >
-      <Spinner color='warning' label='Loading...' />
+      <Spinner color='white' label='Loading...' />
     </div>
   );
 };

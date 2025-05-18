@@ -307,7 +307,7 @@ export function BlogForm({ blog, isOpen, onOpenChange, setBlogId }) {
                     disabled={isSubmitting}
                     className={`w-full md:w-auto px-6 py-3 rounded-md font-medium text-white
              bg-slate-800
-              hover:bg-teal-600  hover:shadow-lg
+              hover:bg-black  hover:shadow-lg
               disabled:from-gray-400 disabled:to-gray-500 disabled:cursor-not-allowed
               transition-all duration-300 ease-in-out
               ${isSubmitting ? 'cursor-wait' : ''}`}

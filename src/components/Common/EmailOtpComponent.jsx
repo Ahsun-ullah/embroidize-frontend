@@ -104,7 +104,7 @@ const EmailOtpComponent = ({
       <div className='mb-6 text-center'>
         <div className='flex justify-center'>
           <div className='w-16 h-16 flex items-center justify-center bg-primary-alt text-primary text-3xl rounded-full'>
-            <i className='ri-mail-line text-teal-600 fw-semibold'></i>
+            <i className='ri-mail-line text-black fw-semibold'></i>
           </div>
         </div>
 
