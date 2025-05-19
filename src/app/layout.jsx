@@ -1,7 +1,6 @@
 import StoreProvider from '@/lib/providers/StoreProvider';
 import UiProvider from '@/lib/providers/UiProvider';
 import { Inter } from 'next/font/google';
-import Head from 'next/head';
 import 'remixicon/fonts/remixicon.css';
 import './globals.css';
 import { metadata } from './page';
@@ -11,7 +10,7 @@ const inter = Inter({ subsets: ['latin'], display: 'swap' });
 export default function RootLayout({ children }) {
   return (
     <html lang='en'>
-      <Head>
+      <head>
         {/* Google Analytics */}
         <script
           async
@@ -56,7 +55,7 @@ export default function RootLayout({ children }) {
           content={metadata.twitter.description}
         />
         <meta name='twitter:image' content={metadata.twitter.images[0]} />
-      </Head>
+      </head>
       <body className={inter.className} suppressHydrationWarning>
         <StoreProvider>
           <UiProvider>
