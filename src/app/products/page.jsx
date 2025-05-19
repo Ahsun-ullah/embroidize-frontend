@@ -7,6 +7,35 @@ import Link from 'next/link';
 import ProductUpdates from './ProductUpdates';
 export const dynamic = 'force-dynamic';
 
+export const metadata = {
+  title: 'Machine Embroidery Designs',
+  description:
+    'Welcome to our premium collection of machine embroidery designs, fully compatible with all embroidery machines. Instantly download high-quality embroidery files in CND, DST, EXP, HUS, JEF, PES, VP3, and XXX formats.',
+  openGraph: {
+    title: 'Machine Embroidery Designs',
+    description:
+      'Welcome to our premium collection of machine embroidery designs, fully compatible with all embroidery machines. Instantly download high-quality embroidery files in CND, DST, EXP, HUS, JEF, PES, VP3, and XXX formats.',
+    url: 'https://embroidize.com/',
+    siteName: 'Embroidize',
+    images: [
+      {
+        url: 'https://embroidize.com/og-banner.jpg',
+        width: 1200,
+        height: 630,
+        alt: 'Embroidery Machine Designs',
+      },
+    ],
+    type: 'website',
+  },
+  twitter: {
+    card: 'summary_large_image',
+    title: 'Embroidery Machine Designs',
+    description:
+      'Welcome to our premium collection of machine embroidery designs, fully compatible with all embroidery machines. Instantly download high-quality embroidery files in CND, DST, EXP, HUS, JEF, PES, VP3, and XXX formats.',
+    images: ['https://embroidize.com/og-banner.jpg'],
+  },
+};
+
 export default async function AllProductsPage({ searchParams }) {
   const currentPage = parseInt(searchParams?.page || '0', 10);
   const perPageData = 20;
