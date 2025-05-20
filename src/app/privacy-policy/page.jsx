@@ -1,6 +1,32 @@
 import Footer from '@/components/user/HomePage/Footer';
 import Header from '@/components/user/HomePage/Header';
 
+export const metadata = {
+  title: 'Privacy Policy - Embroidize',
+  description: 'Download free embroidery machine designs in multiple formats.',
+  openGraph: {
+    title: 'Privacy Policy - Embroidize',
+    description: 'Explore and download premium free embroidery designs.',
+    url: 'https://embroidize.com',
+    siteName: 'Embroidize',
+    images: [
+      {
+        url: 'https://embroidize.com/og-banner.jpg',
+        width: 1200,
+        height: 630,
+      },
+    ],
+    type: 'website',
+  },
+  twitter: {
+    card: 'summary_large_image',
+    title: 'Privacy Policy - Embroidize',
+    description: 'Explore and download premium free embroidery designs.',
+    images: ['https://embroidize.com/og-banner.jpg'],
+  },
+  metadataBase: new URL('https://embroidize.com'),
+};
+
 export default function PrivacyPolicyPage() {
   return (
     <>
@@ -160,14 +186,13 @@ export default function PrivacyPolicyPage() {
                 We provide free newsletters and promotional emails to keep our
                 customers informed about deals, offers, and news. If you no
                 longer wish to receive such messages, you can unsubscribe by
-                contacting us at {' '}
+                contacting us at{' '}
                 <a
                   href='mailto:support@embroidize.com'
                   className='text-blue-600 underline'
                 >
                   support@embroidize.com
-                </a>
-                {' '}
+                </a>{' '}
                 Note that if you opt into receiving emails from third-party
                 partners, those communications will be governed by their own
                 privacy policies and opt-out mechanisms.

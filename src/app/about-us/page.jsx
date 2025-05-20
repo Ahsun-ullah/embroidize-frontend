@@ -1,6 +1,32 @@
 import Footer from '@/components/user/HomePage/Footer';
 import Header from '@/components/user/HomePage/Header';
 
+export const metadata = {
+  title: 'About Us - Embroidize',
+  description: 'Download free embroidery machine designs in multiple formats.',
+  openGraph: {
+    title: 'About Us - Embroidize',
+    description: 'Explore and download premium free embroidery designs.',
+    url: 'https://embroidize.com',
+    siteName: 'Embroidize',
+    images: [
+      {
+        url: 'https://embroidize.com/og-banner.jpg',
+        width: 1200,
+        height: 630,
+      },
+    ],
+    type: 'website',
+  },
+  twitter: {
+    card: 'summary_large_image',
+    title: 'About Us - Embroidize',
+    description: 'Explore and download premium free embroidery designs.',
+    images: ['https://embroidize.com/og-banner.jpg'],
+  },
+  metadataBase: new URL('https://embroidize.com'),
+};
+
 export default function AboutUsPage() {
   return (
     <>
@@ -44,7 +70,6 @@ export default function AboutUsPage() {
                 modern embroidery machines, we help preserve the beauty of
                 tradition while embracing the convenience of technology.
               </p>
-
             </div>
             <div>
               <img

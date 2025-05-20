@@ -1,62 +1,67 @@
 import StoreProvider from '@/lib/providers/StoreProvider';
 import UiProvider from '@/lib/providers/UiProvider';
 import { Inter } from 'next/font/google';
+import Script from 'next/script';
 import 'remixicon/fonts/remixicon.css';
 import './globals.css';
-import { metadata } from './page';
 
 const inter = Inter({ subsets: ['latin'], display: 'swap' });
+
+export const metadata = {
+  title: 'Free Machine Embroidery Designs - Embroidize',
+  description: 'Download free embroidery machine designs in multiple formats.',
+  openGraph: {
+    title: 'Free Machine Embroidery Designs - Embroidize',
+    description: 'Explore and download premium free embroidery designs.',
+    url: 'https://embroidize.com',
+    siteName: 'Embroidize',
+    images: [
+      {
+        url: 'https://embroidize.com/og-banner.jpg',
+        width: 1200,
+        height: 630,
+      },
+    ],
+    type: 'website',
+  },
+  twitter: {
+    card: 'summary_large_image',
+    title: 'Free Machine Embroidery Designs - Embroidize',
+    description: 'Explore and download premium free embroidery designs.',
+    images: ['https://embroidize.com/og-banner.jpg'],
+  },
+  metadataBase: new URL('https://embroidize.com'),
+};
 
 export default function RootLayout({ children }) {
   return (
     <html lang='en'>
       <head>
-        {/* Google Analytics */}
-        <script
-          async
-          src='https://www.googletagmanager.com/gtag/js?id=G-BJ81WDRVP5'
-        ></script>
-        <script
-          dangerouslySetInnerHTML={{
-            __html: `
-            window.dataLayer = window.dataLayer || [];
-            function gtag(){dataLayer.push(arguments);}
-            gtag('js', new Date());
-            gtag('config', 'G-BJ81WDRVP5');
-          `,
-          }}
-        />
-
         {/* Domain Verification */}
         <meta
           name='p:domain_verify'
           content='a417c3036823eb607157878ef76fc2b0'
         />
-
-        {/* SEO Meta Tags */}
-        <title>Free Machine Embroidery Designs - Embroidize</title>
-
-        {/* Open Graph */}
-        <meta property='og:title' content={metadata.openGraph.title} />
-        <meta
-          property='og:description'
-          content={metadata.openGraph.description}
-        />
-        <meta property='og:url' content={metadata.openGraph.url} />
-        <meta property='og:site_name' content={metadata.openGraph.siteName} />
-        <meta property='og:image' content={metadata.openGraph.images[0]?.url} />
-        <meta property='og:type' content={metadata.openGraph.type} />
-
-        {/* Twitter Cards */}
-        <meta name='twitter:card' content={metadata.twitter.card} />
-        <meta name='twitter:title' content={metadata.twitter.title} />
-        <meta
-          name='twitter:description'
-          content={metadata.twitter.description}
-        />
-        <meta name='twitter:image' content={metadata.twitter.images[0]} />
       </head>
       <body className={inter.className} suppressHydrationWarning>
+        {/* Google Analytics */}
+        <Script
+          src='https://www.googletagmanager.com/gtag/js?id=G-BJ81WDRVP5'
+          strategy='afterInteractive'
+        />
+        <Script
+          id='gtag-init'
+          strategy='afterInteractive'
+          dangerouslySetInnerHTML={{
+            __html: `
+              window.dataLayer = window.dataLayer || [];
+              function gtag(){dataLayer.push(arguments);}
+              gtag('js', new Date());
+              gtag('config', 'G-BJ81WDRVP5');
+            `,
+          }}
+        />
+
         <StoreProvider>
           <UiProvider>
             <main className='min-h-screen'>{children}</main>
