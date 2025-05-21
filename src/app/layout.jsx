@@ -42,6 +42,7 @@ export default function RootLayout({ children }) {
           name='p:domain_verify'
           content='a417c3036823eb607157878ef76fc2b0'
         />
+        <meta name="google-site-verification" content="hVDO2LwJX8GOqQ809KdHmfVZ96gxwrrSC8J80OhLD-k" />
       </head>
       <body className={inter.className} suppressHydrationWarning>
         {/* Google Analytics */}
