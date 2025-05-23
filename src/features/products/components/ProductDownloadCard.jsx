@@ -2,6 +2,7 @@
 
 import { ErrorToast } from '@/components/Common/ErrorToast';
 import LoadingSpinner from '@/components/Common/LoadingSpinner';
+import { formatNumber } from '@/utils/functions/page';
 import {
   Button,
   Card,
@@ -147,7 +148,13 @@ export default function ProductDownloadCard({ data }) {
       <Card isFooterBlurred className='flex flex-col  p-8'>
         <h1 className='text-black font-bold text-2xl'>{data?.name}</h1>
         <p className='text-gray-600 my-2'>{data?.meta_description}</p>
-        <h2 className='text-black font-bold mb-2'>Select For Free Download </h2>
+        <div className='flex items-center justify-between mb-2'>
+          <h2 className='text-black font-bold '>Select For Free Download </h2>
+          <span className='font-semibold flex items-center gap-1'>
+            <i className='ri-download-2-line' aria-hidden='true'></i>
+            {formatNumber(data?.downloadCount)}
+          </span>
+        </div>
         {isLoading ? (
           <LoadingSpinner />
         ) : (

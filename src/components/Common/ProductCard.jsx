@@ -1,5 +1,6 @@
 'use client';
 
+import { formatNumber } from '@/utils/functions/page';
 import { Divider } from '@heroui/react';
 import Image from 'next/image';
 import Link from 'next/link';
@@ -63,7 +64,7 @@ export default function ProductCard({ item }) {
             </span>
             <span className='font-semibold flex items-center gap-1'>
               <i className='ri-download-2-line' aria-hidden='true'></i>
-              {downloadCount}
+              {formatNumber(downloadCount)}
             </span>
           </div>
         </div>

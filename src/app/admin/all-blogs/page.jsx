@@ -14,7 +14,7 @@ export default function BlogPageInAdmin() {
   return (
     <div>
       <BlogTableWrapper
-        blogInitialData={blogsData?.data}
+        blogInitialData={blogsData?.data?.blogs}
         blogColumns={blogColumns}
         blogPageSize={5}
         blogSearchableFieldsName={['title']}
