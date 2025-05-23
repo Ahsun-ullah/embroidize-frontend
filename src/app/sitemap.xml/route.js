@@ -8,9 +8,11 @@ export async function GET() {
     const baseUrl = process.env.NEXT_PUBLIC_BASE_URL_CLIENT;
 
     const { blogs } = await getBlogs();
+
     const { products } = await getProducts();
     const { categories } = await getCategories();
     const { subCategories } = await getSubCategories();
+    console.log(subCategories);
 
     const routes = [
       '',

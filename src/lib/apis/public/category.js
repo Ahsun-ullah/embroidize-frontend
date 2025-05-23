@@ -61,19 +61,15 @@ export async function getSingleCategory(categoryId) {
   }
 }
 
-export async function getAllProductsByCategory(
-  slug,
-  currentPage,
-  perPageData,
-) {
+export async function getAllProductsByCategory(slug, currentPage, perPageData) {
   try {
     const headers = new Headers();
     headers.set('Authorization', 'Bearer some-static-token');
 
     // Correct way to build query parameters
     const queryParams = new URLSearchParams();
-    queryParams.append('page', (currentPage).toString());
-    queryParams.append('limit', perPageData.toString());
+    if (currentPage) queryParams.append('page', currentPage.toString());
+    if (perPageData) queryParams.append('limit', perPageData.toString());
 
     const apiUrl = `${process.env.NEXT_PUBLIC_BASE_API_URL_PROD}/public/products-by-category/${slug}?${queryParams.toString()}`;
     console.log(apiUrl);

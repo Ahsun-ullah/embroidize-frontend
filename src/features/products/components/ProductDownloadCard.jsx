@@ -13,20 +13,16 @@ import {
 } from '@heroui/react';
 import Cookies from 'js-cookie';
 
-import { usePathname, useSearchParams } from 'next/navigation';
+import { usePathname } from 'next/navigation';
 import { useState } from 'react';
 
 export default function ProductDownloadCard({ data }) {
-  const router = useSearchParams();
   const pathName = usePathname();
   const [isLoading, setIsLoading] = useState(false);
-  const [allIsLoading, setAllIsLoading] = useState(false);
-
-  const productId = router.get('id');
 
   const handleSingleZipFileDownload = async (fileData) => {
     const token = Cookies.get('token');
-    const redirectPath = `/auth/login?pathName=${pathName}?id=${productId}`;
+    const redirectPath = `/auth/login?pathName=${pathName}?id=${data?._id}`;
 
     if (!token) {
       window.location.href = redirectPath;
@@ -175,7 +171,7 @@ export default function ProductDownloadCard({ data }) {
                     onClick={() =>
                       handleSingleZipFileDownload({
                         extension: type,
-                        id: productId,
+                        id: data?._id,
                       })
                     }
                   >

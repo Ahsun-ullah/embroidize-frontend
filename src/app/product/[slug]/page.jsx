@@ -1,6 +1,7 @@
 import Footer from '@/components/user/HomePage/Footer';
 import Header from '@/components/user/HomePage/Header';
 import { SingleProductComponent } from '@/features/products/components/SingleProductComponent';
+import { getAllProductsByCategory } from '@/lib/apis/public/category';
 import {
   getPopularProducts,
   getSingleProduct,
@@ -55,16 +56,18 @@ export default function ProductDetails({ params }) {
   const response = use(getSingleProduct(slug));
   const product = response?.data;
 
-  const { products: allProductsBuSubcategory } = use(
-    getAllProductsBySubCategory(response?.data?.sub_category?.slug, 1, 6),
-  );
-
-  const popularProducts = use(getPopularProducts('', 1, 4));
-
   if (!product) return notFound();
 
-  console.log(popularProducts?.products);
+  const hasSubCategory = !!product?.sub_category?.slug;
 
+  const productListResponse = use(
+    hasSubCategory
+      ? getAllProductsBySubCategory(product.sub_category.slug, 1, 6)
+      : getAllProductsByCategory(product.category?.slug, 1, 6),
+  );
+
+  const allProducts = productListResponse?.products ?? [];
+  const popularProducts = use(getPopularProducts('', 1, 4))?.products ?? [];
   return (
     <>
       <script
@@ -90,8 +93,8 @@ export default function ProductDetails({ params }) {
       <Header />
       <SingleProductComponent
         singleProductData={product}
-        allProductData={allProductsBuSubcategory}
-        popularProducts={popularProducts?.products}
+        allProductData={allProducts}
+        popularProducts={popularProducts}
       />
       <Footer />
     </>

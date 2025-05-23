@@ -72,8 +72,8 @@ export async function getAllProductsBySubCategory(
 
     // Correct way to build query parameters
     const queryParams = new URLSearchParams();
-    queryParams.append('page', currentPage.toString());
-    queryParams.append('limit', perPageData.toString());
+    if (currentPage) queryParams.append('page', currentPage.toString());
+    if (perPageData) queryParams.append('limit', perPageData.toString());
 
     const apiUrl = `${process.env.NEXT_PUBLIC_BASE_API_URL_PROD}/public/products-by-sub-category/${slug}?${queryParams.toString()}`;
 

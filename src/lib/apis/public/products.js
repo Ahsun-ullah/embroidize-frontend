@@ -5,8 +5,8 @@ export async function getProducts(searchQuery, currentPage, perPageData) {
 
     const queryParams = new URLSearchParams();
     if (searchQuery) queryParams.append('search', searchQuery);
-    queryParams.append('page', currentPage.toString());
-    queryParams.append('limit', perPageData.toString());
+    if (currentPage) queryParams.append('page', currentPage.toString());
+    if (perPageData) queryParams.append('limit', perPageData.toString());
 
     const apiUrl = `${process.env.NEXT_PUBLIC_BASE_API_URL_PROD}/public/product?${queryParams.toString()}`;
     console.log(apiUrl);
