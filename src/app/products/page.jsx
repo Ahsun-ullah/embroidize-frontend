@@ -37,19 +37,21 @@ export const metadata = {
 };
 
 export default async function AllProductsPage({ searchParams }) {
-  const currentPage = parseInt(searchParams?.page || '0', 10);
-  const perPageData = 20;
+  const currentPage = parseInt(searchParams?.page) || 1;
+  const perPageData = parseInt(searchParams?.limit) || 20;
   const isPopular = searchParams?.filter === 'popular';
 
   const productData = isPopular
-    ? await getPopularProducts('', currentPage || 0, perPageData)
-    : await getProducts('', currentPage || 0, perPageData);
+    ? await getPopularProducts('', currentPage, perPageData)
+    : await getProducts('', currentPage, perPageData);
 
   const { products, totalCount, totalPages } = {
     ...productData,
     totalCount: productData.totalCount,
     totalPages: productData.totalPages,
   };
+
+  console.log(productData);
 
   return (
     <>

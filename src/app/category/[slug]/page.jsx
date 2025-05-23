@@ -3,17 +3,17 @@ import ProductCard from '@/components/Common/ProductCard';
 import Footer from '@/components/user/HomePage/Footer';
 import { Header } from '@/components/user/HomePage/Header';
 import { BreadCrumb } from '@/features/products/components/BreadCrumb';
-import { getSingleCategory } from '@/lib/apis/public/category';
-import { getProducts } from '@/lib/apis/public/products';
-import { capitalize, queryString, slugify } from '@/utils/functions/page';
+import {
+  getAllProductsByCategory,
+  getSingleCategory,
+} from '@/lib/apis/public/category';
+import { capitalize } from '@/utils/functions/page';
 import { marked } from 'marked';
 import Link from 'next/link';
 
-export async function generateMetadata({ searchParams }) {
-  const { id } = await searchParams;
-
+export async function generateMetadata({ params }) {
   try {
-    const response = await getSingleCategory(id);
+    const response = await getSingleCategory(params?.slug);
     const category = response?.data;
 
     return {
@@ -47,27 +47,24 @@ export async function generateMetadata({ searchParams }) {
     };
   } catch (error) {
     console.error('Metadata fetch failed:', error);
-
-    return {
-      title: 'Free Embroidery Machine Design',
-      description:
-        'Download free embroidery machine designs with high-quality patterns for various fabric types. Get creative with our exclusive free collection of embroidery designs.',
-    };
   }
 }
 
-export default async function CategoryProducts({ searchParams }) {
-  const currentPage = await searchParams;
-  const perPageData = 20;
-  const searchParamsData = await searchParams;
-  const { products: allProducts, totalPages } = await getProducts(
-    searchParamsData?.searchQuery,
-    currentPage || 0,
+export default async function CategoryProducts({ params, searchParams }) {
+  const currentPage = parseInt(searchParams?.page) || 1;
+  const perPageData = parseInt(searchParams?.limit) || 20;
+
+  const { products: allProducts, totalPages } = await getAllProductsByCategory(
+    params?.slug,
+    currentPage,
     perPageData,
   );
-  const singleCategoryData = await getSingleCategory(searchParamsData?.id);
+
+  const singleCategoryData = await getSingleCategory(params?.slug);
 
   const rawMarkup = marked(singleCategoryData?.data?.description || '');
+
+  console.log(allProducts);
 
   return (
     <>
@@ -90,7 +87,7 @@ export default async function CategoryProducts({ searchParams }) {
           {singleCategoryData?.data?.subcategories?.map((sub) => (
             <Link
               key={sub?._id}
-              href={`/${slugify(singleCategoryData?.data?.name)}/${slugify(sub?.name)}?id=${sub?._id}&searchQuery=${queryString(sub?.name)}`}
+              href={`/${singleCategoryData?.data?.slug}/${sub?.slug}`}
               className='bg-white text-gray-800 px-3 py-1 rounded-md text-sm font-medium capitalize hover:bg-black hover:text-white transition shadow-2xl'
             >
               {sub?.name}

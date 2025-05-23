@@ -60,3 +60,42 @@ export async function getSingleCategory(categoryId) {
     throw error;
   }
 }
+
+export async function getAllProductsByCategory(
+  slug,
+  currentPage,
+  perPageData,
+) {
+  try {
+    const headers = new Headers();
+    headers.set('Authorization', 'Bearer some-static-token');
+
+    // Correct way to build query parameters
+    const queryParams = new URLSearchParams();
+    queryParams.append('page', (currentPage).toString());
+    queryParams.append('limit', perPageData.toString());
+
+    const apiUrl = `${process.env.NEXT_PUBLIC_BASE_API_URL_PROD}/public/products-by-category/${slug}?${queryParams.toString()}`;
+    console.log(apiUrl);
+    const response = await fetch(apiUrl, {
+      headers,
+      cache: 'no-store',
+    });
+
+    if (!response.ok) {
+      throw new Error(`API request failed with status ${response.status}`);
+    }
+
+    const result = await response.json();
+
+    return {
+      products: result.data.products,
+      totalCount: result.data.pagination.totalItems,
+      page: result.data.pagination.currentPage,
+      totalPages: result.data.pagination.totalPages,
+    };
+  } catch (error) {
+    console.error('Error fetching products:', error);
+    throw error;
+  }
+}

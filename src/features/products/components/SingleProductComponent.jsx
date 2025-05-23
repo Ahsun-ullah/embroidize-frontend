@@ -1,6 +1,6 @@
 import LoadingSpinner from '@/components/Common/LoadingSpinner';
 import ProductCard from '@/components/Common/ProductCard';
-import { capitalize, queryString, slugify } from '@/utils/functions/page';
+import { capitalize } from '@/utils/functions/page';
 import { marked } from 'marked';
 import Link from 'next/link';
 import { Suspense } from 'react';
@@ -11,8 +11,9 @@ import { SingleProductImageCard } from './SingleProductImageCard';
 export const SingleProductComponent = async ({
   singleProductData,
   allProductData,
+  popularProducts,
 }) => {
-  console.log(singleProductData);
+  // console.log(singleProductData);
   const rawMarkup = marked(singleProductData?.description || '');
   return (
     <div className='container mx-auto px-4'>
@@ -24,7 +25,11 @@ export const SingleProductComponent = async ({
             { label: 'Product', href: '/products' },
             {
               label: `${capitalize(singleProductData?.category?.name)}`,
-              href: `/category/${slugify(singleProductData?.category?.name)}?id=${singleProductData?.category?._id}&searchQuery=${queryString(singleProductData?.category?.name)}`,
+              href: `/category/${singleProductData?.category?.slug}`,
+            },
+            {
+              label: `${capitalize(singleProductData?.sub_category?.name)}`,
+              href: `/${singleProductData?.category?.slug}/${singleProductData?.sub_category?.slug}`,
             },
             {
               label: `${capitalize(singleProductData?.name)}`,
@@ -143,25 +148,47 @@ export const SingleProductComponent = async ({
         {/* Right: Recommendations */}
         <Suspense fallback={<LoadingSpinner />}>
           <div className='w-full lg:w-1/2'>
-            <div>
+            {/* Relevant Designs */}
+            <div className='mb-10'>
               <div className='flex items-center justify-between mb-6'>
-                <h2 className='text-black text-lg font-semibold'>
-                  You May Also Like
+                <h2 className='text-black text-lg font-bold'>
+                  Relevant Designs
                 </h2>
                 <Link
-                  href={'/products'}
-                  className='text-sm text-blue-600 hover:underline'
+                  href={`/${singleProductData?.category?.slug}/${singleProductData?.sub_category?.slug}`}
+                  className='text-sm text-black underline'
                 >
-                  See More
+                  See All Designs
                 </Link>
               </div>
-
               <div className='grid grid-cols-1 sm:grid-cols-2 gap-4'>
-                {allProductData?.slice(0, 8).map((item, index) => (
-                  <ProductCard item={item} key={index} />
+                {allProductData?.slice(0, 6).map((item, index) => (
+                  <ProductCard item={item} key={`relevant-${index}`} />
                 ))}
               </div>
             </div>
+
+            {/* Most Popular Designs */}
+            <Suspense fallback={<LoadingSpinner />}>
+              <div>
+                <div className='flex items-center justify-between mb-6'>
+                  <h2 className='text-black text-lg font-bold'>
+                    Most Popular Designs
+                  </h2>
+                  <Link
+                    href='/products?filter=popular'
+                    className='text-sm text-black underline'
+                  >
+                    All Popular Designs
+                  </Link>
+                </div>
+                <div className='grid grid-cols-1 sm:grid-cols-2 gap-4'>
+                  {popularProducts?.slice(0, 4).map((item, index) => (
+                    <ProductCard item={item} key={`popular-${index}`} />
+                  ))}
+                </div>
+              </div>
+            </Suspense>
           </div>
         </Suspense>
       </div>

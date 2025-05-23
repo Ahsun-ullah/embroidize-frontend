@@ -40,8 +40,9 @@ export async function generateMetadata({ searchParams }) {
 
 export default function SearchPage({ searchParams }) {
   const searchQuery = searchParams.searchQuery || '';
-  const currentPage = parseInt(searchParams?.page || '0', 10);
-  const perPageData = 20;
+  const currentPage = parseInt(searchParams?.page) || 1;
+  const perPageData = parseInt(searchParams?.limit) || 20;
+
   const { products, totalCount, totalPages } = use(
     getProducts(searchQuery, currentPage || 0, perPageData),
   );

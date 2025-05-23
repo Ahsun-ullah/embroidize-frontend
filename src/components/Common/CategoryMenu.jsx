@@ -1,7 +1,6 @@
 'use client';
 
 import { useGetPublicProductCategoriesQuery } from '@/lib/redux/admin/categoryAndSubcategory/categoryAndSubcategorySlice';
-import { queryString, slugify } from '@/utils/functions/page';
 import Link from 'next/link';
 import { useMemo } from 'react';
 
@@ -14,10 +13,7 @@ export default function CategoryMenu({ isMobileMenuOpen }) {
   const categories = useMemo(() => categoryData?.data || [], [categoryData]);
 
   const renderCategoryLink = (category) => (
-    <Link
-      href={`/category/${slugify(category.name)}?id=${category._id}&searchQuery=${queryString(category.name)}`}
-      className='font-bold capitalize'
-    >
+    <Link href={`/category/${category.slug}`} className='font-bold capitalize'>
       {category.name}
     </Link>
   );
@@ -26,7 +22,7 @@ export default function CategoryMenu({ isMobileMenuOpen }) {
     category.subcategories?.map((sub) => (
       <li key={sub._id}>
         <Link
-          href={`/${slugify(category.name)}/${slugify(sub.name)}?id=${sub._id}&searchQuery=${queryString(sub.name)}`}
+          href={`/${category.slug}/${sub.slug}`}
           className='hover:underline capitalize'
         >
           {sub.name}
@@ -55,7 +51,7 @@ export default function CategoryMenu({ isMobileMenuOpen }) {
       {categories.slice(0, 8).map((category) => (
         <Link
           key={category._id}
-          href={`/category/${slugify(category.name)}?id=${category._id}&searchQuery=${queryString(category.name)}`}
+          href={`/category/${category.slug}`}
           className='capitalize'
         >
           {category.name}

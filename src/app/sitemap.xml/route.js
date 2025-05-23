@@ -2,7 +2,6 @@ import { getBlogs } from '@/lib/apis/public/blog';
 import { getCategories } from '@/lib/apis/public/category';
 import { getProducts } from '@/lib/apis/public/products';
 import { getSubCategories } from '@/lib/apis/public/subcategory';
-import { slugify } from '@/utils/functions/page';
 
 export async function GET() {
   try {
@@ -19,18 +18,13 @@ export async function GET() {
       '/privacy-policy',
       '/terms-and-conditions',
       '/products',
-      ...products.map(
-        (product) => `/product/${slugify(product.name)}?id=${product._id}`,
-      ),
-      ...categories.map(
-        (category) => `/category/${slugify(category.name)}?id=${category._id}`,
-      ),
+      ...products.map((product) => `/product/${product.slug}`),
+      ...categories.map((category) => `/category/${category.slug}`),
       ...subCategories.map(
-        (subCategory) =>
-          `/${slugify(subCategory?.category?.name)}/${slugify(subCategory.name)}?id=${subCategory._id}`,
+        (subCategory) => `/${subCategory?.category?.slug}/${subCategory.slug}`,
       ),
       '/blog',
-      ...blogs.map((blog) => `/blog/${slugify(blog.title)}?id=${blog._id}`),
+      ...blogs.map((blog) => `/blog/${blog.slug}`),
     ];
 
     function escapeXml(str) {

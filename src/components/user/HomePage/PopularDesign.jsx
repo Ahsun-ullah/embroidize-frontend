@@ -4,13 +4,7 @@ import { getPopularProducts } from '@/lib/apis/public/products';
 import Link from 'next/link';
 
 const PopularDesign = async () => {
-  const {
-    products: allProducts,
-    totalCount,
-    totalPages,
-  } = await getPopularProducts('', 0, 8);
-
-  console.log(allProducts);
+  const { products: allProducts } = await getPopularProducts('', 1, 8);
 
   return (
     <>

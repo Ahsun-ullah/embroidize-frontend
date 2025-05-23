@@ -1,15 +1,16 @@
 import Footer from '@/components/user/HomePage/Footer';
 import Header from '@/components/user/HomePage/Header';
 import { SingleProductComponent } from '@/features/products/components/SingleProductComponent';
-import { getProducts, getSingleProduct } from '@/lib/apis/public/products';
-import { slugify } from '@/utils/functions/page';
+import {
+  getPopularProducts,
+  getSingleProduct,
+} from '@/lib/apis/public/products';
+import { getAllProductsBySubCategory } from '@/lib/apis/public/subcategory';
 import { use } from 'react';
 
-export async function generateMetadata({ searchParams }) {
-  const { id } = await searchParams;
-
+export async function generateMetadata({ params }) {
   try {
-    const response = await getSingleProduct(id);
+    const response = await getSingleProduct(params.slug);
     const product = response?.data;
 
     if (!product) return {};
@@ -48,16 +49,21 @@ export async function generateMetadata({ searchParams }) {
   }
 }
 
-export default function ProductDetails({ searchParams }) {
-  const { id } = use(searchParams);
+export default function ProductDetails({ params }) {
+  const { slug } = use(params);
 
-  const response = use(getSingleProduct(id));
-  const categoryName = response?.data?.category?.name.split('-').join('+');
-
-  const { products } = use(getProducts(categoryName, 0, 10));
+  const response = use(getSingleProduct(slug));
   const product = response?.data;
 
+  const { products: allProductsBuSubcategory } = use(
+    getAllProductsBySubCategory(response?.data?.sub_category?.slug, 1, 6),
+  );
+
+  const popularProducts = use(getPopularProducts('', 1, 4));
+
   if (!product) return notFound();
+
+  console.log(popularProducts?.products);
 
   return (
     <>
@@ -72,7 +78,7 @@ export default function ProductDetails({ searchParams }) {
             description: product.meta_description || product.description,
             offers: {
               '@type': 'Offer',
-              url: `https://embroidize.com/product/${slugify(product.name)}?id=${product?._id}`,
+              url: `https://embroidize.com/product/${product.slug}`,
               priceCurrency: 'USD',
               price: product.price,
               availability: 'InStock',
@@ -84,7 +90,8 @@ export default function ProductDetails({ searchParams }) {
       <Header />
       <SingleProductComponent
         singleProductData={product}
-        allProductData={products}
+        allProductData={allProductsBuSubcategory}
+        popularProducts={popularProducts?.products}
       />
       <Footer />
     </>

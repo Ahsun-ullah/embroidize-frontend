@@ -5,11 +5,7 @@ import Link from 'next/link';
 import { use } from 'react';
 
 const RecentProductsSection = () => {
-  const {
-    products: allProducts,
-    totalCount,
-    totalPages,
-  } = use(getProducts('', 0, 8));
+  const { products: allProducts } = use(getProducts('', 1, 8));
 
   return (
     <>

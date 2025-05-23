@@ -1,11 +1,11 @@
-export async function getBlogs(searchQuery, currentPage = 0, perPageData = 8) {
+export async function getBlogs(searchQuery, currentPage, perPageData) {
   try {
     const headers = new Headers();
     headers.set('Authorization', 'Bearer some-static-token');
 
     const queryParams = new URLSearchParams();
     if (searchQuery) queryParams.append('search', searchQuery);
-    queryParams.append('page', (currentPage + 1).toString());
+    queryParams.append('page', currentPage.toString());
     queryParams.append('limit', perPageData.toString());
 
     const apiUrl = `${process.env.NEXT_PUBLIC_BASE_API_URL_PROD}/public/blog?${queryParams.toString()}`;
@@ -22,10 +22,10 @@ export async function getBlogs(searchQuery, currentPage = 0, perPageData = 8) {
     const result = await response.json();
 
     return {
-      blogs: result.data,
-      //   totalCount: result.meta.length,
-      //   page: result.meta.page,
-      //   totalPages: result.data.meta.totalPages,
+      blogs: result.data.blogs,
+      totalCount: result.data.pagination.totalItems,
+      page: result.data.pagination.currentPage,
+      totalPages: result.data.pagination.totalPages,
     };
   } catch (error) {
     console.error('Error fetching blogs:', error);
@@ -33,13 +33,13 @@ export async function getBlogs(searchQuery, currentPage = 0, perPageData = 8) {
   }
 }
 
-export async function getSingleBlog(blogId) {
+export async function getSingleBlog(slug) {
   try {
     const headers = new Headers();
     headers.set('Authorization', 'Bearer some-static-token');
 
     const response = await fetch(
-      `${process.env.NEXT_PUBLIC_BASE_API_URL_PROD}/public/blog/${blogId}`,
+      `${process.env.NEXT_PUBLIC_BASE_API_URL_PROD}/public/blog/${slug}`,
       {
         headers,
         cache: 'no-store',

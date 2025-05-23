@@ -1,10 +1,13 @@
+import LoadingSpinner from '@/components/Common/LoadingSpinner';
 import BlogSection from '@/components/user/HomePage/BlogSection';
 import Footer from '@/components/user/HomePage/Footer';
 import { Header } from '@/components/user/HomePage/Header';
 import HeroSection from '@/components/user/HomePage/HeroSection';
 import PopularDesign from '@/components/user/HomePage/PopularDesign';
 import RecentProductsSection from '@/components/user/HomePage/RecentProductsSection';
+import { getBlogs } from '@/lib/apis/public/blog';
 import Link from 'next/link';
+import { Suspense, use } from 'react';
 export const dynamic = 'force-dynamic';
 export const fetchCache = 'force-no-store';
 
@@ -46,13 +49,17 @@ export const metadata = {
 };
 
 export default function Home() {
+  const { blogs } = use(getBlogs('', 1, 3));
   return (
     <>
       <Header />
       <HeroSection />
       <PopularDesign />
       <RecentProductsSection />
-      <BlogSection />
+
+      <Suspense fallback={<LoadingSpinner />}>
+        <BlogSection blogs={blogs} />
+      </Suspense>
 
       <div className='flex justify-center items-center my-10'>
         <Link

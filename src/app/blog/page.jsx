@@ -1,6 +1,9 @@
+import Pagination from '@/components/Common/Pagination';
 import BlogSection from '@/components/user/HomePage/BlogSection';
 import Footer from '@/components/user/HomePage/Footer';
 import Header from '@/components/user/HomePage/Header';
+import { getBlogs } from '@/lib/apis/public/blog';
+import { use } from 'react';
 
 export const metadata = {
   title: 'Blog | Embroidize',
@@ -30,11 +33,24 @@ export const metadata = {
   },
 };
 
-export default function AllBlogsPageInFrontSite() {
+export default function AllBlogsPageInFrontSite(searchParams) {
+  const currentPage = parseInt(searchParams?.page) || 1;
+  const perPageData = parseInt(searchParams?.limit) || 10;
+  const { blogs, totalPages } = use(getBlogs('', currentPage, perPageData));
+
   return (
     <>
       <Header />
-      <BlogSection />
+      <BlogSection blogs={blogs} />
+      {blogs.length > 0 && (
+        <div className='flex items-center justify-center my-6'>
+          <Pagination
+            currentPage={currentPage?.page}
+            perPageData={perPageData}
+            totalPages={totalPages}
+          />
+        </div>
+      )}
       <Footer />
     </>
   );

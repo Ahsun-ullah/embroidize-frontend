@@ -1,10 +1,6 @@
 import BlogCard from '@/components/Common/BlogCard';
-import { getBlogs } from '@/lib/apis/public/blog';
-import { use } from 'react';
 
-const BlogSection = () => {
-  const { blogs } = use(getBlogs());
-
+const BlogSection = ({ blogs }) => {
   return (
     <>
       <section className='bg-blue-50 text-black my-8 py-6'>
@@ -12,7 +8,9 @@ const BlogSection = () => {
           <h1 className='text-3xl font-bold'>Latest From Blog</h1>
         </div>
         <div className='flex items-center justify-center mt-4'>
-          <p className='font-bold text-lg text-center'>Tips, Trends & Tutorials You’ll Love</p>
+          <p className='font-bold text-lg text-center'>
+            Tips, Trends & Tutorials You’ll Love
+          </p>
         </div>
       </section>
       <section className='text-black my-8 py-6'>

@@ -6,8 +6,8 @@ import Image from 'next/image';
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
 
-export async function generateMetadata({ searchParams }) {
-  const blogData = await getSingleBlog(searchParams.id);
+export async function generateMetadata({ params }) {
+  const blogData = await getSingleBlog(params?.slug);
   const blog = blogData?.blogs;
 
   if (!blog) return {};
@@ -31,15 +31,13 @@ export async function generateMetadata({ searchParams }) {
       card: 'summary_large_image',
       title: blog?.meta_title || blog?.title,
       description: blog?.meta_description || blog?.description,
-      images: [
-        blog?.image?.url || 'https://embroidize.com/og-banner.jpg',
-      ],
+      images: [blog?.image?.url || 'https://embroidize.com/og-banner.jpg'],
     },
   };
 }
 
-export default async function SingleBlogPage({ searchParams }) {
-  const blogData = await getSingleBlog(searchParams.id);
+export default async function SingleBlogPage({ params }) {
+  const blogData = await getSingleBlog(params.slug);
   const blog = blogData?.blogs;
 
   if (!blog) return notFound();
@@ -50,36 +48,42 @@ export default async function SingleBlogPage({ searchParams }) {
     <>
       <Header />
 
-      <div className='container prose prose-lg mx-auto py-12'>
-        <button className='mb-6'>
-          <Link href='/blog' className='button'>
-            ← Back to Blog
-          </Link>
-        </button>
+      <div className='container mx-auto px-4 py-12 max-w-5xl'>
+        <Link
+          href='/blog'
+          className='button inline-block mb-6 text-base font-medium'
+        >
+          ← Back to Blog
+        </Link>
 
-        <div className='w-full aspect-[16/9] relative mb-6 rounded-lg shadow overflow-hidden'>
+        {/* Blog Cover Image */}
+        <div className='relative w-full aspect-[16/9] mb-6 rounded-lg overflow-hidden shadow-md'>
           <Image
-            src={blog.image?.url || '/images.jpg'}
-            alt={blog.title}
+            src={blog?.image?.url || 'https://embroidize.com/og-banner.jpg'}
+            alt={blog?.title}
             fill
             className='object-cover'
             priority
+            sizes='(max-width: 768px) 100vw, 700px'
           />
         </div>
 
-        <h1 className='text-4xl font-bold mb-2'>{blog.title}</h1>
+        {/* Blog Title */}
+        <h1 className='text-4xl font-bold mb-2 leading-tight'>{blog?.title}</h1>
+
+        {/* Blog Date */}
         <p className='text-sm text-gray-500 mb-6'>
-          By{' '}
-          {new Date(blog.createdAt).toLocaleDateString('en-US', {
+          {new Date(blog?.createdAt).toLocaleDateString('en-US', {
             year: 'numeric',
             month: 'long',
             day: 'numeric',
           })}
         </p>
 
-        <pre
+        {/* Blog Content */}
+        <div
+          className='prose max-w-none prose-lg text-gray-800'
           dangerouslySetInnerHTML={{ __html: rawMarkup }}
-          className='prose max-w-none break-words whitespace-pre-wrap font-sans text-lg'
         />
       </div>
 

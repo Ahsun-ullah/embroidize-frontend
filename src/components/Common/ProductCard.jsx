@@ -1,6 +1,5 @@
 'use client';
 
-import { slugify } from '@/utils/functions/page';
 import { Divider } from '@heroui/react';
 import Image from 'next/image';
 import Link from 'next/link';
@@ -9,8 +8,7 @@ export default function ProductCard({ item }) {
   if (!item || !item._id || !item.name) return null;
 
   const imageUrl = item?.image?.url || '/category.jpg';
-  const productSlug = slugify(item.name);
-  const productLink = `/product/${productSlug}?id=${item._id}`;
+  const productLink = `/product/${item.slug}`;
   const productName = item.name;
   const categoryName = item?.category?.name || 'Uncategorized';
   const isFree = item?.price === 0;
