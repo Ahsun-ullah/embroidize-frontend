@@ -11,14 +11,14 @@ const PopularDesign = async () => {
       <ProductUpdates />
       <section className='bg-blue-50 text-black my-8 py-6'>
         <div className='flex items-center justify-center'>
-          <h1 className='text-3xl font-bold text-center'>
+          <h4 className='text-3xl font-bold text-center'>
             Popular embroidery designs
-          </h1>
+          </h4>
         </div>
         <div className='flex items-center justify-center mt-4'>
-          <h3 className='font-semibold text-center'>
+          <h4 className='font-semibold text-center'>
             Browse Our Most Loved Designs.
-          </h3>
+          </h4>
         </div>
       </section>
 

@@ -13,10 +13,10 @@ export async function generateMetadata({ params }) {
   if (!blog) return {};
 
   return {
-    title: blog?.meta_title || blog?.title,
+    title: blog?.meta_title,
     description: blog?.meta_description,
     openGraph: {
-      title: blog?.meta_title || blog?.title,
+      title: blog?.meta_title,
       description: blog?.meta_description,
       images: [
         {
@@ -29,8 +29,8 @@ export async function generateMetadata({ params }) {
     },
     twitter: {
       card: 'summary_large_image',
-      title: blog?.meta_title || blog?.title,
-      description: blog?.meta_description || blog?.description,
+      title: blog?.meta_title,
+      description: blog?.meta_description,
       images: [blog?.image?.url || 'https://embroidize.com/og-banner.jpg'],
     },
   };

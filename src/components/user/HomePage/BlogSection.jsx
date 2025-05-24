@@ -5,7 +5,7 @@ const BlogSection = ({ blogs }) => {
     <>
       <section className='bg-blue-50 text-black my-8 py-6'>
         <div className='flex items-center justify-center'>
-          <h1 className='text-3xl font-bold'>Latest From Blog</h1>
+          <h4 className='text-3xl font-bold'>Latest From Blog</h4>
         </div>
         <div className='flex items-center justify-center mt-4'>
           <p className='font-bold text-lg text-center'>
