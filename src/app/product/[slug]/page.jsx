@@ -7,7 +7,6 @@ import {
   getSingleProduct,
 } from '@/lib/apis/public/products';
 import { getAllProductsBySubCategory } from '@/lib/apis/public/subcategory';
-import Head from 'next/head';
 import { notFound } from 'next/navigation';
 
 export async function generateMetadata({ params }) {
@@ -89,12 +88,12 @@ export default async function ProductDetails({ params }) {
 
   return (
     <>
-      <Head>
+      <head>
         <script
           type='application/ld+json'
           dangerouslySetInnerHTML={{ __html: JSON.stringify(schema) }}
         />
-      </Head>
+      </head>
 
       <Header />
       <SingleProductComponent
