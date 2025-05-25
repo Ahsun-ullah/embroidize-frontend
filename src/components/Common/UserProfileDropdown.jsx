@@ -6,7 +6,6 @@ import {
 } from '@/lib/redux/common/user/userInfoSlice';
 import {
   Avatar,
-  Button,
   Divider,
   Dropdown,
   DropdownItem,
@@ -153,18 +152,13 @@ export default function UserProfileDropdown() {
         ) : (
           <NavbarContent>
             <NavbarItem>
-              <Button
-                as={Link}
-                color='primary'
+              <Link
                 href='/auth/login'
-                variant='flat'
-                size='md'
-                radius='full'
-                className='bg-black text-white hover:bg-slate-700 font-bold px-4 text-base'
+                className='bg-black text-white hover:bg-slate-600  font-bold px-4 py-2 text-base sm:text-sm md:text-md lg:text-lg xl:text-xl rounded-full'
                 aria-label='Sign in'
               >
                 Sign In
-              </Button>
+              </Link>
             </NavbarItem>
           </NavbarContent>
         )}
