@@ -55,55 +55,73 @@ export const metadata = {
 
 export default function Home() {
   const { blogs } = use(getBlogs('', 1, 3));
-  
+
   return (
     <>
-      <Suspense fallback={<LoadingSpinner />}>
-        <ProductUpdates />
-      </Suspense>
+      <ProductUpdates />
 
       <Header />
       <HeroSection />
 
-      <section aria-labelledby='popular-designs-heading'>
-        <h2 id='popular-designs-heading' className='sr-only'>
-          Popular Designs
-        </h2>
-        <Suspense fallback={<LoadingSpinner />}>
-          <PopularDesign />
-        </Suspense>
-      </section>
-
-      <section aria-labelledby='recent-products-heading'>
-        <h2 id='recent-products-heading' className='sr-only'>
-          Recent Products
-        </h2>
-        <Suspense fallback={<LoadingSpinner />}>
-          <RecentProductsSection />
-        </Suspense>
-      </section>
-
-      <section aria-labelledby='blog-section-heading'>
-        <h2 id='blog-section-heading' className='sr-only'>
-          Latest Blog Posts
-        </h2>
-        <Suspense fallback={<LoadingSpinner />}>
-          <BlogSection blogs={blogs} />
-        </Suspense>
-
-        <div className='flex justify-center items-center my-10'>
-          <Link
-            href='/blog'
-            className='bg-black rounded-full hover:bg-blue-400 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-blue-500 transition-colors text-white font-medium px-6 py-2'
+      <section className='bg-blue-50 text-black my-8 py-6'>
+        <div className='flex items-center justify-center'>
+          <h4
+            id='popular-designs-heading'
+            className='text-3xl font-bold text-center'
           >
-            View All
-          </Link>
+            Popular embroidery designs
+          </h4>
+        </div>
+        <div className='flex items-center justify-center mt-4'>
+          <h4 className='font-semibold text-center'>
+            Browse Our Most Loved Designs.
+          </h4>
         </div>
       </section>
+      <PopularDesign />
 
-      <Suspense fallback={<LoadingSpinner />}>
-        <Footer />
-      </Suspense>
+      <section className='bg-blue-50 text-black my-8 py-6'>
+        <div className='flex items-center justify-center'>
+          <h4 className='text-3xl font-bold text-center'>
+            Recent Approved Products
+          </h4>
+        </div>
+        <div className='flex items-center justify-center mt-4'>
+          <h4 className='font-semibold text-center'>
+            Our Newest Creations, Just for You.
+          </h4>
+        </div>
+      </section>
+      <RecentProductsSection />
+
+      {blogs && blogs?.length > 0 && (
+        <>
+          <section className='bg-blue-50 text-black my-8 py-6'>
+            <div className='flex items-center justify-center'>
+              <h4 className='text-3xl font-bold'>Latest From Blog</h4>
+            </div>
+            <div className='flex items-center justify-center mt-4'>
+              <p className='font-bold text-lg text-center'>
+                Tips, Trends & Tutorials You’ll Love
+              </p>
+            </div>
+          </section>
+          <Suspense fallback={<LoadingSpinner />}>
+            <BlogSection blogs={blogs} />
+          </Suspense>
+
+          <div className='flex justify-center items-center my-10'>
+            <Link
+              href='/blog'
+              className='bg-black rounded-full hover:bg-blue-400 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-blue-500 transition-colors text-white font-medium px-6 py-2'
+            >
+              View All
+            </Link>
+          </div>
+        </>
+      )}
+
+      <Footer />
     </>
   );
 }

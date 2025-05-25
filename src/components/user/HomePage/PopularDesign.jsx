@@ -9,19 +9,6 @@ const PopularDesign = async () => {
 
   return (
     <>
-      <section className='bg-blue-50 text-black my-8 py-6'>
-        <div className='flex items-center justify-center'>
-          <h4 className='text-3xl font-bold text-center'>
-            Popular embroidery designs
-          </h4>
-        </div>
-        <div className='flex items-center justify-center mt-4'>
-          <h4 className='font-semibold text-center'>
-            Browse Our Most Loved Designs.
-          </h4>
-        </div>
-      </section>
-
       <section className='text-black my-8 py-6'>
         <div className='container mx-auto px-4'>
           <div className='grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6'>
