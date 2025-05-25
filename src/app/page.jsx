@@ -8,6 +8,7 @@ import RecentProductsSection from '@/components/user/HomePage/RecentProductsSect
 import { getBlogs } from '@/lib/apis/public/blog';
 import Link from 'next/link';
 import { Suspense, use } from 'react';
+import ProductUpdates from './products/ProductUpdates';
 export const dynamic = 'force-dynamic';
 export const fetchCache = 'force-no-store';
 
@@ -23,10 +24,14 @@ export const metadata = {
     'Machine embroidery patterns',
     'free embroidery files',
   ],
+  robots: 'index, follow',
+  alternates: {
+    canonical: 'https://embroidize.com/',
+  },
   openGraph: {
     title: 'Free Machine Embroidery Designs - Embroidize',
     description:
-      'Download free embroidery designs instantly – Browse unlimited machine embroidery Design in multiple categories and styles. All designs are tested and come in the most popular formats.',
+      'Download free embroidery designs instantly – Browse unlimited machine embroidery Design in multiple categories and styles.',
     url: 'https://embroidize.com/',
     siteName: 'Embroidize',
     images: [
@@ -43,34 +48,62 @@ export const metadata = {
     card: 'summary_large_image',
     title: 'Free Embroidery Machine Designs',
     description:
-      'Download free embroidery designs instantly – Browse unlimited machine embroidery Design in multiple categories and styles. All designs are tested and come in the most popular formats.',
+      'Download free embroidery designs instantly – Browse unlimited machine embroidery Design in multiple categories and styles.',
     images: ['https://embroidize.com/og-banner.jpg'],
   },
 };
 
 export default function Home() {
   const { blogs } = use(getBlogs('', 1, 3));
+  
   return (
     <>
-      <Header />
-      <HeroSection />
-      <PopularDesign />
-      <RecentProductsSection />
-
       <Suspense fallback={<LoadingSpinner />}>
-        <BlogSection blogs={blogs} />
+        <ProductUpdates />
       </Suspense>
 
-      <div className='flex justify-center items-center my-10'>
-        <Link
-          href='/blog'
-          className='bg-black rounded-full hover:bg-blue-400 transition-colors text-white font-medium px-6 py-2'
-        >
-          View All
-        </Link>
-      </div>
+      <Header />
+      <HeroSection />
 
-      <Footer />
+      <section aria-labelledby='popular-designs-heading'>
+        <h2 id='popular-designs-heading' className='sr-only'>
+          Popular Designs
+        </h2>
+        <Suspense fallback={<LoadingSpinner />}>
+          <PopularDesign />
+        </Suspense>
+      </section>
+
+      <section aria-labelledby='recent-products-heading'>
+        <h2 id='recent-products-heading' className='sr-only'>
+          Recent Products
+        </h2>
+        <Suspense fallback={<LoadingSpinner />}>
+          <RecentProductsSection />
+        </Suspense>
+      </section>
+
+      <section aria-labelledby='blog-section-heading'>
+        <h2 id='blog-section-heading' className='sr-only'>
+          Latest Blog Posts
+        </h2>
+        <Suspense fallback={<LoadingSpinner />}>
+          <BlogSection blogs={blogs} />
+        </Suspense>
+
+        <div className='flex justify-center items-center my-10'>
+          <Link
+            href='/blog'
+            className='bg-black rounded-full hover:bg-blue-400 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-blue-500 transition-colors text-white font-medium px-6 py-2'
+          >
+            View All
+          </Link>
+        </div>
+      </section>
+
+      <Suspense fallback={<LoadingSpinner />}>
+        <Footer />
+      </Suspense>
     </>
   );
 }

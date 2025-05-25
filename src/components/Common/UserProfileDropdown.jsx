@@ -1,4 +1,5 @@
 'use client';
+
 import {
   userInfoSlice,
   useUserInfoQuery,
@@ -17,6 +18,7 @@ import {
 } from '@heroui/react';
 import Cookies from 'js-cookie';
 import Link from 'next/link';
+import { useRouter } from 'next/navigation';
 import { useEffect } from 'react';
 import { useDispatch } from 'react-redux';
 import LoadingSpinner from './LoadingSpinner';
@@ -25,6 +27,7 @@ export default function UserProfileDropdown() {
   const token = Cookies.get('token');
   const isLoggedIn = !!token;
   const dispatch = useDispatch();
+  const router = useRouter();
 
   const {
     data: userInfoData,
@@ -40,31 +43,39 @@ export default function UserProfileDropdown() {
     }
   }, [isLoggedIn, userInfoRefetch]);
 
+  const handleLogout = () => {
+    Cookies.remove('token');
+    dispatch(userInfoSlice.util.resetApiState());
+    router.push('/'); // Redirect to homepage after logout
+  };
+
   if (isLoading) {
-    return <LoadingSpinner />;
+    return (
+      <NavbarContent>
+        <LoadingSpinner />
+      </NavbarContent>
+    );
   }
 
   if (userInfoData?.role === 'admin') {
     return (
-      <Link
-        href={'/admin'}
-        className='button text-sm sm:text-sm md:text-lg xl:text-xl'
-      >
-        dashboard
-      </Link>
+      <NavbarContent>
+        <Link
+          href='/admin'
+          className='button text-sm sm:text-sm md:text-lg xl:text-xl'
+          aria-label='Go to admin dashboard'
+        >
+          Dashboard
+        </Link>
+      </NavbarContent>
     );
   }
-
-  const handleLogout = () => {
-    Cookies.remove('token');
-    dispatch(userInfoSlice.util.resetApiState());
-  };
 
   return (
     <div>
       <NavbarMenuItem>
         {isLoggedIn && userInfoData?.email ? (
-          <Dropdown placement='bottom-start' className='text-black '>
+          <Dropdown placement='bottom-start' className='text-black'>
             <DropdownTrigger>
               <Avatar
                 isBordered
@@ -74,13 +85,14 @@ export default function UserProfileDropdown() {
                 name={userInfoData?.name}
                 size='sm'
                 src={userInfoData?.profile_image?.url}
+                aria-label='User profile menu'
               />
             </DropdownTrigger>
             <DropdownMenu>
               <DropdownItem
                 isBordered
                 key='profile'
-                className='p-3 gap-2 border-dashed '
+                className='p-3 gap-2 border-dashed'
               >
                 <div className='flex items-center gap-x-4 text-base'>
                   <Avatar
@@ -91,6 +103,7 @@ export default function UserProfileDropdown() {
                     name={userInfoData?.name}
                     size='sm'
                     src={userInfoData?.profile_image?.url}
+                    aria-hidden='true'
                   />
                   <div>
                     <p className='font-semibold'>{userInfoData?.name}</p>
@@ -101,19 +114,19 @@ export default function UserProfileDropdown() {
 
               <DropdownItem>
                 <Link
-                  href={`/user/user-details?tabName=account`}
+                  href='/user/user-details?tabName=account'
                   className='flex text-base gap-1 font-medium'
                 >
-                  <i className='ri-account-circle-fill'></i>
+                  <i className='ri-account-circle-fill' aria-hidden='true'></i>
                   Account
                 </Link>
               </DropdownItem>
               <DropdownItem>
                 <Link
-                  href={`/user/user-details?tabName=downloads`}
+                  href='/user/user-details?tabName=downloads'
                   className='flex text-base gap-1 font-medium'
                 >
-                  <i className='ri-download-fill'></i>
+                  <i className='ri-download-fill' aria-hidden='true'></i>
                   Downloads
                 </Link>
               </DropdownItem>
@@ -126,10 +139,13 @@ export default function UserProfileDropdown() {
                 className='p-2'
                 color='danger'
               >
-                <button onClick={handleLogout}>
-                  <span className='font-semibold flex text-base gap-1'>
-                    Log Out
-                  </span>
+                <button
+                  onClick={handleLogout}
+                  type='button'
+                  className='font-semibold flex text-base gap-1 w-full'
+                  aria-label='Log out'
+                >
+                  Log Out
                 </button>
               </DropdownItem>
             </DropdownMenu>
@@ -145,6 +161,7 @@ export default function UserProfileDropdown() {
                 size='md'
                 radius='full'
                 className='bg-black text-white hover:bg-slate-700 font-bold px-4 text-base'
+                aria-label='Sign in'
               >
                 Sign In
               </Button>

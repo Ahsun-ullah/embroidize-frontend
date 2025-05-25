@@ -16,7 +16,7 @@ const Footer = () => {
             <Image
               src={mainLogo || ''}
               alt='Company Logo'
-              layout='fill'
+              fill
               sizes='(min-width: 640px) 100px, 120px'
               priority
               className='object-contain'

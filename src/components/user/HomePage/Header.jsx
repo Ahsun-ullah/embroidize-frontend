@@ -16,6 +16,8 @@ import mainLogo from '../../../../public/logo-black.png';
 export const Header = () => {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
 
+  const toggleMenu = () => setIsMobileMenuOpen((prev) => !prev);
+
   return (
     <>
       <HeroUINavbar maxWidth='full' className='h-[5.5rem] z-50'>
@@ -23,39 +25,43 @@ export const Header = () => {
           <NavbarContent justify='start' className='flex-1'>
             <Link
               href='/'
-              className='relative block w-[20px] h-[80px] sm:w-[80px] sm:h-[80px] md:w-[120px] md:h-[120px]'
-              aria-label='Navigate to homepage'
+              aria-label='Go to homepage'
+              className='relative w-[80px] h-[60px] md:w-[120px] md:h-[80px]'
             >
               <Image
                 src={mobileLogo}
-                alt='Mobile Company Logo'
+                alt='Embroidize Logo'
                 fill
-                sizes='(max-width: 640px) 80px'
                 priority
+                sizes='(max-width: 640px) 80px'
                 className='object-contain block sm:hidden'
               />
               <Image
                 src={mainLogo}
-                alt='Desktop Company Logo'
+                alt='Embroidize Logo'
                 fill
-                sizes='(min-width: 640px) 100px, 120px'
                 priority
+                sizes='(min-width: 640px) 120px'
                 className='object-contain hidden sm:block'
               />
             </Link>
 
-            {/* Toggle Category Menu Button */}
-            <div className='sm:flex items-center gap-x-2 text-base font-semibold text-gray-700  sm:ms-6 md:ms-8'>
+            {/* Category Menu Toggle */}
+            <div className='sm:flex items-center gap-x-2 text-base font-semibold text-gray-700 sm:ms-6 md:ms-8'>
               <button
-                onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
-                className='flex items-center gap-2 text-gray-800'
+                onClick={toggleMenu}
+                className='flex items-center gap-2 text-gray-800 focus:outline-none focus-visible:ring focus-visible:ring-blue-400 rounded'
+                aria-expanded={isMobileMenuOpen}
+                aria-controls='category-menu'
+                type='button'
               >
-                {isMobileMenuOpen ? (
-                  <i className='ri-menu-2-line' />
-                ) : (
-                  <i className='ri-menu-3-line' />
-                )}
-                <span className='hidden sm:flex'>Categories</span>
+                <i
+                  className={`${
+                    isMobileMenuOpen ? 'ri-menu-2-line' : 'ri-menu-3-line'
+                  }`}
+                  aria-hidden='true'
+                />
+                <span className='hidden sm:inline'>Categories</span>
               </button>
             </div>
           </NavbarContent>
@@ -72,7 +78,10 @@ export const Header = () => {
 
       <Divider className='bg-gray-300' />
 
-      <div className='bg-white overflow-auto transition-all ease-out duration-500 transform'>
+      <div
+        id='category-menu'
+        className='bg-white overflow-auto transition-all ease-out duration-500 transform'
+      >
         <CategoryMenu isMobileMenuOpen={isMobileMenuOpen} />
       </div>
 

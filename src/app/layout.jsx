@@ -10,6 +10,7 @@ const inter = Inter({ subsets: ['latin'], display: 'swap' });
 export const metadata = {
   title: 'Free Machine Embroidery Designs - Embroidize',
   description: 'Download free embroidery machine designs in multiple formats.',
+  metadataBase: new URL('https://embroidize.com'),
   openGraph: {
     title: 'Free Machine Embroidery Designs - Embroidize',
     description: 'Explore and download premium free embroidery designs.',
@@ -20,6 +21,7 @@ export const metadata = {
         url: 'https://embroidize.com/og-banner.jpg',
         width: 1200,
         height: 630,
+        alt: 'Embroidize - Free Embroidery Designs',
       },
     ],
     type: 'website',
@@ -30,21 +32,26 @@ export const metadata = {
     description: 'Explore and download premium free embroidery designs.',
     images: ['https://embroidize.com/og-banner.jpg'],
   },
-  metadataBase: new URL('https://embroidize.com'),
+  icons: {
+    icon: '/favicon.png',
+  },
+  verification: {
+    google: 'hVDO2LwJX8GOqQ809KdHmfVZ96gxwrrSC8J80OhLD-k',
+    other: {
+      'p:domain_verify': 'a417c3036823eb607157878ef76fc2b0',
+    },
+  },
 };
 
 export default function RootLayout({ children }) {
   return (
-    <html lang='en'>
-      <head>
-        {/* Domain Verification */}
-        <meta
-          name='p:domain_verify'
-          content='a417c3036823eb607157878ef76fc2b0'
-        />
-        <meta name="google-site-verification" content="hVDO2LwJX8GOqQ809KdHmfVZ96gxwrrSC8J80OhLD-k" />
-      </head>
-      <body className={inter.className} suppressHydrationWarning>
+    <html lang='en' className='scroll-smooth'>
+      <head />
+
+      <body
+        className={`${inter.className} antialiased text-gray-900 bg-white`}
+        suppressHydrationWarning
+      >
         {/* Google Analytics */}
         <Script
           src='https://www.googletagmanager.com/gtag/js?id=G-BJ81WDRVP5'
@@ -58,14 +65,18 @@ export default function RootLayout({ children }) {
               window.dataLayer = window.dataLayer || [];
               function gtag(){dataLayer.push(arguments);}
               gtag('js', new Date());
-              gtag('config', 'G-BJ81WDRVP5');
+              gtag('config', 'G-BJ81WDRVP5', {
+                page_path: window.location.pathname,
+              });
             `,
           }}
         />
 
         <StoreProvider>
           <UiProvider>
-            <main className='min-h-screen'>{children}</main>
+            <main id='main-content' className='min-h-screen focus:outline-none'>
+              {children}
+            </main>
           </UiProvider>
         </StoreProvider>
       </body>

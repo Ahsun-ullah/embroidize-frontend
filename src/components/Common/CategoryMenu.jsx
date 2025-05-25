@@ -32,31 +32,37 @@ export default function CategoryMenu({ isMobileMenuOpen }) {
 
   if (!categories.length) return null;
 
-  return isMobileMenuOpen ? (
-    <div className='container mx-auto flex flex-wrap items-center justify-center'>
-      <div className='grid grid-cols-2 sm:grid-cols-6 gap-6 p-6 text-sm'>
-        {categories.map((category) => (
-          <div
-            key={category._id}
-            className='space-y-4 border-r border-gray-300 pr-4'
-          >
-            {renderCategoryLink(category)}
-            <ul className='space-y-2'>{renderSubcategoryLinks(category)}</ul>
+  return (
+    <nav aria-label='Category menu'>
+      {isMobileMenuOpen ? (
+        <div className='container mx-auto flex flex-wrap items-center justify-center'>
+          <div className='grid grid-cols-2 sm:grid-cols-6 gap-6 p-6 text-sm'>
+            {categories.map((category) => (
+              <div
+                key={category._id}
+                className='space-y-4 border-r border-gray-300 pr-4'
+              >
+                {renderCategoryLink(category)}
+                <ul className='space-y-2'>
+                  {renderSubcategoryLinks(category)}
+                </ul>
+              </div>
+            ))}
           </div>
-        ))}
-      </div>
-    </div>
-  ) : (
-    <div className='container hidden sm:flex flex-wrap items-center justify-center gap-x-10 py-4'>
-      {categories.slice(0, 8).map((category) => (
-        <Link
-          key={category._id}
-          href={`/category/${category.slug}`}
-          className='capitalize'
-        >
-          {category.name}
-        </Link>
-      ))}
-    </div>
+        </div>
+      ) : (
+        <div className='container hidden sm:flex flex-wrap items-center justify-center gap-x-10 py-4'>
+          {categories.slice(0, 8).map((category) => (
+            <Link
+              key={category._id}
+              href={`/category/${category.slug}`}
+              className='capitalize'
+            >
+              {category.name}
+            </Link>
+          ))}
+        </div>
+      )}
+    </nav>
   );
 }

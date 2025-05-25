@@ -1,14 +1,14 @@
-import ProductUpdates from '@/app/products/ProductUpdates';
+import LoadingSpinner from '@/components/Common/LoadingSpinner';
 import ProductCard from '@/components/Common/ProductCard';
 import { getPopularProducts } from '@/lib/apis/public/products';
 import Link from 'next/link';
+import { Suspense } from 'react';
 
 const PopularDesign = async () => {
   const { products: allProducts } = await getPopularProducts('', 1, 8);
 
   return (
     <>
-      <ProductUpdates />
       <section className='bg-blue-50 text-black my-8 py-6'>
         <div className='flex items-center justify-center'>
           <h4 className='text-3xl font-bold text-center'>
@@ -25,10 +25,12 @@ const PopularDesign = async () => {
       <section className='text-black my-8 py-6'>
         <div className='container mx-auto px-4'>
           <div className='grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6'>
-            {allProducts?.length > 0 &&
-              allProducts.map((item, index) => (
-                <ProductCard key={item._id || index} item={item} />
-              ))}
+            <Suspense fallback={<LoadingSpinner />}>
+              {allProducts?.length > 0 &&
+                allProducts.map((item, index) => (
+                  <ProductCard key={item._id || index} item={item} />
+                ))}
+            </Suspense>
           </div>
           <div className='flex justify-center items-center mt-14'>
             <Link
