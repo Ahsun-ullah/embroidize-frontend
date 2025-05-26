@@ -6,6 +6,7 @@ import {
 } from '@/lib/redux/common/user/userInfoSlice';
 import {
   Avatar,
+  Button,
   Divider,
   Dropdown,
   DropdownItem,
@@ -18,21 +19,15 @@ import {
 import Cookies from 'js-cookie';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
-import { useEffect, useState } from 'react';
+import { useEffect } from 'react';
 import { useDispatch } from 'react-redux';
 import LoadingSpinner from './LoadingSpinner';
 
 export default function UserProfileDropdown() {
+  const token = Cookies.get('token');
+  const isLoggedIn = !!token;
   const dispatch = useDispatch();
   const router = useRouter();
-
-  const [isLoggedIn, setIsLoggedIn] = useState(false);
-  const [isReady, setIsReady] = useState(false);
-
-  useEffect(() => {
-    setIsLoggedIn(!!Cookies.get('token'));
-    setIsReady(true);
-  }, []);
 
   const {
     data: userInfoData,
@@ -51,12 +46,10 @@ export default function UserProfileDropdown() {
   const handleLogout = () => {
     Cookies.remove('token');
     dispatch(userInfoSlice.util.resetApiState());
-    router.push('/');
+    router.push('/'); // Redirect to homepage after logout
   };
 
-  if (!isReady) return null;
-
-  if (isLoggedIn && isLoading) {
+  if (isLoading) {
     return (
       <NavbarContent>
         <LoadingSpinner />
@@ -66,15 +59,12 @@ export default function UserProfileDropdown() {
 
   if (userInfoData?.role === 'admin') {
     return (
-      <NavbarContent>
-        <Link
-          href='/admin'
-          className='button text-sm sm:text-sm md:text-lg xl:text-xl'
-          aria-label='Go to admin dashboard'
-        >
-          Dashboard
-        </Link>
-      </NavbarContent>
+      <Link
+        href={'/admin'}
+        className='button text-sm sm:text-sm md:text-lg xl:text-xl'
+      >
+        dashboard
+      </Link>
     );
   }
 
@@ -104,6 +94,8 @@ export default function UserProfileDropdown() {
                 <div className='flex items-center gap-x-4 text-base'>
                   <Avatar
                     isBordered
+                    as='button'
+                    className='transition-transform'
                     color='primary'
                     name={userInfoData?.name}
                     size='sm'
@@ -158,13 +150,18 @@ export default function UserProfileDropdown() {
         ) : (
           <NavbarContent>
             <NavbarItem>
-              <Link
+              <Button
+                as={Link}
+                color='primary'
                 href='/auth/login'
-                className='bg-black text-white hover:bg-slate-600 font-bold px-4 py-2 text-base sm:text-sm md:text-md lg:text-lg xl:text-xl rounded-full'
+                variant='flat'
+                size='md'
+                radius='full'
+                className='bg-black text-white hover:bg-slate-700 font-bold px-4 text-base'
                 aria-label='Sign in'
               >
                 Sign In
-              </Link>
+              </Button>
             </NavbarItem>
           </NavbarContent>
         )}

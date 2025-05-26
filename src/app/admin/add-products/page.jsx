@@ -7,6 +7,7 @@ async function singleProductFetch(productId) {
     {
       method: 'GET',
       cache: 'no-store',
+      next: { revalidate: 0 },
     },
   );
 
