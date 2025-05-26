@@ -18,15 +18,21 @@ import {
 import Cookies from 'js-cookie';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { useDispatch } from 'react-redux';
 import LoadingSpinner from './LoadingSpinner';
 
 export default function UserProfileDropdown() {
-  const token = Cookies.get('token');
-  const isLoggedIn = !!token;
   const dispatch = useDispatch();
   const router = useRouter();
+
+  const [isLoggedIn, setIsLoggedIn] = useState(false);
+  const [isReady, setIsReady] = useState(false);
+
+  useEffect(() => {
+    setIsLoggedIn(!!Cookies.get('token'));
+    setIsReady(true);
+  }, []);
 
   const {
     data: userInfoData,
@@ -45,10 +51,12 @@ export default function UserProfileDropdown() {
   const handleLogout = () => {
     Cookies.remove('token');
     dispatch(userInfoSlice.util.resetApiState());
-    router.push('/'); // Redirect to homepage after logout
+    router.push('/');
   };
 
-  if (isLoading) {
+  if (!isReady) return null;
+
+  if (isLoggedIn && isLoading) {
     return (
       <NavbarContent>
         <LoadingSpinner />
@@ -96,8 +104,6 @@ export default function UserProfileDropdown() {
                 <div className='flex items-center gap-x-4 text-base'>
                   <Avatar
                     isBordered
-                    as='button'
-                    className='transition-transform'
                     color='primary'
                     name={userInfoData?.name}
                     size='sm'
@@ -154,7 +160,7 @@ export default function UserProfileDropdown() {
             <NavbarItem>
               <Link
                 href='/auth/login'
-                className='bg-black text-white hover:bg-slate-600  font-bold px-4 py-2 text-base sm:text-sm md:text-md lg:text-lg xl:text-xl rounded-full'
+                className='bg-black text-white hover:bg-slate-600 font-bold px-4 py-2 text-base sm:text-sm md:text-md lg:text-lg xl:text-xl rounded-full'
                 aria-label='Sign in'
               >
                 Sign In

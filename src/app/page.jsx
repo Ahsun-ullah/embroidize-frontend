@@ -7,7 +7,7 @@ import PopularDesign from '@/components/user/HomePage/PopularDesign';
 import RecentProductsSection from '@/components/user/HomePage/RecentProductsSection';
 import { getBlogs } from '@/lib/apis/public/blog';
 import Link from 'next/link';
-import { Suspense, use } from 'react';
+import { Suspense } from 'react';
 import ProductUpdates from './products/ProductUpdates';
 export const dynamic = 'force-dynamic';
 export const fetchCache = 'force-no-store';
@@ -53,8 +53,8 @@ export const metadata = {
   },
 };
 
-export default function Home() {
-  const { blogs } = use(getBlogs('', 1, 3));
+export default async function Home() {
+  const { blogs } = await getBlogs('', 1, 3);
 
   return (
     <>
@@ -96,20 +96,9 @@ export default function Home() {
 
       {blogs && blogs?.length > 0 && (
         <>
-          <section className='bg-blue-50 text-black my-8 py-6'>
-            <div className='flex items-center justify-center'>
-              <h4 className='text-3xl font-bold'>Latest From Blog</h4>
-            </div>
-            <div className='flex items-center justify-center mt-4'>
-              <p className='font-bold text-lg text-center'>
-                Tips, Trends & Tutorials You’ll Love
-              </p>
-            </div>
-          </section>
           <Suspense fallback={<LoadingSpinner />}>
             <BlogSection blogs={blogs} />
           </Suspense>
-
           <div className='flex justify-center items-center my-10'>
             <Link
               href='/blog'

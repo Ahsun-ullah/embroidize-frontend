@@ -2,6 +2,11 @@ export function GET() {
   return new Response(
     `User-agent: *
     Disallow: /api/
+    Disallow: /admin/
+    Disallow: /auth/
+    Disallow: /reset-password
+    Disallow: /search
+    Disallow: /user
     Allow: /
 
 

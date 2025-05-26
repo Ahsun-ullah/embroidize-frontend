@@ -19,7 +19,7 @@ const BlogCard = ({ data }) => {
           sizes='(max-width: 640px) 100vw, (max-width: 768px) 50vw, 33vw'
           className='object-cover object-center transition-transform duration-300 group-hover:scale-105'
           placeholder='blur'
-          blurDataURL='/https://embroidize-assets.nyc3.cdn.digitaloceanspaces.com/placeholder.jpg'
+          blurDataURL='https://embroidize-assets.nyc3.cdn.digitaloceanspaces.com/placeholder.jpg'
         />
       </div>
 

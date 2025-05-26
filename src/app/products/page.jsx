@@ -59,7 +59,10 @@ export default async function AllProductsPage({ searchParams }) {
       {/* listens for new-product events and re-runs this SSR page */}
       <ProductUpdates />
       <div className='container flex flex-col justify-between'>
-        <section className='text-black my-8 py-6 border-b-2'>
+        <h1 className='text-3xl font-bold my-6 text-gray-900'>
+          Browse All Digital Embroidery Designs from Embroidize
+        </h1>
+        <section className='text-black mb-8 py-6 border-b-2'>
           <div className='flex justify-start gap-4 mb-8'>
             <Link
               href='/products'

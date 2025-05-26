@@ -77,6 +77,25 @@ export default async function ProductDetails({ params }) {
       '@type': 'Brand',
       name: product.brand || 'Embroidize',
     },
+    aggregateRating: {
+      '@type': 'AggregateRating',
+      ratingValue: product.rating?.average || 4.5,
+      reviewCount: product.rating?.count || 100,
+    },
+    review: product.reviews?.map((review) => ({
+      '@type': 'Review',
+      author: {
+        '@type': 'Person',
+        name: review.author || 'Anonymous',
+      },
+      reviewRating: {
+        '@type': 'Rating',
+        ratingValue: review.rating || 4,
+        bestRating: 5,
+        worstRating: 1,
+      },
+      reviewBody: review.comment || '',
+    })),
     offers: {
       '@type': 'Offer',
       url: `https://embroidize.com/product/${product.slug}`,

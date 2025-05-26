@@ -16,7 +16,7 @@ export const SingleProductComponent = async ({
   // console.log(singleProductData);
   const rawMarkup = marked(singleProductData?.description || '');
   return (
-    <div className='container mx-auto px-4'>
+    <main className='container mx-auto px-4'>
       {/* Breadcrumb */}
       <div className='mb-6 font-medium'>
         <BreadCrumb
@@ -24,16 +24,20 @@ export const SingleProductComponent = async ({
             { label: 'Home', href: '/' },
             { label: 'Product', href: '/products' },
             {
-              label: `${capitalize(singleProductData?.category?.name)}`,
+              label: capitalize(singleProductData?.category?.name),
               href: `/category/${singleProductData?.category?.slug}`,
             },
+            ...(singleProductData?.sub_category?._id
+              ? [
+                  {
+                    label: capitalize(singleProductData.sub_category.name),
+                    href: `/${singleProductData.category.slug}/${singleProductData.sub_category.slug}`,
+                  },
+                ]
+              : []),
             {
-              label: `${capitalize(singleProductData?.sub_category?.name)}`,
-              href: `/${singleProductData?.category?.slug}/${singleProductData?.sub_category?.slug}`,
-            },
-            {
-              label: `${capitalize(singleProductData?.name)}`,
-              href: `/product/${singleProductData?._id}`,
+              label: capitalize(singleProductData?.name),
+              href: '',
             },
           ]}
         />
@@ -195,6 +199,6 @@ export const SingleProductComponent = async ({
 
       {/* Future Section */}
       {/* <SubscribeSearchSection /> */}
-    </div>
+    </main>
   );
 };

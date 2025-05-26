@@ -17,10 +17,10 @@ const HeroSection = () => {
       {/* Content */}
       <div className='flex justify-end absolute inset-0 w-full pe-[10%]'>
         <div className='flex flex-col items-center justify-center text-white'>
-          <h4 className='text-white text-base sm:text-3xl md:text-4xl lg:text-5xl font-bold my-2 text-center'>
-            Machine <br />
+          <h1 className='text-white text-base sm:text-3xl md:text-4xl lg:text-5xl font-bold my-2 text-center'>
+            Free Machine <br />
             Embroidery Designs
-          </h4>
+          </h1>
           <p className='text-xs sm:text-base md:text-lg text-center my-2 max-w-2xl'>
             All you need for your next machine embroidery project. <br /> The
             highest quality for free.

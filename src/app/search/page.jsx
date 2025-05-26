@@ -9,11 +9,11 @@ import { use } from 'react';
 
 export async function generateMetadata({ searchParams }) {
   const searchQuery = searchParams.searchQuery || '';
-
   try {
     return {
       title: `${searchQuery} - Embroidize`,
       description: `Browse the latest ${searchQuery} designs—perfect for your next sewing project. Each file is tested for machine embroidery design compatibility and comes in DST, PES, EXP, HUS, VP3, JEF, XXX, and CND formats.`,
+      robots: 'noindex, follow',
       openGraph: {
         title: `${searchQuery} - Embroidize`,
         description: `Browse the latest ${searchQuery} designs—perfect for your next sewing project. Each file is tested for machine embroidery design compatibility and comes in DST, PES, EXP, HUS, VP3, JEF, XXX, and CND formats.`,

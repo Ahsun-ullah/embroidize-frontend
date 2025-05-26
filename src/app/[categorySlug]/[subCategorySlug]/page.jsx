@@ -75,9 +75,9 @@ export default async function SubCategoryProducts({ params, searchParams }) {
     <>
       <Header />
       <div className='container mx-auto px-4 py-6 flex flex-col gap-4'>
-        <h5 className='capitalize text-3xl'>
+        <h1 className='capitalize text-3xl'>
           {subCategory?.name} Embroidery Designs
-        </h5>
+        </h1>
 
         <BreadCrumb
           items={[
