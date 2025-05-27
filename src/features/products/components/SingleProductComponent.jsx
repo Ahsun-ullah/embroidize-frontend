@@ -37,7 +37,7 @@ export const SingleProductComponent = async ({
               : []),
             {
               label: capitalize(singleProductData?.name),
-              href: '',
+              href: '#',
             },
           ]}
         />

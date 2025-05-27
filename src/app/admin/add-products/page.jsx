@@ -1,5 +1,4 @@
 import { ProductsForm } from '@/features/products/components/ProductsForm';
-import { use } from 'react';
 
 async function singleProductFetch(productId) {
   const res = await fetch(
@@ -18,9 +17,11 @@ async function singleProductFetch(productId) {
   return res.json();
 }
 
-export default function ContactsPage({ searchParams }) {
+export default async function ContactsPage({ searchParams }) {
   const productId = searchParams.productId;
-  const singleProductData = productId && use(singleProductFetch(productId));
+  const singleProductData = productId
+    ? await singleProductFetch(productId)
+    : null;
 
   return (
     <div className='w-full flex flex-col gap-4'>

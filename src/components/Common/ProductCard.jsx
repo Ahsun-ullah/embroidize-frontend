@@ -4,8 +4,11 @@ import { formatNumber } from '@/utils/functions/page';
 import { Divider } from '@heroui/react';
 import Image from 'next/image';
 import Link from 'next/link';
+import { useState } from 'react';
+import LoadingSpinner from './LoadingSpinner';
 
 export default function ProductCard({ item }) {
+  const [isLoading, setIsLoading] = useState(true);
   if (!item || !item._id || !item.name) return null;
 
   const imageUrl = item?.image?.url || '/category.jpg';
@@ -25,14 +28,20 @@ export default function ProductCard({ item }) {
       >
         {/* Responsive Image */}
         <div className='relative w-full aspect-[3/2]'>
+          {isLoading && (
+            <div className='absolute inset-0 z-10 flex items-center justify-center '>
+              <LoadingSpinner />
+            </div>
+          )}
+
           <Image
             src={imageUrl}
             alt={productName}
             fill
+            quality={100}
             sizes='(max-width: 640px) 100vw, (max-width: 768px) 50vw, 33vw'
             className='object-cover object-center transition-transform duration-300 group-hover:scale-105'
-            placeholder='blur'
-            blurDataURL='https://embroidize-assets.nyc3.cdn.digitaloceanspaces.com/placeholder.jpg'
+            onLoadingComplete={() => setIsLoading(false)}
             priority={false}
           />
         </div>

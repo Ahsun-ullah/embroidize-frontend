@@ -1,5 +1,4 @@
-import StoreProvider from '@/lib/providers/StoreProvider';
-import UiProvider from '@/lib/providers/UiProvider';
+import ClientProviders from '@/lib/providers/ClientProviders';
 import { Inter } from 'next/font/google';
 import Script from 'next/script';
 import 'remixicon/fonts/remixicon.css';
@@ -70,13 +69,11 @@ export default function RootLayout({ children }) {
           }}
         />
 
-        <StoreProvider>
-          <UiProvider>
-            <main id='main-content' className='min-h-screen focus:outline-none'>
-              {children}
-            </main>
-          </UiProvider>
-        </StoreProvider>
+        <ClientProviders>
+          <main id='main-content' className='min-h-screen focus:outline-none'>
+            {children}
+          </main>
+        </ClientProviders>
       </body>
     </html>
   );

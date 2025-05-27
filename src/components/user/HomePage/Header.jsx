@@ -8,10 +8,16 @@ import { useState } from 'react';
 
 import CategoryMenu from '@/components/Common/CategoryMenu';
 import SearchBox from '@/components/Common/SearchBox';
-import UserProfileDropdown from '@/components/Common/UserProfileDropdown';
 
 import mobileLogo from '../../../../public/favicon.png';
 import mainLogo from '../../../../public/logo-black.png';
+
+import dynamic from 'next/dynamic';
+
+const UserProfileDropdown = dynamic(
+  () => import('@/components/Common/UserProfileDropdown'),
+  { ssr: false },
+);
 
 export const Header = () => {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
@@ -26,7 +32,7 @@ export const Header = () => {
             <Link
               href='/'
               aria-label='Go to homepage'
-              className='relative w-[80px] h-[60px] md:w-[120px] md:h-[80px]'
+              className='relative w-[30px] h-[30px] sm:w-[60px] sm:h-[60px] md:w-[120px] md:h-[80px]'
             >
               <Image
                 src={mobileLogo}
