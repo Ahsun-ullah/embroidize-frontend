@@ -10,6 +10,7 @@ export default function AllUsersListPage() {
     { name: 'ID', uid: 'id' },
     { name: 'NAME', uid: 'name' },
     { name: 'EMAIL', uid: 'email' },
+    { name: 'DOWNLOAD', uid: 'downloadHistory' },
     { name: 'STATUS', uid: 'status' },
     { name: 'ACTIONS', uid: 'actions' },
   ];

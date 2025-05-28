@@ -78,6 +78,8 @@ export default function UsersTableWrapper({
 
         case 'email':
           return <a href={`mailto:${user.email}`}>{user.email}</a>;
+        case 'downloadHistory':
+          return <>{user?.downloadHistory?.length}</>;
 
         case 'id':
           return <span>{user._id}</span>;
