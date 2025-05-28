@@ -183,7 +183,7 @@ export function ProductsForm({ product }) {
       }
     } catch (error) {
       console.error('Error submitting form:', error);
-      ErrorToast('Error', error || 'API Error', 3000);
+      ErrorToast('Error', error?.data?.message, 3000);
     }
   };
 
