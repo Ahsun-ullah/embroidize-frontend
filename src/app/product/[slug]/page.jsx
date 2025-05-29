@@ -15,6 +15,47 @@ export async function generateMetadata({ params }) {
 
   if (!product) return {};
 
+  return {
+    title: product.meta_title,
+    description: product.meta_description,
+    openGraph: {
+      title: product.meta_title,
+      description: product.meta_description,
+      images: [
+        {
+          url: product.image?.url || 'https://embroidize.com/og-banner.jpg',
+          width: 1200,
+          height: 630,
+          alt: product.title,
+        },
+      ],
+    },
+    twitter: {
+      card: 'summary_large_image',
+      title: product.meta_title,
+      description: product.meta_description,
+      images: [product.image?.url || 'https://embroidize.com/og-banner.jpg'],
+    },
+  };
+}
+
+export default async function ProductDetails({ params }) {
+  const slug = params.slug;
+
+  const response = await getSingleProduct(slug);
+  const product = response?.data;
+
+  if (!product) return notFound();
+
+  const hasSubCategory = !!product?.sub_category?.slug;
+
+  const productListResponse = hasSubCategory
+    ? await getAllProductsBySubCategory(product.sub_category.slug, 1, 6)
+    : await getAllProductsByCategory(product.category?.slug, 1, 6);
+
+  const allProducts = productListResponse?.products ?? [];
+  const popularProducts = (await getPopularProducts('', 1, 4))?.products ?? [];
+
   const schema = {
     '@context': 'https://schema.org/',
     '@type': 'Product',
@@ -53,52 +94,12 @@ export async function generateMetadata({ params }) {
     },
   };
 
-  return {
-    title: product.meta_title,
-    description: product.meta_description,
-    openGraph: {
-      title: product.meta_title,
-      description: product.meta_description,
-      images: [
-        {
-          url: product.image?.url || 'https://embroidize.com/og-banner.jpg',
-          width: 1200,
-          height: 630,
-          alt: product.title,
-        },
-      ],
-    },
-    twitter: {
-      card: 'summary_large_image',
-      title: product.meta_title,
-      description: product.meta_description,
-      images: [product.image?.url || 'https://embroidize.com/og-banner.jpg'],
-    },
-    other: {
-      'ld+json': JSON.stringify(schema),
-    },
-  };
-}
-
-export default async function ProductDetails({ params }) {
-  const slug = params.slug;
-
-  const response = await getSingleProduct(slug);
-  const product = response?.data;
-
-  if (!product) return notFound();
-
-  const hasSubCategory = !!product?.sub_category?.slug;
-
-  const productListResponse = hasSubCategory
-    ? await getAllProductsBySubCategory(product.sub_category.slug, 1, 6)
-    : await getAllProductsByCategory(product.category?.slug, 1, 6);
-
-  const allProducts = productListResponse?.products ?? [];
-  const popularProducts = (await getPopularProducts('', 1, 4))?.products ?? [];
-
   return (
     <>
+      <script
+        type='application/ld+json'
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(schema) }}
+      />
       <Header />
       <SingleProductComponent
         singleProductData={product}
