@@ -2,6 +2,7 @@
 
 /** @type {import('next').NextConfig} */
 const nextConfig = {
+  output:"standalone",
   reactStrictMode: true,
   compress: true,
   images: {
@@ -31,7 +32,7 @@ const nextConfig = {
   },
 
   experimental: {
-    optimizeCss: true, 
+    optimizeCss: true,
   },
   async headers() {
     return [

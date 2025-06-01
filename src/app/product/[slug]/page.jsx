@@ -89,7 +89,7 @@ export default async function ProductDetails({ params }) {
       '@type': 'Offer',
       url: `https://embroidize.com/product/${product.slug}`,
       priceCurrency: 'USD',
-      price: product.price === 0 ? 'Free' : product.price.toFixed(2),
+      price: product.price === 0 ? '0.00' : product.price.toFixed(2),
       availability: 'https://schema.org/InStock',
     },
   };
