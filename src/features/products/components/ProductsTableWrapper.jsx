@@ -115,7 +115,7 @@ export default function ProductsTableWrapper({
                       key='edit'
                       onPress={() => {
                         router.push(
-                          `/admin/add-products?productId=${product?._id}`,
+                          `/admin/add-products?productId=${product._id}&ts=${Date.now()}`,
                         );
                       }}
                     >

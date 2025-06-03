@@ -158,6 +158,7 @@ export function ProductsForm({ product }) {
             reset();
             setDescription('');
             router.push('/admin/all-products');
+            router.refresh();
           } catch (err) {
             console.error('Refetch failed:', err);
             ErrorToast('Error', 'Failed to refresh product list.', 3000);
@@ -179,6 +180,7 @@ export function ProductsForm({ product }) {
           reset();
           setDescription('');
           router.push('/admin/all-products');
+          router.refresh();
         }
       }
     } catch (error) {
