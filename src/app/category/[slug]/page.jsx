@@ -15,12 +15,16 @@ export async function generateMetadata({ params }) {
   try {
     const response = await getSingleCategory(params?.slug);
     const category = response?.data;
+    const canonicalUrl = `https://embroidize.com/category/${params.slug}`;
 
     return {
       title: category?.meta_title || category?.name,
       description:
         category?.meta_description ||
         'Download high-quality embroidery machine designs for free.',
+      alternates: {
+        canonical: canonicalUrl,
+      },
       openGraph: {
         title: category?.meta_title || category?.name,
         description:

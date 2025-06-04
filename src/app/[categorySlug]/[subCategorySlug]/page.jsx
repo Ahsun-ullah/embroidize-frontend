@@ -14,10 +14,14 @@ export async function generateMetadata({ params }) {
   try {
     const response = await getSingleSubCategory(params.subCategorySlug);
     const subcategory = response?.data;
+    const canonicalUrl = `https://embroidize.com/${params.categorySlug}/${params.subCategorySlug}`;
 
     return {
       title: subcategory?.meta_title,
       description: subcategory?.meta_description,
+      alternates: {
+        canonical: canonicalUrl,
+      },
       openGraph: {
         title: subcategory?.meta_title,
         description: subcategory?.meta_description,

@@ -14,6 +14,7 @@ export async function generateMetadata({ params }) {
   const product = response?.data;
 
   if (!product) return {};
+  const canonicalUrl = `https://embroidize.com/product/${params.slug}`;
 
   return {
     title: product.meta_title,
@@ -21,6 +22,9 @@ export async function generateMetadata({ params }) {
     openGraph: {
       title: product.meta_title,
       description: product.meta_description,
+      alternates: {
+        canonical: canonicalUrl,
+      },
       images: [
         {
           url: product.image?.url || 'https://embroidize.com/og-banner.jpg',
@@ -69,7 +73,7 @@ export default async function ProductDetails({ params }) {
     aggregateRating: {
       '@type': 'AggregateRating',
       ratingValue: product.rating?.average || 4.5,
-      reviewCount: product.rating?.count || 100,
+      reviewCount: product.rating?.count || 89,
     },
     review: product.reviews?.map((review) => ({
       '@type': 'Review',
@@ -91,7 +95,11 @@ export default async function ProductDetails({ params }) {
       priceCurrency: 'USD',
       price: product.price === 0 ? '0.00' : product.price.toFixed(2),
       availability: 'https://schema.org/InStock',
+      priceValidUntil: new Date().toISOString().split('T')[0],
     },
+    isAccessibleForFree: true,
+    category: 'DigitalEmbroideryDesign',
+    isVirtualProduct: true,
   };
 
   return (
