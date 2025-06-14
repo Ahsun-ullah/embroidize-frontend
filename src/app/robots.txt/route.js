@@ -5,7 +5,6 @@ export function GET() {
     Disallow: /admin/
     Disallow: /auth/
     Disallow: /reset-password
-    Disallow: /search
     Disallow: /user
     Allow: /
 

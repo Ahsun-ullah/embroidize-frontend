@@ -7,7 +7,7 @@ import {
   getSingleProduct,
 } from '@/lib/apis/public/products';
 import { getAllProductsBySubCategory } from '@/lib/apis/public/subcategory';
-import { notFound } from 'next/navigation';
+import { notFound, redirect } from 'next/navigation';
 
 export async function generateMetadata({ params }) {
   const response = await getSingleProduct(params.slug);
@@ -19,12 +19,21 @@ export async function generateMetadata({ params }) {
   return {
     title: product.meta_title,
     description: product.meta_description,
+    alternates: {
+      canonical: canonicalUrl,
+    },
+    // robots: 'index, follow',
+    // keywords: product.meta_keywords,
+    // redirects: [
+    //   {
+    //     source: `/product/${product.slug}`,
+    //     destination: canonicalUrl,
+    //     permanent: true,
+    //   },
+    // ],
     openGraph: {
       title: product.meta_title,
       description: product.meta_description,
-      alternates: {
-        canonical: canonicalUrl,
-      },
       images: [
         {
           url: product.image?.url || 'https://embroidize.com/og-banner.jpg',
@@ -50,6 +59,10 @@ export default async function ProductDetails({ params }) {
   const product = response?.data;
 
   if (!product) return notFound();
+
+  if (params.slug !== product.slug) {
+    redirect(`/product/${product.slug}`);
+  }
 
   const hasSubCategory = !!product?.sub_category?.slug;
 
@@ -96,10 +109,57 @@ export default async function ProductDetails({ params }) {
       price: product.price === 0 ? '0.00' : product.price.toFixed(2),
       availability: 'https://schema.org/InStock',
       priceValidUntil: new Date().toISOString().split('T')[0],
+      itemCondition: 'https://schema.org/NewCondition',
+      seller: {
+        '@type': 'Organization',
+        name: 'Embroidize',
+      },
+
+      // ✅ Digital-only Shipping Details
+      shippingDetails: {
+        '@type': 'OfferShippingDetails',
+        shippingRate: {
+          '@type': 'MonetaryAmount',
+          value: product.price === 0 ? '0.00' : product.price.toFixed(2),
+          currency: 'USD',
+        },
+        shippingDestination: {
+          '@type': 'DefinedRegion',
+          addressCountry: 'US',
+        },
+        deliveryTime: {
+          '@type': 'ShippingDeliveryTime',
+          handlingTime: {
+            '@type': 'QuantitativeValue',
+            minValue: 0,
+            maxValue: 0,
+            unitCode: 'd',
+          },
+          transitTime: {
+            '@type': 'QuantitativeValue',
+            minValue: 0,
+            maxValue: 0,
+            unitCode: 'd',
+          },
+        },
+      },
+
+      // ✅ Digital-only Return Policy
+      hasMerchantReturnPolicy: {
+        '@type': 'MerchantReturnPolicy',
+        returnPolicyCategory: 'https://schema.org/NonRefundable',
+        applicableCountry: 'US',
+      },
+
+      mainEntityOfPage: {
+        '@type': 'WebPage',
+        '@id': `https://embroidize.com/product/${product.slug}`,
+      },
     },
-    isAccessibleForFree: true,
+
+    // Optional extras for clarity
+    isAccessibleForFree: product.price === 0,
     category: 'DigitalEmbroideryDesign',
-    isVirtualProduct: true,
   };
 
   return (
@@ -108,6 +168,7 @@ export default async function ProductDetails({ params }) {
         type='application/ld+json'
         dangerouslySetInnerHTML={{ __html: JSON.stringify(schema) }}
       />
+
       <Header />
       <SingleProductComponent
         singleProductData={product}
