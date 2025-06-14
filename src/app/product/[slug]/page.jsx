@@ -147,7 +147,9 @@ export default async function ProductDetails({ params }) {
       // ✅ Digital-only Return Policy
       hasMerchantReturnPolicy: {
         '@type': 'MerchantReturnPolicy',
-        returnPolicyCategory: 'https://schema.org/NonRefundable',
+        name: 'Digital Product – No Returns',
+        description: 'This is a digital product and is non-refundable.',
+        returnPolicyCategory: 'https://schema.org/MerchantReturnNotPermitted',
         applicableCountry: 'US',
       },
 
