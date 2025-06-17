@@ -3,10 +3,15 @@ import Header from '@/components/user/HomePage/Header';
 
 export const metadata = {
   title: 'Terms And Conditions - Embroidize',
-  description: 'Download free embroidery machine designs in multiple formats.',
+  description:
+    'Review the Terms and Conditions for using Embroidize. Learn about user responsibilities, intellectual property rights, and guidelines for downloading our embroidery machine designs.',
+  alternates: {
+    canonical: 'https://embroidize.com/terms-and-conditions',
+  },
   openGraph: {
     title: 'Terms And Conditions - Embroidize',
-    description: 'Explore and download premium free embroidery designs.',
+    description:
+      'Review the Terms and Conditions for using Embroidize. Learn about user responsibilities, intellectual property rights, and guidelines for downloading our embroidery machine designs.',
     url: 'https://embroidize.com',
     siteName: 'Embroidize',
     images: [
@@ -21,7 +26,8 @@ export const metadata = {
   twitter: {
     card: 'summary_large_image',
     title: 'Terms And Conditions - Embroidize',
-    description: 'Explore and download premium free embroidery designs.',
+    description:
+      'Review the Terms and Conditions for using Embroidize. Learn about user responsibilities, intellectual property rights, and guidelines for downloading our embroidery machine designs.',
     images: ['https://embroidize.com/og-banner.jpg'],
   },
   metadataBase: new URL('https://embroidize.com'),

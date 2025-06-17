@@ -3,10 +3,14 @@ import Header from '@/components/user/HomePage/Header';
 
 export const metadata = {
   title: 'Privacy Policy - Embroidize',
-  description: 'Download free embroidery machine designs in multiple formats.',
+  description:
+    'Read Embroidize’s Privacy Policy to understand how we collect, use, and protect your personal information when you download embroidery designs from our platform.',
+  alternates: {
+    canonical: 'https://embroidize.com/privacy-policy',
+  },
   openGraph: {
     title: 'Privacy Policy - Embroidize',
-    description: 'Explore and download premium free embroidery designs.',
+    description: 'Read Embroidize’s Privacy Policy to understand how we collect, use, and protect your personal information when you download embroidery designs from our platform.',
     url: 'https://embroidize.com',
     siteName: 'Embroidize',
     images: [
@@ -21,7 +25,8 @@ export const metadata = {
   twitter: {
     card: 'summary_large_image',
     title: 'Privacy Policy - Embroidize',
-    description: 'Explore and download premium free embroidery designs.',
+    description:
+      'Read Embroidize’s Privacy Policy to understand how we collect, use, and protect your personal information when you download embroidery designs from our platform.',
     images: ['https://embroidize.com/og-banner.jpg'],
   },
   metadataBase: new URL('https://embroidize.com'),

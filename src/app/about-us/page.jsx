@@ -3,10 +3,15 @@ import Header from '@/components/user/HomePage/Header';
 
 export const metadata = {
   title: 'About Us - Embroidize',
-  description: 'Download free embroidery machine designs in multiple formats.',
+  description:
+    'Learn about Embroidize, your go-to platform for high-quality, free embroidery machine designs. Explore our story, mission, and commitment to offering designs in multiple formats.',
+  alternates: {
+    canonical: 'https://embroidize.com/about-us',
+  },
   openGraph: {
     title: 'About Us - Embroidize',
-    description: 'Explore and download premium free embroidery designs.',
+    description:
+      'Learn about Embroidize, your go-to platform for high-quality, free embroidery machine designs. Explore our story, mission, and commitment to offering designs in multiple formats.',
     url: 'https://embroidize.com',
     siteName: 'Embroidize',
     images: [
@@ -21,7 +26,8 @@ export const metadata = {
   twitter: {
     card: 'summary_large_image',
     title: 'About Us - Embroidize',
-    description: 'Explore and download premium free embroidery designs.',
+    description:
+      'Learn about Embroidize, your go-to platform for high-quality, free embroidery machine designs. Explore our story, mission, and commitment to offering designs in multiple formats.',
     images: ['https://embroidize.com/og-banner.jpg'],
   },
   metadataBase: new URL('https://embroidize.com'),

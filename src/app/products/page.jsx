@@ -7,34 +7,50 @@ import Link from 'next/link';
 import ProductUpdates from './ProductUpdates';
 export const dynamic = 'force-dynamic';
 
-export const metadata = {
-  title: 'Machine Embroidery Designs',
-  description:
-    'Welcome to our premium collection of machine embroidery designs, fully compatible with all embroidery machines. Instantly download high-quality embroidery files in CND, DST, EXP, HUS, JEF, PES, VP3, and XXX formats.',
-  openGraph: {
-    title: 'Machine Embroidery Designs',
-    description:
-      'Welcome to our premium collection of machine embroidery designs, fully compatible with all embroidery machines. Instantly download high-quality embroidery files in CND, DST, EXP, HUS, JEF, PES, VP3, and XXX formats.',
-    url: 'https://embroidize.com/',
-    siteName: 'Embroidize',
-    images: [
-      {
-        url: 'https://embroidize.com/og-banner.jpg',
-        width: 1200,
-        height: 630,
-        alt: 'Embroidery Machine Designs',
-      },
-    ],
-    type: 'website',
-  },
-  twitter: {
-    card: 'summary_large_image',
-    title: 'Embroidery Machine Designs',
-    description:
-      'Welcome to our premium collection of machine embroidery designs, fully compatible with all embroidery machines. Instantly download high-quality embroidery files in CND, DST, EXP, HUS, JEF, PES, VP3, and XXX formats.',
-    images: ['https://embroidize.com/og-banner.jpg'],
-  },
-};
+export async function generateMetadata({ searchParams }) {
+  const isPopular = searchParams?.filter === 'popular';
+
+  const baseTitle = 'Machine Embroidery Designs';
+  const baseDescription =
+    'Welcome to our premium collection of machine embroidery designs, fully compatible with all embroidery machines. Instantly download high-quality embroidery files in CND, DST, EXP, HUS, JEF, PES, VP3, and XXX formats.';
+
+  const popularTitle = 'Popular Embroidery Designs - Embroidize';
+  const popularDescription =
+    'Explore our most downloaded and loved machine embroidery designs. Popular formats like DST, PES, JEF, and more available for instant download.';
+
+  return {
+    title: isPopular ? popularTitle : baseTitle,
+    description: isPopular ? popularDescription : baseDescription,
+    alternates: {
+      canonical: isPopular
+        ? 'https://embroidize.com/products?filter=popular'
+        : 'https://embroidize.com/products',
+    },
+    openGraph: {
+      title: isPopular ? popularTitle : baseTitle,
+      description: isPopular ? popularDescription : baseDescription,
+      url: isPopular
+        ? 'https://embroidize.com/products?filter=popular'
+        : 'https://embroidize.com/products',
+      siteName: 'Embroidize',
+      images: [
+        {
+          url: 'https://embroidize.com/og-banner.jpg',
+          width: 1200,
+          height: 630,
+          alt: 'Embroidery Machine Designs',
+        },
+      ],
+      type: 'website',
+    },
+    twitter: {
+      card: 'summary_large_image',
+      title: isPopular ? popularTitle : baseTitle,
+      description: isPopular ? popularDescription : baseDescription,
+      images: ['https://embroidize.com/og-banner.jpg'],
+    },
+  };
+}
 
 export default async function AllProductsPage({ searchParams }) {
   const currentPage = parseInt(searchParams?.page) || 1;
@@ -50,8 +66,6 @@ export default async function AllProductsPage({ searchParams }) {
     totalCount: productData.totalCount,
     totalPages: productData.totalPages,
   };
-
-  console.log(productData);
 
   return (
     <>

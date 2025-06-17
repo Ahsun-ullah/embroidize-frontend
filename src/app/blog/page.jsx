@@ -9,6 +9,9 @@ export const metadata = {
   title: 'Blog | Embroidize',
   description:
     'Explore the latest embroidery design tutorials, tips, and updates from the Embro ID team.',
+  alternates: {
+    canonical: 'https://embroidize.com/blog',
+  },
   openGraph: {
     title: 'Blog | Embro ID',
     description:
