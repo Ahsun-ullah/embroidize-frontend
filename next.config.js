@@ -3,6 +3,7 @@ const nextConfig = {
   output: 'standalone',
   reactStrictMode: true,
   compress: true,
+
   images: {
     formats: ['image/avif', 'image/webp'],
     remotePatterns: [
@@ -32,6 +33,7 @@ const nextConfig = {
   experimental: {
     optimizeCss: true,
   },
+
   async headers() {
     return [
       {
@@ -42,6 +44,22 @@ const nextConfig = {
             value: 'public, max-age=31536000, immutable',
           },
         ],
+      },
+    ];
+  },
+
+  async redirects() {
+    return [
+      {
+        source: '/:path*',
+        has: [
+          {
+            type: 'host',
+            value: 'www.embroidize.com',
+          },
+        ],
+        destination: 'https://embroidize.com/:path*',
+        permanent: true,
       },
     ];
   },
