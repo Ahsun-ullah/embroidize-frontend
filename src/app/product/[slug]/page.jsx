@@ -158,9 +158,6 @@ export default async function ProductDetails({ params }) {
         '@id': `https://embroidize.com/product/${product.slug}`,
       },
     },
-
-    // Optional extras for clarity
-    isAccessibleForFree: product.price === 0,
     category: 'DigitalEmbroideryDesign',
   };
 

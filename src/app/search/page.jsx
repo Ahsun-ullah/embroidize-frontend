@@ -17,6 +17,7 @@ export async function generateMetadata({ searchParams }) {
       alternates: {
         canonical: `https://embroidize.com/search?searchQuery=${searchQuery}`,
       },
+
       openGraph: {
         title: `${searchQuery} - Embroidize`,
         description: `Browse the latest ${searchQuery} designs—perfect for your next sewing project. Each file is tested for machine embroidery design compatibility and comes in DST, PES, EXP, HUS, VP3, JEF, XXX, and CND formats.`,
