@@ -4,12 +4,11 @@ on:
   push:
     branches: [main]
     
-
 jobs:
   deploy:
     name: Deploy via SSH
     runs-on: ubuntu-latest
-    environment: production
+
     steps:
       - name: Deploy to Droplet
         uses: appleboy/ssh-action@v1.0.0
@@ -23,3 +22,5 @@ jobs:
             npm install
             npm run build
             pm2 restart embroidize-frontend
+            pm2 save
+
