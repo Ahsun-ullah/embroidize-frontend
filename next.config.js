@@ -5,6 +5,10 @@ const nextConfig = {
   compress: true,
 
   images: {
+    domains:[
+      'www.embroidize.com',
+      'embroidize-assets.nyc3.cdn.digitaloceanspaces.com',
+    ],
     formats: ['image/avif', 'image/webp'],
     remotePatterns: [
       {

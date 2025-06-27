@@ -116,9 +116,9 @@ export const SingleProductComponent = async ({
           {/* Product Details */}
           <Suspense fallback={<LoadingSpinner />}>
             <div className='mb-10'>
-              <h1 className='text-black font-bold text-2xl mb-6 capitalize'>
+              <h2 className='text-black font-bold text-2xl mb-6 capitalize'>
                 About {singleProductData?.name}
-              </h1>
+              </h2>
               <pre
                 dangerouslySetInnerHTML={{ __html: rawMarkup }}
                 className='prose max-w-none break-words whitespace-pre-wrap font-sans text-lg'

@@ -1,6 +1,8 @@
 export function GET() {
   return new Response(
     `User-agent: *
+    Disallow: /_next/
+    Disallow: /static/
     Disallow: /api/
     Disallow: /admin/
     Disallow: /auth/
