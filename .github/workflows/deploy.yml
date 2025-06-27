@@ -13,14 +13,17 @@ jobs:
       - name: Deploy to Droplet
         uses: appleboy/ssh-action@v1.0.0
         with:
-          host: ${{ secrets.DROPLET_HOST }}
-          username: ${{ secrets.DROPLET_USER }}
-          key: ${{ secrets.DROPLET_SSH_KEY }}
-          script: |
-            cd /var/www/embroidize-frontend
-            git pull origin main
-            npm install
-            npm run build
-            pm2 restart embroidize-frontend
-            pm2 save
+              host: ${{ secrets.DROPLET_HOST }}
+              username: ${{ secrets.DROPLET_USER }}
+              key: ${{ secrets.DROPLET_SSH_KEY }}
+              timeout: 600 
+              script: |
+                cd /var/www/embroidize-frontend
+                git pull origin main
+                npm install
+                npm run build
+                pm2 restart embroidize-frontend
+                pm2 save
+            
+
 
