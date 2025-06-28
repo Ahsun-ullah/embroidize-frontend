@@ -4,6 +4,7 @@ import Footer from '@/components/user/HomePage/Footer';
 import Header from '@/components/user/HomePage/Header';
 import { getBlogs } from '@/lib/apis/public/blog';
 import { use } from 'react';
+export const dynamic = 'force-dynamic';
 
 export const metadata = {
   title: 'Blog | Embroidize',

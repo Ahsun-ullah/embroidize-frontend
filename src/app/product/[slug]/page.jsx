@@ -7,7 +7,7 @@ import {
   getSingleProduct,
 } from '@/lib/apis/public/products';
 import { getAllProductsBySubCategory } from '@/lib/apis/public/subcategory';
-import { notFound, redirect } from 'next/navigation';
+import { notFound } from 'next/navigation';
 
 export async function generateMetadata({ params }) {
   const response = await getSingleProduct(params.slug);
@@ -59,10 +59,6 @@ export default async function ProductDetails({ params }) {
   const product = response?.data;
 
   if (!product) return notFound();
-
-  if (params.slug !== product.slug) {
-    redirect(`/product/${product.slug}`);
-  }
 
   const hasSubCategory = !!product?.sub_category?.slug;
 

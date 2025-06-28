@@ -12,7 +12,7 @@ export default function ProductCard({ item }) {
   if (!item || !item._id || !item.name) return null;
 
   const imageUrl = item?.image?.url || '/category.jpg';
-  const productLink = `https://embroidize.com/product/${item.slug}`;
+  const productLink = `${process.env.NEXT_PUBLIC_BASE_URL_CLIENT}/product/${item.slug}`;
   const productName = item.name;
   const categoryName = item?.category?.name || 'Uncategorized';
   const isFree = item?.price === 0;

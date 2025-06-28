@@ -2,6 +2,7 @@ import { getBlogs } from '@/lib/apis/public/blog';
 import { getCategories } from '@/lib/apis/public/category';
 import { getProducts } from '@/lib/apis/public/products';
 import { getSubCategories } from '@/lib/apis/public/subcategory';
+export const dynamic = 'force-dynamic';
 
 export async function GET() {
   try {

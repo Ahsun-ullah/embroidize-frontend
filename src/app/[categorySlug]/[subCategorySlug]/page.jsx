@@ -9,12 +9,13 @@ import {
 } from '@/lib/apis/public/subcategory';
 import { capitalize } from '@/utils/functions/page';
 import { marked } from 'marked';
+import { redirect } from 'next/navigation';
 
 export async function generateMetadata({ params }) {
   try {
     const response = await getSingleSubCategory(params.subCategorySlug);
     const subcategory = response?.data;
-    const canonicalUrl = `https://embroidize.com/${params.categorySlug}/${params.subCategorySlug}`;
+    const canonicalUrl = `https://embroidize.com/${subcategory?.category?.slug}/${subcategory?.slug}`;
 
     return {
       title: subcategory?.meta_title,
@@ -65,6 +66,13 @@ export default async function SubCategoryProducts({ params, searchParams }) {
   const subCategoryData = await getSingleSubCategory(subCategorySlug);
   const subCategory = subCategoryData?.data;
 
+  if (
+    categorySlug !== subCategory?.category?.slug ||
+    subCategorySlug !== subCategory?.slug
+  ) {
+    redirect(`/${subCategory?.category?.slug}/${subCategory?.slug}`);
+  }
+
   if (!subCategory) {
     return (
       <div className='text-center py-12'>
@@ -93,7 +101,7 @@ export default async function SubCategoryProducts({ params, searchParams }) {
             },
             {
               label: capitalize(subCategory?.name),
-              href: `/${categorySlug}/${subCategorySlug}`,
+              href: `/${subCategory?.category?.slug}/${subCategory?.slug}`,
             },
           ]}
         />
