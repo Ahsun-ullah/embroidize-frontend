@@ -12,11 +12,19 @@ export default function CategoryMenu({ isMobileMenuOpen }) {
 
   const categories = useMemo(() => categoryData?.data || [], [categoryData]);
 
-  const renderCategoryLink = (category) => (
-    <Link href={`/category/${category.slug}`} className='font-bold capitalize'>
-      {category.name}
-    </Link>
-  );
+  const renderCategoryLink = (category) => {
+    const displayName = category.name
+      .replace(/embroidery designs/gi, '')
+      .trim();
+    return (
+      <Link
+        href={`/category/${category.slug}`}
+        className='font-bold capitalize'
+      >
+        {displayName}
+      </Link>
+    );
+  };
 
   const renderSubcategoryLinks = (category) =>
     category.subcategories?.map((sub) => (
@@ -52,15 +60,20 @@ export default function CategoryMenu({ isMobileMenuOpen }) {
         </div>
       ) : (
         <div className='container hidden sm:flex flex-wrap items-center justify-center gap-x-10 py-4'>
-          {categories.slice(0, 8).map((category) => (
-            <Link
-              key={category._id}
-              href={`/category/${category.slug}`}
-              className='capitalize'
-            >
-              {category.name}
-            </Link>
-          ))}
+          {categories.slice(0, 8).map((category) => {
+            const displayName = category.name
+              .replace(/embroidery designs/gi, '')
+              .trim();
+            return (
+              <Link
+                key={category._id}
+                href={`/category/${category.slug}`}
+                className='capitalize'
+              >
+                {displayName}
+              </Link>
+            );
+          })}
         </div>
       )}
     </nav>

@@ -73,7 +73,8 @@ export default async function CategoryProducts({ params, searchParams }) {
       <Header />
       <div className='container mx-auto px-4 py-6 flex flex-col gap-4'>
         <h1 className='capitalize text-3xl'>
-          {singleCategoryData?.data?.name} Embroidery Designs
+          {singleCategoryData?.data?.name}
+           {/* Embroidery Designs */}
         </h1>
         <BreadCrumb
           items={[
@@ -81,7 +82,7 @@ export default async function CategoryProducts({ params, searchParams }) {
             { label: 'Product', href: '/products' },
             {
               label: `${capitalize(singleCategoryData?.data?.name)}`,
-              href: `/category/${singleCategoryData?.data?._id}`,
+              href: `/category/${singleCategoryData?.data?.slug}`,
             },
           ]}
         />

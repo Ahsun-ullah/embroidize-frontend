@@ -93,7 +93,31 @@ const Footer = () => {
                     Blogs
                   </Link>
                 </li>
+                <li>
+                  <Link
+                    target='_blank'
+                    rel='noopener noreferrer'
+                    className='text-blueGray-600 hover:text-blueGray-800 font-semibold block pb-2 text-sm'
+                    href={'https://www.etsy.com/shop/embroidize'}
+                  >
+                    Etsy Shop
+                  </Link>
+                </li>
               </ul>
+
+              {/* <Link
+                target='_blank'
+                rel='noopener noreferrer'
+                href='https://www.etsy.com/shop/embroidize'
+                className='flex items-center gap-2 rounded-full bg-gradient-to-r from-orange-400 to-red-500 px-3 py-1.5 text-sm text-white font-semibold shadow-md transition-all hover:scale-105 hover:shadow-lg mt-4'
+              >
+                <img
+                  src='/etsy.png'
+                  alt='Etsy'
+                  className='h-5 w-5 rounded-full bg-white p-0.5 shadow-sm transition-transform group-hover:rotate-6'
+                />
+                Visit Our Etsy Store
+              </Link> */}
             </div>
 
             {/* Other Resources Column */}

@@ -42,6 +42,7 @@ export const Header = () => {
                 sizes='(max-width: 640px) 80px'
                 className='object-contain block sm:hidden'
               />
+              
               <Image
                 src={mainLogo}
                 alt='Embroidize Logo'
