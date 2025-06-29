@@ -159,7 +159,7 @@ export const SingleProductComponent = async ({
                   Relevant Designs
                 </h2>
                 <Link
-                  href={`/${singleProductData?.category?.slug}/${singleProductData?.sub_category?.slug}`}
+                  href={`/${singleProductData?.category?.slug}/${singleProductData?.sub_category?.slug ?? ''}`}
                   className='text-sm text-black underline'
                 >
                   See All Designs
