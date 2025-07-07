@@ -8,6 +8,7 @@ export function GET() {
     Disallow: /auth/
     Disallow: /reset-password
     Disallow: /user
+    Disallow: /search
     Allow: /
 
 
