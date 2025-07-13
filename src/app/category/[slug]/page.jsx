@@ -10,12 +10,13 @@ import {
 import { capitalize } from '@/utils/functions/page';
 import { marked } from 'marked';
 import Link from 'next/link';
+import { redirect } from 'next/navigation';
 
 export async function generateMetadata({ params }) {
   try {
     const response = await getSingleCategory(params?.slug);
     const category = response?.data;
-    const canonicalUrl = `https://embroidize.com/category/${params.slug}`;
+    const canonicalUrl = `https://embroidize.com/category/${category.slug}`;
 
     return {
       title: category?.meta_title || category?.name,
@@ -66,6 +67,18 @@ export default async function CategoryProducts({ params, searchParams }) {
 
   const singleCategoryData = await getSingleCategory(params?.slug);
 
+  if (params?.slug !== singleCategoryData?.data?.slug) {
+    redirect(`/${singleCategoryData?.data?.slug}`);
+  }
+
+  if (!singleCategoryData?.data) {
+    return (
+      <div className='text-center py-12'>
+        <p>category not found.</p>
+      </div>
+    );
+  }
+
   const rawMarkup = marked(singleCategoryData?.data?.description || '');
 
   return (
@@ -74,7 +87,7 @@ export default async function CategoryProducts({ params, searchParams }) {
       <div className='container mx-auto px-4 py-6 flex flex-col gap-4'>
         <h1 className='capitalize text-3xl'>
           {singleCategoryData?.data?.name}
-           {/* Embroidery Designs */}
+          {/* Embroidery Designs */}
         </h1>
         <BreadCrumb
           items={[
