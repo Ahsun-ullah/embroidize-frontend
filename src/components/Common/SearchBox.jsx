@@ -1,20 +1,28 @@
 'use client';
 
-import { Input } from '@heroui/react';
-import { useRouter } from 'next/navigation';
-import { useState } from 'react';
+import { Input, Spinner } from '@heroui/react';
+import { usePathname, useRouter, useSearchParams } from 'next/navigation';
+import { useEffect, useState } from 'react';
 import { SearchIcon } from '../icons';
 
 export default function SearchBox() {
   const [searchQuery, setSearchQuery] = useState('');
+  const [loading, setLoading] = useState(false);
   const router = useRouter();
+  const pathname = usePathname();
+  const searchParams = useSearchParams();
+
+  // Reset loading when pathname or query string changes
+  useEffect(() => {
+    setLoading(false);
+  }, [pathname, searchParams.toString()]);
 
   const handleSubmit = (e) => {
     e.preventDefault();
     const trimmedQuery = searchQuery.trim();
     if (trimmedQuery) {
-      // Use encodeURIComponent to encode the query string safely
-      router.push(`/search?searchQuery=${encodeURIComponent(trimmedQuery)}`);
+      setLoading(true);
+      router.push(`/search?searchQuery=${trimmedQuery.split(' ').join('+')}`);
     }
   };
 
@@ -38,13 +46,19 @@ export default function SearchBox() {
           radius='full'
           isClearable={true}
           onClear={() => setSearchQuery('')}
+          disabled={loading}
         />
         <button
           type='submit'
           className='absolute right-[0.258rem] top-1/2 -translate-y-1/2 bg-black hover:bg-blue-500 rounded-full p-2 flex items-center justify-center focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-500'
           aria-label='Submit search'
+          disabled={loading}
         >
-          <SearchIcon className='text-white h-4 w-4' />
+          {loading ? (
+            <Spinner className='text-white h-4 w-4' />
+          ) : (
+            <SearchIcon className='text-white h-4 w-4' />
+          )}
         </button>
       </form>
     </div>
