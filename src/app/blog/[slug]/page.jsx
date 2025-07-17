@@ -1,7 +1,6 @@
 import Footer from '@/components/user/HomePage/Footer';
 import Header from '@/components/user/HomePage/Header';
 import { getSingleBlog } from '@/lib/apis/public/blog';
-import { marked } from 'marked';
 import Image from 'next/image';
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
@@ -15,6 +14,10 @@ export async function generateMetadata({ params }) {
   return {
     title: blog?.meta_title,
     description: blog?.meta_description,
+    alternatives: {
+      canonical: `https://embroidize.com/blog/${blog.slug}`,
+    },
+    keywords: blog?.meta_keywords,
     openGraph: {
       title: blog?.meta_title,
       description: blog?.meta_description,
@@ -42,8 +45,6 @@ export default async function SingleBlogPage({ params }) {
 
   if (!blog) return notFound();
 
-  const rawMarkup = marked(blog?.description || '');
-
   return (
     <>
       <Header />
@@ -62,7 +63,7 @@ export default async function SingleBlogPage({ params }) {
             src={blog?.image?.url || 'https://embroidize.com/og-banner.jpg'}
             alt={blog?.title}
             fill
-            className='object-cover'
+            className='object-fill'
             priority
             sizes='(max-width: 768px) 100vw, 700px'
           />
@@ -80,10 +81,9 @@ export default async function SingleBlogPage({ params }) {
           })}
         </p>
 
-        {/* Blog Content */}
         <div
-          className='prose max-w-none prose-lg text-gray-800'
-          dangerouslySetInnerHTML={{ __html: rawMarkup }}
+          className='prose max-w-none'
+          dangerouslySetInnerHTML={{ __html: blog?.description }}
         />
       </div>
 

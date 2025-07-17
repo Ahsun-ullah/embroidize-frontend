@@ -1,6 +1,7 @@
 import ClientProviders from '@/lib/providers/ClientProviders';
 import { Inter } from 'next/font/google';
 import Script from 'next/script';
+import 'quill/dist/quill.core.css';
 import 'remixicon/fonts/remixicon.css';
 import './globals.css';
 

@@ -35,7 +35,7 @@ const BlogCard = ({ data }) => {
 
           {/* Blog Description */}
           <p className='text-sm text-black/80 line-clamp-3'>
-            {data?.description.slice(0, 100) ?? 'Blog description goes here...'}
+            {data?.meta_description ?? 'Blog description goes here...'}
           </p>
         </div>
       </div>
