@@ -1,5 +1,6 @@
 import Footer from '@/components/user/HomePage/Footer';
 import Header from '@/components/user/HomePage/Header';
+import { Suspense } from 'react';
 
 export const metadata = {
   title: 'Terms And Conditions - Embroidize',
@@ -54,15 +55,6 @@ export default function TermsAndConditions() {
     {
       title: '4. License and Usage Rights',
       content: `Each design purchased grants the buyer a non-exclusive, non-transferable license for personal or small-business commercial use.`,
-      allowed: [
-        'Use the file to embroider physical items for sale (limited quantity production).',
-        'Resize the file (within machine/software limitations).',
-      ],
-      disallowed: [
-        'Share, resell, or distribute the digital files in any form.',
-        'Claim the design as your own.',
-        'Upload or publish the file on any platform for free or paid download.',
-      ],
     },
     {
       title: '5. Instant Digital Delivery',
@@ -99,7 +91,7 @@ export default function TermsAndConditions() {
   ];
 
   return (
-    <>
+    <Suspense fallback={<div>Loading...</div>}>
       <Header />
       <main className='container'>
         <div className='p-8'>
@@ -160,6 +152,6 @@ export default function TermsAndConditions() {
         </div>
       </main>
       <Footer />
-    </>
+    </Suspense>
   );
 }

@@ -45,7 +45,7 @@
   },
   "devDependencies": {
     "@eslint/eslintrc": "^3",
-    "@tailwindcss/postcss": "^4",
+    "@tailwindcss/postcss": "^4.1.11",
     "@typescript-eslint/eslint-plugin": "^8.27.0",
     "@typescript-eslint/parser": "^8.27.0",
     "autoprefixer": "^10.4.21",
@@ -57,6 +57,6 @@
     "eslint-plugin-react": "^7.37.4",
     "postcss": "^8.5.3",
     "prettier": "^3.5.3",
-    "tailwindcss": "^3.4.17"
+    "tailwindcss": "^4.1.11"
   }
 }

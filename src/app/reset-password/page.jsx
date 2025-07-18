@@ -5,14 +5,12 @@ import { Suspense } from 'react';
 
 export default function ResetPasswordPage() {
   return (
-    <>
+    <Suspense fallback={<div>Loading...</div>}>
       <Header />
       <div className='flex my-10 items-center justify-center bg-gray-50 px-4'>
-        <Suspense fallback={<div>Loading reset form...</div>}>
-          <ResetPasswordForm />
-        </Suspense>
+        <ResetPasswordForm />
       </div>
       <Footer />
-    </>
+    </Suspense>
   );
 }

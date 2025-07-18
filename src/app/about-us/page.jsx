@@ -1,5 +1,6 @@
 import Footer from '@/components/user/HomePage/Footer';
 import Header from '@/components/user/HomePage/Header';
+import { Suspense } from 'react';
 
 export const metadata = {
   title: 'About Us - Embroidize',
@@ -35,7 +36,7 @@ export const metadata = {
 
 export default function AboutUsPage() {
   return (
-    <>
+    <Suspense fallback={<div>Loading...</div>}>
       <Header />
       <main className='container mx-auto px-6 py-16 text-gray-800'>
         <div className='max-w-6xl mx-auto space-y-16'>
@@ -144,6 +145,7 @@ export default function AboutUsPage() {
         </div>
       </main>
       <Footer />
-    </>
+    </Suspense>
   );
 }
+

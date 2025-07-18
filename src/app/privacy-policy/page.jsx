@@ -1,5 +1,6 @@
 import Footer from '@/components/user/HomePage/Footer';
 import Header from '@/components/user/HomePage/Header';
+import { Suspense } from 'react';
 
 export const metadata = {
   title: 'Privacy Policy - Embroidize',
@@ -34,7 +35,7 @@ export const metadata = {
 
 export default function PrivacyPolicyPage() {
   return (
-    <>
+    <Suspense fallback={<div>Loading...</div>}>
       <Header />
       <main className='container px-6 py-12 text-gray-800'>
         <div>
@@ -338,7 +339,7 @@ export default function PrivacyPolicyPage() {
         </div>
       </main>
       <Footer />
-    </>
+    </Suspense>
   );
 }
 
@@ -350,3 +351,4 @@ function Section({ title, children }) {
     </div>
   );
 }
+
