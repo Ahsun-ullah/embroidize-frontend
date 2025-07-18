@@ -4,6 +4,7 @@ import { ErrorToast } from '@/components/Common/ErrorToast';
 import LoadingSpinner from '@/components/Common/LoadingSpinner';
 import { SuccessToast } from '@/components/Common/SuccessToast';
 
+import QuillEditor from '@/components/Common/QuillEditor';
 import {
   useAddBlogMutation,
   useAllBlogsQuery,
@@ -12,7 +13,6 @@ import {
 import { blogSchema } from '@/lib/zodValidation/productValidation';
 import { Modal, ModalBody, ModalContent, ModalHeader } from '@heroui/react';
 import { zodResolver } from '@hookform/resolvers/zod';
-import MDEditor from '@uiw/react-md-editor';
 import { useRouter } from 'next/navigation';
 import { useEffect, useState } from 'react';
 import { Controller, useForm } from 'react-hook-form';
@@ -144,6 +144,7 @@ export function BlogForm({ blog, isOpen, onOpenChange, setBlogId }) {
       scrollBehavior='inside'
       placement='center'
       size={'5xl'}
+      className='max-w-6xl'
     >
       <ModalContent>
         {(onClose) => (
@@ -178,42 +179,36 @@ export function BlogForm({ blog, isOpen, onOpenChange, setBlogId }) {
                 </div>
 
                 {/* Description */}
-                <div data-color-mode='light' className='col-span-3'>
+                <div className='col-span-3 mb-10'>
                   <label
                     className='text-lg font-medium tracking-tight leading-5'
                     htmlFor='description'
                   >
                     Description <span className='text-red-600'>*</span>
                   </label>
-                  <Controller
-                    name='description'
-                    control={control}
-                    render={({ field }) => (
-                      <MDEditor
-                        {...field}
-                        value={description}
-                        onChange={(value) => {
-                          setDescription(value);
-                          field.onChange(value);
-                        }}
-                        preview='edit'
-                        height={300}
-                        textareaProps={{
-                          placeholder: 'Enter Blog Description',
-                        }}
-                        previewOptions={{
-                          disallowedElements: ['style'],
-                        }}
-                        className='rounded-[4px] p-2 overflow-hidden'
-                      />
-                    )}
-                  />
+                  {isOpen && (
+                    <Controller
+                      name='description'
+                      control={control}
+                      render={({ field }) => (
+                        <QuillEditor
+                          {...field}
+                          value={description}
+                          onChange={(value) => {
+                            setDescription(value);
+                            field.onChange(value);
+                          }}
+                        />
+                      )}
+                    />
+                  )}
                   {errors.description && (
                     <p className='text-red-500 font-light'>
                       {errors.description.message}
                     </p>
                   )}
                 </div>
+
                 {/* meta_title  */}
                 <div className='col-span-3'>
                   <label

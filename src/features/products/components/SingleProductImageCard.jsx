@@ -29,7 +29,7 @@ export const SingleProductImageCard = ({ data }) => {
         quality={100}
         sizes='(max-width: 768px) 100vw, 800px'
         className='object-cover transition-opacity duration-300'
-        onLoadingComplete={() => setIsLoading(false)}
+        onLoad={() => setIsLoading(false)}
         priority
       />
     </Card>

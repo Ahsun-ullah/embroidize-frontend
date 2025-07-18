@@ -1,10 +1,10 @@
 import Footer from '@/components/user/HomePage/Footer';
 import Header from '@/components/user/HomePage/Header';
 import { getSingleBlog } from '@/lib/apis/public/blog';
-import { marked } from 'marked';
 import Image from 'next/image';
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
+import 'quill/dist/quill.snow.css';
 
 export async function generateMetadata({ params }) {
   const blogData = await getSingleBlog(params?.slug);
@@ -15,6 +15,10 @@ export async function generateMetadata({ params }) {
   return {
     title: blog?.meta_title,
     description: blog?.meta_description,
+    alternates: {
+      canonical: `https://embroidize.com/blog/${blog.slug}`,
+    },
+    keywords: blog?.meta_keywords?.join(', '),
     openGraph: {
       title: blog?.meta_title,
       description: blog?.meta_description,
@@ -42,51 +46,73 @@ export default async function SingleBlogPage({ params }) {
 
   if (!blog) return notFound();
 
-  const rawMarkup = marked(blog?.description || '');
+  console.log(blog?.image?.url);
 
   return (
     <>
       <Header />
-
-      <div className='container mx-auto px-4 py-12 max-w-5xl'>
-        <Link
-          href='/blog'
-          className='button inline-block mb-6 text-base font-medium'
-        >
-          ← Back to Blog
-        </Link>
-
-        {/* Blog Cover Image */}
-        <div className='relative w-full aspect-[16/9] mb-6 rounded-lg overflow-hidden shadow-md'>
-          <Image
-            src={blog?.image?.url || 'https://embroidize.com/og-banner.jpg'}
-            alt={blog?.title}
-            fill
-            className='object-cover'
-            priority
-            sizes='(max-width: 768px) 100vw, 700px'
-          />
+      <main>
+        <div className='container mx-auto px-4 py-12 max-w-5xl'>
+          <nav>
+            <Link
+              href='/blog'
+              className='button inline-block mb-6 text-base font-medium'
+              aria-label='Back to Blog'
+            >
+              ← Back to Blog
+            </Link>
+          </nav>
+          <article>
+            {/* Blog Cover Image */}
+            <figure className='relative w-full aspect-[16/9] mb-6 rounded-lg overflow-hidden shadow-md'>
+              <Image
+                src={blog?.image?.url || 'https://embroidize.com/og-banner.jpg'}
+                alt={blog?.title}
+                fill
+                className='object-fill'
+                priority
+                sizes='(max-width: 768px) 100vw, 700px'
+              />
+            </figure>
+            <header>
+              <h1 className='text-4xl font-bold mb-2 leading-tight'>
+                {blog?.title}
+              </h1>
+              <time
+                className='text-sm text-gray-500 mb-6 block'
+                dateTime={blog?.createdAt}
+                suppressHydrationWarning
+              >
+                {new Date(blog?.createdAt).toLocaleDateString('en-US', {
+                  year: 'numeric',
+                  month: 'long',
+                  day: 'numeric',
+                })}
+              </time>
+              {/* Render tags if available */}
+              {blog?.meta_keywords?.length > 0 && (
+                <div className='flex flex-wrap gap-2 mb-6'>
+                  {blog.meta_keywords.map((tag) => (
+                    <Link
+                      key={tag}
+                      href={`/search?searchQuery=${tag.split(' ').join('+')}`}
+                      className='inline-block bg-gray-100 px-3 py-1 text-xs rounded-full text-gray-700 hover:bg-primary hover:text-white transition'
+                    >
+                      {tag}
+                    </Link>
+                  ))}
+                </div>
+              )}
+            </header>
+            {/* Rich text blog description */}
+            <div
+              className='ql-editor max-w-none'
+              style={{ padding: 0, fontSize: 18 }}
+              dangerouslySetInnerHTML={{ __html: blog?.description }}
+            />
+          </article>
         </div>
-
-        {/* Blog Title */}
-        <h1 className='text-4xl font-bold mb-2 leading-tight'>{blog?.title}</h1>
-
-        {/* Blog Date */}
-        <p className='text-sm text-gray-500 mb-6'>
-          {new Date(blog?.createdAt).toLocaleDateString('en-US', {
-            year: 'numeric',
-            month: 'long',
-            day: 'numeric',
-          })}
-        </p>
-
-        {/* Blog Content */}
-        <div
-          className='prose max-w-none prose-lg text-gray-800'
-          dangerouslySetInnerHTML={{ __html: rawMarkup }}
-        />
-      </div>
-
+      </main>
       <Footer />
     </>
   );
