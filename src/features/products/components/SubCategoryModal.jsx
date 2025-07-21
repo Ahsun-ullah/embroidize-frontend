@@ -9,6 +9,7 @@ import {
   useUpdateProductSubCategoryMutation,
 } from '@/lib/redux/admin/categoryAndSubcategory/categoryAndSubcategorySlice';
 import { subCategorySchema } from '@/lib/zodValidation/productValidation';
+import { slugify } from '@/utils/functions/page';
 import { Modal, ModalBody, ModalContent, ModalHeader } from '@heroui/react';
 import { zodResolver } from '@hookform/resolvers/zod';
 import MDEditor from '@uiw/react-md-editor';
@@ -27,6 +28,7 @@ export default function SubCategoryModal({
   const [description, setDescription] = useState(
     subCategory?.description || '',
   );
+  const [slug, setSlug] = useState(subCategory?.slug || '');
   const [categoryOption, setCategoryOption] = useState([]);
 
   const { data: categoryData } = useGetPublicProductCategoriesQuery();
@@ -47,6 +49,7 @@ export default function SubCategoryModal({
     resolver: zodResolver(subCategorySchema),
     defaultValues: {
       name: '',
+      slug: '',
       category: '',
       description: '',
       meta_title: '',
@@ -60,6 +63,7 @@ export default function SubCategoryModal({
     if (subCategory) {
       reset({
         name: subCategory.name || '',
+        slug: subCategory.slug || '',
         category: subCategory.category?._id || '',
         description: subCategory.description || '',
         meta_title: subCategory.meta_title || '',
@@ -68,6 +72,7 @@ export default function SubCategoryModal({
         image: subCategory.image || null,
       });
       setDescription(subCategory.description || '');
+      setSlug(subCategory.slug || '');
     }
   }, [subCategory, reset]);
 
@@ -82,11 +87,18 @@ export default function SubCategoryModal({
     }
   }, [categoryData]);
 
+  const handleNameChange = (e) => {
+    const nameValue = e.target.value;
+    setSlug(slugify(nameValue));
+    setValue('name', nameValue);
+  };
+
   const onSubmit = async (data) => {
     console.log('Submitted Data:', data);
     try {
       const formData = new FormData();
       formData.append('name', data.name);
+      formData.append('slug', data.slug);
       formData.append('category', data.category);
       formData.append('description', data.description);
       formData.append('meta_title', data.meta_title);
@@ -181,11 +193,35 @@ export default function SubCategoryModal({
                     id='name'
                     placeholder='Subcategory Name'
                     {...register('name')}
+                    onChange={handleNameChange}
                     className='flex w-full flex-wrap md:flex-nowrap gap-4 border-[1.8px] rounded-[4px] p-2'
                   />
                   {errors.name && (
                     <p className='text-red-500 font-light'>
                       {errors.name.message}
+                    </p>
+                  )}
+                </div>
+
+                {/* Subcategory slug */}
+                <div className='flex flex-col gap-2'>
+                  <label
+                    className='text-lg font-medium tracking-tight leading-5'
+                    htmlFor='slug'
+                  >
+                    Subcategory Slug <span className='text-red-600'>*</span>
+                  </label>
+                  <input
+                    id='slug'
+                    placeholder='Subcategory Slug'
+                    {...register('slug')}
+                    value={slug}
+                    onChange={(e) => setSlug(slugify(e.target.value))}
+                    className='flex w-full flex-wrap md:flex-nowrap gap-4 border-[1.8px] rounded-[4px] p-2'
+                  />
+                  {errors.slug && (
+                    <p className='text-red-500 font-light'>
+                      {errors.slug.message}
                     </p>
                   )}
                 </div>

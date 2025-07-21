@@ -1,8 +1,6 @@
 'use client';
 
-import { ErrorToast } from '@/components/Common/ErrorToast';
 import LoadingSpinner from '@/components/Common/LoadingSpinner';
-import { SuccessToast } from '@/components/Common/SuccessToast';
 import {
   useGetPublicProductCategoriesQuery,
   useGetPublicProductSubCategoriesQuery,
@@ -12,9 +10,8 @@ import {
   useUpdateProductMutation,
 } from '@/lib/redux/admin/protectedProducts/protectedProductSlice';
 import { useAllProductsQuery } from '@/lib/redux/public/products/productSlice';
-import { productSchema } from '@/lib/zodValidation/productValidation';
+import { slugify } from '@/utils/functions/page';
 import { Card } from '@heroui/react';
-import { zodResolver } from '@hookform/resolvers/zod';
 import MDEditor from '@uiw/react-md-editor';
 import { useRouter } from 'next/navigation';
 import { useEffect, useState } from 'react';
@@ -23,6 +20,8 @@ import Select from 'react-select';
 import { ZipFileUpload } from './FileDragAndDropInput';
 import { ImageFileUpload } from './ImageDragAndDropInput';
 import { CreatableTagsInput } from './TagsInput';
+import { SuccessToast } from '@/components/Common/SuccessToast';
+import { ErrorToast } from '@/components/Common/ErrorToast';
 
 export function ProductsForm({ product }) {
   const router = useRouter();
@@ -30,6 +29,7 @@ export function ProductsForm({ product }) {
   const [subCategoryOption, setSubCategoryOption] = useState([]);
   const [description, setDescription] = useState(product?.description || '');
   const [selectedCategory, setSelectedCategory] = useState('');
+  const [slug, setSlug] = useState(product?.slug || '');
 
   const { data: categoryData } = useGetPublicProductCategoriesQuery();
   const { data: subCategoryData } = useGetPublicProductSubCategoriesQuery();
@@ -50,6 +50,7 @@ export function ProductsForm({ product }) {
     resolver: zodResolver(productSchema),
     defaultValues: {
       name: '',
+      slug: '',
       price: null,
       description: '',
       category: '',
@@ -66,6 +67,7 @@ export function ProductsForm({ product }) {
     if (product) {
       reset({
         name: product.name ?? '',
+        slug: product.slug ?? '',
         category: product.category?._id ?? '',
         sub_category: product.sub_category?._id ?? '',
         price: product.price ?? null,
@@ -77,6 +79,7 @@ export function ProductsForm({ product }) {
         file: product.file ?? null,
       });
       setDescription(product.description ?? '');
+      setSlug(product.slug ?? '');
     }
     if (product?.category?._id) {
       setSelectedCategory(product.category._id);
@@ -116,6 +119,12 @@ export function ProductsForm({ product }) {
       }
     }
   }, [categoryData, subCategoryData]);
+
+  const handleNameChange = (e) => {
+    const nameValue = e.target.value;
+    setSlug(slugify(nameValue));
+    setValue('name', nameValue);
+  };
 
   const onSubmit = async (data) => {
     console.log('Submitted Data:', data);
@@ -207,10 +216,32 @@ export function ProductsForm({ product }) {
             id='name'
             placeholder='Product Name'
             {...register('name')}
+            onChange={handleNameChange}
             className='flex w-full flex-wrap md:flex-nowrap gap-4 border-[1.8px] rounded-[4px] p-2'
           />
           {errors.name && (
             <p className='text-red-500 font-light'>{errors.name.message}</p>
+          )}
+        </div>
+
+        {/* Product slug */}
+        <div className='col-span-3'>
+          <label
+            className='text-lg font-medium tracking-tight leading-5'
+            htmlFor='slug'
+          >
+            Product Slug <span className='text-red-600'>*</span>
+          </label>
+          <input
+            id='slug'
+            placeholder='Product Slug'
+            {...register('slug')}
+            value={slug}
+            onChange={(e) => setSlug(slugify(e.target.value))}
+            className='flex w-full flex-wrap md:flex-nowrap gap-4 border-[1.8px] rounded-[4px] p-2'
+          />
+          {errors.slug && (
+            <p className='text-red-500 font-light'>{errors.slug.message}</p>
           )}
         </div>
 

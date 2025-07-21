@@ -8,7 +8,7 @@ import {
   useUpdateProductCategoryMutation,
 } from '@/lib/redux/admin/categoryAndSubcategory/categoryAndSubcategorySlice';
 import { categorySchema } from '@/lib/zodValidation/productValidation';
-import { convertImageUrlToFile } from '@/utils/functions/page';
+import { convertImageUrlToFile, slugify } from '@/utils/functions/page';
 import { Modal, ModalBody, ModalContent, ModalHeader } from '@heroui/react';
 import { zodResolver } from '@hookform/resolvers/zod';
 import MDEditor from '@uiw/react-md-editor';
@@ -24,6 +24,8 @@ export default function CategoryModal({
   setCategoryId,
 }) {
   const [description, setDescription] = useState(category?.description || '');
+  const [slug, setSlug] = useState(category?.slug || '');
+
   const [addProductCategory] = useAddProductCategoryMutation();
   const [updateProductCategory] = useUpdateProductCategoryMutation();
   const { refetch: getProductCategoryRefetch } =
@@ -42,6 +44,7 @@ export default function CategoryModal({
     resolver: zodResolver(categorySchema),
     defaultValues: {
       name: '',
+      slug: '',
       description: '',
       meta_title: '',
       meta_description: '',
@@ -57,6 +60,7 @@ export default function CategoryModal({
       if (category) {
         reset({
           name: category.name ?? '',
+          slug: category.slug ?? '',
           description: category.description ?? '',
           meta_title: category.meta_title ?? '',
           meta_description: category.meta_description ?? '',
@@ -64,10 +68,17 @@ export default function CategoryModal({
           image: newImg ?? null,
         });
         setDescription(category.description ?? '');
+        setSlug(category.slug ?? '');
       }
     }
     fetchData();
   }, [category, reset]);
+
+  const handleNameChange = (e) => {
+    const nameValue = e.target.value;
+    setSlug(slugify(nameValue));
+    setValue('name', nameValue);
+  };
 
   const onSubmit = async (data) => {
     console.log('Submitted Data:', data);
@@ -167,11 +178,35 @@ export default function CategoryModal({
                     id='name'
                     placeholder='Category Name'
                     {...register('name')}
+                    onChange={handleNameChange}
                     className='flex w-full flex-wrap md:flex-nowrap gap-4 border-[1.8px] rounded-[4px] p-2'
                   />
                   {errors.name && (
                     <p className='text-red-500 font-light'>
                       {errors.name.message}
+                    </p>
+                  )}
+                </div>
+
+                {/* Category Slug */}
+                <div className='flex flex-col gap-2'>
+                  <label
+                    className='text-lg font-medium tracking-tight leading-5'
+                    htmlFor='slug'
+                  >
+                    Category Slug <span className='text-red-600'>*</span>
+                  </label>
+                  <input
+                    id='slug'
+                    placeholder='Category Slug'
+                    {...register('slug')}
+                    value={slug}
+                    onChange={(e) => setSlug(slugify(e.target.value))}
+                    className='flex w-full flex-wrap md:flex-nowrap gap-4 border-[1.8px] rounded-[4px] p-2'
+                  />
+                  {errors.slug && (
+                    <p className='text-red-500 font-light'>
+                      {errors.slug.message}
                     </p>
                   )}
                 </div>

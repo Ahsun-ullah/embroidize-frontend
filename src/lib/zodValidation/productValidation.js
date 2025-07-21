@@ -2,6 +2,7 @@ import { z } from 'zod';
 
 export const productSchema = z.object({
   name: z.string().min(1, 'Product name is required'),
+  slug: z.string().optional(),
   category: z.string().min(1, 'Category is required'),
   sub_category: z.string().optional(),
   price: z.number().min(0, 'Price must be greater than 0'),
@@ -14,6 +15,7 @@ export const productSchema = z.object({
 });
 export const blogSchema = z.object({
   title: z.string().min(1, 'Blog Title is required'),
+  slug: z.string().optional(),
   description: z.string().min(1, 'Description is required'),
   meta_title: z.string().min(1, 'Meta Title is required'),
   meta_description: z.string().min(1, 'Meta Description is required'),
@@ -23,6 +25,7 @@ export const blogSchema = z.object({
 
 export const categorySchema = z.object({
   name: z.string().min(1, 'Product name is required'),
+  slug: z.string().optional(),
   description: z.string().min(1, 'Description is required'),
   meta_title: z.string().min(1, 'Meta Title is required'),
   meta_description: z.string().min(1, 'Meta Description is required'),
@@ -31,6 +34,7 @@ export const categorySchema = z.object({
 });
 export const subCategorySchema = z.object({
   name: z.string().min(1, 'Subcategory name is required'),
+  slug: z.string().optional(),
   category: z.string().min(1, 'Category is required'),
   description: z.string().min(1, 'Description is required'),
   meta_title: z.string().min(1, 'Meta Title is required'),
