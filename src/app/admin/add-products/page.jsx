@@ -20,7 +20,7 @@ async function singleProductFetch(productId) {
 export default async function ContactsPage({ searchParams }) {
   const productId = searchParams.productId;
 
-  const _ = searchParams.ts;
+  // const _ = searchParams.ts;
 
   const singleProductData = productId
     ? await singleProductFetch(productId)

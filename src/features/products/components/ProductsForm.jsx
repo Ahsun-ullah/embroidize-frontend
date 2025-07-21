@@ -1,6 +1,8 @@
 'use client';
 
+import { ErrorToast } from '@/components/Common/ErrorToast';
 import LoadingSpinner from '@/components/Common/LoadingSpinner';
+import { SuccessToast } from '@/components/Common/SuccessToast';
 import {
   useGetPublicProductCategoriesQuery,
   useGetPublicProductSubCategoriesQuery,
@@ -10,8 +12,10 @@ import {
   useUpdateProductMutation,
 } from '@/lib/redux/admin/protectedProducts/protectedProductSlice';
 import { useAllProductsQuery } from '@/lib/redux/public/products/productSlice';
+import { productSchema } from '@/lib/zodValidation/productValidation';
 import { slugify } from '@/utils/functions/page';
 import { Card } from '@heroui/react';
+import { zodResolver } from '@hookform/resolvers/zod';
 import MDEditor from '@uiw/react-md-editor';
 import { useRouter } from 'next/navigation';
 import { useEffect, useState } from 'react';
@@ -20,8 +24,6 @@ import Select from 'react-select';
 import { ZipFileUpload } from './FileDragAndDropInput';
 import { ImageFileUpload } from './ImageDragAndDropInput';
 import { CreatableTagsInput } from './TagsInput';
-import { SuccessToast } from '@/components/Common/SuccessToast';
-import { ErrorToast } from '@/components/Common/ErrorToast';
 
 export function ProductsForm({ product }) {
   const router = useRouter();
