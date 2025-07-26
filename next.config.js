@@ -5,7 +5,7 @@ const nextConfig = {
   compress: true,
 
   images: {
-    domains:[
+    domains: [
       'www.embroidize.com',
       'embroidize-assets.nyc3.cdn.digitaloceanspaces.com',
     ],
@@ -13,7 +13,12 @@ const nextConfig = {
     remotePatterns: [
       {
         protocol: 'https',
-        hostname: 'www.embroidize.com',
+        hostname: 'embroidize.com',
+        pathname: '/**',
+      },
+      {
+        protocol: 'https',
+        hostname: 'tan-dogfish-413907.hostingersite.com',
         pathname: '/**',
       },
       {

@@ -3,10 +3,8 @@ import Image from 'next/image';
 import Link from 'next/link';
 
 const BlogCard = ({ data }) => {
-  const imageUrl = data?.image?.url;
-  const altText = data?.title
-    ? `Cover image for "${data.title}"`
-    : 'Blog Post Image';
+  const imageUrl = data?.featuredImage;
+  const altText = data?.title.rendered;
 
   return (
     <>
@@ -33,14 +31,18 @@ const BlogCard = ({ data }) => {
         <div className='border-default-600 dark:border-default-100 p-4 rounded-b-2xl'>
           <div className='flex flex-col gap-2'>
             {/* Blog Title */}
-            <h2 className='text-lg font-bold line-clamp-2'>
-              {data?.title ?? 'Blog Title'}
-            </h2>
+            <h2
+              className='text-2xl font-semibold prose max-w-none'
+              dangerouslySetInnerHTML={{ __html: data.title.rendered }}
+            />
 
             {/* Blog Description */}
-            <p className='text-sm text-black/80 line-clamp-3'>
-              {data?.meta_description ?? 'Blog description goes here...'}
-            </p>
+            {/* <p
+              className='prose max-w-none mt-2'
+              dangerouslySetInnerHTML={{
+                __html: data.excerpt.rendered.slice(0, 100),
+              }}
+            /> */}
           </div>
         </div>
       </Link>

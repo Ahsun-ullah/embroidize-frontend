@@ -5,7 +5,7 @@ import { Header } from '@/components/user/HomePage/Header';
 import HeroSection from '@/components/user/HomePage/HeroSection';
 import PopularDesign from '@/components/user/HomePage/PopularDesign';
 import RecentProductsSection from '@/components/user/HomePage/RecentProductsSection';
-import { getBlogs } from '@/lib/apis/public/blog';
+import { getPosts } from '@/lib/wordpress';
 import Link from 'next/link';
 import { Suspense } from 'react';
 import ProductUpdates from './products/ProductUpdates';
@@ -54,7 +54,7 @@ export const metadata = {
 };
 
 export default async function Home() {
-  const { blogs } = await getBlogs('', 1, 3);
+  const blogs = await getPosts();
 
   return (
     <>
