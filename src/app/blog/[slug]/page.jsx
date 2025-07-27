@@ -1,29 +1,31 @@
 import Footer from '@/components/user/HomePage/Footer';
 import Header from '@/components/user/HomePage/Header';
 import { getPostBySlug } from '@/lib/wordpress';
+import { Divider } from '@heroui/divider';
 import Image from 'next/image';
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
+import BlogPageSidebarContent from '../BlogPageSidebarContent';
 
 export async function generateMetadata({ params }) {
   const blog = await getPostBySlug(params?.slug);
 
   if (!blog) return {};
 
+  const description =
+    blog?.meta_description ||
+    'Explore the latest embroidery design tutorials, tips, and updates from the Embroidize team.';
+
   return {
     title: blog?.title?.rendered,
-    description:
-      blog?.meta_description ||
-      'Explore the latest embroidery design tutorials, tips, and updates from the Embroidize team.',
+    description,
     alternates: {
       canonical: `https://embroidize.com/blog/${blog.slug}`,
     },
     keywords: blog?.tags?.join(', '),
     openGraph: {
       title: blog?.title?.rendered,
-      description:
-        blog?.meta_description ||
-        'Explore the latest embroidery design tutorials, tips, and updates from the Embroidize team.',
+      description,
       images: [
         {
           url: blog?.featuredImage || 'https://embroidize.com/og-banner.jpg',
@@ -36,58 +38,99 @@ export async function generateMetadata({ params }) {
     twitter: {
       card: 'summary_large_image',
       title: blog?.title?.rendered,
-      description:
-        blog?.meta_description ||
-        'Explore the latest embroidery design tutorials, tips, and updates from the Embroidize team.',
+      description,
       images: [blog?.featuredImage || 'https://embroidize.com/og-banner.jpg'],
     },
   };
 }
 
 export default async function SingleBlogPage({ params }) {
-  const blogData = await getPostBySlug(params.slug);
-  const blog = blogData;
+  const blog = await getPostBySlug(params.slug);
 
   if (!blog) return notFound();
+
+  // Generate JSON-LD
+  const jsonLd = {
+    '@context': 'https://schema.org',
+    '@type': 'BlogPosting',
+    mainEntityOfPage: {
+      '@type': 'WebPage',
+      '@id': `https://embroidize.com/blog/${blog.slug}`,
+    },
+    headline: blog?.title?.rendered,
+    description:
+      blog?.meta_description ||
+      'Explore the latest embroidery design tutorials, tips, and updates from the Embroidize team.',
+    image: blog?.featuredImage || 'https://embroidize.com/og-banner.jpg',
+    author: {
+      '@type': 'Organization',
+      name: 'Embroidize',
+    },
+    publisher: {
+      '@type': 'Organization',
+      name: 'Embroidize',
+      logo: {
+        '@type': 'ImageObject',
+        url: 'https://embroidize.com/logo.png', // Replace with your logo URL
+      },
+    },
+    datePublished: blog?.date,
+    dateModified: blog?.modified || blog?.date,
+  };
 
   return (
     <>
       <Header />
-      <main>
-        <div className='container mx-auto py-10'>
-          <nav>
-            <Link
-              href='/blog'
-              className='button inline-block mb-6 text-base font-medium'
-              aria-label='Back to Blog'
-            >
-              ← Back to Blog
-            </Link>
-          </nav>
-          <article>
+      <main className="container mx-auto px-4 lg:px-24 py-8">
+        {/* JSON-LD Structured Data */}
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+        />
+
+        {/* Back to Blog */}
+        <nav className="mb-6">
+          <Link
+            href="/blog"
+            className="button inline-block text-base font-medium hover:underline"
+            aria-label="Back to Blog"
+          >
+            ← Back to Blog
+          </Link>
+        </nav>
+
+        {/* Blog Content and Sidebar */}
+        <div className="flex flex-col lg:flex-row justify-between items-start gap-10">
+          {/* Article */}
+          <article
+            className="flex-1 px-0 lg:px-4"
+            itemScope
+            itemType="https://schema.org/Article"
+          >
             {/* Blog Cover Image */}
-            <figure className='relative w-full aspect-[16/9] mb-6 rounded-lg overflow-hidden shadow-md'>
+            <figure className="relative w-full aspect-[16/9] mb-16 rounded-lg overflow-hidden shadow-md">
               <Image
                 src={
                   blog?.featuredImage || 'https://embroidize.com/og-banner.jpg'
                 }
-                alt={blog?.title?.rendered}
+                alt={blog?.title?.rendered || 'Embroidery Design'}
                 fill
-                className='object-fill'
+                className="object-cover"
                 priority
-                sizes='(max-width: 768px) 100vw, 700px'
+                sizes="(max-width: 768px) 100vw, 700px"
+                itemProp="image"
               />
             </figure>
 
-            <header>
-              <h1 className='text-4xl font-bold mb-2'>
+            {/* Blog Title & Meta */}
+            <header className="mb-6">
+              <h1 className="text-4xl font-bold mb-2" itemProp="headline">
                 {blog?.title?.rendered}
               </h1>
               <time
-                style={{ padding: 0, fontSize: 18 }}
-                className='mb-6 block'
+                className="block text-gray-600 text-sm"
                 dateTime={blog?.date}
-                suppressHydrationWarning
+                itemProp="datePublished"
               >
                 {new Date(blog?.date).toLocaleDateString('en-US', {
                   year: 'numeric',
@@ -95,14 +138,16 @@ export default async function SingleBlogPage({ params }) {
                   day: 'numeric',
                 })}
               </time>
-              {/* Render tags if available */}
+
+              {/* Tags */}
               {blog?.tags?.length > 0 && (
-                <div className='flex flex-wrap gap-2 mb-6'>
+                <div className="flex flex-wrap gap-2 mt-4">
                   {blog.tags.map((tag) => (
                     <Link
                       key={tag}
-                      href={`/search?searchQuery=${tag.split(' ').join('+')}`}
-                      className='inline-block bg-gray-100 px-3 py-1 text-xs rounded-full text-gray-700 hover:bg-primary hover:text-white transition'
+                      href={`/search?searchQuery=${encodeURIComponent(tag)}`}
+                      className="inline-block bg-gray-100 px-3 py-1 text-xs rounded-full text-gray-700 hover:bg-primary hover:text-white transition"
+                      aria-label={`View posts tagged with ${tag}`}
                     >
                       {tag}
                     </Link>
@@ -111,13 +156,23 @@ export default async function SingleBlogPage({ params }) {
               )}
             </header>
 
-            {/* Rich text blog description */}
-            <div
-              className='prose max-w-none'
-              style={{ padding: 0, fontSize: 18 }}
+            {/* Blog Content */}
+            <section
+              className="prose max-w-none leading-relaxed text-justify"
+              style={{ fontSize: 18 }}
               dangerouslySetInnerHTML={{ __html: blog?.content?.rendered }}
+              itemProp="articleBody"
             />
           </article>
+
+          {/* Divider */}
+          <Divider
+            orientation="vertical"
+            className="bg-gray-300 h-96 hidden lg:block self-stretch mx-4"
+          />
+
+          {/* Sidebar */}
+          <BlogPageSidebarContent />
         </div>
       </main>
       <Footer />
