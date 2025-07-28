@@ -11,17 +11,18 @@ const BlogCard = ({ data }) => {
       <Link
         href={`/blog/${data?.slug}`}
         className='bg-white border rounded-2xl shadow-xl overflow-hidden group'
+        aria-label={`View details for ${altText}`}
       >
         {/* Blog Image */}
-        <div className='relative w-full aspect-[4/3]'>
+        <div className='relative w-full aspect-[3/2]'>
           <Image
             src={imageUrl || 'https://embroidize.com/og-banner.jpg'}
             alt={altText}
             fill
-            className='object-fit object-center transition-transform duration-300 group-hover:scale-105'
+            sizes='(max-width: 640px) 100vw, (max-width: 768px) 50vw, 33vw'
+            className='object-cover object-center transition-transform duration-300 group-hover:scale-105'
             quality={80}
             priority={true}
-            sizes='(max-width: 640px) 100vw, (max-width: 768px) 50vw, 33vw'
           />
         </div>
 

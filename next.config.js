@@ -70,6 +70,12 @@ const nextConfig = {
         destination: 'https://embroidize.com/:path*',
         permanent: true,
       },
+      {
+        source:
+          '/blog/10-free-christmas-machine-embroidery-designs-for-your-holiday-projects',
+        destination: '/blog/free-christmas-machine-embroidery-designs',
+        permanent: true,
+      },
     ];
   },
 };

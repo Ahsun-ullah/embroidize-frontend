@@ -14,7 +14,7 @@ export default async function BlogPageSidebarContent() {
   ];
 
   return (
-    <aside className='w-full lg:w-1/3 space-y-8 px-4'>
+    <aside className='w-full lg:w-1/3 space-y-8'>
       {/* Recent Blog Posts */}
       {recentPosts?.length > 0 && (
         <div>

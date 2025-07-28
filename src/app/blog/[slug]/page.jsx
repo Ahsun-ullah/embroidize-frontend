@@ -49,7 +49,7 @@ export default async function SingleBlogPage({ params }) {
 
   if (!blog) return notFound();
 
-  // Generate JSON-LD
+  // JSON-LD Structured Data
   const jsonLd = {
     '@context': 'https://schema.org',
     '@type': 'BlogPosting',
@@ -71,7 +71,7 @@ export default async function SingleBlogPage({ params }) {
       name: 'Embroidize',
       logo: {
         '@type': 'ImageObject',
-        url: 'https://embroidize.com/logo.png', // Replace with your logo URL
+        url: 'https://embroidize.com/logo.png',
       },
     },
     datePublished: blog?.date,
@@ -81,97 +81,89 @@ export default async function SingleBlogPage({ params }) {
   return (
     <>
       <Header />
-      <main className="container mx-auto px-4 lg:px-24 py-8">
-        {/* JSON-LD Structured Data */}
+      <main className='container mx-auto py-8'>
         <script
-          type="application/ld+json"
+          type='application/ld+json'
           dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
         />
 
-        {/* Back to Blog */}
-        <nav className="mb-6">
+        <nav className='mb-6'>
           <Link
-            href="/blog"
-            className="button inline-block text-base font-medium hover:underline"
-            aria-label="Back to Blog"
+            href='/blog'
+            className='button inline-block text-base font-medium hover:underline'
+            aria-label='Back to Blog'
           >
             ← Back to Blog
           </Link>
         </nav>
 
-        {/* Blog Content and Sidebar */}
-        <div className="flex flex-col lg:flex-row justify-between items-start gap-10">
-          {/* Article */}
+        <div className='flex flex-col lg:flex-row justify-between items-start gap-10'>
           <article
-            className="flex-1 px-0 lg:px-4"
+            className='flex-1'
             itemScope
-            itemType="https://schema.org/Article"
+            itemType='https://schema.org/Article'
           >
-            {/* Blog Cover Image */}
-            <figure className="relative w-full aspect-[16/9] mb-16 rounded-lg overflow-hidden shadow-md">
+            <figure className='relative w-full aspect-[16/9] mb-12 rounded-lg overflow-hidden shadow-md'>
               <Image
                 src={
                   blog?.featuredImage || 'https://embroidize.com/og-banner.jpg'
                 }
                 alt={blog?.title?.rendered || 'Embroidery Design'}
                 fill
-                className="object-cover"
+                className='object-cover'
                 priority
-                sizes="(max-width: 768px) 100vw, 700px"
-                itemProp="image"
+                sizes='(max-width: 768px) 100vw, 700px'
+                itemProp='image'
               />
             </figure>
 
-            {/* Blog Title & Meta */}
-            <header className="mb-6">
-              <h1 className="text-4xl font-bold mb-2" itemProp="headline">
-                {blog?.title?.rendered}
-              </h1>
-              <time
-                className="block text-gray-600 text-sm"
-                dateTime={blog?.date}
-                itemProp="datePublished"
-              >
-                {new Date(blog?.date).toLocaleDateString('en-US', {
-                  year: 'numeric',
-                  month: 'long',
-                  day: 'numeric',
-                })}
-              </time>
+            <div className='rounded-lg overflow-hidden shadow-xl p-8'>
+              <header className='mb-6'>
+                <h1 className='text-4xl font-bold mb-2' itemProp='headline'>
+                  {blog?.title?.rendered}
+                </h1>
+                <time
+                  className='block text-gray-600 text-sm'
+                  dateTime={blog?.date}
+                  itemProp='datePublished'
+                >
+                  {new Date(blog?.date).toLocaleDateString('en-US', {
+                    year: 'numeric',
+                    month: 'long',
+                    day: 'numeric',
+                  })}
+                </time>
 
-              {/* Tags */}
-              {blog?.tags?.length > 0 && (
-                <div className="flex flex-wrap gap-2 mt-4">
-                  {blog.tags.map((tag) => (
-                    <Link
-                      key={tag}
-                      href={`/search?searchQuery=${encodeURIComponent(tag)}`}
-                      className="inline-block bg-gray-100 px-3 py-1 text-xs rounded-full text-gray-700 hover:bg-primary hover:text-white transition"
-                      aria-label={`View posts tagged with ${tag}`}
-                    >
-                      {tag}
-                    </Link>
-                  ))}
-                </div>
-              )}
-            </header>
+                {blog?.tags?.length > 0 && (
+                  <div className='flex flex-wrap gap-2 mt-4'>
+                    {blog.tags.map((tag) => (
+                      <Link
+                        key={tag}
+                        href={`/search?searchQuery=${encodeURIComponent(tag)}`}
+                        className='inline-block bg-gray-100 px-3 py-1 text-xs rounded-full text-gray-700 hover:bg-primary hover:text-white transition'
+                        aria-label={`View posts tagged with ${tag}`}
+                      >
+                        {tag}
+                      </Link>
+                    ))}
+                  </div>
+                )}
+              </header>
 
-            {/* Blog Content */}
-            <section
-              className="prose max-w-none leading-relaxed text-justify"
-              style={{ fontSize: 18 }}
-              dangerouslySetInnerHTML={{ __html: blog?.content?.rendered }}
-              itemProp="articleBody"
-            />
+              <section
+                className='prose max-w-none leading-relaxed text-justify'
+                style={{ fontSize: 18 }}
+                dangerouslySetInnerHTML={{ __html: blog?.content?.rendered }}
+                itemProp='articleBody'
+              />
+            </div>
           </article>
 
-          {/* Divider */}
           <Divider
-            orientation="vertical"
-            className="bg-gray-300 h-96 hidden lg:block self-stretch mx-4"
+            orientation='vertical'
+            className='bg-gray-300 h-96 hidden lg:block self-stretch'
           />
 
-          {/* Sidebar */}
           <BlogPageSidebarContent />
         </div>
       </main>
