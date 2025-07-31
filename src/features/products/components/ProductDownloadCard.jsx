@@ -19,6 +19,19 @@ import { useState } from 'react';
 export default function ProductDownloadCard({ data }) {
   const pathName = usePathname();
   const [isLoading, setIsLoading] = useState(false);
+  const [showLimitModal, setShowLimitModal] = useState(false);
+  const [limitModalData, setLimitModalData] = useState({
+    count: null,
+    duration: null,
+  });
+
+  const formatDuration = (duration) => {
+    if (!duration) return '';
+    const num = duration.slice(0, -1);
+    const unit = duration.slice(-1);
+    const units = { d: 'day', h: 'hour', m: 'minute' };
+    return `${num} ${units[unit]}${num === '1' ? '' : 's'}`;
+  };
 
   const handleSingleZipFileDownload = async (fileData) => {
     const token = Cookies.get('token');
@@ -44,16 +57,63 @@ export default function ProductDownloadCard({ data }) {
         },
       );
 
+      // if (!res.ok) {
+      //   let errorMessage = 'Could not download the ZIP file';
+      //   let errorTitle = 'Download Failed';
+      //   try {
+      //     const errorJson = await res.json();
+      //     errorMessage = errorJson?.error?.message || errorMessage;
+      //     errorTitle = errorJson?.message;
+      //   } catch {
+      //     const errorText = await res.text();
+      //     errorMessage = errorText || errorMessage;
+      //   }
+
+      //   ErrorToast(`${errorTitle}`, errorMessage, 3000);
+      //   return;
+      // }
+
       if (!res.ok) {
         let errorMessage = 'Could not download the ZIP file';
         let errorTitle = 'Download Failed';
+        let showLimitModal = false;
+        let limitData = { count: null, duration: null };
+
         try {
           const errorJson = await res.json();
           errorMessage = errorJson?.error?.message || errorMessage;
           errorTitle = errorJson?.message;
+
+          // Check if it's the download limit error
+          if (
+            errorTitle === 'Limit reached' &&
+            /Download limit of (\d+) per (\d+[dhm]) reached\./.test(
+              errorMessage,
+            ) &&
+            errorJson?.status === 403
+          ) {
+            showLimitModal = true;
+
+            const match = errorMessage.match(
+              /Download limit of (\d+) per (\d+[dhm]) reached\./,
+            );
+
+            if (match) {
+              limitData.count = match[1];
+              limitData.duration = match[2]; // 1d, 7d, etc.
+            }
+          }
         } catch {
           const errorText = await res.text();
           errorMessage = errorText || errorMessage;
+        }
+
+        setIsLoading(false);
+
+        if (showLimitModal) {
+          setLimitModalData(limitData);
+          setShowLimitModal(true);
+          return;
         }
 
         ErrorToast(`${errorTitle}`, errorMessage, 3000);
@@ -63,7 +123,7 @@ export default function ProductDownloadCard({ data }) {
       const blob = await res.blob();
 
       const filename =
-        `From_Embroid_${fileData.extension}.zip` ||
+        `From_Embroidize_${fileData.extension}.zip` ||
         res.headers.get('Content-Disposition')?.split('filename=')[1] ||
         'download.zip';
 
@@ -115,7 +175,7 @@ export default function ProductDownloadCard({ data }) {
 
   //     const blob = await res.blob();
 
-  //     const filename = `From_Embroid_${fileData.extension}.zip`;
+  //     const filename = `From_Embroidize_${fileData.extension}.zip`;
 
   //     const url = window.URL.createObjectURL(blob);
   //     const link = document.createElement('a');
@@ -168,7 +228,7 @@ export default function ProductDownloadCard({ data }) {
                 {data.available_file_types.map((type) => (
                   <DropdownItem
                     key={type}
-                    onClick={() =>
+                    onPress={() =>
                       handleSingleZipFileDownload({
                         extension: type,
                         id: data?._id,
@@ -203,6 +263,47 @@ export default function ProductDownloadCard({ data }) {
           </Button>
         )} */}
       </Card>
+
+      {showLimitModal && (
+        <div className='fixed inset-0 z-50 bg-black/40 flex items-center justify-center'>
+          <div className='bg-white rounded-2xl shadow-2xl p-8 max-w-2xl w-full text-center animate-fade-in'>
+            {/* Icon */}
+            <div className='mx-auto mb-4 w-14 h-14 rounded-full bg-red-100 text-red-600 flex items-center justify-center text-2xl'>
+              ⛔
+            </div>
+
+            {/* Heading */}
+            <h2 className='text-2xl font-semibold text-gray-800 mb-2'>
+              Download Limit Reached
+            </h2>
+
+            {/* Message */}
+            <p className='text-gray-600 mb-3'>
+              You've reached your limit of{' '}
+              <span className='font-semibold text-gray-800'>
+                {limitModalData.count}
+              </span>{' '}
+              downloads within{' '}
+              <span className='font-semibold text-gray-800'>
+                {formatDuration(limitModalData.duration)}
+              </span>
+              .
+            </p>
+            <p className='text-sm text-gray-500 mb-4'>
+              Please wait for the limit to reset.
+            </p>
+            <p className='text-sm text-gray-500 mb-6'>Happy Downloading...</p>
+
+            {/* Action Button */}
+            <button
+              className='bg-primary text-white px-5 py-2 rounded-lg hover:bg-primary-dark transition-colors duration-300'
+              onClick={() => setShowLimitModal(false)}
+            >
+              Okay, got it
+            </button>
+          </div>
+        </div>
+      )}
     </>
   );
 }

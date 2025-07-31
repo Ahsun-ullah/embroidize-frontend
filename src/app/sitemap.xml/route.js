@@ -1,19 +1,18 @@
-import { getBlogs } from '@/lib/apis/public/blog';
 import { getCategories } from '@/lib/apis/public/category';
 import { getProducts } from '@/lib/apis/public/products';
 import { getSubCategories } from '@/lib/apis/public/subcategory';
+import { getPosts } from '@/lib/wordpress';
 export const dynamic = 'force-dynamic';
 
 export async function GET() {
   try {
     const baseUrl = process.env.NEXT_PUBLIC_BASE_URL_CLIENT;
 
-    const { blogs } = await getBlogs();
+    const blogs = await getPosts();
 
     const { products } = await getProducts();
     const { categories } = await getCategories();
     const { subCategories } = await getSubCategories();
-    console.log(subCategories);
 
     const routes = [
       '',

@@ -22,15 +22,6 @@ export async function generateMetadata({ params }) {
     alternates: {
       canonical: canonicalUrl,
     },
-    // robots: 'index, follow',
-    // keywords: product.meta_keywords,
-    // redirects: [
-    //   {
-    //     source: `/product/${product.slug}`,
-    //     destination: canonicalUrl,
-    //     permanent: true,
-    //   },
-    // ],
     openGraph: {
       title: product.meta_title,
       description: product.meta_description,
@@ -81,8 +72,8 @@ export default async function ProductDetails({ params }) {
     },
     aggregateRating: {
       '@type': 'AggregateRating',
-      ratingValue: product.rating?.average || 4.5,
-      reviewCount: product.rating?.count || 89,
+      ratingValue: product.rating?.average || 5,
+      // reviewCount: product.rating?.count || 89,
     },
     review: product.reviews?.map((review) => ({
       '@type': 'Review',

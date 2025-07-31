@@ -13,7 +13,6 @@ export const SingleProductComponent = async ({
   allProductData,
   popularProducts,
 }) => {
-  // console.log(singleProductData);
   const rawMarkup = marked(singleProductData?.description || '');
   return (
     <main className='container mx-auto px-4'>
