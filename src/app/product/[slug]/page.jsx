@@ -53,27 +53,32 @@ export default async function ProductDetails({ params }) {
 
   const hasSubCategory = !!product?.sub_category?.slug;
 
-  const productListResponse = hasSubCategory
-    ? await getAllProductsBySubCategory(product.sub_category.slug, 1, 6)
-    : await getAllProductsByCategory(product.category?.slug, 1, 6);
+  const [productListResponse, popularProductsResponse] = await Promise.all([
+    hasSubCategory
+      ? getAllProductsBySubCategory(product.sub_category.slug, 1, 6)
+      : getAllProductsByCategory(product.category?.slug, 1, 6),
+    getPopularProducts('', 1, 4),
+  ]);
 
   const allProducts = productListResponse?.products ?? [];
-  const popularProducts = (await getPopularProducts('', 1, 4))?.products ?? [];
+  const popularProducts = popularProductsResponse?.products ?? [];
 
   const schema = {
     '@context': 'https://schema.org/',
     '@type': 'Product',
     name: product.name,
-    image: [product.image?.url],
+    image: product?.image?.url,
     description: product.meta_description,
+    sku: product.sku || product._id,
     brand: {
       '@type': 'Brand',
-      name: product.brand || 'Embroidize',
+      name: product.brand?.name || 'Embroidize',
     },
     aggregateRating: {
       '@type': 'AggregateRating',
-      ratingValue: product.rating?.average || 5,
-      // reviewCount: product.rating?.count || 89,
+      ratingValue: product.rating?.average || 5.0,
+      bestRating: 5,
+      worstRating: 1,
     },
     review: product.reviews?.map((review) => ({
       '@type': 'Review',
@@ -83,8 +88,8 @@ export default async function ProductDetails({ params }) {
       },
       reviewRating: {
         '@type': 'Rating',
-        ratingValue: review.rating || 4,
-        bestRating: 5,
+        ratingValue: review.rating || 5.0,
+        bestRating: 5.0,
         worstRating: 1,
       },
       reviewBody: review.comment || '',

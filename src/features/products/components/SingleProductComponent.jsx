@@ -1,18 +1,22 @@
+'use client';
+
 import LoadingSpinner from '@/components/Common/LoadingSpinner';
-import ProductCard from '@/components/Common/ProductCard';
 import { capitalize } from '@/utils/functions/page';
 import { marked } from 'marked';
 import Link from 'next/link';
-import { Suspense } from 'react';
+import { Suspense, useState } from 'react';
 import { BreadCrumb } from './BreadCrumb';
 import ProductDownloadCard from './ProductDownloadCard';
+import ClientOnlyRecommendations from './ProductMostPopularAndRelaventDesign';
 import { SingleProductImageCard } from './SingleProductImageCard';
 
-export const SingleProductComponent = async ({
+export const SingleProductComponent = ({
   singleProductData,
   allProductData,
   popularProducts,
 }) => {
+  const [imageLoaded, setImageLoaded] = useState(false);
+
   const rawMarkup = marked(singleProductData?.description || '');
   return (
     <main className='container mx-auto px-4'>
@@ -45,9 +49,12 @@ export const SingleProductComponent = async ({
       {/* Product Image & Download Section */}
       <div className='flex flex-col lg:flex-row gap-10'>
         <div>
-          <Suspense fallback={<LoadingSpinner />}>
-            <SingleProductImageCard data={singleProductData} />
-          </Suspense>
+          {/* <Suspense fallback={<LoadingSpinner />}> */}
+            <SingleProductImageCard
+              data={singleProductData}
+              onImageLoad={() => setImageLoaded(true)}
+            />
+          {/* </Suspense> */}
         </div>
 
         <div className='flex flex-col gap-10 w-full'>
@@ -149,51 +156,14 @@ export const SingleProductComponent = async ({
         </div>
 
         {/* Right: Recommendations */}
-        <Suspense fallback={<LoadingSpinner />}>
-          <div className='w-full lg:w-1/2'>
-            {/* Relevant Designs */}
-            <div className='mb-10'>
-              <div className='flex items-center justify-between mb-6'>
-                <h2 className='text-black text-lg font-bold'>
-                  Relevant Designs
-                </h2>
-                <Link
-                  href={`/${singleProductData?.sub_category?.slug ? singleProductData?.category?.slug : 'category/' + singleProductData?.category?.slug}/${singleProductData?.sub_category?.slug ?? ''}`}
-                  className='text-sm text-black underline'
-                >
-                  See All Designs
-                </Link>
-              </div>
-              <div className='grid grid-cols-1 sm:grid-cols-2 gap-4'>
-                {allProductData?.slice(0, 6).map((item, index) => (
-                  <ProductCard item={item} key={`relevant-${index}`} />
-                ))}
-              </div>
-            </div>
-
-            {/* Most Popular Designs */}
-            <Suspense fallback={<LoadingSpinner />}>
-              <div>
-                <div className='flex items-center justify-between mb-6'>
-                  <h2 className='text-black text-lg font-bold'>
-                    Most Popular Designs
-                  </h2>
-                  <Link
-                    href='/products?filter=popular'
-                    className='text-sm text-black underline'
-                  >
-                    All Popular Designs
-                  </Link>
-                </div>
-                <div className='grid grid-cols-1 sm:grid-cols-2 gap-4'>
-                  {popularProducts?.slice(0, 4).map((item, index) => (
-                    <ProductCard item={item} key={`popular-${index}`} />
-                  ))}
-                </div>
-              </div>
-            </Suspense>
-          </div>
-        </Suspense>
+        {imageLoaded && (
+          <Suspense fallback={<LoadingSpinner />}>
+            <ClientOnlyRecommendations
+              allProductData={allProductData}
+              popularProducts={popularProducts}
+            />
+          </Suspense>
+        )}
       </div>
 
       {/* Future Section */}

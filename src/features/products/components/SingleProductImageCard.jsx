@@ -5,7 +5,7 @@ import { Card } from '@heroui/react';
 import Image from 'next/image';
 import { useState } from 'react';
 
-export const SingleProductImageCard = ({ data }) => {
+export const SingleProductImageCard = ({ data, onImageLoad }) => {
   const [isLoading, setIsLoading] = useState(true);
 
   const imageUrl = data?.image?.url || '/blog.jpg';
@@ -29,7 +29,10 @@ export const SingleProductImageCard = ({ data }) => {
         quality={100}
         sizes='(max-width: 768px) 100vw, 800px'
         className='object-cover transition-opacity duration-300'
-        onLoad={() => setIsLoading(false)}
+        onLoad={() => {
+          setIsLoading(false);
+          if (onImageLoad) onImageLoad();
+        }}
         priority
       />
     </Card>

@@ -149,60 +149,12 @@ export default function ProductDownloadCard({ data }) {
     }
   };
 
-  // for all file download
-  // const handleAllFileDownloadZip = async (fileData) => {
-  //   try {
-  //     setAllIsLoading(true);
-
-  //     const token = Cookies.get('token');
-  //     const headers = new Headers();
-
-  //     if (token) {
-  //       headers.set('Authorization', `Bearer ${token}`);
-  //     }
-
-  //     const res = await fetch(
-  //       `${process.env.NEXT_PUBLIC_BASE_API_URL_PROD}/download/product/${fileData.id}/extension/${fileData.extension}`,
-  //       {
-  //         method: 'GET',
-  //         headers,
-  //       },
-  //     );
-
-  //     if (!res.ok) {
-  //       throw new Error(`Download failed with status ${res.status}`);
-  //     }
-
-  //     const blob = await res.blob();
-
-  //     const filename = `From_Embroidize_${fileData.extension}.zip`;
-
-  //     const url = window.URL.createObjectURL(blob);
-  //     const link = document.createElement('a');
-  //     link.href = url;
-  //     link.download = filename;
-  //     document.body.appendChild(link);
-  //     link.click();
-
-  //     // Cleanup
-  //     window.URL.revokeObjectURL(url);
-  //     document.body.removeChild(link);
-  //   } catch (err) {
-  //     console.error('Download error:', err);
-  //     ErrorToast(
-  //       'Download Failed',
-  //       err?.message || 'Could not download the ZIP file',
-  //       3000,
-  //     );
-  //   } finally {
-  //     setAllIsLoading(false);
-  //   }
-  // };
+  
 
   return (
     <>
       <Card isFooterBlurred className='flex flex-col  p-8'>
-        <h1 className='text-black font-bold text-2xl'>{data?.name}</h1>
+        <h2 className='text-black font-bold text-2xl'>{data?.name}</h2>
         <p className='text-gray-600 my-2'>{data?.meta_description}</p>
         <div className='flex items-center justify-between mb-2'>
           <h2 className='text-black font-bold '>Select For Free Download </h2>
