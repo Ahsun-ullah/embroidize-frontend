@@ -4,8 +4,8 @@ import { getProducts } from '@/lib/apis/public/products';
 import Link from 'next/link';
 import { Suspense, use } from 'react';
 
-const RecentProductsSection = () => {
-  const { products: allProducts } = use(getProducts('', 1, 8));
+const RecentProductsSection = ({ recentProducts }) => {
+  const { products: allProducts } = recentProducts;
 
   return (
     <>

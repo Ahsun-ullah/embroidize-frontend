@@ -22,20 +22,11 @@ const FaqSection = () => {
             {'>'} Can these Embroidery designs be used for Machine Embroidery?
           </div>
           <Divider className="" />
-          <div className="my-6">
-            {' '}
-            {'>'} Can these Embroidery designs be used for Machine Embroidery?
-          </div>
+          <div className="my-6"> {'>'} What file formats are included in the downloads? </div>
           <Divider />
-          <div className="my-6">
-            {' '}
-            {'>'} Can these Embroidery designs be used for Machine Embroidery?
-          </div>
+          <div className="my-6"> {'>'} Are the designs compatible with my embroidery machine? </div>
           <Divider />
-          <div className="my-6">
-            {' '}
-            {'>'} Can these Embroidery designs be used for Machine Embroidery?
-          </div>
+          <div className="my-6"> {'>'} Can I use these designs for commercial purposes? </div>
         </div>
       </section>
     </>

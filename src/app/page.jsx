@@ -5,11 +5,11 @@ import { Header } from '@/components/user/HomePage/Header';
 import HeroSection from '@/components/user/HomePage/HeroSection';
 import PopularDesign from '@/components/user/HomePage/PopularDesign';
 import RecentProductsSection from '@/components/user/HomePage/RecentProductsSection';
+import { getPopularProducts, getProducts } from '@/lib/apis/public/products';
 import { getPosts } from '@/lib/wordpress';
 import Link from 'next/link';
 import { Suspense } from 'react';
 import ProductUpdates from './products/ProductUpdates';
-export const dynamic = 'force-dynamic';
 export const fetchCache = 'force-no-store';
 
 export const metadata = {
@@ -54,7 +54,11 @@ export const metadata = {
 };
 
 export default async function Home() {
-  const blogs = await getPosts();
+  const [blogs, popularProducts, recentProducts] = await Promise.all([
+    getPosts(),
+    getPopularProducts('', 1, 12),
+    getProducts('', 1, 8),
+  ]);
 
   return (
     <>
@@ -78,7 +82,7 @@ export default async function Home() {
           </h4>
         </div>
       </section>
-      <PopularDesign />
+      <PopularDesign popularProducts={popularProducts} />
 
       <section className='bg-blue-50 text-black my-8 py-6'>
         <div className='flex items-center justify-center'>
@@ -92,7 +96,7 @@ export default async function Home() {
           </h4>
         </div>
       </section>
-      <RecentProductsSection />
+      <RecentProductsSection recentProducts={recentProducts} />
 
       {blogs && blogs?.length > 0 && (
         <>

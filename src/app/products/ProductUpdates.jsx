@@ -9,11 +9,13 @@ export default function ProductUpdates({ retryInterval = 10000 }) {
   const retryTimeout = useRef(null);
   const [status, setStatus] = useState('connecting');
 
+  console.log('status', status);
+
   const streamUrl =
     process.env.NEXT_PUBLIC_BASE_API_URL_PROD + '/public/product/stream';
 
   const connect = () => {
-    if (!streamUrl || typeof window === 'undefined') return;
+    // if (!streamUrl || typeof window === 'undefined') return;
 
     setStatus('connecting');
     const es = new EventSource(streamUrl);
@@ -49,5 +51,5 @@ export default function ProductUpdates({ retryInterval = 10000 }) {
     };
   }, []);
 
-  return null; 
+  return null;
 }

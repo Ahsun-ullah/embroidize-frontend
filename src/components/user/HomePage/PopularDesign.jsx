@@ -1,11 +1,10 @@
 import LoadingSpinner from '@/components/Common/LoadingSpinner';
 import ProductCard from '@/components/Common/ProductCard';
-import { getPopularProducts } from '@/lib/apis/public/products';
 import Link from 'next/link';
 import { Suspense } from 'react';
 
-const PopularDesign = async () => {
-  const { products: allProducts } = await getPopularProducts('', 1, 8);
+const PopularDesign = ({ popularProducts }) => {
+  const { products: allProducts } = popularProducts;
 
   return (
     <>
