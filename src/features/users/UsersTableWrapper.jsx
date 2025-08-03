@@ -1,11 +1,8 @@
 'use client';
 import UserTable from '@/components/Common/Table';
 import { VerticalDotsIcon } from '@/components/icons';
-import { userStatusColor } from '@/utils/colorStatus/page';
-import { capitalize } from '@/utils/functions/page';
 import {
   Button,
-  Chip,
   Dropdown,
   DropdownItem,
   DropdownMenu,
@@ -64,17 +61,11 @@ export default function UsersTableWrapper({
               {user.name}
             </User>
           );
-        case 'status':
-          return (
-            <Chip
-              className='capitalize'
-              color={userStatusColor[user.status]}
-              size='sm'
-              variant='flat'
-            >
-              {capitalize(user.status)}
-            </Chip>
-          );
+        case 'createdAt':
+          const createdAt = new Date(user.createdAt);
+          const formattedDate = `${createdAt.getDate().toString().padStart(2, '0')}-${(createdAt.getMonth() + 1).toString().padStart(2, '0')}-${createdAt.getFullYear()}`;
+
+          return <>{formattedDate}</>;
 
         case 'email':
           return <a href={`mailto:${user.email}`}>{user.email}</a>;

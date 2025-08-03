@@ -6,12 +6,14 @@ import { useAllUsersQuery } from '@/lib/redux/admin/users/userSlice';
 export default function AllUsersListPage() {
   const { data: users, isLoading: usersIsloading } = useAllUsersQuery();
 
+  console.log('user', users);
+
   const columns = [
     { name: 'ID', uid: 'id' },
     { name: 'NAME', uid: 'name' },
     { name: 'EMAIL', uid: 'email' },
     { name: 'DOWNLOAD', uid: 'downloadHistory' },
-    { name: 'STATUS', uid: 'status' },
+    { name: 'Registration Date', uid: 'createdAt' },
     { name: 'ACTIONS', uid: 'actions' },
   ];
 
@@ -24,7 +26,7 @@ export default function AllUsersListPage() {
           initialData={users?.data ?? []}
           columns={columns}
           pageSize={5}
-          searchableFieldsName={['name', 'status', 'email']}
+          searchableFieldsName={['name', 'createdAt', 'email']}
         />
       )}
     </div>

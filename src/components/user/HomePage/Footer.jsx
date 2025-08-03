@@ -169,7 +169,7 @@ const Footer = () => {
       <div className='flex flex-wrap items-center md:justify-between justify-between py-2 px-1'>
         <div className='w-full md:w-4/12 px-4 mx-auto text-center'>
           <strong>Embroidize</strong>
-          <p>&copy;2024. All rights reserved.</p>
+          <p>&copy;{new Date().getFullYear()}. All rights reserved.</p>
         </div>
       </div>
     </footer>
