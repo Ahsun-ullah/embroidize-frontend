@@ -1,6 +1,8 @@
+import { NProgressProvider } from '@/components/providers/NProgressProvider';
 import ClientProviders from '@/lib/providers/ClientProviders';
 import { Inter } from 'next/font/google';
 import Script from 'next/script';
+import { Suspense } from 'react';
 import 'remixicon/fonts/remixicon.css';
 import './globals.css';
 
@@ -70,9 +72,13 @@ export default function RootLayout({ children }) {
         />
 
         <ClientProviders>
-          <main id='main-content' className='min-h-screen focus:outline-none'>
-            {children}
-          </main>
+          <Suspense>
+            <NProgressProvider>
+              <main id='main-content' className='min-h-screen focus:outline-none'>
+                {children}
+              </main>
+            </NProgressProvider>
+          </Suspense>
         </ClientProviders>
       </body>
     </html>

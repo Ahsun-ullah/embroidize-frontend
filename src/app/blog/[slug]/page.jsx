@@ -151,7 +151,7 @@ export default async function SingleBlogPage({ params }) {
               </header>
 
               <section
-                className='prose max-w-none leading-relaxed text-justify'
+                className='prose custom-blog-content'
                 style={{ fontSize: 18 }}
                 dangerouslySetInnerHTML={{ __html: blog?.content?.rendered }}
                 itemProp='articleBody'
