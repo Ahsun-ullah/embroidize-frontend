@@ -6,8 +6,7 @@ import { getPopularProducts, getProducts } from '@/lib/apis/public/products';
 import Link from 'next/link';
 import ProductUpdates from './ProductUpdates';
 
-export const dynamic = 'force-dynamic';
-export const fetchCache = 'force-no-store';
+export const revalidate = 0;
 
 export async function generateMetadata({ searchParams }) {
   const isPopular = searchParams?.filter === 'popular';

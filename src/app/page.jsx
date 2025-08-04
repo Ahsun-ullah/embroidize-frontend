@@ -10,7 +10,8 @@ import { getPosts } from '@/lib/wordpress';
 import Link from 'next/link';
 import { Suspense } from 'react';
 import ProductUpdates from './products/ProductUpdates';
-export const fetchCache = 'force-no-store';
+export const revalidate = 0;
+
 
 export const metadata = {
   title: 'Free Machine Embroidery Designs - Embroidize',

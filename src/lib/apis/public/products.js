@@ -12,7 +12,6 @@ export async function getProducts(searchQuery, currentPage, perPageData) {
     console.log(apiUrl);
     const response = await fetch(apiUrl, {
       headers,
-      cache: 'no-store',
     });
 
     if (!response.ok) {
@@ -51,7 +50,6 @@ export async function getPopularProducts(
     console.log(apiUrl);
     const response = await fetch(apiUrl, {
       headers,
-      cache: 'no-store',
     });
 
     if (!response.ok) {
@@ -81,7 +79,6 @@ export async function getSingleProduct(productId) {
       `${process.env.NEXT_PUBLIC_BASE_API_URL_PROD}/public/product/${productId}`,
       {
         headers,
-        cache: 'no-store',
       },
     );
 
