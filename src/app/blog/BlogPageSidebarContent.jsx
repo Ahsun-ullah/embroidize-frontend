@@ -5,7 +5,9 @@ import Link from 'next/link';
 export default async function BlogPageSidebarContent() {
   // const recentPosts = await getPosts();
 
-  const recentPosts = await getBlogs();
+  const blogsData = await getBlogs();
+
+  const recentPosts = blogsData?.blogs;
 
   const usefulLinks = [
     { label: 'Useful Link 01', href: '/link1' },

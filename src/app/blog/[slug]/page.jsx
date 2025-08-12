@@ -47,7 +47,7 @@ export async function generateMetadata({ params }) {
       card: 'summary_large_image',
       title: blog?.title,
       // blog?.title?.rendered
-      description,
+      description: blog?.meta_description,
       images: [
         blog?.image?.url,
         // blog?.featuredImage || 'https://embroidize.com/og-banner.jpg'
