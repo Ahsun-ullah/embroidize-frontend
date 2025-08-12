@@ -1,17 +1,16 @@
 import LoadingSpinner from '@/components/Common/LoadingSpinner';
 import BlogSection from '@/components/user/HomePage/BlogSection';
 import Footer from '@/components/user/HomePage/Footer';
-import { Header } from '@/components/user/HomePage/Header';
+import Header from '@/components/user/HomePage/Header';
 import HeroSection from '@/components/user/HomePage/HeroSection';
 import PopularDesign from '@/components/user/HomePage/PopularDesign';
 import RecentProductsSection from '@/components/user/HomePage/RecentProductsSection';
+import { getBlogs } from '@/lib/apis/public/blog';
 import { getPopularProducts, getProducts } from '@/lib/apis/public/products';
-import { getPosts } from '@/lib/wordpress';
 import Link from 'next/link';
 import { Suspense } from 'react';
 import ProductUpdates from './products/ProductUpdates';
 export const revalidate = 0;
-
 
 export const metadata = {
   title: 'Free Machine Embroidery Designs - Embroidize',
@@ -55,12 +54,11 @@ export const metadata = {
 };
 
 export default async function Home() {
-  const [blogs, popularProducts, recentProducts] = await Promise.all([
-    getPosts(),
+  const [popularProducts, recentProducts] = await Promise.all([
     getPopularProducts('', 1, 12),
     getProducts('', 1, 8),
   ]);
-
+  const { blogs } = await getBlogs();
   return (
     <>
       <ProductUpdates />

@@ -3,8 +3,12 @@ import Image from 'next/image';
 import Link from 'next/link';
 
 const BlogCard = ({ data }) => {
-  const imageUrl = data?.featuredImage;
-  const altText = data?.title.rendered;
+  const imageUrl =
+    // data?.featuredImage // wordpress
+    data?.image?.url;
+  const altText =
+    // data?.title.rendered // wordpress
+    data?.title;
 
   return (
     <>
@@ -34,7 +38,11 @@ const BlogCard = ({ data }) => {
             {/* Blog Title */}
             <h2
               className='text-2xl font-semibold prose max-w-none'
-              dangerouslySetInnerHTML={{ __html: data.title.rendered }}
+              dangerouslySetInnerHTML={{
+                __html: data?.meta_description,
+
+                // data.title.rendered
+              }}
             />
 
             {/* Blog Description */}

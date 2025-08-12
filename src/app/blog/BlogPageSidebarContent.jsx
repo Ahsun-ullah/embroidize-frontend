@@ -1,9 +1,11 @@
-import { getPosts } from '@/lib/wordpress';
+import { getBlogs } from '@/lib/apis/public/blog';
 import { Divider } from '@heroui/divider';
 import Link from 'next/link';
 
 export default async function BlogPageSidebarContent() {
-  const recentPosts = await getPosts();
+  // const recentPosts = await getPosts();
+
+  const recentPosts = await getBlogs();
 
   const usefulLinks = [
     { label: 'Useful Link 01', href: '/link1' },
@@ -27,11 +29,18 @@ export default async function BlogPageSidebarContent() {
                 className='flex flex-col gap-4 w-60% lg:w-full'
               >
                 {/* Thumbnail */}
-                <div className=' bg-gray-200  aspect-[3/2] rounded-lg overflow-hidden shadow-md' >
-                  {post.featuredImage ? (
+                <div className=' bg-gray-200  aspect-[3/2] rounded-lg overflow-hidden shadow-md'>
+                  {post?.image?.url ? (
+                    // post.featuredImage
                     <img
-                      src={post.featuredImage}
-                      alt={post.title.rendered}
+                      src={
+                        post?.image?.url
+                        // post.featuredImage
+                      }
+                      alt={
+                        post.title
+                        // post.title.rendered
+                      }
                       className='w-full h-full object-cover'
                     />
                   ) : null}
@@ -39,7 +48,10 @@ export default async function BlogPageSidebarContent() {
 
                 {/* Title */}
                 <p className='text-sm text-start hover:underline break-words line-clamp-2'>
-                  {post.title.rendered}
+                  {
+                    post.title
+                    // post.title.rendered
+                  }
                 </p>
               </Link>
             ))}

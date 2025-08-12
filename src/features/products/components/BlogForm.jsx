@@ -154,14 +154,14 @@ export function BlogForm({ blog, isOpen, onOpenChange, setBlogId }) {
       }}
       scrollBehavior='inside'
       placement='center'
-      size={'5xl'}
+      size={'full'}
       className='max-w-6xl'
     >
       <ModalContent>
         {(onClose) => (
           <>
             <ModalHeader className='flex flex-col gap-1'>
-              {blog ? 'Update Category' : 'Add Category'}
+              {blog ? 'Update Blog' : 'Add Blog'}
             </ModalHeader>
             <ModalBody>
               <form

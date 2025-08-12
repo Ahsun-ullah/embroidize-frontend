@@ -38,6 +38,11 @@ export async function getSingleBlog(slug) {
     const headers = new Headers();
     headers.set('Authorization', 'Bearer some-static-token');
 
+    console.log(
+      'apirul',
+      `${process.env.NEXT_PUBLIC_BASE_API_URL_PROD}/public/blog/${slug}`,
+    );
+
     const response = await fetch(
       `${process.env.NEXT_PUBLIC_BASE_API_URL_PROD}/public/blog/${slug}`,
       {

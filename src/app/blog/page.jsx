@@ -2,7 +2,7 @@ import Pagination from '@/components/Common/Pagination';
 import BlogSection from '@/components/user/HomePage/BlogSection';
 import Footer from '@/components/user/HomePage/Footer';
 import Header from '@/components/user/HomePage/Header';
-import { getPosts } from '@/lib/wordpress';
+import { getBlogs } from '@/lib/apis/public/blog';
 
 export const revalidate = 0;
 
@@ -38,14 +38,18 @@ export const metadata = {
 };
 
 export default async function AllBlogsPageInFrontSite({ searchParams }) {
-  const blogs = await getPosts();
+  // const blogs = await getPosts(); // wordpress blogs
+
+  const { blogs } = await getBlogs();
+
+  console.log('blogsData:', blogs);
 
   return (
     <>
       <Header />
       <BlogSection blogs={blogs} />
 
-      {blogs.length > 0 && (
+      {/* {blogs.length > 0 && (
         <div className='flex items-center justify-center my-6'>
           <Pagination
             currentPage={searchParams?.page || 1}
@@ -53,7 +57,7 @@ export default async function AllBlogsPageInFrontSite({ searchParams }) {
             totalPages={Math.ceil(blogs.length / 6)}
           />
         </div>
-      )}
+      )} */}
 
       <Footer />
     </>

@@ -248,6 +248,25 @@ h6 {
   padding: 12px !important;
 }
 
+.custom-blog-content ol {
+  list-style-type: disc !important;
+  padding-left: 1.25rem !important;
+}
+
+.custom-blog-content li {
+  margin: 0.25rem 0;
+  list-style-type: unset;
+}
+
+.prose .ql-align-center > img,
+.ql-align-center > img {
+  display: block;
+  margin-left: auto;
+  margin-right: auto;
+  height: auto;
+  max-width: 100%;
+}
+
 @keyframes fade-in {
   from {
     opacity: 0;
