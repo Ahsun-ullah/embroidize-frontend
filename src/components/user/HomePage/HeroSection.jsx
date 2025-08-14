@@ -27,6 +27,7 @@ const HeroSection = () => {
           </p>
           <Link
             href='/products'
+            prefetch={false}
             className='bg-white text-black text-xs sm:text-base md:text-lg font-bold transition duration-300 ease-in-out hover:opacity-60 focus:opacity-60 px-4 py-1 rounded-full'
             passHref
           >

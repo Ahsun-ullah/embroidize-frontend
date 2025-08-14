@@ -73,6 +73,7 @@ const Login = () => {
             <div>
               <Link
                 href='/'
+                prefetch={false}
                 className='relative block'
                 aria-label='Navigate to homepage'
               >
@@ -153,6 +154,7 @@ const Login = () => {
                 Don't have an account?
                 <Link
                   href='/auth/register'
+                  prefetch={false}
                   className='font-semibold ml-1 text-blue-500 underline'
                 >
                   Register

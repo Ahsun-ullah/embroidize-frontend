@@ -104,6 +104,7 @@ export default async function CategoryProducts({ params, searchParams }) {
             <Link
               key={sub?._id}
               href={`/${singleCategoryData?.data?.slug}/${sub?.slug}`}
+              prefetch={false}
               className='bg-white text-gray-800 px-3 py-1 rounded-md text-sm font-medium capitalize hover:bg-black hover:text-white transition shadow-2xl'
             >
               {sub?.name}

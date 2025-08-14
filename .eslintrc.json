@@ -22,7 +22,18 @@
   },
   "overrides": [
     {
-      "files": ["*.ts", "*.tsx"],
+      "files": [
+        "*.ts",
+        "*.tsx",
+        "next.config.js",
+        "next.config.cjs",
+        "*.config.js",
+        "*.config.cjs"
+      ],
+      "rules": {
+        "@typescript-eslint/no-require-imports": "off",
+        "@typescript-eslint/no-var-requires": "off"
+      },
       "extends": [
         "plugin:@typescript-eslint/recommended",
         "plugin:prettier/recommended"

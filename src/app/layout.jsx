@@ -5,6 +5,9 @@ import Script from 'next/script';
 import { Suspense } from 'react';
 import 'remixicon/fonts/remixicon.css';
 import './globals.css';
+export const dynamic = 'force-dynamic';
+export const revalidate = 0;
+export const fetchCache = 'default-no-store';
 
 const inter = Inter({ subsets: ['latin'], display: 'swap' });
 
@@ -74,7 +77,10 @@ export default function RootLayout({ children }) {
         <ClientProviders>
           <Suspense>
             <NProgressProvider>
-              <main id='main-content' className='min-h-screen focus:outline-none'>
+              <main
+                id='main-content'
+                className='min-h-screen focus:outline-none'
+              >
                 {children}
               </main>
             </NProgressProvider>

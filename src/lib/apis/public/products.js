@@ -9,9 +9,13 @@ export async function getProducts(searchQuery, currentPage, perPageData) {
     if (perPageData) queryParams.append('limit', perPageData.toString());
 
     const apiUrl = `${process.env.NEXT_PUBLIC_BASE_API_URL_PROD}/public/product?${queryParams.toString()}`;
+
     console.log(apiUrl);
+
     const response = await fetch(apiUrl, {
       headers,
+      cache: 'no-store',
+      next: { revalidate: 0 },
     });
 
     if (!response.ok) {
@@ -47,9 +51,13 @@ export async function getPopularProducts(
     queryParams.append('limit', perPageData.toString());
 
     const apiUrl = `${process.env.NEXT_PUBLIC_BASE_API_URL_PROD}/public/popular/products?${queryParams.toString()}`;
+
     console.log(apiUrl);
+
     const response = await fetch(apiUrl, {
       headers,
+      cache: 'no-store',
+      next: { revalidate: 0 },
     });
 
     if (!response.ok) {
@@ -79,6 +87,8 @@ export async function getSingleProduct(productId) {
       `${process.env.NEXT_PUBLIC_BASE_API_URL_PROD}/public/product/${productId}`,
       {
         headers,
+        cache: 'no-store',
+        next: { revalidate: 0 },
       },
     );
 

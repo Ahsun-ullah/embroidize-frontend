@@ -105,6 +105,7 @@ export default async function Home() {
           <div className='flex justify-center items-center my-10'>
             <Link
               href='/blog'
+              prefetch={false}
               className='bg-black rounded-full hover:bg-blue-400 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-blue-500 transition-colors text-white font-medium px-6 py-2'
             >
               View All

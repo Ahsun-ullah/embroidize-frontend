@@ -187,7 +187,7 @@ export default function ProductsTableWrapper({
     <>
       <div className='flex justify-between items-center mb-4'>
         <h1>All Products</h1>
-        <Link href='/admin/add-products'>
+        <Link href='/admin/add-products' prefetch={false}>
           <Button
             className='bg-foreground text-background'
             endContent={<PlusIcon />}

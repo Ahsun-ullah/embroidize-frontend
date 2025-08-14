@@ -17,6 +17,7 @@ export async function getSubCategories(
     const response = await fetch(apiUrl, {
       headers,
       cache: 'no-store',
+      next: { revalidate: 0 },
     });
 
     if (!response.ok) {
@@ -46,6 +47,7 @@ export async function getSingleSubCategory(slug) {
       {
         headers,
         cache: 'no-store',
+        next: { revalidate: 0 },
       },
     );
 
@@ -82,6 +84,7 @@ export async function getAllProductsBySubCategory(
     const response = await fetch(apiUrl, {
       headers,
       cache: 'no-store',
+      next: { revalidate: 0 },
     });
 
     if (!response.ok) {

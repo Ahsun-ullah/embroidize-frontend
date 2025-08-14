@@ -52,6 +52,7 @@ const Register = () => {
             <div>
               <Link
                 href='/'
+                prefetch={false}
                 className='relative block'
                 aria-label='Navigate to homepage'
               >
@@ -113,6 +114,7 @@ const Register = () => {
                 By registering, you agree to our{' '}
                 <Link
                   target='_blank'
+                  prefetch={false}
                   href='/terms-and-conditions'
                   className='text-blue-500 underline'
                 >
@@ -121,6 +123,7 @@ const Register = () => {
                 and{' '}
                 <Link
                   target='_blank'
+                  prefetch={false}
                   href='/privacy-policy'
                   className='text-blue-500 underline'
                 >
@@ -149,6 +152,7 @@ const Register = () => {
                 Already have an account?{' '}
                 <Link
                   href='/auth/login'
+                  prefetch={false}
                   className='font-semibold ms-1 text-blue-500 underline'
                 >
                   Sign In

@@ -31,6 +31,7 @@ export const Header = () => {
           <NavbarContent justify='start' className='flex-1'>
             <Link
               href='/'
+              prefetch={false}
               aria-label='Go to homepage'
               className='relative w-[30px] h-[30px] sm:w-[60px] sm:h-[60px] md:w-[120px] md:h-[80px]'
             >
@@ -42,7 +43,7 @@ export const Header = () => {
                 sizes='(max-width: 640px) 80px'
                 className='object-contain block sm:hidden'
               />
-              
+
               <Image
                 src={mainLogo}
                 alt='Embroidize Logo'

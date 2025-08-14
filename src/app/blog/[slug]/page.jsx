@@ -110,6 +110,7 @@ export default async function SingleBlogPage({ params }) {
         <nav className='mb-6'>
           <Link
             href='/blog'
+            prefetch={false}
             className='button inline-block text-base font-medium hover:underline'
             aria-label='Back to Blog'
           >
@@ -177,6 +178,7 @@ export default async function SingleBlogPage({ params }) {
                         <Link
                           key={tag}
                           href={`/search?searchQuery=${tag.split(' ').join('+')}`}
+                          prefetch={false}
                           className='inline-block bg-gray-100 px-3 py-1 text-xs rounded-full text-gray-700 hover:bg-primary hover:text-white transition'
                           aria-label={`View posts tagged with ${tag}`}
                         >

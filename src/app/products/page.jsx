@@ -81,12 +81,14 @@ export default async function AllProductsPage({ searchParams }) {
           <div className='flex justify-start gap-4 mb-8'>
             <Link
               href='/products'
+              prefetch={false}
               className={`px-4 py-2 rounded ${!isPopular ? 'bg-black text-white' : 'border'}`}
             >
               All Products
             </Link>
             <Link
               href='/products?filter=popular'
+              prefetch={false}
               className={`px-4 py-2 rounded ${isPopular ? 'bg-black text-white' : 'border'}`}
             >
               Popular Products

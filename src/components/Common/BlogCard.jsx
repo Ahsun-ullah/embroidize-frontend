@@ -14,6 +14,7 @@ const BlogCard = ({ data }) => {
     <>
       <Link
         href={`/blog/${data?.slug}`}
+        prefetch={false}
         className='bg-white border rounded-2xl shadow-xl overflow-hidden group'
         aria-label={`View details for ${altText}`}
       >

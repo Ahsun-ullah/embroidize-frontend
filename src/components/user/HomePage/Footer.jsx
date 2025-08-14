@@ -10,6 +10,7 @@ const Footer = () => {
         <div className='w-full lg:w-6/12 pb-6'>
           <Link
             href='/'
+            prefetch={false}
             className='relative block w-[160px] h-[80px] sm:w-[120px] sm:h-[60px] md:w-[160px] md:h-[80px]'
             aria-label='Navigate to homepage'
           >
@@ -71,24 +72,27 @@ const Footer = () => {
               <ul className='list-unstyled'>
                 <li>
                   <Link
-                    className='text-blueGray-600 hover:text-blueGray-800 font-semibold block pb-2 text-sm'
                     href='/'
+                    prefetch={false}
+                    className='text-blueGray-600 hover:text-blueGray-800 font-semibold block pb-2 text-sm'
                   >
                     Home
                   </Link>
                 </li>
                 <li>
                   <Link
-                    className='text-blueGray-600 hover:text-blueGray-800 font-semibold block pb-2 text-sm'
                     href='/products'
+                    prefetch={false}
+                    className='text-blueGray-600 hover:text-blueGray-800 font-semibold block pb-2 text-sm'
                   >
                     Products
                   </Link>
                 </li>
                 <li>
                   <Link
-                    className='text-blueGray-600 hover:text-blueGray-800 font-semibold block pb-2 text-sm'
                     href='/blog'
+                    prefetch={false}
+                    className='text-blueGray-600 hover:text-blueGray-800 font-semibold block pb-2 text-sm'
                   >
                     Blogs
                   </Link>

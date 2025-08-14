@@ -19,6 +19,7 @@ export default function CategoryMenu({ isMobileMenuOpen }) {
     return (
       <Link
         href={`/category/${category.slug}`}
+        prefetch={false}
         className='font-bold capitalize'
       >
         {displayName}
@@ -31,6 +32,7 @@ export default function CategoryMenu({ isMobileMenuOpen }) {
       <li key={sub._id}>
         <Link
           href={`/${category.slug}/${sub.slug}`}
+          prefetch={false}
           className='hover:underline capitalize'
         >
           {sub.name}
@@ -68,6 +70,7 @@ export default function CategoryMenu({ isMobileMenuOpen }) {
               <Link
                 key={category._id}
                 href={`/category/${category.slug}`}
+                prefetch={false}
                 className='capitalize'
               >
                 {displayName}

@@ -47,7 +47,7 @@ const CategorySection = () => {
 
         <h2 className="text-3xl font-bold text-center mb-6">
           Browse Best Categories
-        </h1>
+        </h2>
         <div className="flex items-center justify-center">
           <CardSlider cardData={cardData} />
         </div>

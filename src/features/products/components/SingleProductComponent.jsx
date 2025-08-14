@@ -50,10 +50,10 @@ export const SingleProductComponent = ({
       <div className='flex flex-col lg:flex-row gap-10'>
         <div>
           {/* <Suspense fallback={<LoadingSpinner />}> */}
-            <SingleProductImageCard
-              data={singleProductData}
-              onImageLoad={() => setImageLoaded(true)}
-            />
+          <SingleProductImageCard
+            data={singleProductData}
+            onImageLoad={() => setImageLoaded(true)}
+          />
           {/* </Suspense> */}
         </div>
 
@@ -142,8 +142,9 @@ export const SingleProductComponent = ({
                 <div className='flex flex-wrap gap-2'>
                   {singleProductData?.meta_keywords.map((item, index) => (
                     <Link
-                      href={`/search?searchQuery=${item.split(' ').join('+')}`}
                       key={index}
+                      href={`/search?searchQuery=${item.split(' ').join('+')}`}
+                      prefetch={false}
                       className='bg-gray-200 text-gray-800 px-3 py-1 rounded-full text-sm font-medium capitalize hover:bg-black hover:text-white transition'
                     >
                       {item}

@@ -27,6 +27,7 @@ export default async function BlogPageSidebarContent() {
             {recentPosts.slice(0, 6).map((post, index) => (
               <Link
                 href={`/blog/${post.slug}`}
+                prefetch={false}
                 key={index}
                 className='flex flex-col gap-4 w-60% lg:w-full'
               >

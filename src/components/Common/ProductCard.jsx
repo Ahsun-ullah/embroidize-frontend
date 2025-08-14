@@ -23,6 +23,7 @@ export default function ProductCard({ item }) {
     <div className='bg-white border rounded-2xl shadow-xl overflow-hidden'>
       <Link
         href={productLink}
+        prefetch={false}
         className='block group'
         aria-label={`View details for ${productName}`}
       >
