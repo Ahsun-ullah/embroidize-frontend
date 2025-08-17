@@ -1,6 +1,6 @@
 import { cookies } from 'next/headers';
 
-export async function getUsers() {
+export async function getUsers(page = 1, perPage = 10) {
   'use server';
   try {
     const cookieStore = cookies();
@@ -12,19 +12,30 @@ export async function getUsers() {
       headers.set('Authorization', `Bearer ${token}`);
     }
 
-    const response = await fetch(
-      `${process.env.NEXT_PUBLIC_BASE_API_URL_PROD}/all-users`,
-      {
-        headers,
-        cache: 'no-store',
-      },
-    );
+    const apiUrl =
+      process.env.NEXT_PUBLIC_BASE_API_URL_PROD ||
+      process.env.NEXT_PUBLIC_BASE_API_URL;
+
+    const url = new URL(`${apiUrl}/all-users`);
+    url.searchParams.set('page', String(page));
+    url.searchParams.set('perPage', String(perPage));
+
+    const response = await fetch(url.toString(), {
+      headers,
+      cache: 'no-store',
+    });
 
     if (!response.ok) {
       throw new Error(`API request failed with status ${response.status}`);
     }
 
-    return response.json();
+    const responseData = await response.json();
+    console.log('Raw getUsers API Response:', responseData?.data?.pagination);
+
+    return {
+      data: responseData?.data,
+      pagination: responseData?.data?.pagination,
+    };
   } catch (error) {
     console.error('Error fetching users:', error);
     throw error;
@@ -66,6 +77,7 @@ export async function getDownloadStats(page = 1, perPage = 10) {
     }
 
     const responseData = await response.json();
+    console.log('Raw getUsers API Response:', responseData);
 
     return {
       data: responseData?.data?.data,

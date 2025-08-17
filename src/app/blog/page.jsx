@@ -44,20 +44,24 @@ export default async function AllBlogsPageInFrontSite({ searchParams }) {
 
   console.log('blogsData:', blogs);
 
+  const currentPage = parseInt(searchParams?.page || '1', 10);
+  const perPageData = 6;
+  const totalPages = Math.ceil(blogs.length / perPageData);
+
+  const startIndex = (currentPage - 1) * perPageData;
+  const endIndex = startIndex + perPageData;
+  const paginatedBlogs = blogs.slice(startIndex, endIndex);
+
   return (
     <>
       <Header />
-      <BlogSection blogs={blogs} />
+      <BlogSection blogs={paginatedBlogs} />
 
-      {/* {blogs.length > 0 && (
+      {blogs.length > 0 && (
         <div className='flex items-center justify-center my-6'>
-          <Pagination
-            currentPage={searchParams?.page || 1}
-            perPageData={6}
-            totalPages={Math.ceil(blogs.length / 6)}
-          />
+          <Pagination totalPages={totalPages} perPage={perPageData} />
         </div>
-      )} */}
+      )}
 
       <Footer />
     </>

@@ -9,19 +9,18 @@ import {
   DropdownTrigger,
   User,
 } from '@heroui/react';
-import { useCallback, useMemo, useState } from 'react';
+import { useCallback } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 
-export default function UsersTableWrapper({
+export default function MostDownloadedProductsTableWrapper({
   initialData,
   columns,
+  pageSize,
   searchableFieldsName,
+  pagination,
 }) {
   const router = useRouter();
   const searchParams = useSearchParams();
-
-  const [page, setPage] = useState(1);
-  const rowsPerPage = 10;
 
   const onSearchChange = useCallback(
     (value) => {
@@ -31,56 +30,43 @@ export default function UsersTableWrapper({
       } else {
         params.delete('search');
       }
-      setPage(1);
+      params.set('page', '1');
       router.push(`?${params.toString()}`);
     },
     [router, searchParams],
   );
 
   const onPageChange = useCallback(
-    (newPage) => {
-      setPage(newPage);
+    (page) => {
+      const params = new URLSearchParams(searchParams);
+      params.set('page', page.toString());
+      router.push(`?${params.toString()}`);
     },
-    [],
+    [router, searchParams],
   );
 
-  const paginatedData = useMemo(() => {
-    const start = (page - 1) * rowsPerPage;
-    const end = start + rowsPerPage;
-    return initialData.slice(start, end);
-  }, [initialData, page, rowsPerPage]);
-
-  const totalPages = useMemo(() => {
-    return Math.ceil(initialData.length / rowsPerPage);
-  }, [initialData.length, rowsPerPage]);
-
-  const renderCell = useCallback((user, columnKey) => {
+  const renderCell = useCallback((item, columnKey) => {
     try {
-      const cellValue = user[columnKey];
+      const cellValue = item.product[columnKey];
 
       switch (columnKey) {
         case 'name':
           return (
             <User
-              avatarProps={{ radius: 'lg', src: user.avatar }}
+              avatarProps={{ radius: 'lg', src: item.product.image?.url }}
               name={cellValue}
             >
-              {user.name}
+              {item.product.name}
             </User>
           );
-        case 'createdAt':
-          const createdAt = new Date(user.createdAt);
-          const formattedDate = `${createdAt.getDate().toString().padStart(2, '0')}-${(createdAt.getMonth() + 1).toString().padStart(2, '0')}-${createdAt.getFullYear()}`;
-
-          return <>{formattedDate}</>;
-
-        case 'email':
-          return <a href={`mailto:${user.email}`}>{user.email}</a>;
-        case 'downloadHistory':
-          return <>{user?.downloadHistory?.length}</>;
-
-        case 'id':
-          return <span>{user._id}</span>;
+        case 'category':
+          return <>{item.product.category?.name || '-'}</>;
+        case 'sub_category':
+          return <>{item.product.sub_category?.name || '-'}</>;
+        case 'totalDownloads':
+          return <>{item.totalDownloads}</>;
+        case 'fileTypes':
+          return <>{item.fileTypes?.join(', ') || '-'}</>;
         case 'actions':
           return (
             <div className='relative flex justify-center items-center gap-2'>
@@ -91,9 +77,7 @@ export default function UsersTableWrapper({
                   </Button>
                 </DropdownTrigger>
                 <DropdownMenu>
-                  <DropdownItem key='delete' onPress={() => {}}>
-                    Delete
-                  </DropdownItem>
+                  <DropdownItem key='view'>View</DropdownItem>
                 </DropdownMenu>
               </Dropdown>
             </div>
@@ -110,16 +94,16 @@ export default function UsersTableWrapper({
   return (
     <>
       <div className='flex justify-between items-center'>
-        <h1>All Users</h1>
+        <h1>Most Downloaded Products</h1>
       </div>
       <UserTable
-        data={paginatedData}
+        data={initialData}
         columns={columns}
-        pageSize={rowsPerPage}
+        pageSize={pageSize}
         renderCell={renderCell}
         searchableFieldsName={searchableFieldsName}
         onSearchChange={onSearchChange}
-        pagination={{ totalPages: totalPages, currentPage: page }}
+        pagination={pagination}
         onPageChange={onPageChange}
       />
     </>

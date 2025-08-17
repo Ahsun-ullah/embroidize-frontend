@@ -1,12 +1,9 @@
-'use client';
-import GlobalLoadingPage from '@/components/Common/GlobalLoadingPage';
 import UsersTableWrapper from '@/features/users/UsersTableWrapper';
-import { useAllUsersQuery } from '@/lib/redux/admin/users/userSlice';
+import { getUsers } from '@/lib/apis/protected/users';
 
-export default function AllUsersListPage() {
-  const { data: users, isLoading: usersIsloading } = useAllUsersQuery();
-
-  console.log('user', users);
+export default async function AllUsersListPage() {
+  const usersResponse = await getUsers();
+  const { data: users } = usersResponse;
 
   const columns = [
     { name: 'ID', uid: 'id' },
@@ -17,18 +14,15 @@ export default function AllUsersListPage() {
     { name: 'ACTIONS', uid: 'actions' },
   ];
 
+  console.log('object', users);
+
   return (
     <div className='flex flex-col gap-3'>
-      {usersIsloading ? (
-        <GlobalLoadingPage />
-      ) : (
-        <UsersTableWrapper
-          initialData={users?.data ?? []}
-          columns={columns}
-          pageSize={5}
-          searchableFieldsName={['name', 'createdAt', 'email']}
-        />
-      )}
+      <UsersTableWrapper
+        initialData={users ?? []}
+        columns={columns}
+        searchableFieldsName={['name', 'createdAt', 'email']}
+      />
     </div>
   );
 }

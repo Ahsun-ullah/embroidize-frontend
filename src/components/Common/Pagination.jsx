@@ -2,20 +2,20 @@
 
 import { useRouter, useSearchParams } from 'next/navigation';
 
-const Pagination = ({ totalPages }) => {
+const Pagination = ({ totalPages, perPage }) => {
   const router = useRouter();
   const searchParams = useSearchParams();
 
   // Get current page and limit from URL or use defaults
   const currentPage = parseInt(searchParams.get('page') || '1', 10);
-  const perPageData = parseInt(searchParams.get('limit') || '20', 10);
+  const currentPerPage = parseInt(searchParams.get('limit') || (perPage || '20'), 10);
 
   const visiblePages = 5;
 
   const handleClick = (pageNumber) => {
     const newParams = new URLSearchParams(searchParams.toString());
     newParams.set('page', pageNumber.toString());
-    newParams.set('limit', perPageData.toString());
+    newParams.set('limit', currentPerPage.toString());
     router.push(`?${newParams.toString()}`);
   };
 

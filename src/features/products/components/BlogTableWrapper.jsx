@@ -11,7 +11,7 @@ import {
   useDisclosure,
   User,
 } from '@heroui/react';
-import { useCallback, useEffect, useState } from 'react';
+import { useCallback, useEffect, useState, useMemo } from 'react';
 import { BlogForm } from './BlogForm';
 
 export default function BlogTableWrapper({
@@ -21,20 +21,43 @@ export default function BlogTableWrapper({
   blogSearchableFieldsName,
 }) {
   const [blogId, setBlogId] = useState('');
+  
+  // State for blog pagination
+  const [blogCurrentPage, setBlogCurrentPage] = useState(1);
+
+  // State for filtered data (for search)
   const [blogFilteredData, setBlogFilteredData] = useState(
     blogInitialData || [],
   );
 
-  const { data: getSingleBlogData } = useSingleBlogQuery(blogId);
-
+  // Update filtered data when initial data changes
   useEffect(() => {
     setBlogFilteredData(blogInitialData || []);
   }, [blogInitialData]);
 
+  const { data: getSingleBlogData } = useSingleBlogQuery(blogId);
+
   const { isOpen, onOpen, onOpenChange } = useDisclosure();
+
+  // Memoized paginated data for blogs
+  const paginatedBlogData = useMemo(() => {
+    const start = (blogCurrentPage - 1) * blogPageSize;
+    const end = start + blogPageSize;
+    return (blogFilteredData || []).slice(start, end);
+  }, [blogFilteredData, blogCurrentPage, blogPageSize]);
+
+  // Memoized total pages for blogs
+  const blogTotalPages = useMemo(() => {
+    return Math.ceil((blogFilteredData?.length || 0) / blogPageSize);
+  }, [blogFilteredData?.length, blogPageSize]);
+
+  const onBlogPageChange = useCallback((newPage) => {
+    setBlogCurrentPage(newPage);
+  }, []);
 
   const blogFilterData = useCallback(
     (value) => {
+      setBlogCurrentPage(1); // Reset page on search
       try {
         if (!value || value.trim() === '') {
           setBlogFilteredData(blogInitialData || []);
@@ -150,12 +173,14 @@ export default function BlogTableWrapper({
         />
       </div>
       <UserTable
-        data={blogFilteredData}
+        data={paginatedBlogData}
         columns={blogColumns}
         pageSize={blogPageSize}
         renderCell={blogRenderCell}
         searchableFieldsName={blogSearchableFieldsName}
         onSearchChange={blogFilterData}
+        pagination={{ totalPages: blogTotalPages, currentPage: blogCurrentPage }}
+        onPageChange={onBlogPageChange}
       />
     </div>
   );

@@ -56,6 +56,20 @@ export default function AdminSidebar({ isCollapsed, setIsCollapsed }) {
           </Link>
         </li>
         <li>
+          <Link href='/admin/downloads'>
+            {!isCollapsed ? (
+              <span className='sidebar-text '>
+                <i className='ri-download-cloud-fill me-2'></i>
+                Downloads
+              </span>
+            ) : (
+              <Tooltip content={'Downloads'}>
+                <i className='ri-download-cloud-fill'></i>
+              </Tooltip>
+            )}
+          </Link>
+        </li>
+        <li>
           <Link href='/admin/users'>
             {!isCollapsed ? (
               <span className='sidebar-text '>
@@ -125,6 +139,7 @@ export default function AdminSidebar({ isCollapsed, setIsCollapsed }) {
             )}
           </Link>
         </li>
+
         <li>
           <Link href='/admin/settings'>
             {!isCollapsed ? (

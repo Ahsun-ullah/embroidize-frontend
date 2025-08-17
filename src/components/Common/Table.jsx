@@ -11,21 +11,23 @@ import {
 } from '@heroui/react';
 import { useMemo, useState } from 'react';
 
-const UserTable = ({ data, columns, pageSize, renderCell, onSearchChange }) => {
+const UserTable = ({
+  data,
+  columns,
+  pageSize,
+  renderCell,
+  onSearchChange,
+  pagination,
+  onPageChange,
+}) => {
   const [selectedKeys, setSelectedKeys] = useState(new Set([]));
-  const [page, setPage] = useState(1);
-
-  // console.log(data);
-
-  const selectedKeysArray = Array.from(selectedKeys);
 
   const paginatedItems = useMemo(() => {
-    const start = (page - 1) * pageSize;
-    const end = start + pageSize;
-    return Array.isArray(data) ? data.slice(start, end) : [];
-  }, [data, page, pageSize]);
+    return Array.isArray(data) ? data : [];
+  }, [data]);
 
-  const pages = Math.ceil(data?.length / pageSize);
+  const pages = pagination?.totalPages || 1;
+  const currentPage = pagination?.currentPage || 1;
 
   const topContent = (
     <div className='flex flex-col gap-4'>
@@ -48,9 +50,9 @@ const UserTable = ({ data, columns, pageSize, renderCell, onSearchChange }) => {
         showControls
         showShadow
         color='primary'
-        page={page}
+        page={currentPage}
         total={pages}
-        onChange={setPage}
+        onChange={onPageChange}
       />
     </div>
   );

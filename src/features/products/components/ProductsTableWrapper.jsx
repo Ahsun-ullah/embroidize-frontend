@@ -20,56 +20,53 @@ import {
   User,
 } from '@heroui/react';
 import Link from 'next/link';
-import { useRouter } from 'next/navigation';
-import { useCallback, useEffect, useState } from 'react';
+import { useRouter, useSearchParams } from 'next/navigation';
+import { useCallback, useEffect, useState, useMemo } from 'react';
 
 export default function ProductsTableWrapper({
   columns,
-  pageSize,
   searchableFieldsName,
 }) {
   const router = useRouter();
+  const searchParams = useSearchParams();
 
   const [deleteProduct] = useDeleteProductMutation();
   const { data: allProducts, refetch: allProductRefetch } =
     useAllProductsQuery();
 
-  const [filteredData, setFilteredData] = useState(allProducts?.data?.data);
+  const [page, setPage] = useState(1);
+  const rowsPerPage = 10;
 
-  useEffect(() => {
-    setFilteredData(allProducts?.data?.data);
-  }, [allProducts?.data?.data]);
-
-  const filterData = useCallback(
+  const onSearchChange = useCallback(
     (value) => {
-      try {
-        if (!value) {
-          setFilteredData(allProducts?.data?.data);
-          return;
-        }
-
-        const filtered = allProducts?.data?.data?.filter((product) => {
-          const availableFields = searchableFieldsName.filter(
-            (field) =>
-              product.hasOwnProperty(field) &&
-              product[field] !== undefined &&
-              product[field] !== null,
-          );
-          return availableFields.some((field) =>
-            product[field]
-              ?.toString()
-              .toLowerCase()
-              .includes(value.toLowerCase()),
-          );
-        });
-        setFilteredData(filtered);
-      } catch (error) {
-        console.error('Error filtering data:', error);
-        setFilteredData(allProducts?.data?.data);
+      const params = new URLSearchParams(searchParams);
+      if (value) {
+        params.set('search', value);
+      } else {
+        params.delete('search');
       }
+      setPage(1);
+      router.push(`?${params.toString()}`);
     },
-    [allProducts?.data?.data, searchableFieldsName],
+    [router, searchParams],
   );
+
+  const onPageChange = useCallback(
+    (newPage) => {
+      setPage(newPage);
+    },
+    [],
+  );
+
+  const paginatedData = useMemo(() => {
+    const start = (page - 1) * rowsPerPage;
+    const end = start + rowsPerPage;
+    return allProducts?.data?.data?.slice(start, end) || [];
+  }, [allProducts?.data?.data, page, rowsPerPage]);
+
+  const totalPages = useMemo(() => {
+    return Math.ceil((allProducts?.data?.data?.length || 0) / rowsPerPage);
+  }, [allProducts?.data?.data?.length, rowsPerPage]);
 
   const renderCell = useCallback(
     (product, columnKey) => {
@@ -145,10 +142,6 @@ export default function ProductsTableWrapper({
                                 );
                               },
                             );
-                            // Update local filteredData
-                            setFilteredData((prev) =>
-                              prev?.filter((item) => item._id !== product?._id),
-                            );
                             SuccessToast(
                               'Deleted',
                               response.data?.message || 'Product deleted',
@@ -198,12 +191,14 @@ export default function ProductsTableWrapper({
         </Link>
       </div>
       <UserTable
-        data={filteredData || []}
+        data={paginatedData}
         columns={columns}
-        pageSize={pageSize}
+        pageSize={rowsPerPage}
         renderCell={renderCell}
         searchableFieldsName={searchableFieldsName}
-        onSearchChange={filterData}
+        onSearchChange={onSearchChange}
+        pagination={{ totalPages: totalPages, currentPage: page }}
+        onPageChange={onPageChange}
       />
     </>
   );

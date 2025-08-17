@@ -45,6 +45,13 @@ const Footer = () => {
               <i className='ri-facebook-circle-fill rounded-full bg-black text-white p-2 text-base'></i>
             </Link>
             <Link
+              href='https://x.com/embroidize'
+              target='_blank'
+              aria-label='x-button'
+            >
+              <i className='ri-twitter-x-fill rounded-full bg-black text-white p-2 text-base'></i>
+            </Link>
+            <Link
               href='https://www.instagram.com/embroidize/'
               target='_blank'
               aria-label='instagram-button'

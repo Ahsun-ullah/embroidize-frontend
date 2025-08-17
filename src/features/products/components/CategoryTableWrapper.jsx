@@ -14,7 +14,7 @@ import {
   useDisclosure,
   User,
 } from '@heroui/react';
-import { useCallback, useEffect, useState } from 'react';
+import { useCallback, useEffect, useState, useMemo } from 'react';
 import CategoryModal from './CategoryModal';
 import SubCategoryModal from './SubCategoryModal';
 
@@ -30,12 +30,28 @@ export default function CategoryTableWrapper({
 }) {
   const [categoryId, setCategoryId] = useState('');
   const [subCategoryId, setSubCategoryId] = useState('');
+
+  // States for category pagination
+  const [categoryCurrentPage, setCategoryCurrentPage] = useState(1);
+  const [subCategoryCurrentPage, setSubCategoryCurrentPage] = useState(1);
+
+  // States for filtered data (for search)
   const [categoryFilteredData, setCategoryFilteredData] = useState(
     categoryInitialData || [],
   );
   const [subCategoryFilteredData, setSubCategoryFilteredData] = useState(
     subCategoryInitialData || [],
   );
+
+  // Update filtered data when initial data changes
+  useEffect(() => {
+    setCategoryFilteredData(categoryInitialData || []);
+  }, [categoryInitialData]);
+
+  useEffect(() => {
+    setSubCategoryFilteredData(subCategoryInitialData || []);
+  }, [subCategoryInitialData]);
+
 
   const { data: getSingleCategoryData } =
     useGetSinglePublicProductCategoryQuery(categoryId);
@@ -46,15 +62,37 @@ export default function CategoryTableWrapper({
   console.log('subCategoryId', subCategoryId);
   console.log('getSingleSubCategoryData', getSingleSubCategoryData);
 
-  useEffect(() => {
-    // console.log('categoryInitialData updated:', categoryInitialData);
-    setCategoryFilteredData(categoryInitialData || []);
-  }, [categoryInitialData]);
+  // Memoized paginated data for categories
+  const paginatedCategoryData = useMemo(() => {
+    const start = (categoryCurrentPage - 1) * categoryPageSize;
+    const end = start + categoryPageSize;
+    return (categoryFilteredData || []).slice(start, end);
+  }, [categoryFilteredData, categoryCurrentPage, categoryPageSize]);
 
-  useEffect(() => {
-    // console.log('subCategoryInitialData updated:', subCategoryInitialData);
-    setSubCategoryFilteredData(subCategoryInitialData || []);
-  }, [subCategoryInitialData]);
+  // Memoized total pages for categories
+  const categoryTotalPages = useMemo(() => {
+    return Math.ceil((categoryFilteredData?.length || 0) / categoryPageSize);
+  }, [categoryFilteredData?.length, categoryPageSize]);
+
+  // Memoized paginated data for subcategories
+  const paginatedSubCategoryData = useMemo(() => {
+    const start = (subCategoryCurrentPage - 1) * subCategoryPageSize;
+    const end = start + subCategoryPageSize;
+    return (subCategoryFilteredData || []).slice(start, end);
+  }, [subCategoryFilteredData, subCategoryCurrentPage, subCategoryPageSize]);
+
+  // Memoized total pages for subcategories
+  const subCategoryTotalPages = useMemo(() => {
+    return Math.ceil((subCategoryFilteredData?.length || 0) / subCategoryPageSize);
+  }, [subCategoryFilteredData?.length, subCategoryPageSize]);
+
+  const onCategoryPageChange = useCallback((newPage) => {
+    setCategoryCurrentPage(newPage);
+  }, []);
+
+  const onSubCategoryPageChange = useCallback((newPage) => {
+    setSubCategoryCurrentPage(newPage);
+  }, []);
 
   const { isOpen, onOpen, onOpenChange } = useDisclosure();
   const {
@@ -63,62 +101,55 @@ export default function CategoryTableWrapper({
     onOpenChange: subCategoryOnOpenChange,
   } = useDisclosure();
 
+  // Re-introduced filter functions
   const categoryFilterData = useCallback(
     (value) => {
-      try {
-        if (!value || value.trim() === '') {
-          setCategoryFilteredData(categoryInitialData || []);
-          return;
-        }
-
-        const filtered = (categoryInitialData || []).filter((item) => {
-          const availableFields = categorySearchableFieldsName.filter(
-            (field) =>
-              item.hasOwnProperty(field) &&
-              item[field] !== undefined &&
-              item[field] !== null,
-          );
-
-          return availableFields.some((field) =>
-            item[field].toString().toLowerCase().includes(value.toLowerCase()),
-          );
-        });
-
-        setCategoryFilteredData(filtered);
-      } catch (error) {
-        console.error('Error filtering data:', error);
+      setCategoryCurrentPage(1); // Reset page on search
+      if (!value || value.trim() === '') {
         setCategoryFilteredData(categoryInitialData || []);
+        return;
       }
+
+      const filtered = (categoryInitialData || []).filter((item) => {
+        const availableFields = categorySearchableFieldsName.filter(
+          (field) =>
+            item.hasOwnProperty(field) &&
+            item[field] !== undefined &&
+            item[field] !== null,
+        );
+
+        return availableFields.some((field) =>
+          item[field].toString().toLowerCase().includes(value.toLowerCase()),
+        );
+      });
+
+      setCategoryFilteredData(filtered);
     },
     [categoryInitialData, categorySearchableFieldsName],
   );
 
   const subcategoryFilterData = useCallback(
     (value) => {
-      try {
-        if (!value || value.trim() === '') {
-          setSubCategoryFilteredData(subCategoryInitialData || []);
-          return;
-        }
-
-        const filtered = (subCategoryInitialData || []).filter((item) => {
-          const availableFields = subCategorySearchableFieldsName.filter(
-            (field) =>
-              item.hasOwnProperty(field) &&
-              item[field] !== undefined &&
-              item[field] !== null,
-          );
-
-          return availableFields.some((field) =>
-            item[field].toString().toLowerCase().includes(value.toLowerCase()),
-          );
-        });
-
-        setSubCategoryFilteredData(filtered);
-      } catch (error) {
-        console.error('Error filtering data:', error);
+      setSubCategoryCurrentPage(1); // Reset page on search
+      if (!value || value.trim() === '') {
         setSubCategoryFilteredData(subCategoryInitialData || []);
+        return;
       }
+
+      const filtered = (subCategoryInitialData || []).filter((item) => {
+        const availableFields = subCategorySearchableFieldsName.filter(
+          (field) =>
+            item.hasOwnProperty(field) &&
+            item[field] !== undefined &&
+            item[field] !== null,
+        );
+
+        return availableFields.some((field) =>
+          item[field].toString().toLowerCase().includes(value.toLowerCase()),
+        );
+      });
+
+      setSubCategoryFilteredData(filtered);
     },
     [subCategoryInitialData, subCategorySearchableFieldsName],
   );
@@ -262,10 +293,6 @@ export default function CategoryTableWrapper({
     [],
   );
 
-  // Log filtered data before rendering
-  // console.log('Rendering - categoryFilteredData:', categoryFilteredData);
-  // console.log('Rendering - subCategoryFilteredData:', subCategoryFilteredData);
-
   return (
     <div>
       <div className='flex justify-between items-center mb-4'>
@@ -303,20 +330,24 @@ export default function CategoryTableWrapper({
       </div>
       <div className='grid grid-cols-2 gap-4'>
         <UserTable
-          data={categoryFilteredData}
+          data={paginatedCategoryData}
           columns={categoryColumns}
           pageSize={categoryPageSize}
           renderCell={categoryRenderCell}
           searchableFieldsName={categorySearchableFieldsName}
           onSearchChange={categoryFilterData}
+          pagination={{ totalPages: categoryTotalPages, currentPage: categoryCurrentPage }}
+          onPageChange={onCategoryPageChange}
         />
         <UserTable
-          data={subCategoryFilteredData}
+          data={paginatedSubCategoryData}
           columns={subCategoryColumns}
           pageSize={subCategoryPageSize}
           renderCell={subcategoryRenderCell}
           searchableFieldsName={subCategorySearchableFieldsName}
           onSearchChange={subcategoryFilterData}
+          pagination={{ totalPages: subCategoryTotalPages, currentPage: subCategoryCurrentPage }}
+          onPageChange={onSubCategoryPageChange}
         />
       </div>
     </div>
