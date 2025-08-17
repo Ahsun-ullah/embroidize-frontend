@@ -84,6 +84,8 @@ export function BlogForm({ blog, isOpen, onOpenChange, setBlogId }) {
           if (key === 'image') {
             if (value instanceof File) {
               formData.append(key, value);
+            } else if (typeof value === 'string') {
+              formData.append(key, value);
             }
           } else if (key === 'meta_keywords') {
             value.forEach((tag, index) => {

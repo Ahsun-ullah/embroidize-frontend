@@ -10,6 +10,8 @@ const BlogCard = ({ data }) => {
     // data?.title.rendered // wordpress
     data?.title;
 
+  console.log('data', data);
+
   return (
     <>
       <Link
@@ -40,19 +42,17 @@ const BlogCard = ({ data }) => {
             <h2
               className='text-2xl font-semibold prose max-w-none'
               dangerouslySetInnerHTML={{
-                __html: data?.meta_description,
-
-                // data.title.rendered
+                __html: altText,
               }}
             />
 
             {/* Blog Description */}
-            {/* <p
+            <p
               className='prose max-w-none mt-2'
               dangerouslySetInnerHTML={{
-                __html: data.excerpt.rendered.slice(0, 100),
+                __html: `${data.meta_description.slice(0, 100)}...`,
               }}
-            /> */}
+            />
           </div>
         </div>
       </Link>
