@@ -38,7 +38,6 @@ const nextConfig = {
         destination: 'https://embroidize.com/:path*',
         permanent: true,
       },
-
       ...redirectsFromMap,
     ];
   },
