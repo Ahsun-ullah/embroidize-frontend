@@ -27,18 +27,27 @@ export default function CategoryMenu({ isMobileMenuOpen }) {
     );
   };
 
-  const renderSubcategoryLinks = (category) =>
-    category.subcategories?.map((sub) => (
-      <li key={sub._id}>
-        <Link
-          href={`/${category.slug}/${sub.slug}`}
-          prefetch={false}
-          className='hover:underline capitalize'
-        >
-          {sub.name}
-        </Link>
-      </li>
-    ));
+  const renderSubcategoryLinks = (category) => {
+    if (!category?.subcategories?.length) return null;
+
+    return category.subcategories.map((sub) => {
+      const displayName = (sub.name || '')
+        .replace(/embroidery design(s)?/gi, '') // remove “Embroidery Design(s)”
+        .trim();
+
+      return (
+        <li key={sub._id ?? sub.slug}>
+          <Link
+            href={`/${category.slug}/${sub.slug}`}
+            prefetch={false}
+            className='hover:underline capitalize'
+          >
+            {displayName}
+          </Link>
+        </li>
+      );
+    });
+  };
 
   if (!categories.length) return null;
 
