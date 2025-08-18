@@ -157,9 +157,9 @@ export default function UserProfileDropdown() {
                 color='primary'
                 href='/auth/login'
                 variant='flat'
-                size='md'
+                size='sm'
                 radius='full'
-                className='bg-black text-white hover:bg-slate-700 font-bold px-4 text-base'
+                className='bg-black text-white hover:bg-slate-700 font-semibold px-0 lg:px-4  text-[0.5rem] lg:text-base'
                 aria-label='Sign in'
               >
                 Sign In
