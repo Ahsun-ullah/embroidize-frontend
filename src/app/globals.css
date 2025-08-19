@@ -267,6 +267,98 @@ h6 {
   max-width: 100%;
 }
 
+.prose :where(p):not(:where([class~='not-prose'], [class~='not-prose'] *)) {
+  margin-top: 0.25em !important;
+  margin-bottom: 0.25em !important;
+}
+.prose
+  :where(h1, h2, h3, h4, h5, h6):not(
+    :where([class~='not-prose'], [class~='not-prose'] *)
+  ) {
+  margin-top: 0.5em !important;
+  margin-bottom: 0.5em !important;
+}
+.prose
+  :where(ul, ol):not(:where([class~='not-prose'], [class~='not-prose'] *)) {
+  margin-top: 0.25em !important;
+  margin-bottom: 0.25em !important;
+}
+.prose
+  :where(blockquote):not(:where([class~='not-prose'], [class~='not-prose'] *)) {
+  margin-top: 0.5em !important;
+  margin-bottom: 0.5em !important;
+}
+.prose :where(pre):not(:where([class~='not-prose'], [class~='not-prose'] *)) {
+  margin-top: 0.5em !important;
+  margin-bottom: 0.5em !important;
+}
+.prose :where(code):not(:where([class~='not-prose'], [class~='not-prose'] *)) {
+  margin-top: 0.25em !important;
+  margin-bottom: 0.25em !important;
+}
+.prose :where(img):not(:where([class~='not-prose'], [class~='not-prose'] *)) {
+  margin-top: 0.5em !important;
+  margin-bottom: 0.5em !important;
+  display: block;
+  max-width: 100%;
+  height: auto;
+}
+.prose :where(table):not(:where([class~='not-prose'], [class~='not-prose'] *)) {
+  margin-top: 0.5em !important;
+  margin-bottom: 0.5em !important;
+  width: 100%;
+  border-collapse: collapse;
+}
+/* Tailwind Typography (.prose) table cleanup */
+.prose
+  :where(table)
+  > thead
+  > tr
+  > th:not(:where([class~='not-prose'], [class~='not-prose'] *)) {
+  padding: 0.5em !important;
+  text-align: left;
+  border-bottom: 1px solid #e5e7eb;
+}
+
+.prose
+  :where(table)
+  > tbody
+  > tr
+  > th:not(:where([class~='not-prose'], [class~='not-prose'] *)) {
+  padding: 0.5em !important;
+  text-align: left;
+  font-weight: 600;
+  border-bottom: 1px solid #e5e7eb;
+  vertical-align: top;
+}
+
+.prose
+  :where(table)
+  > tbody
+  > tr
+  > td:not(:where([class~='not-prose'], [class~='not-prose'] *)) {
+  padding: 0.5em !important;
+  text-align: left;
+  border-bottom: 1px solid #e5e7eb;
+  vertical-align: top;
+}
+
+/* Zebra striping */
+.prose
+  :where(table)
+  > tbody
+  > tr:nth-child(odd)
+  > td:not(:where([class~='not-prose'], [class~='not-prose'] *)) {
+  background-color: #f9fafb;
+}
+.prose
+  :where(table)
+  > tbody
+  > tr:nth-child(even)
+  > td:not(:where([class~='not-prose'], [class~='not-prose'] *)) {
+  background-color: #f3f4f6;
+}
+
 @keyframes fade-in {
   from {
     opacity: 0;
