@@ -1,3 +1,4 @@
+import ScrollToTopBottom from '@/components/Common/ScrollToTopBottom';
 import { NProgressProvider } from '@/components/providers/NProgressProvider';
 import ClientProviders from '@/lib/providers/ClientProviders';
 import { Inter } from 'next/font/google';
@@ -83,6 +84,7 @@ export default function RootLayout({ children }) {
               >
                 {children}
               </main>
+              <ScrollToTopBottom />
             </NProgressProvider>
           </Suspense>
         </ClientProviders>
