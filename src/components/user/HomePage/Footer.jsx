@@ -31,6 +31,13 @@ const Footer = () => {
           <div className='flex items-center justify-start gap-x-2'>
             {/* Social Media Links */}
             <Link
+              href='https://www.linkedin.com/company/embroidize-official/'
+              target='_blank'
+              aria-label='linkedin-button'
+            >
+              <i className='ri-linkedin-fill rounded-full bg-black text-white p-2 text-base'></i>
+            </Link>
+            <Link
               href='https://www.pinterest.com/embroidize/'
               target='_blank'
               aria-label='pinterest-button'
