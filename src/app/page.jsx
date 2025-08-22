@@ -51,6 +51,12 @@ export const metadata = {
       'Download free embroidery designs instantly – Browse unlimited machine embroidery Design in multiple categories and styles.',
     images: ['https://embroidize.com/og-banner.jpg'],
   },
+  verification: {
+    google: 'hVDO2LwJX8GOqQ809KdHmfVZ96gxwrrSC8J80OhLD-k',
+    other: {
+      'p:domain_verify': 'a417c3036823eb607157878ef76fc2b0',
+    },
+  },
 };
 
 export default async function Home() {
