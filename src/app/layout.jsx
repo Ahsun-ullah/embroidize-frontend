@@ -41,7 +41,7 @@ export const metadata = {
     icon: '/favicon.png',
   },
   verification: {
-    google: 'hVDO2LwJX8GOqQ809KdHmfVZ96gxwrrSC8J80OhLD-k',
+    // google: 'hVDO2LwJX8GOqQ809KdHmfVZ96gxwrrSC8J80OhLD-k',
     other: {
       'p:domain_verify': 'a417c3036823eb607157878ef76fc2b0',
     },
@@ -60,6 +60,7 @@ export default function RootLayout({ children }) {
           src='https://www.googletagmanager.com/gtag/js?id=G-BJ81WDRVP5'
           strategy='afterInteractive'
         />
+
         <Script
           id='gtag-init'
           strategy='afterInteractive'
