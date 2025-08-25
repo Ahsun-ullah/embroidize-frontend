@@ -95,8 +95,9 @@ export default async function AllProductsPage({ searchParams }) {
             </Link>
           </div>
           <div className='grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6'>
-            {products.map((item) => (
-              <ProductCard key={item._id} item={item} />
+            {products.map((item,index) => (
+              // <ProductCard key={item._id} item={item} />
+              <ProductCard key={item._id} item={item} index={index} />
             ))}
           </div>
           {/* Pagination Component */}

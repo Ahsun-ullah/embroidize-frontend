@@ -1,8 +1,7 @@
 import LoadingSpinner from '@/components/Common/LoadingSpinner';
 import ProductCard from '@/components/Common/ProductCard';
-import { getProducts } from '@/lib/apis/public/products';
 import Link from 'next/link';
-import { Suspense, use } from 'react';
+import { Suspense } from 'react';
 
 const RecentProductsSection = ({ recentProducts }) => {
   const { products: allProducts } = recentProducts;
@@ -15,7 +14,8 @@ const RecentProductsSection = ({ recentProducts }) => {
             <Suspense fallback={<LoadingSpinner />}>
               {allProducts?.length > 0 &&
                 allProducts.map((item, index) => (
-                  <ProductCard key={item._id || index} item={item} />
+                  // <ProductCard key={item._id || index} item={item} />
+                  <ProductCard key={item._id} item={item} index={index} />
                 ))}
             </Suspense>
           </div>

@@ -35,7 +35,7 @@ export default async function AdminDashboard({ searchParams }) {
       user.downloadHistory.forEach(download => {
         if (download.downloadedAt) {
           const date = new Date(download.downloadedAt).toISOString().split('T')[0];
-          acc[date] = (acc[date] || 0) + 1; // Count each download event
+          acc[date] = (acc[date] || 0) + 1; 
         } else {
           console.warn('Skipping download entry due to missing downloadedAt:', download);
         }

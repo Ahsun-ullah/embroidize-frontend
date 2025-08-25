@@ -101,7 +101,7 @@ export default function UserDetailsComponent({ defaultTab = 'account' }) {
         <div className='flex sm:flex-row sm:items-center justify-between sm:w-1/2'>
           {/* Date */}
           <div className='text-sm text-gray-500 flex items-center'>
-            {new Date(downloadedAt).toLocaleDateString()}
+            {new Date(downloadedAt).toISOString().split('T')[0]}
           </div>
 
           {/* Action */}

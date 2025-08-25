@@ -9,8 +9,8 @@ import {
   DropdownTrigger,
   User,
 } from '@heroui/react';
-import { useCallback, useMemo, useState } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
+import { useCallback, useMemo, useState } from 'react';
 
 export default function UsersTableWrapper({
   initialData,
@@ -37,12 +37,9 @@ export default function UsersTableWrapper({
     [router, searchParams],
   );
 
-  const onPageChange = useCallback(
-    (newPage) => {
-      setPage(newPage);
-    },
-    [],
-  );
+  const onPageChange = useCallback((newPage) => {
+    setPage(newPage);
+  }, []);
 
   const paginatedData = useMemo(() => {
     const start = (page - 1) * rowsPerPage;
@@ -68,11 +65,12 @@ export default function UsersTableWrapper({
               {user.name}
             </User>
           );
-        case 'createdAt':
-          const createdAt = new Date(user.createdAt);
-          const formattedDate = `${createdAt.getDate().toString().padStart(2, '0')}-${(createdAt.getMonth() + 1).toString().padStart(2, '0')}-${createdAt.getFullYear()}`;
 
+        case 'createdAt': {
+          const createdAt = new Date(user.createdAt);
+          const formattedDate = createdAt.toISOString().split('T')[0];
           return <>{formattedDate}</>;
+        }
 
         case 'email':
           return <a href={`mailto:${user.email}`}>{user.email}</a>;

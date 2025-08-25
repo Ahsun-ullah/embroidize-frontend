@@ -14,7 +14,8 @@ const PopularDesign = ({ popularProducts }) => {
             <Suspense fallback={<LoadingSpinner />}>
               {allProducts?.length > 0 &&
                 allProducts.map((item, index) => (
-                  <ProductCard key={index} item={item} />
+                  // <ProductCard key={index} item={item} />
+                  <ProductCard key={item._id} item={item} index={index} />
                 ))}
             </Suspense>
           </div>

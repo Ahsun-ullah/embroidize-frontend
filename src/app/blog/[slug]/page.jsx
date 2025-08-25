@@ -158,14 +158,7 @@ export default async function SingleBlogPage({ params }) {
                   }
                   itemProp='datePublished'
                 >
-                  {new Date(
-                    blog?.createdAt,
-                    // blog?.date
-                  ).toLocaleDateString('en-US', {
-                    year: 'numeric',
-                    month: 'long',
-                    day: 'numeric',
-                  })}
+                  {new Date(blog?.createdAt).toISOString().split('T')[0]}
                 </time>
 
                 {blog?.meta_keywords?.length >

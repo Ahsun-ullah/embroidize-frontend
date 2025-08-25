@@ -18,7 +18,12 @@ export default function ClientOnlyRecommendations({
         </div>
         <div className='grid grid-cols-1 sm:grid-cols-2 gap-4'>
           {allProductData?.slice(0, 6).map((item, index) => (
-            <ProductCard item={item} key={`relevant-${index}`} />
+            // <ProductCard item={item} key={`relevant-${index}`} />
+            <ProductCard
+              key={`relevant-${item._id}`}
+              item={item}
+              index={index}
+            />
           ))}
         </div>
       </div>
@@ -36,7 +41,12 @@ export default function ClientOnlyRecommendations({
         </div>
         <div className='grid grid-cols-1 sm:grid-cols-2 gap-4'>
           {popularProducts?.slice(0, 4).map((item, index) => (
-            <ProductCard item={item} key={`popular-${index}`} />
+            // <ProductCard item={item} key={`popular-${index}`} />
+            <ProductCard
+              key={`popular-${item._id}`}
+              item={item}
+              index={index}
+            />
           ))}
         </div>
       </div>

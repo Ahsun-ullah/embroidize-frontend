@@ -114,7 +114,8 @@ export default async function SubCategoryProducts({ params, searchParams }) {
             </p>
           ) : (
             products.map((item, index) => (
-              <ProductCard key={index} item={item} />
+              // <ProductCard key={index} item={item} />
+              <ProductCard key={item._id} item={item} index={index} />
             ))
           )}
         </div>

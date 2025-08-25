@@ -1,7 +1,7 @@
 import ScrollToTopBottom from '@/components/Common/ScrollToTopBottom';
 import { NProgressProvider } from '@/components/providers/NProgressProvider';
 import ClientProviders from '@/lib/providers/ClientProviders';
-import { Inter } from 'next/font/google';
+import { Inter, Plus_Jakarta_Sans } from 'next/font/google';
 import Script from 'next/script';
 import { Suspense } from 'react';
 import 'remixicon/fonts/remixicon.css';
@@ -11,6 +11,15 @@ export const revalidate = 0;
 export const fetchCache = 'default-no-store';
 
 const inter = Inter({ subsets: ['latin'], display: 'swap' });
+
+
+
+export const plusJakarta = Plus_Jakarta_Sans({
+  subsets: ['latin'],
+  weight: ['300', '400', '500', '600', '700', '800'],
+  display: 'swap',
+  variable: '--font-sans',
+});
 
 export const metadata = {
   title: 'Free Machine Embroidery Designs - Embroidize',
@@ -52,7 +61,7 @@ export default function RootLayout({ children }) {
   return (
     <html lang='en' className='scroll-smooth'>
       <body
-        className={`${inter.className} antialiased text-gray-900 bg-white`}
+        className={`${plusJakarta.className} antialiased text-gray-900 bg-white`}
         suppressHydrationWarning
       >
         {/* Google Analytics */}
