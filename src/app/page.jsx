@@ -57,7 +57,11 @@ export default async function Home() {
     getPopularProducts('', 1, 12),
     getProducts('', 1, 8),
   ]);
+
   const { blogs } = await getBlogs();
+
+  console.log('popularProducts', popularProducts);
+
   return (
     <>
       <ProductUpdates />
@@ -116,8 +120,12 @@ export default async function Home() {
           </div>
         </div>
       </section>
-      <PopularDesign popularProducts={popularProducts} />
-
+      {popularProducts?.products && popularProducts?.products?.length > 0 && (
+        <Suspense fallback={<LoadingSpinner />}>
+          <PopularDesign popularProducts={popularProducts} />
+        </Suspense>
+      )}
+      {/* recent products section */}
       <section
         style={{ backgroundColor: '#fafafa' }}
         className=' text-black my-8 py-6'
@@ -135,7 +143,12 @@ export default async function Home() {
           </div>
         </div>
       </section>
-      <RecentProductsSection recentProducts={recentProducts} />
+
+      {recentProducts?.products && recentProducts?.products?.length > 0 && (
+        <Suspense fallback={<LoadingSpinner />}>
+          <RecentProductsSection recentProducts={recentProducts} />
+        </Suspense>
+      )}
 
       {blogs && blogs?.length > 0 && (
         <>
