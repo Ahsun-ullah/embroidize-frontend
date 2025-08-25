@@ -3,14 +3,19 @@ import BlogCard from '@/components/Common/BlogCard';
 const BlogSection = ({ blogs }) => {
   return (
     <>
-      <section className='bg-blue-50 text-black my-8 py-6'>
-        <div className='flex items-center justify-center'>
-          <h1 className='text-3xl font-bold'>Latest From Blog</h1>
-        </div>
-        <div className='flex items-center justify-center mt-4'>
-          <p className='font-bold text-lg text-center'>
-            Tips, Trends & Tutorials You’ll Love
-          </p>
+      <section
+        style={{ backgroundColor: '#fafafa' }}
+        className=' text-black my-8 py-6'
+      >
+        <div>
+          <div className='flex items-center justify-center'>
+            <h1 className='text-3xl font-bold'>Latest From Blog</h1>
+          </div>
+          <div className='flex items-center justify-center mt-4'>
+            <p className='font-bold text-lg text-center'>
+              Tips, Trends & Tutorials You’ll Love
+            </p>
+          </div>
         </div>
       </section>
       <section className='text-black my-8 py-6'>

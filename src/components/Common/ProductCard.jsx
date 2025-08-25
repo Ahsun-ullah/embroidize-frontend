@@ -1,7 +1,6 @@
 'use client';
 
 import { formatNumber } from '@/utils/functions/page';
-import { Divider } from '@heroui/react';
 import Image from 'next/image';
 import Link from 'next/link';
 import { useState } from 'react';
@@ -14,13 +13,13 @@ export default function ProductCard({ item }) {
   const imageUrl = item?.image?.url || '/category.jpg';
   const productLink = `${process.env.NEXT_PUBLIC_BASE_URL_CLIENT}/product/${item.slug}`;
   const productName = item.name;
-  const categoryName = item?.category?.name || 'Uncategorized';
+  const categoryName = item?.category?.name;
   const isFree = item?.price === 0;
   const priceLabel = isFree ? 'Free' : `$${item.price?.toFixed(2)}`;
   const downloadCount = item?.downloadCount || 0;
 
   return (
-    <div className='bg-white border rounded-2xl shadow-xl overflow-hidden'>
+    <div className='bg-white  rounded-2xl shadow-xl overflow-hidden'>
       <Link
         href={productLink}
         prefetch={false}
@@ -47,7 +46,7 @@ export default function ProductCard({ item }) {
           />
         </div>
 
-        <Divider />
+        {/* <Divider /> */}
 
         {/* Info Section */}
         <div className='flex flex-col p-4 gap-y-2'>
@@ -70,7 +69,7 @@ export default function ProductCard({ item }) {
               className='text-black capitalize font-medium truncate'
               title={categoryName}
             >
-              {categoryName}
+              {categoryName.replace(/embroidery designs/gi, '').trim()}
             </span>
             <span className='font-semibold flex items-center gap-1'>
               <i className='ri-download-2-line' aria-hidden='true'></i>

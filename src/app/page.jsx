@@ -2,7 +2,6 @@ import LoadingSpinner from '@/components/Common/LoadingSpinner';
 import BlogSection from '@/components/user/HomePage/BlogSection';
 import Footer from '@/components/user/HomePage/Footer';
 import Header from '@/components/user/HomePage/Header';
-import HeroSection from '@/components/user/HomePage/HeroSection';
 import PopularDesign from '@/components/user/HomePage/PopularDesign';
 import RecentProductsSection from '@/components/user/HomePage/RecentProductsSection';
 import { getBlogs } from '@/lib/apis/public/blog';
@@ -64,35 +63,76 @@ export default async function Home() {
       <ProductUpdates />
 
       <Header />
-      <HeroSection />
 
-      <section className='bg-blue-50 text-black my-8 py-6'>
-        <div className='flex items-center justify-center'>
-          <h4
-            id='popular-designs-heading'
-            className='text-3xl font-bold text-center'
-          >
-            Popular embroidery designs
-          </h4>
+      {/* hero section */}
+      <section className='w-full flex items-center overflow-hidden'>
+        <div className='flex items-center justify-center w-full m-[30px] sm:m-[40px] md:m-[40px] lg:m-[60px] xl:m-[70px] 2xl:m-[80px]'>
+          <div className='flex flex-col items-center justify-center '>
+            <h1 className='text-3xl sm:text-3xl md:text-4xl lg:text-5xl font-bold my-2 text-center'>
+              Free Machine Embroidery Designs
+            </h1>
+            <p className='text-base sm:text-base md:text-lg text-center my-2 max-w-2xl'>
+              All you need for your next machine embroidery project. <br /> The
+              highest quality for free.
+            </p>
+            <Link
+              href='/products'
+              prefetch={false}
+              className=' text-black text-xs sm:text-base md:text-lg font-bold transition duration-300 ease-in-out hover:opacity-60 focus:opacity-60 px-4 py-1 rounded-full mt-4'
+              passHref
+            >
+              <span
+                style={{
+                  padding: '9px 24px',
+                  borderRadius: '9999px',
+                }}
+                className='button rounded-md'
+              >
+                Download Now
+              </span>
+            </Link>
+          </div>
         </div>
-        <div className='flex items-center justify-center mt-4'>
-          <h4 className='font-semibold text-center'>
-            Browse Our Most Loved Designs.
-          </h4>
+      </section>
+
+      {/* popular section] */}
+      <section
+        style={{ backgroundColor: '#fafafa' }}
+        className=' text-black my-8 py-6'
+      >
+        <div>
+          <div className='flex items-center justify-center '>
+            <h4
+              id='popular-designs-heading'
+              className='text-3xl font-bold text-center'
+            >
+              Popular embroidery designs
+            </h4>
+          </div>
+          <div className='flex items-center justify-center mt-2'>
+            <h4 className='font-semibold text-center'>
+              Browse Our Most Loved Designs.
+            </h4>
+          </div>
         </div>
       </section>
       <PopularDesign popularProducts={popularProducts} />
 
-      <section className='bg-blue-50 text-black my-8 py-6'>
-        <div className='flex items-center justify-center'>
-          <h4 className='text-3xl font-bold text-center'>
-            Recent Approved Products
-          </h4>
-        </div>
-        <div className='flex items-center justify-center mt-4'>
-          <h4 className='font-semibold text-center'>
-            Our Newest Creations, Just for You.
-          </h4>
+      <section
+        style={{ backgroundColor: '#fafafa' }}
+        className=' text-black my-8 py-6'
+      >
+        <div>
+          <div className='flex items-center justify-center'>
+            <h4 className='text-3xl font-bold text-center'>
+              Recent Approved Products
+            </h4>
+          </div>
+          <div className='flex items-center justify-center mt-4'>
+            <h4 className='font-semibold text-center'>
+              Our Newest Creations, Just for You.
+            </h4>
+          </div>
         </div>
       </section>
       <RecentProductsSection recentProducts={recentProducts} />
