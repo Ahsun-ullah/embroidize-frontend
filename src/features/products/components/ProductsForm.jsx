@@ -62,6 +62,7 @@ export function ProductsForm({ product }) {
       meta_keywords: [],
       image: null,
       file: null,
+      product_pdf: null,
     },
   });
 
@@ -79,6 +80,7 @@ export function ProductsForm({ product }) {
         meta_keywords: product.meta_keywords ?? [],
         image: product.image ?? null,
         file: product.file ?? null,
+        product_pdf: product.product_pdf ?? null,
       });
       setDescription(product.description ?? '');
       setSlug(product.slug ?? '');
@@ -134,7 +136,7 @@ export function ProductsForm({ product }) {
       const formData = new FormData();
       Object.entries(data).forEach(([key, value]) => {
         if (value !== null && value !== undefined) {
-          if (key === 'image' || key === 'file') {
+          if (key === 'image' || key === 'file' || key === 'product_pdf') {
             if (value instanceof File) {
               formData.append(key, value);
             }
@@ -387,6 +389,7 @@ export function ProductsForm({ product }) {
             </p>
           )}
         </div>
+
         {/* meta_title  */}
         <div className='col-span-3'>
           <label
@@ -407,6 +410,7 @@ export function ProductsForm({ product }) {
             </p>
           )}
         </div>
+
         {/* Meta Description */}
         <div className='col-span-3'>
           <label
@@ -430,13 +434,14 @@ export function ProductsForm({ product }) {
         </div>
 
         {/* Product Tags */}
-        <div className='col-span-3'>
+        <div className='col-span-2'>
           <label
             className='text-lg font-medium tracking-tight leading-5'
             htmlFor='meta_keywords'
           >
             Product Tags <span className='text-red-600'>*</span>
           </label>
+
           <Controller
             name='meta_keywords'
             control={control}
@@ -451,6 +456,35 @@ export function ProductsForm({ product }) {
           {errors.meta_keywords && (
             <p className='text-red-500 font-light'>
               {errors.meta_keywords.message}
+            </p>
+          )}
+        </div>
+
+        <div className='col-span-1'>
+          <label
+            className='text-lg font-medium tracking-tight leading-5'
+            htmlFor='meta_keywords'
+          >
+            PDF File <span className='text-red-600'>*</span>
+          </label>
+          <input
+            type='file'
+            accept='application/pdf'
+            onChange={(e) =>
+              setValue('product_pdf', e.target.files?.[0], {
+                shouldDirty: true,
+              })
+            }
+            className='
+    block w-full border-[1.8px] rounded-[4px] p-2 file:mr-4 file:py-2 file:px-4 file:rounded-full
+    file:border-0 file:text-sm file:font-semibold file:bg-slate-100 file:text-slate-700
+    hover:file:bg-slate-200 transition
+  '
+          />
+
+          {errors.product_pdf && (
+            <p className='text-red-500 font-light'>
+              {errors.product_pdf.message}
             </p>
           )}
         </div>

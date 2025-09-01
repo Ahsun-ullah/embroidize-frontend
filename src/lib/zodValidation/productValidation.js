@@ -12,6 +12,7 @@ export const productSchema = z.object({
   meta_keywords: z.array(z.string()).optional(),
   image: z.any().optional(),
   file: z.any().optional(),
+  product_pdf: z.any().optional(),
 });
 export const blogSchema = z.object({
   title: z.string().min(1, 'Blog Title is required'),

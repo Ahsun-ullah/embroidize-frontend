@@ -49,6 +49,8 @@ export default async function ProductDetails({ params }) {
   const response = await getSingleProduct(slug);
   const product = response?.data;
 
+  console.log('Product details response:', product);
+
   if (!product) return notFound();
 
   const hasSubCategory = !!product?.sub_category?.slug;

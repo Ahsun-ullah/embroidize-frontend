@@ -122,9 +122,40 @@ export const SingleProductComponent = ({
           {/* Product Details */}
           <Suspense fallback={<LoadingSpinner />}>
             <div className='mb-10'>
-              <h2 className='text-black font-bold text-2xl mb-6 capitalize'>
-                About {singleProductData?.name}
-              </h2>
+              <div className='flex flex-col md:flex-row md:items-center md:justify-between gap-4'>
+                <h2 className='text-black font-bold text-2xl mb-4 md:mb-0 capitalize'>
+                  About {singleProductData?.name}
+                </h2>
+                {singleProductData?.product_pdf?.url && (
+                  <a
+                    href={singleProductData.product_pdf.url}
+                    target='_blank'
+                    rel='noopener noreferrer'
+                    className='inline-flex items-center gap-2 px-4 py-2 bg-black hover:bg-blue-400 text-white rounded-lg shadow transition font-semibold text-sm'
+                    title='Download Product PDF'
+                  >
+                    <svg
+                      xmlns="http://www.w3.org/2000/svg"
+                      width="22"
+                      height="22"
+                      fill="none"
+                      viewBox="0 0 24 24"
+                      className="w-6 h-6"
+                    >
+                      <rect width="24" height="24" rx="4" fill="#fff" />
+                      <path
+                        d="M12 3v12m0 0l-4-4m4 4l4-4M4 17h16"
+                        stroke="#DC2626"
+                        strokeWidth="2"
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                      />
+                    </svg>
+                    <span>Download PDF</span>
+                  </a>
+                )}
+              </div>
+
               <pre
                 dangerouslySetInnerHTML={{ __html: rawMarkup }}
                 className='prose max-w-none break-words whitespace-pre-wrap font-sans text-lg'

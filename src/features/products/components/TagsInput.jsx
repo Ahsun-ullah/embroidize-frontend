@@ -54,6 +54,7 @@ export const CreatableTagsInput = ({ value = [], onChange }) => {
       onKeyDown={handleKeyDown}
       placeholder='Type or paste tags, then press Enter or Tab...'
       value={selectValue}
+
     />
   );
 };
