@@ -332,7 +332,7 @@ export default function PrivacyPolicyPage() {
                   support@embroidize.com
                 </a>
               </p>
-              <p>Phone: +0123456789</p>
+              {/* <p>Phone: +0123456789</p> */}
             </Section>
           </div>
         </div>

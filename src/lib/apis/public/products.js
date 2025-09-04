@@ -173,3 +173,24 @@ export async function getSingleProduct(productId) {
   const url = buildURL(`/public/product/${productId}`);
   return getJSON(url);
 }
+
+// get all products in sitemap
+export async function getAllProductsPaginated() {
+  let page = 1;
+  const limit = 500;
+  let allProducts = [];
+  let totalPages = 1;
+
+  do {
+    const { products, totalPages: total } = await getProducts(
+      null,
+      page,
+      limit,
+    );
+    allProducts.push(...products);
+    totalPages = total;
+    page++;
+  } while (page <= totalPages);
+
+  return allProducts;
+}

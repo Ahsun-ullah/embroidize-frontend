@@ -1,6 +1,6 @@
 import { getBlogs } from '@/lib/apis/public/blog';
 import { getCategories } from '@/lib/apis/public/category';
-import { getProducts } from '@/lib/apis/public/products';
+import { getAllProductsPaginated } from '@/lib/apis/public/products';
 import { getSubCategories } from '@/lib/apis/public/subcategory';
 export const dynamic = 'force-dynamic';
 
@@ -10,7 +10,10 @@ export async function GET() {
 
     // const blogs = await getPosts();
     const { blogs } = await getBlogs();
-    const { products } = await getProducts();
+    const products = await getAllProductsPaginated();
+
+    console.log(products);
+
     const { categories } = await getCategories();
     const { subCategories } = await getSubCategories();
 
