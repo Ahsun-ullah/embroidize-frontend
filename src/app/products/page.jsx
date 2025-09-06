@@ -78,24 +78,28 @@ export default async function AllProductsPage({ searchParams }) {
           Browse All Digital Embroidery Designs from Embroidize
         </h1>
         <section className='text-black mb-8 py-6 border-b-2'>
-          <div className='flex justify-start gap-4 mb-8'>
-            <Link
-              href='/products'
-              prefetch={false}
-              className={`px-4 py-2 rounded ${!isPopular ? 'bg-black text-white' : 'border'}`}
-            >
-              All Products
-            </Link>
-            <Link
-              href='/products?filter=popular'
-              prefetch={false}
-              className={`px-4 py-2 rounded ${isPopular ? 'bg-black text-white' : 'border'}`}
-            >
-              Popular Products
-            </Link>
+          <div className='flex justify-between gap-4 mb-8'>
+            <div className='flex justify-between gap-4'>
+              <Link
+                href='/products'
+                prefetch={false}
+                className={`px-4 py-2 rounded ${!isPopular ? 'bg-black text-white' : 'border'}`}
+              >
+                All Products
+              </Link>
+              <Link
+                href='/products?filter=popular'
+                prefetch={false}
+                className={`px-4 py-2 rounded ${isPopular ? 'bg-black text-white' : 'border'}`}
+              >
+                Popular Products
+              </Link>
+            </div>
+
+            <div className='px-4 py-2 border rounded bg-slate-50'>{totalCount}  Results Found</div>
           </div>
           <div className='grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6'>
-            {products.map((item,index) => (
+            {products.map((item, index) => (
               // <ProductCard key={item._id} item={item} />
               <ProductCard key={item._id} item={item} index={index} />
             ))}

@@ -105,7 +105,9 @@ function DownloadIcon(props) {
 export default function ProductCard({ item, index = 0 }) {
   if (!item?._id || !item?.name) return null;
 
-  const imageUrl = item?.image?.url || '/category.jpg';
+  const imageUrl =
+    item?.image?.url ||
+    'https://embroidize-assets.nyc3.cdn.digitaloceanspaces.com/image-not-found.png';
   const productLink = `/product/${item.slug}`;
   const productName = item.name;
   const categoryName = item?.category?.name || '';

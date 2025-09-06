@@ -1,34 +1,25 @@
 'use client';
 
-import { useRouter, useSearchParams } from 'next/navigation';
+import Link from 'next/link';
+import { useSearchParams } from 'next/navigation';
 
 const Pagination = ({ totalPages, perPage }) => {
-  const router = useRouter();
   const searchParams = useSearchParams();
 
-  // Get current page and limit from URL or use defaults
   const currentPage = parseInt(searchParams.get('page') || '1', 10);
-  const currentPerPage = parseInt(searchParams.get('limit') || (perPage || '20'), 10);
+  const currentPerPage = parseInt(
+    searchParams.get('limit') || perPage || '20',
+    10,
+  );
 
   const visiblePages = 5;
 
-  const handleClick = (pageNumber) => {
-    const newParams = new URLSearchParams(searchParams.toString());
-    newParams.set('page', pageNumber.toString());
-    newParams.set('limit', currentPerPage.toString());
-    router.push(`?${newParams.toString()}`);
-  };
-
-  const handlePrevPage = () => {
-    if (currentPage > 1) {
-      handleClick(currentPage - 1);
-    }
-  };
-
-  const handleNextPage = () => {
-    if (currentPage < totalPages) {
-      handleClick(currentPage + 1);
-    }
+  // Helper to build URLs with updated page number
+  const buildPageHref = (pageNumber) => {
+    const params = new URLSearchParams(searchParams.toString());
+    params.set('page', pageNumber.toString());
+    params.set('limit', currentPerPage.toString());
+    return `?${params.toString()}`;
   };
 
   const renderPageNumbers = () => {
@@ -53,57 +44,52 @@ const Pagination = ({ totalPages, perPage }) => {
     }
 
     return pageNumbers.map((page) => (
-      <li
-        key={page}
-        onClick={() => handleClick(page)}
-        className={`${
-          page === currentPage
-            ? 'active bg-blue-100 border rounded-[5px] py-[3px] px-[10px] cursor-pointer'
-            : 'button cursor-pointer'
-        }`}
-        role='button'
-        tabIndex={0}
-        aria-label={`Go to page ${page}`}
-      >
-        {page}
+      <li key={page}>
+        <Link
+          href={buildPageHref(page)}
+          className={`${
+            page === currentPage
+              ? 'active bg-blue-100 border rounded px-3 py-1 text-center items-center justify-center flex'
+              : 'bg-black text-white px-3 py-1 rounded hover:bg-gray-100 hover:text-black text-center items-center justify-center flex'
+          }`}
+          aria-label={`Go to page ${page}`}
+        >
+          {page}
+        </Link>
       </li>
     ));
   };
 
   return (
-    <div className='mt-16 me-5 text-lg'>
+    <nav className='mt-16 me-5 text-lg' aria-label='Pagination'>
       <ul className='flex justify-end gap-2'>
-        {currentPage === 1 ? (
-          ''
-        ) : (
-          <li
-            onClick={handlePrevPage}
-            className='cursor-pointer px-3 py-1 button rounded'
-            role='button'
-            tabIndex={0}
-            aria-label='Previous page'
-          >
-            &laquo;
+        {currentPage > 1 && (
+          <li>
+            <Link
+              href={buildPageHref(currentPage - 1)}
+              className='bg-black text-white px-3 py-1 rounded hover:bg-gray-100 hover:text-black text-center items-center justify-center flex'
+              aria-label='Previous page'
+            >
+              &laquo;
+            </Link>
           </li>
         )}
 
         {renderPageNumbers()}
 
-        {currentPage === totalPages ? (
-          ''
-        ) : (
-          <li
-            onClick={handleNextPage}
-            className='cursor-pointer px-3 py-1 button rounded'
-            role='button'
-            tabIndex={0}
-            aria-label='Next page'
-          >
-            &raquo;
+        {currentPage < totalPages && (
+          <li>
+            <Link
+              href={buildPageHref(currentPage + 1)}
+              className='bg-black text-white px-3 py-1 rounded hover:bg-gray-100 hover:text-black text-center items-center justify-center flex'
+              aria-label='Next page'
+            >
+              &raquo;
+            </Link>
           </li>
         )}
       </ul>
-    </div>
+    </nav>
   );
 };
 
