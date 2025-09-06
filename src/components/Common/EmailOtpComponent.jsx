@@ -112,7 +112,7 @@ const EmailOtpComponent = ({
           Verify Your Email
         </h4>
 
-        <p className='text-muted text-sm sm:text-base mt-2'>
+        <p className='text-slate-400 text-sm sm:text-base mt-2'>
           Please enter the 6-digit code sent to{' '}
           <span className='font-semibold'>{userEmail}</span>
         </p>

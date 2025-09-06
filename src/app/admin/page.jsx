@@ -24,32 +24,53 @@ export default async function AdminDashboard({ searchParams }) {
     return acc;
   }, {});
 
-  const formattedUserData = Object.keys(userDataForChart).map((date) => ({
-    date,
-    value: userDataForChart[date],
-  })).sort((a, b) => new Date(a.date) - new Date(b.date));
+  const formattedUserData = Object.keys(userDataForChart)
+    .map((date) => ({
+      date,
+      value: userDataForChart[date],
+    }))
+    .sort((a, b) => new Date(a.date) - new Date(b.date));
 
   // Process download data for chart from allUsers' downloadHistory
   const downloadDataForChart = allUsers.reduce((acc, user) => {
     if (user.downloadHistory && Array.isArray(user.downloadHistory)) {
-      user.downloadHistory.forEach(download => {
+      user.downloadHistory.forEach((download) => {
         if (download.downloadedAt) {
-          const date = new Date(download.downloadedAt).toISOString().split('T')[0];
-          acc[date] = (acc[date] || 0) + 1; 
+          const date = new Date(download.downloadedAt)
+            .toISOString()
+            .split('T')[0];
+          acc[date] = (acc[date] || 0) + 1;
         } else {
-          console.warn('Skipping download entry due to missing downloadedAt:', download);
+          console.warn(
+            'Skipping download entry due to missing downloadedAt:',
+            download,
+          );
         }
       });
     }
     return acc;
   }, {});
 
-  const formattedDownloadData = Object.keys(downloadDataForChart).map(
-    (date) => ({
+  const formattedDownloadData = Object.keys(downloadDataForChart)
+    .map((date) => ({
       date,
       value: downloadDataForChart[date],
-    }),
-  ).sort((a, b) => new Date(a.date) - new Date(b.date));
+    }))
+    .sort((a, b) => new Date(a.date) - new Date(b.date));
+
+  // Group users by country (from ipInfo)
+  const userCountryData = allUsers.reduce((acc, user) => {
+    const country = user.ipInfo?.country || 'Unknown';
+    acc[country] = (acc[country] || 0) + 1;
+    return acc;
+  }, {});
+
+  const formattedCountryData = Object.entries(userCountryData)
+    .map(([country, count]) => ({
+      country,
+      value: count,
+    }))
+    .sort((a, b) => b.value - a.value); // Optional: sort by count descending
 
   return (
     <div className='dashboard p-6'>
@@ -61,6 +82,7 @@ export default async function AdminDashboard({ searchParams }) {
         <DashboardCharts
           userData={formattedUserData}
           downloadData={formattedDownloadData}
+          locationData={formattedCountryData}
         />
       </div>
     </div>

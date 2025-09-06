@@ -7,6 +7,11 @@ import {
   DropdownItem,
   DropdownMenu,
   DropdownTrigger,
+  Modal,
+  ModalBody,
+  ModalContent,
+  ModalFooter,
+  ModalHeader,
   User,
 } from '@heroui/react';
 import { useRouter, useSearchParams } from 'next/navigation';
@@ -19,6 +24,18 @@ export default function UsersTableWrapper({
 }) {
   const router = useRouter();
   const searchParams = useSearchParams();
+  const [selectedUser, setSelectedUser] = useState(null);
+  const [isModalOpen, setIsModalOpen] = useState(false);
+
+  const handleOpenModal = (user) => {
+    setSelectedUser(user);
+    setIsModalOpen(true);
+  };
+
+  const handleCloseModal = () => {
+    setSelectedUser(null);
+    setIsModalOpen(false);
+  };
 
   const [page, setPage] = useState(1);
   const rowsPerPage = 10;
@@ -89,8 +106,11 @@ export default function UsersTableWrapper({
                   </Button>
                 </DropdownTrigger>
                 <DropdownMenu>
-                  <DropdownItem key='delete' onPress={() => {}}>
-                    Delete
+                  <DropdownItem
+                    key='more-info'
+                    onPress={() => handleOpenModal(user)}
+                  >
+                    More Info
                   </DropdownItem>
                 </DropdownMenu>
               </Dropdown>
@@ -120,6 +140,26 @@ export default function UsersTableWrapper({
         pagination={{ totalPages: totalPages, currentPage: page }}
         onPageChange={onPageChange}
       />
+
+      <Modal isOpen={isModalOpen} onClose={handleCloseModal}>
+        <ModalContent>
+          <ModalHeader>📍 IP Info</ModalHeader>
+          <ModalBody className='text-sm space-y-2'>
+            {Object.entries(selectedUser?.ipInfo || {}).map(([key, value]) => (
+              <div key={key} className='flex justify-between gap-4'>
+                <span className='font-semibold'>{key}:</span>
+                <span className='text-right'>{String(value)}</span>
+              </div>
+            ))}
+          </ModalBody>
+
+          <ModalFooter>
+            <Button onPress={handleCloseModal} color='primary'>
+              Close
+            </Button>
+          </ModalFooter>
+        </ModalContent>
+      </Modal>
     </>
   );
 }
