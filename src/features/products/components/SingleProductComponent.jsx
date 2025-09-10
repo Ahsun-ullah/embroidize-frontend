@@ -18,6 +18,7 @@ export const SingleProductComponent = ({
   const [imageLoaded, setImageLoaded] = useState(false);
 
   const rawMarkup = marked(singleProductData?.description || '');
+  
   return (
     <main className='container mx-auto px-4'>
       {/* Breadcrumb */}

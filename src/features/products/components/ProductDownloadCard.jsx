@@ -149,8 +149,6 @@ export default function ProductDownloadCard({ data }) {
     }
   };
 
-  
-
   return (
     <>
       <Card isFooterBlurred className='flex flex-col  p-8'>
@@ -166,7 +164,11 @@ export default function ProductDownloadCard({ data }) {
         {isLoading ? (
           <LoadingSpinner />
         ) : (
-          <Dropdown className='border w-full'>
+          <Dropdown
+            className='border w-full'
+            shouldBlockScroll={true}
+            portalContainer={document.body}
+          >
             <DropdownTrigger>
               <Button
                 variant='flat'
@@ -176,7 +178,13 @@ export default function ProductDownloadCard({ data }) {
               </Button>
             </DropdownTrigger>
             {Array.isArray(data?.available_file_types) && (
-              <DropdownMenu aria-label='Download Formats'>
+              <DropdownMenu
+                aria-label='Download Formats'
+                className='w-full min-w-[200px]'
+                itemClasses={{
+                  base: 'w-full flex justify-center',
+                }}
+              >
                 {data.available_file_types.map((type) => (
                   <DropdownItem
                     key={type}
@@ -187,7 +195,7 @@ export default function ProductDownloadCard({ data }) {
                       })
                     }
                   >
-                    <small className='uppercase font-semibold text-base'>
+                    <small className='uppercase font-semibold text-base block w-full text-start'>
                       {type}
                     </small>
                   </DropdownItem>
