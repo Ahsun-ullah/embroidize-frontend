@@ -216,24 +216,47 @@ export default function ProductDownloadCard({ data }) {
         onOpenChange={setShowMobileSheet}
         placement='bottom'
         scrollBehavior='inside'
+        hideCloseButton // 👈 removes default X
         classNames={{
           wrapper: 'items-end',
-          base: 'rounded-t-2xl max-h-[70vh]',
+          base: 'rounded-t-2xl max-h-[70vh] relative', // relative so we can position absolute inside
         }}
       >
         <ModalContent>
           {(onClose) => (
             <>
-              <ModalHeader className='text-lg font-semibold'>
+              {/* Custom Close Button */}
+              <button
+                onClick={onClose}
+                className='absolute top-3 right-3 text-gray-600 hover:text-black transition-colors z-10'
+                aria-label='Close'
+              >
+                <svg
+                  xmlns='http://www.w3.org/2000/svg'
+                  fill='none'
+                  viewBox='0 0 24 24'
+                  strokeWidth={2.5}
+                  stroke='currentColor'
+                  className='w-7 h-9'
+                >
+                  <path
+                    strokeLinecap='round'
+                    strokeLinejoin='round'
+                    d='M6 18L18 6M6 6l12 12'
+                  />
+                </svg>
+              </button>
+
+              <ModalHeader className='text-lg font-bold'>
                 Choose Format
               </ModalHeader>
+
               <ModalBody>
                 {Array.isArray(data?.available_file_types) &&
                   data.available_file_types.map((type) => (
                     <Button
                       key={type}
-                      variant='flat'
-                      className='w-full my-1 bg-gray-100 hover:bg-gray-200 text-lg font-semibold'
+                      className='w-full bg-gray-100 hover:bg-gray-200 text-lg font-bold'
                       onPress={() =>
                         handleSingleZipFileDownload({
                           extension: type,
