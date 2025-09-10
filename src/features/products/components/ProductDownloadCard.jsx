@@ -10,20 +10,33 @@ import {
   DropdownItem,
   DropdownMenu,
   DropdownTrigger,
+  Modal,
+  ModalBody,
+  ModalContent,
+  ModalHeader,
 } from '@heroui/react';
 import Cookies from 'js-cookie';
-
 import { usePathname } from 'next/navigation';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 
 export default function ProductDownloadCard({ data }) {
   const pathName = usePathname();
   const [isLoading, setIsLoading] = useState(false);
   const [showLimitModal, setShowLimitModal] = useState(false);
+  const [showMobileSheet, setShowMobileSheet] = useState(false);
+  const [isMobile, setIsMobile] = useState(false);
+  const [downloadingType, setDownloadingType] = useState(null);
   const [limitModalData, setLimitModalData] = useState({
     count: null,
     duration: null,
   });
+
+  useEffect(() => {
+    const handleResize = () => setIsMobile(window.innerWidth < 768);
+    handleResize();
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
+  }, []);
 
   const formatDuration = (duration) => {
     if (!duration) return '';
@@ -44,7 +57,7 @@ export default function ProductDownloadCard({ data }) {
 
     try {
       setIsLoading(true);
-
+      setDownloadingType(fileData.extension);
       const headers = new Headers({
         Authorization: `Bearer ${token}`,
       });
@@ -57,26 +70,12 @@ export default function ProductDownloadCard({ data }) {
         },
       );
 
-      // if (!res.ok) {
-      //   let errorMessage = 'Could not download the ZIP file';
-      //   let errorTitle = 'Download Failed';
-      //   try {
-      //     const errorJson = await res.json();
-      //     errorMessage = errorJson?.error?.message || errorMessage;
-      //     errorTitle = errorJson?.message;
-      //   } catch {
-      //     const errorText = await res.text();
-      //     errorMessage = errorText || errorMessage;
-      //   }
-
-      //   ErrorToast(`${errorTitle}`, errorMessage, 3000);
-      //   return;
-      // }
-
       if (!res.ok) {
+        setDownloadingType(null);
+        setIsLoading(false);
         let errorMessage = 'Could not download the ZIP file';
         let errorTitle = 'Download Failed';
-        let showLimitModal = false;
+        let showLimit = false;
         let limitData = { count: null, duration: null };
 
         try {
@@ -84,7 +83,6 @@ export default function ProductDownloadCard({ data }) {
           errorMessage = errorJson?.error?.message || errorMessage;
           errorTitle = errorJson?.message;
 
-          // Check if it's the download limit error
           if (
             errorTitle === 'Limit reached' &&
             /Download limit of (\d+) per (\d+[dhm]) reached\./.test(
@@ -92,15 +90,13 @@ export default function ProductDownloadCard({ data }) {
             ) &&
             errorJson?.status === 403
           ) {
-            showLimitModal = true;
-
+            showLimit = true;
             const match = errorMessage.match(
               /Download limit of (\d+) per (\d+[dhm]) reached\./,
             );
-
             if (match) {
               limitData.count = match[1];
-              limitData.duration = match[2]; // 1d, 7d, etc.
+              limitData.duration = match[2];
             }
           }
         } catch {
@@ -110,7 +106,7 @@ export default function ProductDownloadCard({ data }) {
 
         setIsLoading(false);
 
-        if (showLimitModal) {
+        if (showLimit) {
           setLimitModalData(limitData);
           setShowLimitModal(true);
           return;
@@ -121,7 +117,6 @@ export default function ProductDownloadCard({ data }) {
       }
 
       const blob = await res.blob();
-
       const filename =
         `From_Embroidize_${fileData.extension}.zip` ||
         res.headers.get('Content-Disposition')?.split('filename=')[1] ||
@@ -133,8 +128,6 @@ export default function ProductDownloadCard({ data }) {
       link.download = filename;
       document.body.appendChild(link);
       link.click();
-
-      // Cleanup
       window.URL.revokeObjectURL(url);
       document.body.removeChild(link);
     } catch (err) {
@@ -145,30 +138,40 @@ export default function ProductDownloadCard({ data }) {
         3000,
       );
     } finally {
+      setDownloadingType(null);
       setIsLoading(false);
+      setShowMobileSheet(false);
     }
   };
 
   return (
     <>
-      <Card isFooterBlurred className='flex flex-col  p-8'>
+      <Card isFooterBlurred className='flex flex-col p-8'>
         <h2 className='text-black font-bold text-2xl'>{data?.name}</h2>
         <p className='text-gray-600 my-2'>{data?.meta_description}</p>
+
         <div className='flex items-center justify-between mb-2'>
-          <h2 className='text-black font-bold '>Select For Free Download </h2>
+          <h2 className='text-black font-bold'>Select For Free Download</h2>
           <span className='font-semibold flex items-center gap-1'>
             <i className='ri-download-2-line' aria-hidden='true'></i>
             {formatNumber(data?.downloadCount)}
           </span>
         </div>
+
         {isLoading ? (
           <LoadingSpinner />
-        ) : (
-          <Dropdown
-            className='border w-full'
-            shouldBlockScroll={true}
-            portalContainer={document.body}
+        ) : isMobile ? (
+          // 👉 On Mobile, show bottom sheet
+          <Button
+            variant='flat'
+            className='border w-full bg-black text-white font-semibold text-lg h-12'
+            onPress={() => setShowMobileSheet(true)}
           >
+            Free Download
+          </Button>
+        ) : (
+          // 👉 On Desktop, use normal dropdown
+          <Dropdown portalContainer={document.body}>
             <DropdownTrigger>
               <Button
                 variant='flat'
@@ -187,6 +190,7 @@ export default function ProductDownloadCard({ data }) {
               >
                 {data.available_file_types.map((type) => (
                   <DropdownItem
+                    variant='flat'
                     key={type}
                     onPress={() =>
                       handleSingleZipFileDownload({
@@ -195,7 +199,7 @@ export default function ProductDownloadCard({ data }) {
                       })
                     }
                   >
-                    <small className='uppercase font-semibold text-base block w-full text-start'>
+                    <small className='uppercase font-semibold text-base block w-full text-center'>
                       {type}
                     </small>
                   </DropdownItem>
@@ -204,40 +208,65 @@ export default function ProductDownloadCard({ data }) {
             )}
           </Dropdown>
         )}
-        {/* {allIsLoading ? (
-          <LoadingSpinner />
-        ) : (
-          <Button
-            className='button mt-8 pt-3 text-xl w-full'
-            radius='none'
-            size='lg'
-            variant='light'
-            onClick={() =>
-              handleAllFileDownloadZip({
-                extension: 'all',
-                id: router?.id,
-              })
-            }
-          >
-            Free Download
-          </Button>
-        )} */}
       </Card>
 
+      {/* 👉 Mobile Bottom Sheet */}
+      <Modal
+        isOpen={showMobileSheet}
+        onOpenChange={setShowMobileSheet}
+        placement='bottom'
+        scrollBehavior='inside'
+        classNames={{
+          wrapper: 'items-end',
+          base: 'rounded-t-2xl max-h-[70vh]',
+        }}
+      >
+        <ModalContent>
+          {(onClose) => (
+            <>
+              <ModalHeader className='text-lg font-semibold'>
+                Choose Format
+              </ModalHeader>
+              <ModalBody>
+                {Array.isArray(data?.available_file_types) &&
+                  data.available_file_types.map((type) => (
+                    <Button
+                      key={type}
+                      variant='flat'
+                      className='w-full my-1 bg-gray-100 hover:bg-gray-200 text-lg font-semibold'
+                      onPress={() =>
+                        handleSingleZipFileDownload({
+                          extension: type,
+                          id: data?._id,
+                        })
+                      }
+                      isDisabled={downloadingType && downloadingType !== type}
+                    >
+                      {downloadingType === type ? (
+                        <span className='flex items-center justify-center gap-2'>
+                          Downloading...
+                        </span>
+                      ) : (
+                        type.toUpperCase()
+                      )}
+                    </Button>
+                  ))}
+              </ModalBody>
+            </>
+          )}
+        </ModalContent>
+      </Modal>
+
+      {/* Download Limit Modal */}
       {showLimitModal && (
         <div className='fixed inset-0 z-50 bg-black/40 flex items-center justify-center'>
           <div className='bg-white rounded-2xl shadow-2xl p-8 max-w-2xl w-full text-center animate-fade-in'>
-            {/* Icon */}
             <div className='mx-auto mb-4 w-14 h-14 rounded-full bg-red-100 text-red-600 flex items-center justify-center text-2xl'>
               ⛔
             </div>
-
-            {/* Heading */}
             <h2 className='text-2xl font-semibold text-gray-800 mb-2'>
               Download Limit Reached
             </h2>
-
-            {/* Message */}
             <p className='text-gray-600 mb-3'>
               You've reached your limit of{' '}
               <span className='font-semibold text-gray-800'>
@@ -253,8 +282,6 @@ export default function ProductDownloadCard({ data }) {
               Please wait for the limit to reset.
             </p>
             <p className='text-sm text-gray-500 mb-6'>Happy Downloading...</p>
-
-            {/* Action Button */}
             <button
               className='bg-primary text-white px-5 py-2 rounded-lg hover:bg-primary-dark transition-colors duration-300'
               onClick={() => setShowLimitModal(false)}
