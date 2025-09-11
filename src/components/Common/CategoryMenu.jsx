@@ -20,7 +20,7 @@ export default function CategoryMenu({ isMobileMenuOpen }) {
       <Link
         href={`/category/${category.slug}`}
         prefetch={false}
-        className='font-bold capitalize'
+        className='font-bold capitalize underline text-base'
       >
         {displayName}
       </Link>
