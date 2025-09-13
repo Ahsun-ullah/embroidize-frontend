@@ -26,6 +26,7 @@ import { useCallback } from 'react';
 export default function ProductsTableWrapper({
   columns,
   searchableFieldsName,
+  pageNumber,
 }) {
   const router = useRouter();
   const searchParams = useSearchParams();
@@ -113,7 +114,7 @@ export default function ProductsTableWrapper({
                     key='edit'
                     onPress={() =>
                       router.push(
-                        `/admin/add-products?productId=${product._id}&ts=${Date.now()}`,
+                        `/admin/add-products?productId=${product._id}&ts=${Date.now()}&pageNumber=${pageNumber}`,
                       )
                     }
                   >
@@ -169,6 +170,7 @@ export default function ProductsTableWrapper({
                             3000,
                           );
                           await allProductRefetch();
+                          router.push(`/admin/all-products?page=${pageParam}`); // stay on same page after deletion
                         }
                       } catch (error) {
                         ErrorToast(

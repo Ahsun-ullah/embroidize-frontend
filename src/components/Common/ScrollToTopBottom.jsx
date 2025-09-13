@@ -38,18 +38,23 @@ const ScrollToTopBottom = () => {
   return (
     <div className='fixed bottom-4 right-4 z-50'>
       {isVisible && (
-        <div className='flex flex-col space-y-2'>
+        <div className='flex flex-col space-y-2 fixed bottom-4 right-4 z-50'>
           <button
             onClick={scrollToTop}
-            className='p-2 rounded bg-gray-800 text-white hover:bg-gray-900 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-500'
+            className='p-3 sm:p-2 rounded bg-gray-800 text-white
+               hover:bg-gray-900 focus:outline-none
+               focus:ring-2 focus:ring-offset-2 focus:ring-gray-500'
           >
-            <ChevronsUp />
+            <ChevronsUp className='w-6 h-6 sm:w-5 sm:h-5' />
           </button>
+
           <button
             onClick={scrollToBottom}
-            className='p-2 rounded bg-gray-800 text-white hover:bg-gray-900 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-500'
+            className='p-3 sm:p-2 rounded bg-gray-800 text-white
+               hover:bg-gray-900 focus:outline-none
+               focus:ring-2 focus:ring-offset-2 focus:ring-gray-500'
           >
-            <ChevronsDown />
+            <ChevronsDown className='w-6 h-6 sm:w-5 sm:h-5' />
           </button>
         </div>
       )}

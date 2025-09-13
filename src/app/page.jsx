@@ -128,10 +128,13 @@ export default async function Home() {
       <section className='w-full flex items-center overflow-hidden'>
         <div className='flex items-center justify-center w-full m-[30px] sm:m-[40px] md:m-[40px] lg:m-[60px] xl:m-[70px] 2xl:m-[80px]'>
           <div className='flex flex-col items-center justify-center'>
-            <h1 style={{
-              fontFamily: 'Inter, sans-serif',
-              fontWeight: 700,
-            }} className='text-3xl sm:text-3xl md:text-4xl lg:text-5xl font-bold my-2 text-center'>
+            <h1
+              style={{
+                fontFamily: 'Inter, sans-serif',
+                fontWeight: 700,
+              }}
+              className='text-3xl sm:text-3xl md:text-4xl lg:text-5xl font-bold my-2 text-center'
+            >
               Free Machine Embroidery Designs
             </h1>
             <p className='text-base sm:text-base md:text-lg text-center my-2 max-w-2xl'>
@@ -187,12 +190,13 @@ export default async function Home() {
         <div className='bg-[#fafafa] flex flex-col items-center justify-center gap-2 py-6 mb-6'>
           <h2
             id='popular-designs-heading'
-            className='text-3xl font-bold text-center'
+            className='text-2xl sm:text-2xl md:text-3xl font-bold leading-snug'
           >
             Popular embroidery designs
           </h2>
-          <p className='font-semibold text-center'>
-            Browse Our Most Loved Designs.
+
+          <p className='text-base sm:text-base md:text-lg font-medium text-gray-600'>
+            Browse our most loved designs.
           </p>
         </div>
 
@@ -233,10 +237,11 @@ export default async function Home() {
 
       <section className=' text-black my-8 py-6'>
         <div className=' bg-[#fafafa] flex flex-col items-center justify-center gap-2 py-6 mb-6'>
-          <h2 className='text-3xl font-bold text-center'>
+          <h2 className='text-2xl sm:text-2xl md:text-3xl font-bold leading-snug'>
             Recent Approved Products
           </h2>
-          <p className='font-semibold text-center'>
+
+          <p className='text-base sm:text-base md:text-lg font-medium text-gray-600'>
             Our Newest Creations, Just for You.
           </p>
         </div>

@@ -17,7 +17,7 @@ import { slugify } from '@/utils/functions/page';
 import { Card } from '@heroui/react';
 import { zodResolver } from '@hookform/resolvers/zod';
 import MDEditor from '@uiw/react-md-editor';
-import { useRouter } from 'next/navigation';
+import { useRouter, useSearchParams } from 'next/navigation';
 import { useEffect, useState } from 'react';
 import { Controller, useForm } from 'react-hook-form';
 import Select from 'react-select';
@@ -32,10 +32,10 @@ export function ProductsForm({ product }) {
   const [description, setDescription] = useState(product?.description || '');
   const [selectedCategory, setSelectedCategory] = useState('');
   const [slug, setSlug] = useState(product?.slug || '');
-
+  const searchParams = useSearchParams();
+  const pageNumber = searchParams.get('pageNumber') || '1';
   const { data: categoryData } = useGetPublicProductCategoriesQuery();
   const { data: subCategoryData } = useGetPublicProductSubCategoriesQuery();
-
   const [addProduct] = useAddProductMutation();
   const [updateProduct] = useUpdateProductMutation();
   const { refetch: allProductRefetch } = useAllProductsQuery();
@@ -170,7 +170,7 @@ export function ProductsForm({ product }) {
             await allProductRefetch();
             reset();
             setDescription('');
-            router.push('/admin/all-products');
+            router.push(`/admin/all-products?page=${pageNumber}`);
             router.refresh();
           } catch (err) {
             console.error('Refetch failed:', err);

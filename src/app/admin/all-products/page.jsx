@@ -1,6 +1,10 @@
 import ProductsTableWrapper from '@/features/products/components/ProductsTableWrapper';
 
-export default function AllProductsListPage() {
+export default function AllProductsListPage({ searchParams }) {
+  const page = Number(searchParams.page) || 1;
+
+  console.log('object', page);
+
   const columns = [
     { name: 'NAME', uid: 'name' },
     { name: 'CATEGORY', uid: 'category' },
@@ -14,6 +18,7 @@ export default function AllProductsListPage() {
       <ProductsTableWrapper
         columns={columns}
         pageSize={10}
+        pageNumber={page}
         searchableFieldsName={['name', 'category', 'price', 'sub_category']}
       />
     </>
