@@ -54,6 +54,7 @@ export function ProductsForm({ product }) {
       name: '',
       slug: '',
       price: null,
+      sku_code: '',
       description: '',
       category: '',
       sub_category: '',
@@ -74,6 +75,7 @@ export function ProductsForm({ product }) {
         category: product.category?._id ?? '',
         sub_category: product.sub_category?._id ?? '',
         price: product.price ?? null,
+        sku_code: product.sku_code ?? '',
         description: product.description ?? '',
         meta_title: product.meta_title ?? '',
         meta_description: product.meta_description ?? '',
@@ -229,7 +231,7 @@ export function ProductsForm({ product }) {
         </div>
 
         {/* Product slug */}
-        <div className='col-span-3'>
+        <div className='col-span-2'>
           <label
             className='text-lg font-medium tracking-tight leading-5'
             htmlFor='slug'
@@ -246,6 +248,25 @@ export function ProductsForm({ product }) {
           />
           {errors.slug && (
             <p className='text-red-500 font-light'>{errors.slug.message}</p>
+          )}
+        </div>
+
+        {/* sku_code */}
+        <div className='col-span-1'>
+          <label
+            className='text-lg font-medium tracking-tight leading-5'
+            htmlFor='sku_code'
+          >
+            SKU Code <span className='text-red-600'>*</span>
+          </label>
+          <input
+            id='sku_code'
+            placeholder='SKU Code'
+            {...register('sku_code')}
+            className='flex w-full flex-wrap md:flex-nowrap gap-4 border-[1.8px] rounded-[4px] p-2'
+          />
+          {errors.sku_code && (
+            <p className='text-red-500 font-light'>{errors.sku_code.message}</p>
           )}
         </div>
 

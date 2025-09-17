@@ -6,6 +6,7 @@ export const productSchema = z.object({
   category: z.string().min(1, 'Category is required'),
   sub_category: z.string().optional(),
   price: z.number().min(0, 'Price must be greater than 0'),
+  sku_code: z.string().min(1, 'SKU Code is required'),
   description: z.string().min(1, 'Description is required'),
   meta_title: z.string().min(1, 'Meta Title is required'),
   meta_description: z.string().min(1, 'Meta Description is required'),
