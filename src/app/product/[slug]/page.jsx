@@ -155,11 +155,46 @@ export default async function ProductDetails({ params }) {
     category: 'DigitalEmbroideryDesign',
   };
 
+  const breadcrumb = {
+    '@context': 'https://schema.org',
+    '@type': 'BreadcrumbList',
+    itemListElement: [
+      {
+        '@type': 'ListItem',
+        position: 1,
+        name: 'Home',
+        item: 'https://embroidize.com/',
+      },
+      {
+        '@type': 'ListItem',
+        position: 2,
+        name: product?.category?.name,
+        item: `https://embroidize.com/${product?.category?.slug}`,
+      },
+      {
+        '@type': 'ListItem',
+        position: 3,
+        name: product?.sub_category?.name,
+        item: `https://embroidize.com/${product?.category?.slug}/${product?.sub_category?.slug}`,
+      },
+      {
+        '@type': 'ListItem',
+        position: 4,
+        name: product?.name,
+        item: `https://embroidize.com/product/${product?.slug}`,
+      },
+    ],
+  };
+
   return (
     <>
       <script
         type='application/ld+json'
         dangerouslySetInnerHTML={{ __html: JSON.stringify(schema) }}
+      />
+      <script
+        type='application/ld+json'
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumb) }}
       />
 
       <Header />
