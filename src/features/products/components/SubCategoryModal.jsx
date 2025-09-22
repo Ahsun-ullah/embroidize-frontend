@@ -78,7 +78,6 @@ export default function SubCategoryModal({
 
   useEffect(() => {
     if (categoryData?.data?.length > 0) {
-      console.log('categoryData:', categoryData);
       const formattedCategory = categoryData.data.map((cat) => ({
         label: cat?.name,
         value: cat?._id,
@@ -94,7 +93,6 @@ export default function SubCategoryModal({
   };
 
   const onSubmit = async (data) => {
-    console.log('Submitted Data:', data);
     try {
       const formData = new FormData();
       formData.append('name', data.name);
@@ -115,7 +113,6 @@ export default function SubCategoryModal({
       if (subCategory?._id) {
         formData.append('id', subCategory._id);
         const response = await updateProductSubCategory(formData).unwrap();
-        // console.log('API Response:', response);
         if (response.error) {
           ErrorToast('Error', response.error.data.message || 'API Error', 3000);
         } else {
@@ -132,8 +129,6 @@ export default function SubCategoryModal({
         }
       } else {
         const response = await addProductSubCategory(formData).unwrap();
-        console.log('API Response:', response);
-
         if (response.error) {
           ErrorToast(
             'Error',

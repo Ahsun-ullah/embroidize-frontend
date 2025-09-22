@@ -42,8 +42,6 @@ export default async function AllBlogsPageInFrontSite({ searchParams }) {
 
   const { blogs } = await getBlogs();
 
-  console.log('blogsData:', blogs);
-
   const currentPage = parseInt(searchParams?.page || '1', 10);
   const perPageData = 6;
   const totalPages = Math.ceil(blogs.length / perPageData);

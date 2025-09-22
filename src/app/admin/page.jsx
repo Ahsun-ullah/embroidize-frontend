@@ -1,21 +1,18 @@
 import DashboardCharts from '@/features/dashboard/components/DashboardCharts';
 import { getDownloadStats, getUsers } from '@/lib/apis/protected/users';
+import { getProducts } from '@/lib/apis/public/products';
 
 export default async function AdminDashboard({ searchParams }) {
-  const page = parseInt(searchParams.page || '1', 10);
-  const perPage = parseInt(searchParams.perPage || '10', 10);
-
   // Fetch all users for chart data
   const usersResponse = await getUsers();
   const allUsers = usersResponse?.data || [];
 
-  console.log('allUsers', allUsers);
-
-  // Fetch all download stats for chart data (assuming API can handle large perPage)
-  const allDownloadStatsResponse = await getDownloadStats(1, 10000); // Fetch a large number of items
+  // Fetch all download stats for chart data
+  const allDownloadStatsResponse = await getDownloadStats(1, 10000);
   const allDownloadStats = allDownloadStatsResponse?.data || [];
 
-  console.log('allDownloadStats', allDownloadStats);
+  // 🔁 Fetch from server with search + pagination
+  const allProducts = await getProducts('', 1, 20);
 
   // Process user data for chart
   const userDataForChart = allUsers.reduce((acc, user) => {
@@ -70,7 +67,7 @@ export default async function AdminDashboard({ searchParams }) {
       country,
       value: count,
     }))
-    .sort((a, b) => b.value - a.value); // Optional: sort by count descending
+    .sort((a, b) => b.value - a.value);
 
   return (
     <div className='dashboard p-6'>
@@ -78,6 +75,26 @@ export default async function AdminDashboard({ searchParams }) {
       <p className='text-medium font-semibold mb-6'>
         This is where you can manage users, view reports, and adjust settings.
       </p>
+      <div className='grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-8'>
+        <div className='bg-white rounded shadow p-4 flex flex-col items-center'>
+          <span className='text-2xl font-bold'>{allProducts?.totalCount}</span>
+          <span className='text-gray-500 mt-2'>Total Products</span>
+        </div>
+        <div className='bg-white rounded shadow p-4 flex flex-col items-center'>
+          <span className='text-2xl font-bold'>{allUsers.length}</span>
+          <span className='text-gray-500 mt-2'>Total Users</span>
+        </div>
+        <div className='bg-white rounded shadow p-4 flex flex-col items-center'>
+          <span className='text-2xl font-bold'>{allDownloadStats.length}</span>
+          <span className='text-gray-500 mt-2'>Total Downloads</span>
+        </div>
+        <div className='bg-white rounded shadow p-4 flex flex-col items-center'>
+          <span className='text-2xl font-bold'>
+            {formattedCountryData.length}
+          </span>
+          <span className='text-gray-500 mt-2'>Countries</span>
+        </div>
+      </div>
       <div className='mb-8'>
         <DashboardCharts
           userData={formattedUserData}

@@ -30,8 +30,6 @@ export async function getUsers(page = 1, perPage = 10) {
     }
 
     const responseData = await response.json();
-    console.log('Raw getUsers API Response:', responseData?.data?.pagination);
-
     return {
       data: responseData?.data,
       pagination: responseData?.data?.pagination,
@@ -77,8 +75,6 @@ export async function getDownloadStats(page = 1, perPage = 10) {
     }
 
     const responseData = await response.json();
-    console.log('Raw getUsers API Response:', responseData);
-
     return {
       data: responseData?.data?.data,
       pagination: responseData?.data?.pagination,

@@ -10,8 +10,6 @@ const BlogCard = ({ data }) => {
     // data?.title.rendered // wordpress
     data?.title;
 
-  console.log('data', data);
-
   return (
     <>
       <Link

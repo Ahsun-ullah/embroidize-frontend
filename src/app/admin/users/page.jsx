@@ -14,7 +14,6 @@ export default async function AllUsersListPage() {
     { name: 'ACTIONS', uid: 'actions' },
   ];
 
-  console.log('object', users);
 
   return (
     <div className='flex flex-col gap-3'>

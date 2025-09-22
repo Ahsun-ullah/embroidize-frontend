@@ -67,7 +67,6 @@ export async function getAllProductsBySubCategory(
   currentPage,
   perPageData,
 ) {
-  console.log('slug', slug);
   try {
     const headers = new Headers();
     headers.set('Authorization', 'Bearer some-static-token');
@@ -78,8 +77,6 @@ export async function getAllProductsBySubCategory(
     if (perPageData) queryParams.append('limit', perPageData.toString());
 
     const apiUrl = `${process.env.NEXT_PUBLIC_BASE_API_URL_PROD}/public/products-by-sub-category/${slug}?${queryParams.toString()}`;
-
-    console.log(apiUrl);
 
     const response = await fetch(apiUrl, {
       headers,

@@ -10,7 +10,6 @@
 
 //     const apiUrl = `${process.env.NEXT_PUBLIC_BASE_API_URL_PROD}/public/product?${queryParams.toString()}`;
 
-//     console.log(apiUrl);
 
 //     const response = await fetch(apiUrl, {
 //       headers,
@@ -52,7 +51,6 @@
 
 //     const apiUrl = `${process.env.NEXT_PUBLIC_BASE_API_URL_PROD}/public/popular/products?${queryParams.toString()}`;
 
-//     console.log(apiUrl);
 
 //     const response = await fetch(apiUrl, {
 //       headers,

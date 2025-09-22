@@ -3,8 +3,6 @@ import ProductsTableWrapper from '@/features/products/components/ProductsTableWr
 export default function AllProductsListPage({ searchParams }) {
   const page = Number(searchParams.page) || 1;
 
-  console.log('object', page);
-
   const columns = [
     { name: 'NAME', uid: 'name' },
     { name: 'CATEGORY', uid: 'category' },

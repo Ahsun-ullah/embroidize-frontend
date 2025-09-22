@@ -76,7 +76,6 @@ export function BlogForm({ blog, isOpen, onOpenChange, setBlogId }) {
   };
 
   const onSubmit = async (data) => {
-    console.log('Submitted Data:', data);
     try {
       const formData = new FormData();
       Object.entries(data).forEach(([key, value]) => {
@@ -97,14 +96,10 @@ export function BlogForm({ blog, isOpen, onOpenChange, setBlogId }) {
         }
       });
 
-      // formData.forEach((value, key) => {
-      //   console.log(`${key}:`, value);
-      // });
 
       if (blog?._id) {
         formData.append('id', blog._id);
         const response = await updateBlog(formData).unwrap();
-        // console.log('API Response:', response);
         if (response.error) {
           ErrorToast('Error', response.error.data.message || 'API Error', 3000);
         } else {
@@ -127,7 +122,6 @@ export function BlogForm({ blog, isOpen, onOpenChange, setBlogId }) {
         }
       } else {
         const response = await addBlog(formData).unwrap();
-        // console.log('API Response:', response);
         if (response.error) {
           ErrorToast('Error', response.error.data.message || 'API Error', 3000);
         } else {

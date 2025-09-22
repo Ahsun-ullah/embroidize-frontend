@@ -11,9 +11,6 @@ export async function GET() {
     // const blogs = await getPosts();
     const { blogs } = await getBlogs();
     const products = await getAllProductsPaginated();
-
-    console.log(products);
-
     const { categories } = await getCategories();
     const { subCategories } = await getSubCategories();
 

@@ -31,8 +31,6 @@ export default function CategoryModal({
   const { refetch: getProductCategoryRefetch } =
     useGetPublicProductCategoriesQuery();
 
-  // console.log(category?._id);
-
   const {
     control,
     register,
@@ -56,7 +54,6 @@ export default function CategoryModal({
   useEffect(() => {
     async function fetchData() {
       const newImg = await convertImageUrlToFile(category?.image?.url);
-      // console.log(newImg);
       if (category) {
         reset({
           name: category.name ?? '',
@@ -81,7 +78,6 @@ export default function CategoryModal({
   };
 
   const onSubmit = async (data) => {
-    console.log('Submitted Data:', data);
     try {
       const formData = new FormData();
       Object.entries(data).forEach(([key, value]) => {
@@ -104,7 +100,6 @@ export default function CategoryModal({
       if (category?._id) {
         formData.append('id', category._id);
         const response = await updateProductCategory(formData).unwrap();
-        // console.log('API Response:', response);
         if (response.error) {
           ErrorToast('Error', response.error.data.message || 'API Error', 3000);
         } else {
@@ -122,7 +117,6 @@ export default function CategoryModal({
       } else {
         // Here you would typically make an API call
         const response = await addProductCategory(formData).unwrap();
-        // console.log('API Response:', response);
         if (response.error) {
           ErrorToast('Error', response.error.data.message || 'API Error', 3000);
         } else {
@@ -139,7 +133,6 @@ export default function CategoryModal({
         }
       }
 
-      console.log('Form Data:', Object.fromEntries(formData));
     } catch (error) {
       console.error('Error submitting form:', error);
       ErrorToast('Error', error || 'API Error', 3000);

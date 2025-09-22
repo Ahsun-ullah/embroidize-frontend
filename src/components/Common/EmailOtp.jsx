@@ -83,8 +83,6 @@ const EmailOtp = ({ step, setStep, userDetailsData }) => {
       //   3000,
       // );
 
-      console.log(loginResult.data);
-
       Cookies.set('token', loginResult.data.token);
 
       // Step 4: Redirect based on role

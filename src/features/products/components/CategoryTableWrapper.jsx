@@ -59,9 +59,6 @@ export default function CategoryTableWrapper({
   const { data: getSingleSubCategoryData } =
     useGetSinglePublicProductSubCategoryQuery(subCategoryId);
 
-  console.log('subCategoryId', subCategoryId);
-  console.log('getSingleSubCategoryData', getSingleSubCategoryData);
-
   // Memoized paginated data for categories
   const paginatedCategoryData = useMemo(() => {
     const start = (categoryCurrentPage - 1) * categoryPageSize;

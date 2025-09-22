@@ -197,7 +197,7 @@ export default function ProductsTableWrapper({
   return (
     <>
       <div className='flex justify-between items-center mb-4'>
-        <h1>All Products</h1>
+        <h1>Total {allProducts?.data?.meta?.total} Products</h1>
         <Link href='/admin/add-products' prefetch={false}>
           <Button
             className='bg-foreground text-background'

@@ -94,8 +94,6 @@ export function ProductsForm({ product }) {
 
   useEffect(() => {
     if (categoryData?.data) {
-      console.log('categoryData:', categoryData);
-
       if (Array.isArray(categoryData.data) && categoryData.data.length > 0) {
         const formattedCategory = categoryData.data.map((cat) => ({
           label: cat.name || 'Unnamed Category',
@@ -108,8 +106,6 @@ export function ProductsForm({ product }) {
     }
 
     if (subCategoryData?.data) {
-      console.log('subCategoryData:', subCategoryData);
-
       if (
         Array.isArray(subCategoryData.data) &&
         subCategoryData.data.length > 0
@@ -133,7 +129,6 @@ export function ProductsForm({ product }) {
   };
 
   const onSubmit = async (data) => {
-    console.log('Submitted Data:', data);
     try {
       const formData = new FormData();
       Object.entries(data).forEach(([key, value]) => {
@@ -152,14 +147,9 @@ export function ProductsForm({ product }) {
         }
       });
 
-      // formData.forEach((value, key) => {
-      //   console.log(`${key}:`, value);
-      // });
-
       if (product?._id) {
         formData.append('id', product._id);
         const response = await updateProduct(formData).unwrap();
-        // console.log('API Response:', response);
         if (response.error) {
           ErrorToast('Error', response.error.data.message || 'API Error', 3000);
         } else {
@@ -182,7 +172,6 @@ export function ProductsForm({ product }) {
       } else {
         // Here you would typically make an API call
         const response = await addProduct(formData).unwrap();
-        // console.log('API Response:', response);
         if (response.error) {
           ErrorToast('Error', response.error.data.message || 'API Error', 3000);
         } else {
