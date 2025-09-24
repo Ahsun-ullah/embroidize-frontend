@@ -12,7 +12,7 @@ const Pagination = ({ totalPages, perPage }) => {
     10,
   );
 
-  const visiblePages = 5;
+  const visiblePages = 10;
 
   // Helper to build URLs with updated page number
   const buildPageHref = (pageNumber) => {
