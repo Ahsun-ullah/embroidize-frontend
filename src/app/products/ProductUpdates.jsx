@@ -68,7 +68,7 @@ export default function ProductUpdates({ retryInterval = 10000 }) {
   return (
     <div className="fixed bottom-4 right-4">
       <div className="flex items-center space-x-2">
-        <div className={`h-3 w-3 rounded-full ${statusColor[status]}`}></div>
+        {/* <div className={`h-3 w-3 rounded-full ${statusColor[status]}`}></div> */}
         <p className="text-sm text-gray-500">
           {/* {status.charAt(0).toUpperCase() + status.slice(1)} */}
         </p>
@@ -76,3 +76,4 @@ export default function ProductUpdates({ retryInterval = 10000 }) {
     </div>
   );
 }
+

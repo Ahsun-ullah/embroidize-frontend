@@ -53,6 +53,16 @@ p {
   line-height: 1.6;
 }
 
+
+.widget-visible iframe[title="chat widget"] {
+  right: 0px !important;
+  position: fixed !important;
+  /* bottom: 20px !important; */
+  width: 350px !important;
+  height: 520px !important;
+}
+
+
 .end-3 {
   inset-inline-end: 3.75rem;
 }

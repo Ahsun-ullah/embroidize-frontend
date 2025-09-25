@@ -38,13 +38,48 @@ export const metadata = {
 export default function RootLayout({ children }) {
   return (
     <html lang='en' className='scroll-smooth'>
+      <Script
+        id='tawk-script'
+        strategy='afterInteractive'
+        dangerouslySetInnerHTML={{
+          __html: `
+        var Tawk_API=Tawk_API||{}, Tawk_LoadStart=new Date();
+        (function(){
+          var s1=document.createElement("script"),s0=document.getElementsByTagName("script")[0];
+          s1.async=true;
+          s1.src='https://embed.tawk.to/68d4e2b7d256dc1950c32019/1j5vpb81o';
+          s1.charset='UTF-8';
+          s1.setAttribute('crossorigin','*');
+          s0.parentNode.insertBefore(s1,s0);
+        })();
+      `,
+        }}
+      />
+
+      <Script
+        id="tawk-iframe-fix"
+        strategy="afterInteractive"
+        dangerouslySetInnerHTML={{
+          __html: `
+            function fixTawkIframes() {
+              document.querySelectorAll('iframe[title="chat widget"]').forEach((iframe) => {
+                iframe.style.setProperty('right', '0px', 'important');
+                iframe.style.setProperty('position', 'fixed', 'important');
+              });
+            }
+            fixTawkIframes();
+            setInterval(fixTawkIframes, 1000);
+          `
+        }}
+      />
+
       <body
         className={`${plusJakarta.className} antialiased text-gray-900 bg-white`}
         suppressHydrationWarning
       >
         {/* Google Analytics */}
         <Script
-          src='https://www.googletagmanager.com/gtag/js?id=G-BJ81WDRVP5'
+          src='https://www.googletagmanager.comgtag/js?id=G-BJ81WDRVP5'
           strategy='afterInteractive'
         />
 

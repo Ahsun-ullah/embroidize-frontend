@@ -36,9 +36,9 @@ const ScrollToTopBottom = () => {
   }, []);
 
   return (
-    <div className='fixed bottom-4 right-4 z-50'>
+    <div className='fixed bottom-4 right-2 z-50'>
       {isVisible && (
-        <div className='flex flex-col space-y-2 fixed bottom-4 right-4 z-50'>
+        <div className='flex flex-col space-y-2 fixed bottom-28 right-2 z-50'>
           <button
             onClick={scrollToTop}
             className='p-3 sm:p-2 rounded bg-gray-800 text-white
