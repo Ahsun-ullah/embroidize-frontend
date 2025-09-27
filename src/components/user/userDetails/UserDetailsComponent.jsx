@@ -157,13 +157,15 @@ export default function UserDetailsComponent({ defaultTab = 'account' }) {
           variant='bordered'
           size='sm'
           placement='top'
-          className='bg-white !border-black '
+          className='bg-white !border-black'
         >
           <Tab
             key='account'
             title={
-              <div className='flex items-center justify-start space-x-2  text-xs md:text-xl'>
-                <i className='ri-account-circle-fill ' />
+              <div
+                className={`flex items-center justify-start space-x-2 text-xs md:text-xl ${activeTab === 'account' ? 'text-white' : 'text-black'}`}
+              >
+                <i className='ri-account-circle-fill' />
                 <span>Account</span>
               </div>
             }
@@ -171,8 +173,10 @@ export default function UserDetailsComponent({ defaultTab = 'account' }) {
           <Tab
             key='password'
             title={
-              <div className='flex items-center space-x-2  text-xs md:text-xl'>
-                <i className='ri-lock-password-fill ' />
+              <div
+                className={`flex items-center space-x-2 text-xs md:text-xl ${activeTab === 'password' ? 'text-white' : 'text-black'}`}
+              >
+                <i className='ri-lock-password-fill' />
                 <span>Change Password</span>
               </div>
             }
@@ -180,8 +184,10 @@ export default function UserDetailsComponent({ defaultTab = 'account' }) {
           <Tab
             key='downloads'
             title={
-              <div className='flex items-center space-x-2 text-xs md:text-xl'>
-                <i className='ri-download-fill ' />
+              <div
+                className={`flex items-center space-x-2 text-xs md:text-xl ${activeTab === 'downloads' ? 'text-white' : 'text-black'}`}
+              >
+                <i className='ri-download-fill' />
                 <span>Downloads</span>
               </div>
             }

@@ -139,6 +139,20 @@ export default function AdminSidebar({ isCollapsed, setIsCollapsed }) {
             )}
           </Link>
         </li>
+        <li>
+          <Link href='/admin/contact-submissions'>
+            {!isCollapsed ? (
+              <span className='sidebar-text '>
+                <i className='ri-mail-line me-2'></i>
+                Contact Submissions
+              </span>
+            ) : (
+              <Tooltip content={'Contact Submissions'}>
+                <i className='ri-mail-line'></i>
+              </Tooltip>
+            )}
+          </Link>
+        </li>
 
         <li>
           <Link href='/admin/settings'>
