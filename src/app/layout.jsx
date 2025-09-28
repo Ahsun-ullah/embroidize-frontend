@@ -57,8 +57,8 @@ export default function RootLayout({ children }) {
       />
 
       <Script
-        id="tawk-iframe-fix"
-        strategy="afterInteractive"
+        id='tawk-iframe-fix'
+        strategy='afterInteractive'
         dangerouslySetInnerHTML={{
           __html: `
             function fixTawkIframes() {
@@ -69,7 +69,7 @@ export default function RootLayout({ children }) {
             }
             fixTawkIframes();
             setInterval(fixTawkIframes, 1000);
-          `
+          `,
         }}
       />
 
@@ -79,7 +79,7 @@ export default function RootLayout({ children }) {
       >
         {/* Google Analytics */}
         <Script
-          src='https://www.googletagmanager.comgtag/js?id=G-BJ81WDRVP5'
+          src='https://www.googletagmanager.com/gtag/js?id=G-BJ81WDRVP5'
           strategy='afterInteractive'
         />
 
