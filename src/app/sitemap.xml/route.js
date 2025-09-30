@@ -17,6 +17,7 @@ export async function GET() {
     const routes = [
       '',
       '/about-us',
+      '/contact-us',
       '/privacy-policy',
       '/terms-and-conditions',
       '/products',

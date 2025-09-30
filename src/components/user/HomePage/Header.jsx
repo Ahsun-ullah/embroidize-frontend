@@ -54,11 +54,10 @@ export const Header = () => {
               />
             </Link>
 
-            {/* Category Menu Toggle */}
-            <div className='sm:flex items-center gap-x-2 text-base font-semibold text-gray-700 sm:ms-6 md:ms-8'>
+            <div className='sm:flex items-center gap-x-2 text-base font-bold text-gray-700 sm:ms-6 md:ms-8'>
               <button
                 onClick={toggleMenu}
-                className='flex items-center gap-2 text-gray-800 focus:outline-none focus-visible:ring focus-visible:ring-blue-400 rounded'
+                className='flex items-center gap-2 text-gray-800 font-bold focus:outline-none focus-visible:ring focus-visible:ring-gray-400 rounded'
                 aria-expanded={isMobileMenuOpen}
                 aria-controls='category-menu'
                 type='button'
@@ -69,7 +68,7 @@ export const Header = () => {
                   }`}
                   aria-hidden='true'
                 />
-                <span className='hidden sm:inline'>Categories</span>
+                <span className='hidden sm:inline font-bold'>Categories</span>
               </button>
             </div>
           </NavbarContent>
@@ -77,6 +76,16 @@ export const Header = () => {
           <NavbarContent justify='center' className='flex-1'>
             <SearchBox />
           </NavbarContent>
+
+          {/* <NavbarContent justify='center' className='flex-1'>
+            <Link
+              href='/custom-embroidery-order'
+              className='flex items-center gap-2 px-4 py-2 text-lg font-bold r    hover:text-slate-500 duration-200 whitespace-nowrap'
+            >
+              <i className='ri-magic-line text-gray-600 hover:text-slate-500 text-lg' aria-hidden='true' />
+              <span>Custom Digitizing</span>
+            </Link>
+          </NavbarContent> */}
 
           <NavbarContent justify='end' className='flex-1'>
             <UserProfileDropdown />
