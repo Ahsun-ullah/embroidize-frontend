@@ -30,7 +30,7 @@ export async function generateMetadata({ params }) {
           url: product.image?.url || 'https://embroidize.com/og-banner.jpg',
           width: 1200,
           height: 630,
-          alt: product.title,
+          alt: product.name,
         },
       ],
     },
@@ -39,6 +39,7 @@ export async function generateMetadata({ params }) {
       title: product.meta_title,
       description: product.meta_description,
       images: [product.image?.url || 'https://embroidize.com/og-banner.jpg'],
+      alt: product.name,
     },
   };
 }
@@ -63,51 +64,37 @@ export default async function ProductDetails({ params }) {
   const allProducts = productListResponse?.products ?? [];
   const popularProducts = popularProductsResponse?.products ?? [];
 
+  const today = new Date();
+  const oneYearLater = new Date(
+    today.getFullYear() + 1,
+    today.getMonth(),
+    today.getDate(),
+  );
+  const oneYearLaterMS = oneYearLater.getTime();
+  const priceValidUntil = new Date(oneYearLaterMS).toISOString().split('T')[0];
+  
   const schema = {
     '@context': 'https://schema.org/',
     '@type': 'Product',
     name: product.name,
-    image: product?.image?.url,
     description: product.meta_description,
     sku: product.sku || product._id,
     brand: {
       '@type': 'Brand',
       name: product.brand?.name || 'Embroidize',
     },
-    aggregateRating: {
-      '@type': 'AggregateRating',
-      ratingValue: product.rating?.average || 5.0,
-      bestRating: 5,
-      worstRating: 1,
-    },
-    review: product.reviews?.map((review) => ({
-      '@type': 'Review',
-      author: {
-        '@type': 'Person',
-        name: review.author || 'Anonymous',
-      },
-      reviewRating: {
-        '@type': 'Rating',
-        ratingValue: review.rating || 5.0,
-        bestRating: 5.0,
-        worstRating: 1,
-      },
-      reviewBody: review.comment || '',
-    })),
     offers: {
       '@type': 'Offer',
       url: `https://embroidize.com/product/${product.slug}`,
       priceCurrency: 'USD',
       price: product.price === 0 ? '0.00' : product.price.toFixed(2),
       availability: 'https://schema.org/InStock',
-      priceValidUntil: new Date().toISOString().split('T')[0],
+      priceValidUntil: priceValidUntil,
       itemCondition: 'https://schema.org/NewCondition',
       seller: {
         '@type': 'Organization',
         name: 'Embroidize',
       },
-
-      // ✅ Digital-only Shipping Details
       shippingDetails: {
         '@type': 'OfferShippingDetails',
         shippingRate: {
@@ -135,8 +122,6 @@ export default async function ProductDetails({ params }) {
           },
         },
       },
-
-      // ✅ Digital-only Return Policy
       hasMerchantReturnPolicy: {
         '@type': 'MerchantReturnPolicy',
         name: 'Digital Product – No Returns',
@@ -144,7 +129,6 @@ export default async function ProductDetails({ params }) {
         returnPolicyCategory: 'https://schema.org/MerchantReturnNotPermitted',
         applicableCountry: 'US',
       },
-
       mainEntityOfPage: {
         '@type': 'WebPage',
         '@id': `https://embroidize.com/product/${product.slug}`,
@@ -152,6 +136,34 @@ export default async function ProductDetails({ params }) {
     },
     category: 'DigitalEmbroideryDesign',
   };
+
+  if (product.image?.url) {
+    schema.image = product.image.url;
+  }
+
+  if (product.rating && product.reviews?.length > 0) {
+    schema.aggregateRating = {
+      '@type': 'AggregateRating',
+      ratingValue: product.rating.average || 5.0,
+      reviewCount: product.reviews.length,
+      bestRating: 5,
+      worstRating: 1,
+    };
+    schema.review = product.reviews.map((review) => ({
+      '@type': 'Review',
+      author: {
+        '@type': 'Person',
+        name: review.author || 'Anonymous',
+      },
+      reviewRating: {
+        '@type': 'Rating',
+        ratingValue: review.rating || 5.0,
+        bestRating: 5.0,
+        worstRating: 1,
+      },
+      reviewBody: review.comment || '',
+    }));
+  }
 
   const breadcrumb = {
     '@context': 'https://schema.org',
@@ -163,26 +175,33 @@ export default async function ProductDetails({ params }) {
         name: 'Home',
         item: 'https://embroidize.com/',
       },
-      {
-        '@type': 'ListItem',
-        position: 2,
-        name: product?.category?.name,
-        item: `https://embroidize.com/${product?.category?.slug}`,
-      },
-      {
-        '@type': 'ListItem',
-        position: 3,
-        name: product?.sub_category?.name,
-        item: `https://embroidize.com/${product?.category?.slug}/${product?.sub_category?.slug}`,
-      },
-      {
-        '@type': 'ListItem',
-        position: 4,
-        name: product?.name,
-        item: `https://embroidize.com/product/${product?.slug}`,
-      },
     ],
   };
+
+  if (product.category) {
+    breadcrumb.itemListElement.push({
+      '@type': 'ListItem',
+      position: 2,
+      name: product.category.name,
+      item: `https://embroidize.com/${product.category.slug}`,
+    });
+  }
+
+  if (product.sub_category) {
+    breadcrumb.itemListElement.push({
+      '@type': 'ListItem',
+      position: 3,
+      name: product.sub_category.name,
+      item: `https://embroidize.com/${product.category.slug}/${product.sub_category.slug}`,
+    });
+  }
+
+  breadcrumb.itemListElement.push({
+    '@type': 'ListItem',
+    position: product.sub_category ? 4 : 3,
+    name: product.name,
+    item: `https://embroidize.com/product/${product.slug}`,
+  });
 
   return (
     <>

@@ -152,7 +152,7 @@ export const SingleProductComponent = ({
                 </h2>
               </div>
 
-              <pre
+              <div
                 dangerouslySetInnerHTML={{ __html: rawMarkup }}
                 className='prose max-w-none break-words whitespace-pre-wrap font-sans text-lg'
               />
