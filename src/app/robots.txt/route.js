@@ -9,6 +9,7 @@ export function GET() {
     Disallow: /reset-password
     Disallow: /user
     Disallow: /search
+    Allow: /_next/image
     Allow: /
 
 
