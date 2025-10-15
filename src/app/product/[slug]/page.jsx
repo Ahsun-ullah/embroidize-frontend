@@ -150,8 +150,8 @@ export default async function ProductDetails({ params }) {
         dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbSchema) }}
       />
       <SingleProductComponent
-        product={product}
-        allProducts={allProducts}
+        singleProductData={product}
+        allProductData={allProducts}
         popularProducts={popularProducts}
       />
       <Footer />
