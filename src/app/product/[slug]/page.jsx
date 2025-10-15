@@ -1,3 +1,4 @@
+// app/product/[slug]/page.jsx
 import Footer from '@/components/user/HomePage/Footer';
 import Header from '@/components/user/HomePage/Header';
 import { SingleProductComponent } from '@/features/products/components/SingleProductComponent';
@@ -9,8 +10,7 @@ import {
 import { getAllProductsBySubCategory } from '@/lib/apis/public/subcategory';
 import { notFound } from 'next/navigation';
 
-// ✅ This is a pure server component – do NOT add "use client"
-
+// Metadata
 export async function generateMetadata({ params }) {
   const response = await getSingleProduct(params.slug);
   const product = response?.data;
@@ -39,7 +39,6 @@ export async function generateMetadata({ params }) {
       title: product.meta_title,
       description: product.meta_description,
       images: [product.image?.url || 'https://embroidize.com/og-banner.jpg'],
-      alt: product.name,
     },
   };
 }
@@ -51,6 +50,7 @@ export default async function ProductDetails({ params }) {
   if (!product) return notFound();
 
   const hasSubCategory = !!product?.sub_category?.slug;
+
   const [productListResponse, popularProductsResponse] = await Promise.all([
     hasSubCategory
       ? getAllProductsBySubCategory(product.sub_category.slug, 1, 6)
@@ -61,23 +61,22 @@ export default async function ProductDetails({ params }) {
   const allProducts = productListResponse?.products ?? [];
   const popularProducts = popularProductsResponse?.products ?? [];
 
-  // ---- Schema (SSR-safe JSON) ----
+  // ---- Schema.org JSON-LD ----
   const today = new Date();
-  const priceValidUntil = new Date(
+  const oneYearLater = new Date(
     today.getFullYear() + 1,
     today.getMonth(),
     today.getDate(),
-  )
-    .toISOString()
-    .split('T')[0];
+  );
+  const priceValidUntil = oneYearLater.toISOString().split('T')[0]; // "YYYY-MM-DD"
 
-  const schema = {
-    '@context': 'https://schema.org/',
+  const productSchema = {
+    '@context': 'https://schema.org',
     '@type': 'Product',
     name: product.name,
     description: product.meta_description,
     sku: product.sku || product._id,
-    image: product.image?.url,
+    image: product.image?.url ? [product.image.url] : undefined,
     brand: { '@type': 'Brand', name: 'Embroidize' },
     offers: {
       '@type': 'Offer',
@@ -91,15 +90,15 @@ export default async function ProductDetails({ params }) {
     },
   };
 
-  if (product.rating && product.reviews?.length > 0) {
-    schema.aggregateRating = {
+  if (product?.rating?.average && product?.reviews?.length > 0) {
+    productSchema.aggregateRating = {
       '@type': 'AggregateRating',
-      ratingValue: product.rating.average || 5.0,
-      reviewCount: product.reviews.length,
+      ratingValue: Number(product.rating.average),
+      reviewCount: Number(product.reviews.length),
     };
   }
 
-  const breadcrumb = {
+  const breadcrumbSchema = {
     '@context': 'https://schema.org',
     '@type': 'BreadcrumbList',
     itemListElement: [
@@ -138,23 +137,21 @@ export default async function ProductDetails({ params }) {
     ],
   };
 
-  // ---- Return HTML (server-rendered JSON-LD included) ----
   return (
     <>
-      {/* ✅ These scripts render server-side and are visible in page source */}
-      <script
-        type='application/ld+json'
-        dangerouslySetInnerHTML={{ __html: JSON.stringify(schema) }}
-      />
-      <script
-        type='application/ld+json'
-        dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumb) }}
-      />
-
       <Header />
+      {/* JSON-LD scripts must be server-rendered and visible in page source */}
+      <script
+        type='application/ld+json'
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(productSchema) }}
+      />
+      <script
+        type='application/ld+json'
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbSchema) }}
+      />
       <SingleProductComponent
-        singleProductData={product}
-        allProductData={allProducts}
+        product={product}
+        allProducts={allProducts}
         popularProducts={popularProducts}
       />
       <Footer />
