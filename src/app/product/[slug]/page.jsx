@@ -1,3 +1,4 @@
+export const dynamic = 'force-static';
 import Footer from '@/components/user/HomePage/Footer';
 import Header from '@/components/user/HomePage/Header';
 import { SingleProductComponent } from '@/features/products/components/SingleProductComponent';
@@ -143,11 +144,15 @@ export default async function ProductDetails({ params }) {
     <>
       {/* ✅ These scripts render server-side and are visible in page source */}
       <script
+        id='product-schema'
         type='application/ld+json'
+        strategy='beforeInteractive'
         dangerouslySetInnerHTML={{ __html: JSON.stringify(schema) }}
       />
       <script
+        id='breadcrumb-schema'
         type='application/ld+json'
+        strategy='beforeInteractive'
         dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumb) }}
       />
 
