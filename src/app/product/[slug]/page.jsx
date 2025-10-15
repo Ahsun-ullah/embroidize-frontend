@@ -1,4 +1,5 @@
 // app/product/[slug]/page.jsx
+export const dynamic = 'force-dynamic';
 import Footer from '@/components/user/HomePage/Footer';
 import Header from '@/components/user/HomePage/Header';
 import { SingleProductComponent } from '@/features/products/components/SingleProductComponent';
@@ -98,57 +99,66 @@ export default async function ProductDetails({ params }) {
     };
   }
 
-  const breadcrumbSchema = {
-    '@context': 'https://schema.org',
-    '@type': 'BreadcrumbList',
-    itemListElement: [
-      {
-        '@type': 'ListItem',
-        position: 1,
-        name: 'Home',
-        item: 'https://embroidize.com/',
-      },
-      ...(product.category
-        ? [
-            {
-              '@type': 'ListItem',
-              position: 2,
-              name: product.category.name,
-              item: `https://embroidize.com/${product.category.slug}`,
-            },
-          ]
-        : []),
-      ...(product.sub_category
-        ? [
-            {
-              '@type': 'ListItem',
-              position: 3,
-              name: product.sub_category.name,
-              item: `https://embroidize.com/${product.category.slug}/${product.sub_category.slug}`,
-            },
-          ]
-        : []),
-      {
-        '@type': 'ListItem',
-        position: product.sub_category ? 4 : 3,
-        name: product.name,
-        item: `https://embroidize.com/product/${product.slug}`,
-      },
-    ],
-  };
-
   return (
     <>
       <Header />
-      {/* JSON-LD scripts must be server-rendered and visible in page source */}
-      <script
+
+      {/* Server-rendered JSON-LD visible in View Source */}
+      {/* <script
         type='application/ld+json'
         dangerouslySetInnerHTML={{ __html: JSON.stringify(productSchema) }}
-      />
+      /> */}
       <script
         type='application/ld+json'
-        dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbSchema) }}
+        dangerouslySetInnerHTML={{
+          __html: JSON.stringify(productSchema).replace(/</g, '\\u003c'),
+        }}
       />
+
+      <script
+        type='application/ld+json'
+        dangerouslySetInnerHTML={{
+          __html: JSON.stringify({
+            '@context': 'https://schema.org',
+            '@type': 'BreadcrumbList',
+            itemListElement: [
+              {
+                '@type': 'ListItem',
+                position: 1,
+                name: 'Home',
+                item: 'https://embroidize.com/',
+              },
+              ...(product.category
+                ? [
+                    {
+                      '@type': 'ListItem',
+                      position: 2,
+                      name: product.category.name,
+                      item: `https://embroidize.com/${product.category.slug}`,
+                    },
+                  ]
+                : []),
+              ...(product.sub_category
+                ? [
+                    {
+                      '@type': 'ListItem',
+                      position: 3,
+                      name: product.sub_category.name,
+                      item: `https://embroidize.com/${product.category.slug}/${product.sub_category.slug}`,
+                    },
+                  ]
+                : []),
+              {
+                '@type': 'ListItem',
+                position: product.sub_category ? 4 : 3,
+                name: product.name,
+                item: `https://embroidize.com/product/${product.slug}`,
+              },
+            ],
+          }),
+        }}
+      />
+
       <SingleProductComponent
         singleProductData={product}
         allProductData={allProducts}
