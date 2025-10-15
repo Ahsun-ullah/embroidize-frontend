@@ -9,19 +9,19 @@ import {
 import { getAllProductsBySubCategory } from '@/lib/apis/public/subcategory';
 import { notFound } from 'next/navigation';
 
+// ✅ This is a pure server component – do NOT add "use client"
+
 export async function generateMetadata({ params }) {
   const response = await getSingleProduct(params.slug);
   const product = response?.data;
-
   if (!product) return {};
+
   const canonicalUrl = `https://embroidize.com/product/${params.slug}`;
 
   return {
     title: product.meta_title,
     description: product.meta_description,
-    alternates: {
-      canonical: canonicalUrl,
-    },
+    alternates: { canonical: canonicalUrl },
     openGraph: {
       title: product.meta_title,
       description: product.meta_description,
@@ -46,14 +46,11 @@ export async function generateMetadata({ params }) {
 
 export default async function ProductDetails({ params }) {
   const slug = params.slug;
-
   const response = await getSingleProduct(slug);
   const product = response?.data;
-
   if (!product) return notFound();
 
   const hasSubCategory = !!product?.sub_category?.slug;
-
   const [productListResponse, popularProductsResponse] = await Promise.all([
     hasSubCategory
       ? getAllProductsBySubCategory(product.sub_category.slug, 1, 6)
@@ -64,105 +61,42 @@ export default async function ProductDetails({ params }) {
   const allProducts = productListResponse?.products ?? [];
   const popularProducts = popularProductsResponse?.products ?? [];
 
+  // ---- Schema (SSR-safe JSON) ----
   const today = new Date();
-  const oneYearLater = new Date(
+  const priceValidUntil = new Date(
     today.getFullYear() + 1,
     today.getMonth(),
     today.getDate(),
-  );
-  const oneYearLaterMS = oneYearLater.getTime();
-  const priceValidUntil = new Date(oneYearLaterMS).toISOString().split('T')[0];
-  
+  )
+    .toISOString()
+    .split('T')[0];
+
   const schema = {
     '@context': 'https://schema.org/',
     '@type': 'Product',
     name: product.name,
     description: product.meta_description,
     sku: product.sku || product._id,
-    brand: {
-      '@type': 'Brand',
-      name: product.brand?.name || 'Embroidize',
-    },
+    image: product.image?.url,
+    brand: { '@type': 'Brand', name: 'Embroidize' },
     offers: {
       '@type': 'Offer',
       url: `https://embroidize.com/product/${product.slug}`,
       priceCurrency: 'USD',
-      price: product.price === 0 ? '0.00' : product.price.toFixed(2),
+      price: Number(product.price || 0).toFixed(2),
       availability: 'https://schema.org/InStock',
-      priceValidUntil: priceValidUntil,
+      priceValidUntil,
       itemCondition: 'https://schema.org/NewCondition',
-      seller: {
-        '@type': 'Organization',
-        name: 'Embroidize',
-      },
-      shippingDetails: {
-        '@type': 'OfferShippingDetails',
-        shippingRate: {
-          '@type': 'MonetaryAmount',
-          value: product.price === 0 ? '0.00' : product.price.toFixed(2),
-          currency: 'USD',
-        },
-        shippingDestination: {
-          '@type': 'DefinedRegion',
-          addressCountry: 'US',
-        },
-        deliveryTime: {
-          '@type': 'ShippingDeliveryTime',
-          handlingTime: {
-            '@type': 'QuantitativeValue',
-            minValue: 0,
-            maxValue: 0,
-            unitCode: 'd',
-          },
-          transitTime: {
-            '@type': 'QuantitativeValue',
-            minValue: 0,
-            maxValue: 0,
-            unitCode: 'd',
-          },
-        },
-      },
-      hasMerchantReturnPolicy: {
-        '@type': 'MerchantReturnPolicy',
-        name: 'Digital Product – No Returns',
-        description: 'This is a digital product and is non-refundable.',
-        returnPolicyCategory: 'https://schema.org/MerchantReturnNotPermitted',
-        applicableCountry: 'US',
-      },
-      mainEntityOfPage: {
-        '@type': 'WebPage',
-        '@id': `https://embroidize.com/product/${product.slug}`,
-      },
+      seller: { '@type': 'Organization', name: 'Embroidize' },
     },
-    category: 'DigitalEmbroideryDesign',
   };
-
-  if (product.image?.url) {
-    schema.image = product.image.url;
-  }
 
   if (product.rating && product.reviews?.length > 0) {
     schema.aggregateRating = {
       '@type': 'AggregateRating',
       ratingValue: product.rating.average || 5.0,
       reviewCount: product.reviews.length,
-      bestRating: 5,
-      worstRating: 1,
     };
-    schema.review = product.reviews.map((review) => ({
-      '@type': 'Review',
-      author: {
-        '@type': 'Person',
-        name: review.author || 'Anonymous',
-      },
-      reviewRating: {
-        '@type': 'Rating',
-        ratingValue: review.rating || 5.0,
-        bestRating: 5.0,
-        worstRating: 1,
-      },
-      reviewBody: review.comment || '',
-    }));
   }
 
   const breadcrumb = {
@@ -175,36 +109,39 @@ export default async function ProductDetails({ params }) {
         name: 'Home',
         item: 'https://embroidize.com/',
       },
+      ...(product.category
+        ? [
+            {
+              '@type': 'ListItem',
+              position: 2,
+              name: product.category.name,
+              item: `https://embroidize.com/${product.category.slug}`,
+            },
+          ]
+        : []),
+      ...(product.sub_category
+        ? [
+            {
+              '@type': 'ListItem',
+              position: 3,
+              name: product.sub_category.name,
+              item: `https://embroidize.com/${product.category.slug}/${product.sub_category.slug}`,
+            },
+          ]
+        : []),
+      {
+        '@type': 'ListItem',
+        position: product.sub_category ? 4 : 3,
+        name: product.name,
+        item: `https://embroidize.com/product/${product.slug}`,
+      },
     ],
   };
 
-  if (product.category) {
-    breadcrumb.itemListElement.push({
-      '@type': 'ListItem',
-      position: 2,
-      name: product.category.name,
-      item: `https://embroidize.com/${product.category.slug}`,
-    });
-  }
-
-  if (product.sub_category) {
-    breadcrumb.itemListElement.push({
-      '@type': 'ListItem',
-      position: 3,
-      name: product.sub_category.name,
-      item: `https://embroidize.com/${product.category.slug}/${product.sub_category.slug}`,
-    });
-  }
-
-  breadcrumb.itemListElement.push({
-    '@type': 'ListItem',
-    position: product.sub_category ? 4 : 3,
-    name: product.name,
-    item: `https://embroidize.com/product/${product.slug}`,
-  });
-
+  // ---- Return HTML (server-rendered JSON-LD included) ----
   return (
     <>
+      {/* ✅ These scripts render server-side and are visible in page source */}
       <script
         type='application/ld+json'
         dangerouslySetInnerHTML={{ __html: JSON.stringify(schema) }}
