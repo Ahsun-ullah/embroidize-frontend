@@ -109,11 +109,11 @@ export default function AboutUsPage() {
               Why Choose Embroidize?
             </h2>
             <ul className='list-disc pl-6 space-y-2 text-gray-700'>
-              <li>🌟 Curated and original embroidery designs</li>
-              <li>🎁 Free daily downloads — no strings attached</li>
-              <li>📂 Easy-to-use formats for all major machines</li>
-              <li>👩‍🎨 A platform built by creators, for creators</li>
-              <li>🔐 Secure access and ethical use policies</li>
+              <li> Curated and original embroidery designs</li>
+              <li> Free daily downloads — no strings attached</li>
+              <li> Easy-to-use formats for all major machines</li>
+              <li> A platform built by creators, for creators</li>
+              <li> Secure access and ethical use policies</li>
             </ul>
           </section>
 

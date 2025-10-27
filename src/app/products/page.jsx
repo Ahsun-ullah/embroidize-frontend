@@ -77,7 +77,7 @@ export default async function AllProductsPage({ searchParams }) {
         <h1 className='text-3xl font-bold my-6 text-gray-900'>
           Browse All Digital Embroidery Designs from Embroidize
         </h1>
-        <section className='text-black mb-8 py-6 border-b-2'>
+        <section className='text-black mb-8 py-6'>
           <div className='flex justify-between gap-4 mb-8'>
             <div className='flex justify-between gap-4'>
               <Link
@@ -105,7 +105,7 @@ export default async function AllProductsPage({ searchParams }) {
             ))}
           </div>
           {/* Pagination Component */}
-          <div className='flex items-center justify-center mt-6'>
+          <div className='flex items-center justify-center mt-8'>
             <Pagination
               currentPage={currentPage}
               perPageData={perPageData}
