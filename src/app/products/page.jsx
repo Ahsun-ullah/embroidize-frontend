@@ -96,7 +96,9 @@ export default async function AllProductsPage({ searchParams }) {
               </Link>
             </div>
 
-            <div className='px-4 py-2 border rounded bg-slate-50'>{totalCount}  Results Found</div>
+            <div className='px-4 py-2 border rounded bg-slate-50'>
+              {totalCount} Results Found
+            </div>
           </div>
           <div className='grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6'>
             {products.map((item, index) => (
@@ -106,11 +108,7 @@ export default async function AllProductsPage({ searchParams }) {
           </div>
           {/* Pagination Component */}
           <div className='flex items-center justify-center mt-8'>
-            <Pagination
-              currentPage={currentPage}
-              perPageData={perPageData}
-              totalPages={totalPages}
-            />
+            <Pagination totalPages={totalPages} perPageData={perPageData} />
           </div>
         </section>
       </div>
