@@ -1,5 +1,5 @@
+import BlogCard from '@/components/Common/BlogCard';
 import Pagination from '@/components/Common/Pagination';
-import BlogSection from '@/components/user/HomePage/BlogSection';
 import Footer from '@/components/user/HomePage/Footer';
 import Header from '@/components/user/HomePage/Header';
 import { getBlogs } from '@/lib/apis/public/blog';
@@ -53,12 +53,23 @@ export default async function AllBlogsPageInFrontSite({ searchParams }) {
   return (
     <>
       <Header />
-      <BlogSection blogs={paginatedBlogs} />
+      {/* <BlogSection blogs={paginatedBlogs} /> */}
 
-      {blogs.length > 0 && (
-        <div className='flex items-center justify-center my-6'>
-          <Pagination totalPages={totalPages} perPage={perPageData} />
-        </div>
+      {paginatedBlogs.length > 0 && (
+        <>
+          <section className='text-black my-8 py-6'>
+            <div className='container mx-auto px-4'>
+              <div className='grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-10'>
+                {paginatedBlogs.map((item, index) => (
+                  <BlogCard key={index} data={item} />
+                ))}
+              </div>
+            </div>
+          </section>
+          <div className='flex items-center justify-center my-6'>
+            <Pagination totalPages={totalPages} perPage={perPageData} />
+          </div>
+        </>
       )}
 
       <Footer />

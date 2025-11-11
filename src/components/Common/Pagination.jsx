@@ -4,7 +4,7 @@ import { Pagination as HeroPagination, Spinner } from '@heroui/react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { useCallback, useTransition } from 'react';
 
-const Pagination = ({ totalPages, perPageData = 20 }) => {
+const Pagination = ({ totalPages, perPageData }) => {
   const router = useRouter();
   const searchParams = useSearchParams();
   const [isPending, startTransition] = useTransition();
