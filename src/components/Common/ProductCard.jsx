@@ -121,14 +121,17 @@ export default function ProductCard({ item, index = 0 }) {
 
   const blur = item?.image?.blurDataURL || blurDataURL(600, 400);
 
+  const categorySlug = (categoryName || '')
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, '-')
+    .replace(/(^-|-$)/g, '');
+  const categoryLink = `/category/${encodeURIComponent(categorySlug)}`;
+
   return (
     <div className='bg-white rounded-2xl shadow-xl overflow-hidden'>
-      <Link
-        href={productLink}
-        className='block group'
-        aria-label={`View details for ${productName}`}
-      >
-        <div className='relative w-full aspect-[3/2]'>
+      <div className='block group' aria-label={`View details for ${productName}`}>
+        {/* Product image — links to product page */}
+        <Link href={productLink} className='relative w-full aspect-[3/2] block'>
           <Image
             src={imageUrl}
             alt={productName}
@@ -143,30 +146,38 @@ export default function ProductCard({ item, index = 0 }) {
             placeholder='blur'
             blurDataURL={blur}
           />
-        </div>
+        </Link>
 
         <div className='flex flex-col p-4 gap-y-2'>
           <div className='flex items-center justify-between gap-4'>
-            <p
-              className='text-sm sm:text-base md:text-lg font-semibold capitalize truncate'
-              title={productName}
-            >
-              {productName}
-            </p>
+            {/* Product name links to product page */}
+            <Link href={productLink} className='flex-1'>
+              <p
+                className='text-sm sm:text-base md:text-lg font-semibold capitalize truncate'
+                title={productName}
+              >
+                {productName}
+              </p>
+            </Link>
+
             <span
-              className={`text-sm sm:text-base md:text-lg font-semibold rounded-xl px-2 shadow ${isFree ? 'text-green-900 font-extrabold' : 'text-black'}`}
+              className={`text-sm sm:text-base md:text-lg px-2 rounded-md shadow-sm ${isFree ? ' font-extrabold uppercase' : 'text-black font-semibold'}`}
             >
               {priceLabel}
             </span>
           </div>
 
           <div className='flex items-center justify-between gap-4 text-xs sm:text-sm md:text-base'>
-            <span
+            {/* Category is now a link to /category/{categorySlug} */}
+            <Link
+              href={categoryLink}
               className='text-black capitalize font-medium truncate'
               title={categoryName}
+              aria-label={`View category ${categoryName}`}
             >
               {categoryName.replace(/embroidery designs/gi, '').trim()}
-            </span>
+            </Link>
+
             <span className='font-semibold flex items-center gap-1'>
               <DownloadIcon />
               {new Intl.NumberFormat('en-US', {
@@ -176,7 +187,7 @@ export default function ProductCard({ item, index = 0 }) {
             </span>
           </div>
         </div>
-      </Link>
+      </div>
     </div>
   );
 }
