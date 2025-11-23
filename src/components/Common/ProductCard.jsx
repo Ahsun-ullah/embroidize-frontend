@@ -1,6 +1,7 @@
 import { blurDataURL } from '@/utils/blur';
 import Image from 'next/image';
 import Link from 'next/link';
+import React from 'react';
 
 function DownloadIcon(props) {
   return (
@@ -17,7 +18,7 @@ function DownloadIcon(props) {
 }
 
 // pass `index` from parent map so the first visible image becomes the LCP image
-export default function ProductCard({ item, index = 0 }) {
+const ProductCard = React.memo(function ProductCard({ item, index = 0 }) {
   if (!item?._id || !item?.name) return null;
 
   const imageUrl =
@@ -84,14 +85,12 @@ export default function ProductCard({ item, index = 0 }) {
           </div>
 
           <div className='flex items-center justify-between gap-4 text-xs sm:text-sm md:text-base'>
-            <Link
-              href={categoryLink}
+            <div
               className='text-black capitalize font-semibold truncate'
               title={categoryName}
-              aria-label={`View category ${categoryName}`}
             >
               {categoryName.replace(/embroidery designs/gi, '').trim()}
-            </Link>
+            </div>
             <span className='font-semibold flex items-center gap-1'>
               <DownloadIcon />
               {new Intl.NumberFormat('en-US', {
@@ -104,4 +103,6 @@ export default function ProductCard({ item, index = 0 }) {
       </Link>
     </div>
   );
-}
+});
+
+export default ProductCard;

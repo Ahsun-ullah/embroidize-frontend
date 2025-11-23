@@ -1,8 +1,9 @@
 import { Divider } from '@heroui/react';
 import Image from 'next/image';
 import Link from 'next/link';
+import React from 'react';
 
-const BlogCard = ({ data }) => {
+const BlogCard = React.memo(function BlogCard({ data }) {
   const imageUrl =
     // data?.featuredImage // wordpress
     data?.image?.url;
@@ -56,6 +57,6 @@ const BlogCard = ({ data }) => {
       </Link>
     </>
   );
-};
+});
 
 export default BlogCard;

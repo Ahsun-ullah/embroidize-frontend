@@ -4,20 +4,26 @@ import {
   useVerifyOtpMutation,
 } from '@/lib/redux/public/auth/authSlice';
 import Cookies from 'js-cookie';
-import { useRouter } from 'next/navigation';
-import { useState } from 'react';
+import { useRouter, usePathname } from 'next/navigation';
+import { useState, useEffect } from 'react';
 import EmailOtpComponent from './EmailOtpComponent';
-import { ErrorToast } from './ErrorToast';
+import { handleApiError } from '@/lib/utils/handleError';
 import { SuccessToast } from './SuccessToast';
 
 const EmailOtp = ({ step, setStep, userDetailsData }) => {
   const router = useRouter();
+  const pathname = usePathname();
   const [otp, setOtp] = useState(['', '', '', '', '', '']);
+  const [isNavigating, setIsNavigating] = useState(false);
 
   const [verifyOtp, { isLoading: isVerifying }] = useVerifyOtpMutation();
   const [logIn, { isLoading: loginIsLoading }] = useLogInMutation();
   const [userRegister, { isLoading: isRegistering }] =
     useUserRegisterMutation();
+
+  useEffect(() => {
+    setIsNavigating(false);
+  }, [pathname]);
 
   const handlePaste = (e, index) => {
     e.preventDefault();
@@ -35,7 +41,6 @@ const EmailOtp = ({ step, setStep, userDetailsData }) => {
 
     setOtp(newOtp);
 
-    // Focus the next available input field
     const nextIndex = Math.min(index + pastedText.length, otp.length - 1);
     const inputElements = document.querySelectorAll('input.code-input');
     inputElements[nextIndex]?.focus();
@@ -48,28 +53,19 @@ const EmailOtp = ({ step, setStep, userDetailsData }) => {
     const email = userDetailsData?.email;
 
     try {
-      // Step 1: Verify OTP
-      const verifyResult = await verifyOtp({
+      await verifyOtp({
         email,
         otp: parseInt(fullOtp, 10),
       }).unwrap();
 
-      // SuccessToast(
-      //   'Success',
-      //   verifyResult?.data?.message || 'OTP verified successfully!',
-      //   3000,
-      // );
-
-      // Step 2: Register user
       const registerResult = await userRegister(userDetailsData).unwrap();
 
       SuccessToast(
         'Success',
-        registerResult?.data?.message || 'Registration successful!',
+        registerResult?.message || 'Registration successful!',
         3000,
       );
 
-      // Step 3: Auto login
       const loginPayload = {
         email: userDetailsData.email,
         password: userDetailsData.password,
@@ -77,24 +73,14 @@ const EmailOtp = ({ step, setStep, userDetailsData }) => {
 
       const loginResult = await logIn(loginPayload).unwrap();
 
-      // SuccessToast(
-      //   'Success',
-      //   loginResult?.data?.message || 'Login successful!',
-      //   3000,
-      // );
-
       Cookies.set('token', loginResult.data.token);
 
-      // Step 4: Redirect based on role
+      setIsNavigating(true);
       const role = loginResult?.data?.role;
       const destination = role === 'admin' ? '/admin' : '/';
       router.push(destination);
     } catch (error) {
-      const message =
-        error?.data?.message ||
-        error?.message ||
-        'Something went wrong. Please try again.';
-      ErrorToast('Error', message, 3000);
+      handleApiError(error, 'Something went wrong. Please try again.');
     }
   };
 
@@ -103,7 +89,7 @@ const EmailOtp = ({ step, setStep, userDetailsData }) => {
       userEmail={userDetailsData?.email}
       otp={otp}
       handlePaste={handlePaste}
-      isLoading={isVerifying || isRegistering || loginIsLoading}
+      isLoading={isVerifying || isRegistering || loginIsLoading || isNavigating}
       handleSubmit={handleSubmit}
       setOtp={setOtp}
       setStep={setStep}

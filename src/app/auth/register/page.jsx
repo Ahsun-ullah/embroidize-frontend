@@ -5,10 +5,10 @@ import { useRouter } from 'next/navigation';
 import { useState } from 'react';
 
 import EmailOtp from '@/components/Common/EmailOtp';
-import { ErrorToast } from '@/components/Common/ErrorToast';
 import LoadingSpinner from '@/components/Common/LoadingSpinner';
 import { SuccessToast } from '@/components/Common/SuccessToast';
 import { useGenerateOtpMutation } from '@/lib/redux/public/auth/authSlice';
+import { handleApiError } from '@/lib/utils/handleError';
 import { Card, CardBody, CardHeader, Input } from '@heroui/react';
 import Image from 'next/image';
 import mainLogo from '../../../../public/logo-black.png';
@@ -40,7 +40,7 @@ const Register = () => {
       );
       setStep(step + 1);
     } catch (err) {
-      ErrorToast('Error', err?.data?.message || 'Failed to send OTP', 3000);
+      handleApiError(err, 'Failed to send OTP');
     }
   };
 
@@ -80,9 +80,11 @@ const Register = () => {
                 <Input
                   type='text'
                   name='name'
+                  id='name'
                   className='form-control mt-2'
                   placeholder='Enter your full name'
                   required
+                  aria-required='true'
                 />
               </div>
               <div className='mb-4'>
@@ -92,9 +94,11 @@ const Register = () => {
                 <Input
                   type='email'
                   name='email'
+                  id='email'
                   className='form-control mt-2'
                   placeholder='Enter your email'
                   required
+                  aria-required='true'
                 />
               </div>
               <div className='mb-6'>
@@ -104,9 +108,11 @@ const Register = () => {
                 <Input
                   type='password'
                   name='password'
+                  id='password'
                   className='form-control mt-2'
                   placeholder='Enter password'
                   required
+                  aria-required='true'
                 />
               </div>
 
@@ -133,7 +139,10 @@ const Register = () => {
 
               <div className='w-full flex items-center justify-center '>
                 {otpGenerateIsLoading ? (
-                  <LoadingSpinner />
+                  <div role='status' aria-live='polite'>
+                    <LoadingSpinner />
+                    <span className='sr-only'>Loading...</span>
+                  </div>
                 ) : (
                   <input
                     type='submit'
@@ -181,3 +190,4 @@ const Register = () => {
 };
 
 export default Register;
+

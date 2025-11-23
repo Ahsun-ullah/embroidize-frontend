@@ -1,79 +1,71 @@
 'use client';
 import { useGenerateOtpMutation } from '@/lib/redux/public/auth/authSlice';
 import { Card } from '@heroui/react';
-import { useCallback, useEffect } from 'react';
+import React, { useCallback, useRef } from 'react';
 import { ErrorToast } from './ErrorToast';
 import LoadingSpinner from './LoadingSpinner';
 import OtpComponent from './OtpComponent';
 import { SuccessToast } from './SuccessToast';
 
-const EmailOtpComponent = ({
+const EmailOtpComponent = React.memo(function EmailOtpComponent({
   userEmail,
   otp,
-  handlePaste,
-  isLoading,
-  handleSubmit,
   setOtp,
   step,
   setStep,
-}) => {
+  isLoading,
+  handleSubmit,
+}) {
   const [generateOtp, { isLoading: otpGenerateIsLoading }] =
     useGenerateOtpMutation();
+  const inputRefs = useRef([]);
 
   const handleKeyDown = useCallback(
     (e, index) => {
-      if (e.key === 'Backspace' && !e.target.value && index > 0) {
-        const inputElements = document.querySelectorAll('input.code-input');
-        const prevIndex = Math.max(0, index - 1);
-        inputElements[prevIndex].focus();
-
-        setOtp((prev) => {
-          const updated = [...prev];
-          updated[prevIndex] = '';
-          return updated;
-        });
+      if (e.key === 'Backspace' && !otp[index] && index > 0) {
+        inputRefs.current[index - 1].focus();
       }
     },
-    [setOtp],
+    [otp],
   );
 
   const handleInput = useCallback(
     (e, index) => {
-      const value = e.target.value.replace(/\D/g, ''); // Only digits
-      const inputElements = document.querySelectorAll('input.code-input');
-
-      setOtp((prev) => {
-        const updated = [...prev];
-        updated[index] = value[0] || '';
-        return updated;
-      });
+      const value = e.target.value.replace(/\D/g, '');
+      const newOtp = [...otp];
+      newOtp[index] = value;
+      setOtp(newOtp);
 
       if (value && index < otp.length - 1) {
-        inputElements[index + 1].focus();
+        inputRefs.current[index + 1].focus();
       }
     },
-    [otp.length, setOtp],
+    [otp, setOtp],
   );
 
-  useEffect(() => {
-    const inputElements = document.querySelectorAll('input.code-input');
+  const handlePaste = useCallback(
+    (e, index) => {
+      e.preventDefault();
+      const pastedText = e.clipboardData
+        .getData('Text')
+        .replace(/\D/g, '')
+        .slice(0, 6);
+      const newOtp = [...otp];
 
-    inputElements.forEach((el, idx) => {
-      const keyDownHandler = (e) => handleKeyDown(e, idx);
-      const inputHandler = (e) => handleInput(e, idx);
+      for (let i = 0; i < pastedText.length; i++) {
+        if (index + i < otp.length) {
+          newOtp[index + i] = pastedText[i];
+        }
+      }
+      setOtp(newOtp);
 
-      el.addEventListener('keydown', keyDownHandler);
-      el.addEventListener('input', inputHandler);
+      const nextIndex = Math.min(index + pastedText.length, otp.length - 1);
+      inputRefs.current[nextIndex]?.focus();
+    },
+    [otp, setOtp],
+  );
 
-      // Cleanup
-      return () => {
-        el.removeEventListener('keydown', keyDownHandler);
-        el.removeEventListener('input', inputHandler);
-      };
-    });
-  }, [handleKeyDown, handleInput]);
-
-  const handleResentOtp = async () => {
+  const handleResendOtp = async () => {
     try {
       const response = await generateOtp({ email: userEmail }).unwrap();
       SuccessToast(
@@ -120,10 +112,13 @@ const EmailOtpComponent = ({
 
       <OtpComponent
         otp={otp}
-        handlePaste={handlePaste}
+        setOtp={setOtp}
+        onPaste={handlePaste}
         isLoading={isLoading}
         handleSubmit={handleSubmit}
-        setOtp={setOtp}
+        onKeyDown={handleKeyDown}
+        onInput={handleInput}
+        inputRefs={inputRefs}
       />
 
       <div className='text-center text-base'>
@@ -133,7 +128,7 @@ const EmailOtpComponent = ({
         ) : (
           <button
             disabled={otpGenerateIsLoading}
-            onClick={handleResentOtp}
+            onClick={handleResendOtp}
             className='text-teal-600 hover:underline font-semibold'
           >
             Resend
@@ -142,6 +137,6 @@ const EmailOtpComponent = ({
       </div>
     </Card>
   );
-};
+});
 
 export default EmailOtpComponent;

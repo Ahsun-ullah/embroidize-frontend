@@ -1,19 +1,19 @@
 'use client';
 
-import { ErrorToast } from '@/components/Common/ErrorToast';
-import LoadingSpinner from '@/components/Common/LoadingSpinner';
-import { SuccessToast } from '@/components/Common/SuccessToast';
+import { handleApiError } from '@/lib/utils/handleError';
 import { useForgotPasswordMutation } from '@/lib/redux/common/user/userInfoSlice';
 import { zodResolver } from '@hookform/resolvers/zod';
-import { useState } from 'react';
+import React, { useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { z } from 'zod';
+import LoadingSpinner from './LoadingSpinner';
+import { SuccessToast } from './SuccessToast';
 
 const forgotPasswordSchema = z.object({
   email: z.string().email('Please enter a valid email address'),
 });
 
-export default function ForgotPasswordModal({ isOpen, onClose }) {
+const ForgotPasswordModal = React.memo(function ForgotPasswordModal({ isOpen, onClose }) {
   const {
     register,
     handleSubmit,
@@ -36,11 +36,7 @@ export default function ForgotPasswordModal({ isOpen, onClose }) {
       setSubmitted(true);
       reset();
     } catch (error) {
-      ErrorToast(
-        'Error',
-        error.data?.message || 'Failed to send reset link',
-        3000,
-      );
+      handleApiError(error, 'Failed to send reset link');
     }
   };
 
@@ -53,17 +49,24 @@ export default function ForgotPasswordModal({ isOpen, onClose }) {
   if (!isOpen) return null;
 
   return (
-    <div className='fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50'>
+    <div
+      className='fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50'
+      role='dialog'
+      aria-modal='true'
+      aria-labelledby='forgot-password-title'
+    >
       <div className='bg-white w-full max-w-md p-6 rounded-lg relative shadow-lg'>
-        {/* Close Button */}
         <button
           onClick={handleClose}
           className='absolute top-3 right-3 text-gray-500 hover:text-black text-xl'
+          aria-label='Close dialog'
         >
           <i className='ri-close-fill text-2xl' />
         </button>
 
-        <h2 className='text-2xl font-bold mb-6 text-center'>Forgot Password</h2>
+        <h2 id='forgot-password-title' className='text-2xl font-bold mb-6 text-center'>
+          Forgot Password
+        </h2>
 
         {submitted ? (
           <p className='text-green-600 text-sm mb-4 text-center'>
@@ -71,7 +74,6 @@ export default function ForgotPasswordModal({ isOpen, onClose }) {
           </p>
         ) : (
           <form onSubmit={handleSubmit(onSubmit)}>
-            {/* Email Input */}
             <div className='mb-6'>
               <label className='block font-medium mb-1' htmlFor='email'>
                 Email Address
@@ -82,15 +84,16 @@ export default function ForgotPasswordModal({ isOpen, onClose }) {
                 {...register('email')}
                 className='w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500'
                 placeholder='Enter your email'
+                aria-required='true'
+                aria-invalid={errors.email ? 'true' : 'false'}
               />
               {errors.email && (
-                <p className='text-red-500 text-sm mt-1'>
+                <p className='text-red-500 text-sm mt-1' role='alert'>
                   {errors.email.message}
                 </p>
               )}
             </div>
 
-            {/* Submit Button */}
             <button
               type='submit'
               disabled={isLoading || !isDirty}
@@ -107,4 +110,6 @@ export default function ForgotPasswordModal({ isOpen, onClose }) {
       </div>
     </div>
   );
-}
+});
+
+export default ForgotPasswordModal;
