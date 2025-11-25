@@ -1,9 +1,24 @@
 import UsersTableWrapper from '@/features/users/UsersTableWrapper';
 import { getUsers } from '@/lib/apis/protected/users';
 
-export default async function AllUsersListPage() {
-  const usersResponse = await getUsers();
-  const { data: users } = usersResponse;
+export default async function AllUsersListPage({ searchParams }) {
+  // 1. Extract params from URL
+  const page = Number(searchParams?.page) || 1;
+  const search = searchParams?.search || '';
+  const minDownloads = searchParams?.minDownloads || '';
+  const startDate = searchParams?.startDate || '';
+  const endDate = searchParams?.endDate || '';
+
+  // 2. Fetch data with filters
+  const usersResponse = await getUsers(
+    page,
+    10,
+    search,
+    minDownloads,
+    startDate,
+    endDate,
+  );
+  const { data: users, pagination } = usersResponse;
 
   const columns = [
     { name: 'ID', uid: 'id' },
@@ -17,10 +32,11 @@ export default async function AllUsersListPage() {
 
   return (
     <div className='flex flex-col gap-3'>
+
       <UsersTableWrapper
         initialData={users ?? []}
+        pagination={pagination} // Pass pagination from server
         columns={columns}
-        searchableFieldsName={['name', 'createdAt', 'email']}
       />
     </div>
   );
