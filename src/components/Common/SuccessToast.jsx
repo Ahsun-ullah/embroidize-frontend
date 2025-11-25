@@ -4,7 +4,7 @@ export const SuccessToast = (success, message, time) => {
   return addToast({
     title: `${success}!`,
     description: `${message}`,
-    timeout: `${time || 3000}`,
+    timeout: `${time}`,
     color: 'success',
     position: 'top-right',
     shouldShowTimeoutProgress: true,

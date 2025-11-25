@@ -23,6 +23,7 @@ const Register = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     const formData = new FormData(e.target);
+
     const data = {
       name: formData.get('name'),
       email: formData.get('email')?.toString().toLowerCase(),
@@ -33,11 +34,13 @@ const Register = () => {
 
     try {
       const response = await generateOtp({ email: data?.email }).unwrap();
+
       SuccessToast(
         'Success',
         response?.message || 'OTP sent successfully!',
-        3000,
+        10000,
       );
+
       setStep(step + 1);
     } catch (err) {
       handleApiError(err, 'Failed to send OTP');
@@ -181,13 +184,10 @@ const Register = () => {
       )}
 
       <div className='text-center'>
-        <p className='mb-0'>
-          &copy; {new Date().getFullYear()} Embroidize.
-        </p>
+        <p className='mb-0'>&copy; {new Date().getFullYear()} Embroidize.</p>
       </div>
     </div>
   );
 };
 
 export default Register;
-
