@@ -20,8 +20,13 @@ export default async function DownloadsPage({ searchParams }) {
   const searchableFieldsName = ['name', 'category', 'sub_category'];
 
   return (
-    <div className="downloads-page p-6">
-      <h1 className="text-xl font-bold mb-4">Downloads</h1>
+    <div className='downloads-page p-6'>
+      <div className='flex justify-between items-center me-6'>
+        <h1 className='text-2xl font-bold mb-4'>Downloads</h1>
+        <div className='mb-4 font-semibold text-lg'>
+          Found {pagination?.total} results
+        </div>
+      </div>
       <MostDownloadedProductsTableWrapper
         initialData={data}
         columns={columns}

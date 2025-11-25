@@ -53,6 +53,36 @@ export async function getUsers(
   }
 }
 
+export async function getDashboardStatsAPI() {
+  'use server';
+  try {
+    const cookieStore = await cookies(); // Next.js 15 fix
+    const token = cookieStore.get('token')?.value;
+    const headers = new Headers();
+
+    if (token) {
+      headers.set('Authorization', `Bearer ${token}`);
+    }
+
+    const apiUrl = process.env.NEXT_PUBLIC_BASE_API_URL_PROD;
+    // Call the NEW endpoint
+    const response = await fetch(`${apiUrl}/dashboard-stats`, {
+      headers,
+      cache: 'no-store', // Ensure fresh data
+    });
+
+    if (!response.ok) {
+      throw new Error('Failed to fetch dashboard stats');
+    }
+
+    const data = await response.json();
+    return data.data; // Returns { totalUsers, formattedUserData, etc. }
+  } catch (error) {
+    console.error('Error fetching dashboard stats:', error);
+    return null;
+  }
+}
+
 export async function getDownloadStats(page = 1, perPage = 10) {
   'use server';
 
