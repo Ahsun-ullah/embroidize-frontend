@@ -19,7 +19,7 @@ const UserTable = ({
   onSearchChange,
   pagination,
   onPageChange,
-  topContent
+  topContent,
 }) => {
   const [selectedKeys, setSelectedKeys] = useState(new Set([]));
 
@@ -30,19 +30,21 @@ const UserTable = ({
   const pages = pagination?.totalPages || 1;
   const currentPage = pagination?.currentPage || 1;
 
-  // const topContent = (
-  //   <div className='flex flex-col gap-4'>
-  //     <div className='flex justify-between gap-3 items-end'>
-  //       <Input
-  //         isClearable
-  //         className='w-full sm:max-w-[44%]'
-  //         placeholder='Search by name...'
-  //         onValueChange={onSearchChange}
-  //         onClear={() => onSearchChange('')}
-  //       />
-  //     </div>
-  //   </div>
-  // );
+  const defaultTopContent = (
+    <div className='flex flex-col gap-4'>
+      <div className='flex justify-between gap-3 items-end'>
+        <Input
+          isClearable
+          className='w-full sm:max-w-[44%]'
+          placeholder='Search by name...'
+          onValueChange={onSearchChange}
+          onClear={() => onSearchChange('')}
+        />
+      </div>
+    </div>
+  );
+
+  const finalTopContent = topContent || defaultTopContent;
 
   const bottomContent = pages > 1 && (
     <div className='py-2 px-2 flex justify-between items-center'>
@@ -64,7 +66,7 @@ const UserTable = ({
         isHeaderSticky
         aria-label='Example table with custom cells, pagination, and sorting'
         bottomContent={bottomContent}
-        topContent={topContent}
+        topContent={finalTopContent}
         selectedKeys={selectedKeys}
         selectionMode='multiple'
         onSelectionChange={setSelectedKeys}
