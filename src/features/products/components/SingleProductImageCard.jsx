@@ -14,7 +14,7 @@ export const SingleProductImageCard = ({ data, onImageLoad }) => {
   return (
     <Card
       isFooterBlurred
-      className='relative aspect-[3/2] w-full md:w-[688px] md:h-[459px] lg:w-[800px] lg:h-[533px] xl:w-[764px] xl:h-[509px] overflow-hidden'
+      className='relative aspect-[3/2] w-full md:w-[688px] md:h-[459px] lg:w-[580px] lg:h-[533px] xl:w-[768px] xl:h-[509px] overflow-hidden'
     >
       {isLoading && (
         <div className='absolute inset-0 z-10 flex items-center justify-center '>

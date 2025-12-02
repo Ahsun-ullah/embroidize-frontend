@@ -6,10 +6,6 @@ import { formatNumber } from '@/utils/functions/page';
 import {
   Button,
   Card,
-  Dropdown,
-  DropdownItem,
-  DropdownMenu,
-  DropdownTrigger,
   Modal,
   ModalBody,
   ModalContent,
@@ -23,7 +19,7 @@ export default function ProductDownloadCard({ data }) {
   const pathName = usePathname();
   const [isLoading, setIsLoading] = useState(false);
   const [showLimitModal, setShowLimitModal] = useState(false);
-  const [showMobileSheet, setShowMobileSheet] = useState(false);
+  const [showFormatSheet, setShowFormatSheet] = useState(false);
   const [isMobile, setIsMobile] = useState(false);
   const [downloadingType, setDownloadingType] = useState(null);
   const [limitModalData, setLimitModalData] = useState({
@@ -31,11 +27,17 @@ export default function ProductDownloadCard({ data }) {
     duration: null,
   });
 
+  // ---- Detect ALL mobile / tablet / iPad / iOS ----
   useEffect(() => {
-    const handleResize = () => setIsMobile(window.innerWidth < 768);
-    handleResize();
-    window.addEventListener('resize', handleResize);
-    return () => window.removeEventListener('resize', handleResize);
+    const ua = navigator.userAgent;
+
+    const isiOS =
+      /iPad|iPhone|iPod/.test(ua) ||
+      (navigator.maxTouchPoints > 1 && /Macintosh/.test(ua)); // iPadOS
+
+    const isSmallDevice = window.innerWidth < 1025; // iPad Pro landscape fix
+
+    setIsMobile(isiOS || isSmallDevice);
   }, []);
 
   const formatDuration = (duration) => {
@@ -44,6 +46,36 @@ export default function ProductDownloadCard({ data }) {
     const unit = duration.slice(-1);
     const units = { d: 'day', h: 'hour', m: 'minute' };
     return `${num} ${units[unit]}${num === '1' ? '' : 's'}`;
+  };
+
+  // ---- Safe download function for iOS + Android ----
+  const safeDownload = (blob, filename) => {
+    const ua = navigator.userAgent;
+    const isiOS = /iPad|iPhone|iPod/.test(ua);
+
+    if (isiOS) {
+      // ---- iOS special handling (forces correct filename) ----
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        const base64Data = reader.result;
+        const a = document.createElement('a');
+        a.href = base64Data;
+        a.download = filename;
+        a.click();
+      };
+      reader.readAsDataURL(blob);
+      return;
+    }
+
+    // ---- Normal download for Windows / Mac / Android ----
+    const url = window.URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = filename;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    window.URL.revokeObjectURL(url);
   };
 
   const handleSingleZipFileDownload = async (fileData) => {
@@ -58,21 +90,18 @@ export default function ProductDownloadCard({ data }) {
     try {
       setIsLoading(true);
       setDownloadingType(fileData.extension);
-      const headers = new Headers({
-        Authorization: `Bearer ${token}`,
-      });
 
       const res = await fetch(
         `${process.env.NEXT_PUBLIC_BASE_API_URL_PROD}/download/product/${fileData.id}/extension/${fileData.extension}`,
         {
           method: 'GET',
-          headers,
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
         },
       );
 
       if (!res.ok) {
-        setDownloadingType(null);
-        setIsLoading(false);
         let errorMessage = 'Could not download the ZIP file';
         let errorTitle = 'Download Failed';
         let showLimit = false;
@@ -104,32 +133,23 @@ export default function ProductDownloadCard({ data }) {
           errorMessage = errorText || errorMessage;
         }
 
-        setIsLoading(false);
-
         if (showLimit) {
           setLimitModalData(limitData);
           setShowLimitModal(true);
+          setIsLoading(false);
           return;
         }
 
-        ErrorToast(`${errorTitle}`, errorMessage, 3000);
+        ErrorToast(errorTitle, errorMessage, 3000);
+        setIsLoading(false);
         return;
       }
 
       const blob = await res.blob();
-      const filename =
-        `From_Embroidize_${fileData.extension}.zip` ||
-        res.headers.get('Content-Disposition')?.split('filename=')[1] ||
-        'download.zip';
 
-      const url = window.URL.createObjectURL(blob);
-      const link = document.createElement('a');
-      link.href = url;
-      link.download = filename;
-      document.body.appendChild(link);
-      link.click();
-      window.URL.revokeObjectURL(url);
-      document.body.removeChild(link);
+      const filename = `Embroidize_${fileData.extension}.zip`;
+
+      safeDownload(blob, filename);
     } catch (err) {
       console.error('Download error:', err);
       ErrorToast(
@@ -140,7 +160,7 @@ export default function ProductDownloadCard({ data }) {
     } finally {
       setDownloadingType(null);
       setIsLoading(false);
-      setShowMobileSheet(false);
+      setShowFormatSheet(false);
     }
   };
 
@@ -153,98 +173,44 @@ export default function ProductDownloadCard({ data }) {
         <div className='flex items-center justify-between mb-2'>
           <h2 className='text-black font-bold'>Select For Free Download</h2>
           <span className='font-semibold flex items-center gap-1'>
-            <i className='ri-download-2-line' aria-hidden='true'></i>
+            <i className='ri-download-2-line'></i>
             {formatNumber(data?.downloadCount)}
           </span>
         </div>
 
         {isLoading ? (
           <LoadingSpinner />
-        ) : isMobile ? (
-          // 👉 On Mobile, show bottom sheet
+        ) : (
           <Button
             variant='flat'
             className='border w-full bg-black text-white font-semibold text-lg h-12'
-            onPress={() => setShowMobileSheet(true)}
+            onPress={() => setShowFormatSheet(true)}
           >
             Free Download
           </Button>
-        ) : (
-          // 👉 On Desktop, use normal dropdown
-          <Dropdown portalContainer={document.body}>
-            <DropdownTrigger>
-              <Button
-                variant='flat'
-                className='border w-full bg-black text-white font-semibold text-lg h-12'
-              >
-                Free Download
-              </Button>
-            </DropdownTrigger>
-            {Array.isArray(data?.available_file_types) && (
-              <DropdownMenu
-                aria-label='Download Formats'
-                className='w-full min-w-[200px]'
-                itemClasses={{
-                  base: 'w-full flex justify-center',
-                }}
-              >
-                {data.available_file_types.map((type) => (
-                  <DropdownItem
-                    variant='flat'
-                    key={type}
-                    onPress={() =>
-                      handleSingleZipFileDownload({
-                        extension: type,
-                        id: data?._id,
-                      })
-                    }
-                  >
-                    <small className='uppercase font-semibold text-base block w-full text-center'>
-                      {type}
-                    </small>
-                  </DropdownItem>
-                ))}
-              </DropdownMenu>
-            )}
-          </Dropdown>
         )}
       </Card>
 
-      {/* 👉 Mobile Bottom Sheet */}
+      {/* Format Selection Bottom Sheet for ALL Mobile/Tablet */}
       <Modal
-        isOpen={showMobileSheet}
-        onOpenChange={setShowMobileSheet}
+        isOpen={showFormatSheet}
+        onOpenChange={setShowFormatSheet}
         placement='bottom'
         scrollBehavior='inside'
-        hideCloseButton // 👈 removes default X
+        hideCloseButton
         classNames={{
           wrapper: 'items-end',
-          base: 'rounded-t-2xl max-h-[70vh] relative', // relative so we can position absolute inside
+          base: 'rounded-t-2xl max-h-[70vh] relative',
         }}
       >
         <ModalContent>
           {(onClose) => (
             <>
-              {/* Custom Close Button */}
               <button
                 onClick={onClose}
-                className='absolute top-3 right-3 text-gray-600 hover:text-black transition-colors z-10'
-                aria-label='Close'
+                className='absolute top-3 right-3 text-gray-600 hover:text-black z-10'
               >
-                <svg
-                  xmlns='http://www.w3.org/2000/svg'
-                  fill='none'
-                  viewBox='0 0 24 24'
-                  strokeWidth={2.5}
-                  stroke='currentColor'
-                  className='w-7 h-9'
-                >
-                  <path
-                    strokeLinecap='round'
-                    strokeLinejoin='round'
-                    d='M6 18L18 6M6 6l12 12'
-                  />
-                </svg>
+                ✕
               </button>
 
               <ModalHeader className='text-lg font-bold'>
@@ -252,28 +218,23 @@ export default function ProductDownloadCard({ data }) {
               </ModalHeader>
 
               <ModalBody>
-                {Array.isArray(data?.available_file_types) &&
-                  data.available_file_types.map((type) => (
-                    <Button
-                      key={type}
-                      className='w-full bg-gray-100 hover:bg-gray-200 text-lg font-bold'
-                      onPress={() =>
-                        handleSingleZipFileDownload({
-                          extension: type,
-                          id: data?._id,
-                        })
-                      }
-                      isDisabled={downloadingType && downloadingType !== type}
-                    >
-                      {downloadingType === type ? (
-                        <span className='flex items-center justify-center gap-2'>
-                          Downloading...
-                        </span>
-                      ) : (
-                        type.toUpperCase()
-                      )}
-                    </Button>
-                  ))}
+                {data?.available_file_types?.map((type) => (
+                  <Button
+                    key={type}
+                    className='w-full bg-gray-100 hover:bg-gray-200 text-lg font-bold'
+                    onPress={() =>
+                      handleSingleZipFileDownload({
+                        extension: type,
+                        id: data?._id,
+                      })
+                    }
+                    isDisabled={downloadingType && downloadingType !== type}
+                  >
+                    {downloadingType === type
+                      ? 'Downloading...'
+                      : type.toUpperCase()}
+                  </Button>
+                ))}
               </ModalBody>
             </>
           )}
@@ -282,31 +243,23 @@ export default function ProductDownloadCard({ data }) {
 
       {/* Download Limit Modal */}
       {showLimitModal && (
-        <div className='fixed inset-0 z-50 bg-black/40 flex items-center justify-center'>
-          <div className='bg-white rounded-2xl shadow-2xl p-8 max-w-2xl w-full text-center animate-fade-in'>
+        <div className='fixed inset-0 bg-black/40 flex items-center justify-center z-50'>
+          <div className='bg-white rounded-2xl p-8 max-w-xl w-full text-center'>
             <div className='mx-auto mb-4 w-14 h-14 rounded-full bg-red-100 text-red-600 flex items-center justify-center text-2xl'>
               ⛔
             </div>
-            <h2 className='text-2xl font-semibold text-gray-800 mb-2'>
+            <h2 className='text-2xl font-semibold mb-2'>
               Download Limit Reached
             </h2>
             <p className='text-gray-600 mb-3'>
-              You've reached your limit of{' '}
-              <span className='font-semibold text-gray-800'>
-                {limitModalData.count}
-              </span>{' '}
-              downloads within{' '}
-              <span className='font-semibold text-gray-800'>
-                {formatDuration(limitModalData.duration)}
-              </span>
-              .
+              You've reached your download limit of{' '}
+              <b>{limitModalData.count}</b> downloads per{' '}
+              <b>{formatDuration(limitModalData.duration)} (24 hours)</b>.
+              Please try again after{' '}
+              <b>{formatDuration(limitModalData.duration)}</b>.
             </p>
-            <p className='text-sm text-gray-500 mb-4'>
-              Please wait for the limit to reset.
-            </p>
-            <p className='text-sm text-gray-500 mb-6'>Happy Downloading...</p>
             <button
-              className='bg-primary text-white px-5 py-2 rounded-lg hover:bg-primary-dark transition-colors duration-300'
+              className='bg-primary text-white px-5 py-2 rounded-lg mt-4'
               onClick={() => setShowLimitModal(false)}
             >
               Okay, got it
