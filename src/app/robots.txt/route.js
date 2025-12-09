@@ -1,15 +1,12 @@
 export function GET() {
   return new Response(
     `User-agent: *
-    Disallow: /_next/
-    Disallow: /static/
     Disallow: /api/
     Disallow: /admin/
     Disallow: /auth/
     Disallow: /reset-password
     Disallow: /user
     Disallow: /search
-    Allow: /_next/image
     Allow: /
 
 
