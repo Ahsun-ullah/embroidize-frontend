@@ -1,5 +1,4 @@
 // app/product/[slug]/page.jsx
-export const dynamic = 'force-dynamic';
 import Footer from '@/components/user/HomePage/Footer';
 import Header from '@/components/user/HomePage/Header';
 import { SingleProductComponent } from '@/features/products/components/SingleProductComponent';

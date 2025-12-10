@@ -6,9 +6,7 @@ import Script from 'next/script';
 import { Suspense } from 'react';
 import 'remixicon/fonts/remixicon.css';
 import './globals.css';
-export const dynamic = 'force-dynamic';
-export const revalidate = 0;
-export const fetchCache = 'default-no-store';
+
 
 export const plusJakarta = Plus_Jakarta_Sans({
   subsets: ['latin'],
