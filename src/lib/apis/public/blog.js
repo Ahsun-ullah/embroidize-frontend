@@ -39,6 +39,8 @@ export async function getSingleBlog(slug) {
     const headers = new Headers();
     headers.set('Authorization', 'Bearer some-static-token');
 
+    console.log(slug);
+
     const response = await fetch(
       `${process.env.NEXT_PUBLIC_BASE_API_URL_PROD}/public/blog/${slug}`,
       {
@@ -47,6 +49,8 @@ export async function getSingleBlog(slug) {
         next: { revalidate: 0 },
       },
     );
+
+    console.log(response);
 
     if (!response.ok) {
       throw new Error(`API request failed with status ${response.status}`);
