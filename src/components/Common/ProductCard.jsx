@@ -1,7 +1,9 @@
+import { useUserInfoQuery } from '@/lib/redux/common/user/userInfoSlice';
 import { blurDataURL } from '@/utils/blur';
 import Image from 'next/image';
 import Link from 'next/link';
 import React from 'react';
+import SkuFlag from './SkuFlag';
 
 function DownloadIcon(props) {
   return (
@@ -45,8 +47,14 @@ const ProductCard = React.memo(function ProductCard({ item, index = 0 }) {
     .replace(/(^-|-$)/g, '');
   const categoryLink = `/category/${encodeURIComponent(categorySlug)}`;
 
+  const { data: userInfoData } = useUserInfoQuery();
+
   return (
-    <div className='bg-white rounded-2xl shadow-xl overflow-hidden'>
+    <div className='bg-white rounded-2xl shadow-xl overflow-hidden relative'>
+      {/* SKU FLAG */}
+      {item?.sku_code && userInfoData?.role === 'admin' && (
+        <SkuFlag sku={item.sku_code} />
+      )}
       <Link
         href={productLink}
         className='block group'

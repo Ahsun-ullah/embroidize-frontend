@@ -2,6 +2,8 @@
 
 import { ErrorToast } from '@/components/Common/ErrorToast';
 import LoadingSpinner from '@/components/Common/LoadingSpinner';
+import SkuFlag from '@/components/Common/SkuFlag';
+import { useUserInfoQuery } from '@/lib/redux/common/user/userInfoSlice';
 import { formatNumber } from '@/utils/functions/page';
 import {
   Button,
@@ -26,6 +28,10 @@ export default function ProductDownloadCard({ data }) {
     count: null,
     duration: null,
   });
+
+  const { data: userInfoData } = useUserInfoQuery();
+
+
 
   // ---- Detect ALL mobile / tablet / iPad / iOS ----
   useEffect(() => {
@@ -166,12 +172,20 @@ export default function ProductDownloadCard({ data }) {
 
   return (
     <>
-      <Card isFooterBlurred className='flex flex-col p-8'>
-        <h2 className='text-black font-bold text-2xl'>{data?.name}</h2>
+      <Card
+        isFooterBlurred
+        className='relative flex flex-col p-8 overflow-hidden gap-4'
+      >
+        {/* SKU FLAG */}
+        {data?.sku_code && userInfoData?.role === 'admin' && (
+          <SkuFlag sku={data.sku_code} />
+        )}
+
+        <h1 className='text-black font-bold text-2xl pt-3'>{data?.name}</h1>
         <p className='text-gray-600 my-2'>{data?.meta_description}</p>
 
         <div className='flex items-center justify-between mb-2'>
-          <h2 className='text-black font-bold'>Select For Free Download</h2>
+          <p className='text-black font-bold'>Select For Free Download</p>
           <span className='font-semibold flex items-center gap-1'>
             <i className='ri-download-2-line'></i>
             {formatNumber(data?.downloadCount)}
@@ -183,7 +197,8 @@ export default function ProductDownloadCard({ data }) {
         ) : (
           <Button
             variant='flat'
-            className='border w-full bg-black text-white font-semibold text-lg h-12'
+            size='lg'
+            className='border w-full bg-black text-white font-semibold text-xl h-14'
             onPress={() => setShowFormatSheet(true)}
           >
             Free Download
@@ -203,12 +218,12 @@ export default function ProductDownloadCard({ data }) {
           base: 'rounded-t-2xl max-h-[70vh] relative',
         }}
       >
-        <ModalContent>
+        <ModalContent className='bg-gray-200 pb-6'>
           {(onClose) => (
             <>
               <button
                 onClick={onClose}
-                className='absolute top-3 right-3 text-gray-600 hover:text-black z-10'
+                className='absolute top-3 right-3 text-gray-600 hover:text-black z-10 text-2xl'
               >
                 ✕
               </button>
@@ -221,7 +236,7 @@ export default function ProductDownloadCard({ data }) {
                 {data?.available_file_types?.map((type) => (
                   <Button
                     key={type}
-                    className='w-full bg-gray-100 hover:bg-gray-200 text-lg font-bold'
+                    className='w-full bg-white hover:bg-white text-lg font-bold'
                     onPress={() =>
                       handleSingleZipFileDownload({
                         extension: type,

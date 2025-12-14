@@ -2,6 +2,7 @@
 
 import LoadingSpinner from '@/components/Common/LoadingSpinner';
 import { capitalize } from '@/utils/functions/page';
+import { Card } from '@heroui/react';
 import { marked } from 'marked';
 import Link from 'next/link';
 import { Suspense, useState } from 'react';
@@ -59,82 +60,120 @@ export const SingleProductComponent = ({
           {/* </Suspense> */}
         </div>
 
-        <div className='flex flex-col gap-10 w-full'>
+        <div className='flex flex-col gap-6 w-full rounded-2xl h-fit'>
           <ProductDownloadCard data={singleProductData} />
-          {singleProductData?.product_pdf?.url && (
-            <a
-              href={singleProductData.product_pdf.url}
-              target='_blank'
-              rel='noopener noreferrer'
-              className='inline-flex items-center justify-center gap-2 px-4 py-2 bg-white hover:bg-black  hover:text-white  text-black rounded-lg shadow-lg transition font-bold text-base '
-              title='Download Product PDF'
-            >
-              <svg
-                xmlns='http://www.w3.org/2000/svg'
-                viewBox='0 0 24 24'
-                width='32'
-                height='32'
-                fill='rgba(165,28,16,1)'
-              >
-                <path d='M3.9985 2C3.44749 2 3 2.44405 3 2.9918V21.0082C3 21.5447 3.44476 22 3.9934 22H20.0066C20.5551 22 21 21.5489 21 20.9925L20.9997 7L16 2H3.9985ZM10.5 7.5H12.5C12.5 9.98994 14.6436 12.6604 17.3162 13.5513L16.8586 15.49C13.7234 15.0421 10.4821 16.3804 7.5547 18.3321L6.3753 16.7191C7.46149 15.8502 8.50293 14.3757 9.27499 12.6534C10.0443 10.9373 10.5 9.07749 10.5 7.5ZM11.1 13.4716C11.3673 12.8752 11.6043 12.2563 11.8037 11.6285C12.2754 12.3531 12.8553 13.0182 13.5102 13.5953C12.5284 13.7711 11.5666 14.0596 10.6353 14.4276C10.8 14.1143 10.9551 13.7948 11.1 13.4716Z'></path>
-              </svg>
-              <span> MORE SWEING INFO (PDF)</span>
-            </a>
-          )}
-          <div className='bg-white py-4 px-4 md:px-8 rounded-2xl shadow-lg'>
-            <div className='max-w-5xl mx-auto grid grid-cols-1 md:grid-cols-3 gap-10 text-center text-gray-800'>
-              <div className='flex flex-col items-center'>
-                <svg
-                  className='w-8 h-8 text-black mb-4'
-                  fill='currentColor'
-                  viewBox='0 0 20 20'
-                >
-                  <path d='M10 0C8.895 0 8 0.895 8 2v7H5l5 5 5-5h-3V2c0-1.105-.895-2-2-2zm-6 18v2h12v-2H4z' />
-                </svg>
-                <h3 className='font-semibold text-xs uppercase'>
-                  Including
-                  <br />
-                  Commercial License
-                </h3>
-              </div>
 
-              <div className='flex flex-col items-center'>
-                <svg
-                  className='w-8 h-8 text-black mb-4'
-                  fill='currentColor'
-                  viewBox='0 0 20 20'
+          <div className='flex flex-col gap-4 bg-slate-50 p-4 rounded-2xl'>
+            <Card
+              isFooterBlurred
+              className='flex flex-col hover:bg-black/5 transition'
+            >
+              {singleProductData?.product_pdf?.url && (
+                <a
+                  href={singleProductData.product_pdf.url}
+                  target='_blank'
+                  rel='noopener noreferrer'
+                  className='inline-flex items-center justify-center gap-2 px-4 py-3 text-black font-bold '
+                  title='Download Product PDF'
                 >
-                  <path d='M10 0C4.486 0 0 4.486 0 10s4.486 10 10 10 10-4.486 10-10S15.514 0 10 0zm0 3a2 2 0 110 4 2 2 0 010-4zm0 14c-2.485 0-4.675-1.28-6-3.25.03-2 4-3.1 6-3.1s5.97 1.1 6 3.1C14.675 15.72 12.485 17 10 17z' />
+                  <svg
+                    xmlns='http://www.w3.org/2000/svg'
+                    viewBox='0 0 24 24'
+                    width='24'
+                    height='24'
+                    fill='black'
+                  >
+                    <path d='M3.9985 2C3.44749 2 3 2.44405 3 2.9918V21.0082C3 21.5447 3.44476 22 3.9934 22H20.0066C20.5551 22 21 21.5489 21 20.9925L20.9997 7L16 2H3.9985ZM10.5 7.5H12.5C12.5 9.98994 14.6436 12.6604 17.3162 13.5513L16.8586 15.49C13.7234 15.0421 10.4821 16.3804 7.5547 18.3321L6.3753 16.7191C7.46149 15.8502 8.50293 14.3757 9.27499 12.6534C10.0443 10.9373 10.5 9.07749 10.5 7.5ZM11.1 13.4716C11.3673 12.8752 11.6043 12.2563 11.8037 11.6285C12.2754 12.3531 12.8553 13.0182 13.5102 13.5953C12.5284 13.7711 11.5666 14.0596 10.6353 14.4276C10.8 14.1143 10.9551 13.7948 11.1 13.4716Z' />
+                  </svg>
+
+                  <span>MORE SEWING INFO (PDF)</span>
+                </a>
+              )}
+            </Card>
+
+            {/* Cards */}
+            <div className='flex flex-col sm:flex-row justify-between gap-4 w-full'>
+              {/* Card 1 */}
+              <Card
+                isFooterBlurred
+                className='flex flex-col items-center justify-center p-4 hover:bg-black/5 transition-all  rounded-2xl flex-1 gap-2'
+              >
+                <svg
+                  xmlns='http://www.w3.org/2000/svg'
+                  width='24'
+                  height='24'
+                  viewBox='0 0 24 24'
+                  fill='none'
+                  stroke='#50a54a'
+                  stroke-width='3'
+                  stroke-linecap='round'
+                  stroke-linejoin='round'
+                  class='lucide lucide-badge-check-icon lucide-badge-check'
+                >
+                  <path d='M3.85 8.62a4 4 0 0 1 4.78-4.77 4 4 0 0 1 6.74 0 4 4 0 0 1 4.78 4.78 4 4 0 0 1 0 6.74 4 4 0 0 1-4.77 4.78 4 4 0 0 1-6.75 0 4 4 0 0 1-4.78-4.77 4 4 0 0 1 0-6.76Z' />
+                  <path d='m9 12 2 2 4-4' />
                 </svg>
-                <h3 className='font-semibold text-xs uppercase'>
+                <p className='font-bold text-xs text-center'>
+                  Commercial
+                  <br />
+                  License
+                </p>
+              </Card>
+
+              {/* Card 2 */}
+              <Card
+                isFooterBlurred
+                className='flex flex-col items-center justify-center p-4 hover:bg-black/5 transition-all  rounded-2xl flex-1 gap-2'
+              >
+                <svg
+                  xmlns='http://www.w3.org/2000/svg'
+                  width='24'
+                  height='24'
+                  viewBox='0 0 24 24'
+                  fill='none'
+                  stroke='#8d928b'
+                  stroke-width='3'
+                  stroke-linecap='round'
+                  stroke-linejoin='round'
+                  class='lucide lucide-headset-icon lucide-headset'
+                >
+                  <path d='M3 11h3a2 2 0 0 1 2 2v3a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-5Zm0 0a9 9 0 1 1 18 0m0 0v5a2 2 0 0 1-2 2h-1a2 2 0 0 1-2-2v-3a2 2 0 0 1 2-2h3Z' />
+                  <path d='M21 16v2a4 4 0 0 1-4 4h-5' />
+                </svg>
+                <p className='font-bold text-xs text-center'>
                   Premium
                   <br />
-                  Technical Support
-                </h3>
-              </div>
+                  Support
+                </p>
+              </Card>
 
-              <div className='flex flex-col items-center'>
+              {/* Card 3 */}
+              <Card
+                isFooterBlurred
+                className='flex flex-col items-center justify-center p-4 hover:bg-black/5 transition-all  rounded-2xl flex-1 gap-2'
+              >
                 <svg
-                  className='w-8 h-8 text-black mb-4'
-                  fill='currentColor'
+                  xmlns='http://www.w3.org/2000/svg'
+                  width='24'
+                  height='24'
                   viewBox='0 0 24 24'
+                  fill='none'
+                  stroke='#aebcd0'
+                  stroke-width='3'
+                  stroke-linecap='round'
+                  stroke-linejoin='round'
+                  class='lucide lucide-spool-icon lucide-spool'
                 >
-                  <path d='M12 0c-1.1 0-2 .9-2 2v4h-2V2c0-1.1-.9-2-2-2S4 0.9 4 2v4H2c-1.1 0-2 .9-2 2v2h24V8c0-1.1-.9-2-2-2h-2V2c0-1.1-.9-2-2-2s-2 .9-2 2v4h-2V2c0-1.1-.9-2-2-2zM0 12v10c0 1.1.9 2 2 2h20c1.1 0 2-.9 2-2V12H0zm6 2h12v2H6v-2z' />
+                  <path d='M17 13.44 4.442 17.082A2 2 0 0 0 4.982 21H19a2 2 0 0 0 .558-3.921l-1.115-.32A2 2 0 0 1 17 14.837V7.66' />
+                  <path d='m7 10.56 12.558-3.642A2 2 0 0 0 19.018 3H5a2 2 0 0 0-.558 3.921l1.115.32A2 2 0 0 1 7 9.163v7.178' />
                 </svg>
-                <h3 className='font-semibold text-xs uppercase'>
-                  Embroidery
+                <p className='font-bold text-xs text-center'>
+                  Easy To
                   <br />
-                  Machine Friendly
-                </h3>
-              </div>
+                  Use
+                </p>
+              </Card>
             </div>
-
-            {!singleProductData?.product_pdf?.url && (
-              <p className='text-center mt-8 text-gray-600'>
-                This design is an embroidery design, optimized for embroidery
-                machines.
-              </p>
-            )}
           </div>
         </div>
       </div>
@@ -147,14 +186,14 @@ export const SingleProductComponent = ({
           <Suspense fallback={<LoadingSpinner />}>
             <div className='mb-10'>
               <div className='flex flex-col md:flex-row md:items-center md:justify-between gap-4'>
-                <h2 className='text-black font-bold text-2xl mb-4 md:mb-0 capitalize'>
+                <h2 className='text-black font-bold text-4xl mb-6 capitalize'>
                   About {singleProductData?.name}
                 </h2>
               </div>
 
               <div
                 dangerouslySetInnerHTML={{ __html: rawMarkup }}
-                className='prose max-w-none break-words whitespace-pre-wrap font-sans text-lg'
+                className=' max-w-none break-words whitespace-pre-wrap text-2xl'
               />
             </div>
           </Suspense>
