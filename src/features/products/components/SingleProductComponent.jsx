@@ -105,10 +105,10 @@ export const SingleProductComponent = ({
                   viewBox='0 0 24 24'
                   fill='none'
                   stroke='#50a54a'
-                  stroke-width='3'
-                  stroke-linecap='round'
-                  stroke-linejoin='round'
-                  class='lucide lucide-badge-check-icon lucide-badge-check'
+                  strokeWidth='3'
+                  strokeLinecap='round'
+                  strokeLinejoin='round'
+                  className='lucide lucide-badge-check-icon lucide-badge-check'
                 >
                   <path d='M3.85 8.62a4 4 0 0 1 4.78-4.77 4 4 0 0 1 6.74 0 4 4 0 0 1 4.78 4.78 4 4 0 0 1 0 6.74 4 4 0 0 1-4.77 4.78 4 4 0 0 1-6.75 0 4 4 0 0 1-4.78-4.77 4 4 0 0 1 0-6.76Z' />
                   <path d='m9 12 2 2 4-4' />
@@ -132,10 +132,10 @@ export const SingleProductComponent = ({
                   viewBox='0 0 24 24'
                   fill='none'
                   stroke='#8d928b'
-                  stroke-width='3'
-                  stroke-linecap='round'
-                  stroke-linejoin='round'
-                  class='lucide lucide-headset-icon lucide-headset'
+                  strokeWidth='3'
+                  strokeLinecap='round'
+                  strokeLinejoin='round'
+                  className='lucide lucide-headset-icon lucide-headset'
                 >
                   <path d='M3 11h3a2 2 0 0 1 2 2v3a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-5Zm0 0a9 9 0 1 1 18 0m0 0v5a2 2 0 0 1-2 2h-1a2 2 0 0 1-2-2v-3a2 2 0 0 1 2-2h3Z' />
                   <path d='M21 16v2a4 4 0 0 1-4 4h-5' />
@@ -159,10 +159,10 @@ export const SingleProductComponent = ({
                   viewBox='0 0 24 24'
                   fill='none'
                   stroke='#aebcd0'
-                  stroke-width='3'
-                  stroke-linecap='round'
-                  stroke-linejoin='round'
-                  class='lucide lucide-spool-icon lucide-spool'
+                  strokeWidth='3'
+                  strokeLinecap='round'
+                  strokeLinejoin='round'
+                  className='lucide lucide-spool-icon lucide-spool'
                 >
                   <path d='M17 13.44 4.442 17.082A2 2 0 0 0 4.982 21H19a2 2 0 0 0 .558-3.921l-1.115-.32A2 2 0 0 1 17 14.837V7.66' />
                   <path d='m7 10.56 12.558-3.642A2 2 0 0 0 19.018 3H5a2 2 0 0 0-.558 3.921l1.115.32A2 2 0 0 1 7 9.163v7.178' />
@@ -186,7 +186,7 @@ export const SingleProductComponent = ({
           <Suspense fallback={<LoadingSpinner />}>
             <div className='mb-10'>
               <div className='flex flex-col md:flex-row md:items-center md:justify-between gap-4'>
-                <h2 className='text-black font-bold text-4xl mb-6 capitalize'>
+                <h2 className='text-black font-bold text-3xl mb-6 capitalize'>
                   About {singleProductData?.name}
                 </h2>
               </div>

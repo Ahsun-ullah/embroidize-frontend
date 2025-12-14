@@ -14,6 +14,7 @@ import {
   ModalHeader,
 } from '@heroui/react';
 import Cookies from 'js-cookie';
+import { Download } from 'lucide-react';
 import { usePathname } from 'next/navigation';
 import { useEffect, useState } from 'react';
 
@@ -30,8 +31,6 @@ export default function ProductDownloadCard({ data }) {
   });
 
   const { data: userInfoData } = useUserInfoQuery();
-
-
 
   // ---- Detect ALL mobile / tablet / iPad / iOS ----
   useEffect(() => {
@@ -201,7 +200,7 @@ export default function ProductDownloadCard({ data }) {
             className='border w-full bg-black text-white font-semibold text-xl h-14'
             onPress={() => setShowFormatSheet(true)}
           >
-            Free Download
+            <Download color='#ffffff' strokeWidth={3} /> Free Download
           </Button>
         )}
       </Card>

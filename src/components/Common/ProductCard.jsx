@@ -1,3 +1,5 @@
+'use client';
+
 import { useUserInfoQuery } from '@/lib/redux/common/user/userInfoSlice';
 import { blurDataURL } from '@/utils/blur';
 import Image from 'next/image';
