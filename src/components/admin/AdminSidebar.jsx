@@ -60,7 +60,7 @@ export default function AdminSidebar({ isCollapsed, setIsCollapsed }) {
             {!isCollapsed ? (
               <span className='sidebar-text '>
                 <i className='ri-download-cloud-fill me-2'></i>
-                Downloads
+                Downloaded Products
               </span>
             ) : (
               <Tooltip content={'Downloads'}>

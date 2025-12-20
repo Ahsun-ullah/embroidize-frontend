@@ -82,7 +82,7 @@ export default function DashboardCharts({
   downloadData = [],
   locationData = [],
 }) {
-  const [filter, setFilter] = useState('all'); 
+  const [filter, setFilter] = useState('all');
   const [customRange, setCustomRange] = useState(null);
 
   // --- Filtering Logic ---
@@ -117,6 +117,7 @@ export default function DashboardCharts({
     () => filterDataByDate(userData),
     [userData, filter, customRange],
   );
+  
   const filteredDownloadData = useMemo(
     () => filterDataByDate(downloadData),
     [downloadData, filter, customRange],

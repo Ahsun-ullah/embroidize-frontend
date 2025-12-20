@@ -180,7 +180,7 @@ export default function ProductDownloadCard({ data }) {
           <SkuFlag sku={data.sku_code} />
         )}
 
-        <h1 className='text-black font-bold text-2xl pt-3'>{data?.name}</h1>
+        <h1 className='text-black font-bold text-2xl'>{data?.name}</h1>
         <p className='text-gray-600 my-2'>{data?.meta_description}</p>
 
         <div className='flex items-center justify-between mb-2'>
