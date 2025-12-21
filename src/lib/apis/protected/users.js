@@ -175,6 +175,8 @@ export async function getDownloadStats(
 
     const responseData = await response.json();
 
+    console.log(responseData);
+
     return {
       data: responseData?.data?.data || [],
       pagination: responseData?.data?.pagination || { total: 0, totalPages: 0 },

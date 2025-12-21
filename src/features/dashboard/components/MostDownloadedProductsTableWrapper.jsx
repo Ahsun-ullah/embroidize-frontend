@@ -117,10 +117,10 @@ export default function MostDownloadedProductsTableWrapper({
         return <>{item.product.category?.name || '-'}</>;
       case 'sub_category':
         return <>{item.product.sub_category?.name || '-'}</>;
-      case 'totalDownloads':
-        return <>{item.totalDownloads}</>; // Fixed: Show actual download count
-      case 'fileType':
-        return <p className='uppercase'>{item.fileType || '-'}</p>;
+      case 'downloadCount':
+        return <>{item.downloadCount}</>;
+      case 'fileTypes':
+        return <p className='uppercase'>{item.fileTypes?.join(', ') || '-'}</p>;
       case 'actions':
         return (
           <div className='relative flex justify-center items-center gap-2'>
@@ -151,6 +151,7 @@ export default function MostDownloadedProductsTableWrapper({
             { label: 'Today', value: 'today', unit: null },
             { label: 'Yesterday', value: 'yesterday', unit: null },
             { label: 'Last 24h', value: 1, unit: 'days' },
+            { label: '3D', value: 3, unit: 'days' },
             { label: '7D', value: 7, unit: 'days' },
             { label: '15D', value: 15, unit: 'days' },
             { label: '1M', value: 1, unit: 'months' },
@@ -171,6 +172,14 @@ export default function MostDownloadedProductsTableWrapper({
               {btn.label}
             </button>
           ))}
+        </div>
+
+        <div className='flex gap-2 items-center'>
+          {pagination?.totalDownloads !== undefined && (
+            <div className='mb-0 font-semibold text-lg'>
+              Total {pagination?.totalDownloads || 0} File Downloads
+            </div>
+          )}
         </div>
 
         {/* Date Inputs */}

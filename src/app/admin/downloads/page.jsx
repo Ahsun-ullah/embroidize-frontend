@@ -20,12 +20,14 @@ export default async function DownloadsPage({ searchParams }) {
 
   const { data, pagination } = statsResponse;
 
+  console.log(data);
+
   const columns = [
     { name: 'Product', uid: 'name' },
     { name: 'Category', uid: 'category' },
     { name: 'Subcategory', uid: 'sub_category' },
-    // { name: 'Downloads', uid: 'totalDownloads' },
-    { name: 'File Types', uid: 'fileType' },
+    { name: 'Downloads', uid: 'downloadCount' },
+    { name: 'File Types', uid: 'fileTypes' },
     { name: 'Actions', uid: 'actions' },
   ];
 
@@ -34,7 +36,7 @@ export default async function DownloadsPage({ searchParams }) {
       <div className='flex justify-between items-center me-6'>
         <h1 className='text-2xl font-bold mb-4'>All Downloaded Products</h1>
         <div className='mb-4 font-semibold text-lg'>
-          Total {pagination?.total || 0} Downloads
+          Total {pagination?.total || 0} Product Downloads
         </div>
       </div>
       <MostDownloadedProductsTableWrapper

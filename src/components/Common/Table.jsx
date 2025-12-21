@@ -9,7 +9,7 @@ import {
   TableHeader,
   TableRow,
 } from '@heroui/react';
-import { useMemo, useState } from 'react';
+import { useMemo } from 'react';
 
 const UserTable = ({
   data,
@@ -20,9 +20,8 @@ const UserTable = ({
   pagination,
   onPageChange,
   topContent,
+  ...props
 }) => {
-  const [selectedKeys, setSelectedKeys] = useState(new Set([]));
-
   const paginatedItems = useMemo(() => {
     return Array.isArray(data) ? data : [];
   }, [data]);
@@ -30,9 +29,11 @@ const UserTable = ({
   const pages = pagination?.totalPages || 1;
   const currentPage = pagination?.currentPage || 1;
 
+
   const defaultTopContent = (
     <div className='flex flex-col gap-4'>
-      <div className='flex justify-between gap-3 items-end'>
+      {/* Added 'justify-center' to align items in the center horizontally */}
+      <div className='flex  gap-3 items-center w-full'>
         <Input
           isClearable
           className='w-full sm:max-w-[44%]'
@@ -40,6 +41,13 @@ const UserTable = ({
           onValueChange={onSearchChange}
           onClear={() => onSearchChange('')}
         />
+
+        {props.selectedIds?.length > 0 && (
+          <div className='text-lg text-gray-600 whitespace-nowrap'>
+            {props.selectedIds.length} item
+            {props.selectedIds.length > 1 ? 's' : ''} selected
+          </div>
+        )}
       </div>
     </div>
   );
@@ -67,9 +75,9 @@ const UserTable = ({
         aria-label='Example table with custom cells, pagination, and sorting'
         bottomContent={bottomContent}
         topContent={finalTopContent}
-        selectedKeys={selectedKeys}
+        selectedKeys={props.selectedKeys}
         selectionMode='multiple'
-        onSelectionChange={setSelectedKeys}
+        onSelectionChange={props.onSelectionChange}
       >
         <TableHeader columns={columns}>
           {(column) => (

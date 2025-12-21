@@ -7,7 +7,7 @@ import {
   DropdownItem,
   DropdownMenu,
   DropdownTrigger,
-  Input, 
+  Input,
   Modal,
   ModalBody,
   ModalContent,
@@ -74,7 +74,6 @@ export default function UsersTableWrapper({
   const handleFilterChange = (key, value) => {
     const newFilters = { ...filters, [key]: value };
     setFilters(newFilters);
-    // Debounce could be added here for text search
     updateURL(newFilters);
   };
 
@@ -193,12 +192,12 @@ export default function UsersTableWrapper({
 
       {/* Pass topContent (Filter Bar) to your Table component */}
       <UserTable
-        data={initialData} // Direct data from server (no local slice)
+        data={initialData}
         columns={columns}
         renderCell={renderCell}
-        pagination={pagination} // Pass full pagination object
+        pagination={pagination}
         onPageChange={onPageChange}
-        topContent={topContent} // Pass the filter inputs
+        topContent={topContent}
       />
 
       <Modal isOpen={isModalOpen} onClose={handleCloseModal}>
