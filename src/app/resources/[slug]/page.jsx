@@ -12,56 +12,47 @@ import BlogPageSidebarContent from '../ResourcePageSidebarContent';
 export async function generateMetadata({ params }) {
   const slugData = params.slug;
   const blogData = await getSingleBlog(slugData);
-  const blog = blogData?.blogs;
-  // const blog = await getPostBySlug(slugData);
+  const resource = blogData?.blogs;
 
-  if (!blog) return {};
+  if (!resource) return {};
 
   return {
-    title: blog?.title,
-    // blog?.title?.rendered
+    title: resource?.title,
     description:
-      blog?.meta_description ||
+      resource?.meta_description ||
       'Explore the latest embroidery design tutorials, tips, and updates from the Embroidize team.',
     alternates: {
-      canonical: `https://embroidize.com/blog/${blog.slug}`,
+      canonical: `https://embroidize.com/resource/${resource.slug}`,
     },
-    keywords: blog?.meta_keywords?.join(', '),
-    // blog?.tags?.join(', ')
+    keywords: resource?.meta_keywords?.join(', '),
     openGraph: {
-      title: blog?.title,
-      // blog?.title?.rendered
-      description: blog?.meta_description,
+      title: resource?.title,
+      description: resource?.meta_description,
       images: [
         {
-          url: blog?.image?.url,
-          // blog?.featuredImage
+          url: resource?.image?.url,
           width: 1200,
           height: 630,
-          alt: blog?.title,
-          // blog?.title?.rendered || 'Embroidery Design'
+          alt: resource?.title,
         },
       ],
     },
     twitter: {
       card: 'summary_large_image',
-      title: blog?.title,
-      // blog?.title?.rendered
-      description: blog?.meta_description,
+      title: resource?.title,
+      description: resource?.meta_description,
       images: [
-        blog?.image?.url,
-        // blog?.featuredImage || 'https://embroidize.com/og-banner.jpg'
+        resource?.image?.url,
       ],
     },
   };
 }
 
 export default async function SingleBlogPage({ params }) {
-  // const blog = await getPostBySlug(params.slug);
   const slugData = params.slug;
   const blogData = await getSingleBlog(slugData);
-  const blog = blogData?.blogs;
-  if (!blog) return notFound();
+  const resource = blogData?.blogs;
+  if (!resource) return notFound();
 
   // JSON-LD Structured Data
   const jsonLd = {
@@ -69,16 +60,14 @@ export default async function SingleBlogPage({ params }) {
     '@type': 'BlogPosting',
     mainEntityOfPage: {
       '@type': 'WebPage',
-      '@id': `https://embroidize.com/blog/${blog.slug}`,
+      '@id': `https://embroidize.com/resource/${resource.slug}`,
     },
-    headline: blog?.title,
-    // blog?.title?.rendered
+    headline: resource?.title,
 
     description:
-      blog?.meta_description ||
+      resource?.meta_description ||
       'Explore the latest embroidery design tutorials, tips, and updates from the Embroidize team.',
-    image: blog?.image?.url,
-    // blog?.featuredImage || 'https://embroidize.com/og-banner.jpg'
+    image: resource?.image?.url,
     author: {
       '@type': 'Organization',
       name: 'Embroidize',
@@ -91,11 +80,8 @@ export default async function SingleBlogPage({ params }) {
         url: 'https://embroidize.com/logo.png',
       },
     },
-    datePublished: blog?.createdAt,
-    // blog?.date
-
-    dateModified: blog?.updatedAt,
-    // blog?.modified || blog?.date
+    datePublished: resource?.createdAt,
+    dateModified: resource?.updatedAt,
   };
 
   return (
@@ -109,12 +95,12 @@ export default async function SingleBlogPage({ params }) {
 
         <nav className='mb-6'>
           <Link
-            href='/blog'
+            href='/resource'
             prefetch={false}
             className='button inline-block text-base font-medium hover:underline'
             aria-label='Back to Blog'
           >
-            ← Back to Blog
+            ← Back to Resources
           </Link>
         </nav>
 
@@ -127,12 +113,12 @@ export default async function SingleBlogPage({ params }) {
             <figure className='relative w-full aspect-[3/2] mb-12 rounded-lg overflow-hidden shadow-md'>
               <Image
                 src={
-                  blog?.image?.url
-                  // blog?.featuredImage || 'https://embroidize.com/og-banner.jpg'
+                  resource?.image?.url
+                  // resource?.featuredImage || 'https://embroidize.com/og-banner.jpg'
                 }
                 alt={
-                  blog?.title
-                  // blog?.title?.rendered || 'Embroidery Design'
+                  resource?.title
+                  // resource?.title?.rendered || 'Embroidery Design'
                 }
                 fill
                 className='object-cover'
@@ -146,27 +132,27 @@ export default async function SingleBlogPage({ params }) {
               <header className='mb-6'>
                 <h1 className='text-4xl font-bold mb-2' itemProp='headline'>
                   {
-                    blog?.title
-                    // blog?.title?.rendered
+                    resource?.title
+                    // resource?.title?.rendered
                   }
                 </h1>
                 <time
                   className='block text-gray-600 text-sm'
                   dateTime={
-                    blog?.createdAt
-                    // blog?.date
+                    resource?.createdAt
+                    // resource?.date
                   }
                   itemProp='datePublished'
                 >
-                  {new Date(blog?.createdAt).toISOString().split('T')[0]}
+                  {new Date(resource?.createdAt).toISOString().split('T')[0]}
                 </time>
 
-                {blog?.meta_keywords?.length >
-                  //  blog?.tags?.length
+                {resource?.meta_keywords?.length >
+                  //  resource?.tags?.length
                   0 && (
                   <div className='flex flex-wrap gap-2 mt-4'>
-                    {blog?.meta_keywords
-                      // blog.tags.
+                    {resource?.meta_keywords
+                      // resource.tags.
                       .map((tag) => (
                         <Link
                           key={tag}
@@ -183,11 +169,11 @@ export default async function SingleBlogPage({ params }) {
               </header>
 
               <section
-                className='porse custom-blog-content '
+                className='porse custom-resource-content '
                 style={{ fontSize: 18 }}
                 dangerouslySetInnerHTML={{
-                  __html: blog?.description,
-                  // blog?.content?.rendered
+                  __html: resource?.description,
+                  // resource?.content?.rendered
                 }}
                 itemProp='articleBody'
               />

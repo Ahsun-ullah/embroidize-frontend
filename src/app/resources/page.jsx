@@ -49,8 +49,6 @@ export default async function AllResourcesPageInFrontSite({ searchParams }) {
   const endIndex = startIndex + perPageData;
   const paginatedResources = resources.slice(startIndex, endIndex);
 
-  console.log(resources);
-
   return (
     <>
       <Header />
