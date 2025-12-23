@@ -11,7 +11,7 @@ import {
   useDisclosure,
   User,
 } from '@heroui/react';
-import { useCallback, useEffect, useState, useMemo } from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 import { BlogForm } from './BlogForm';
 
 export default function BlogTableWrapper({
@@ -21,7 +21,7 @@ export default function BlogTableWrapper({
   blogSearchableFieldsName,
 }) {
   const [blogId, setBlogId] = useState('');
-  
+
   // State for blog pagination
   const [blogCurrentPage, setBlogCurrentPage] = useState(1);
 
@@ -35,7 +35,15 @@ export default function BlogTableWrapper({
     setBlogFilteredData(blogInitialData || []);
   }, [blogInitialData]);
 
-  const { data: getSingleBlogData } = useSingleBlogQuery(blogId);
+  // ⭐ Skip query when blogId is empty, refetch when it changes
+  const {
+    data: getSingleBlogData,
+    isLoading: isSingleBlogLoading,
+    refetch: refetchSingleBlog, // ⭐ Get refetch function
+  } = useSingleBlogQuery(blogId, {
+    skip: !blogId, // ⭐ Skip query when no blogId
+    refetchOnMountOrArgChange: true, // ⭐ Always refetch on mount/arg change
+  });
 
   const { isOpen, onOpen, onOpenChange } = useDisclosure();
 
@@ -86,70 +94,81 @@ export default function BlogTableWrapper({
     [blogInitialData, blogSearchableFieldsName],
   );
 
-  const blogRenderCell = useCallback((blogItem, blogColumnKey) => {
-    try {
-      const cellValue = blogItem[blogColumnKey];
+  // ⭐ Handle opening modal with fresh data
+  const handleEditBlog = useCallback(
+    (id) => {
+      setBlogId(id);
+      setTimeout(() => {
+        onOpen();
+      }, 0);
+    },
+    [onOpen],
+  );
 
-      switch (blogColumnKey) {
-        case 'image?.url':
-          return (
-            <User
-              avatarProps={{ radius: 'lg', src: blogItem?.image?.url }}
-              name={cellValue}
-            />
-          );
-        case 'title':
-          return <div className='capitalize'>{blogItem.title}</div>;
-        case 'actions':
-          return (
-            <div className='flex justify-start items-center gap-2'>
-              <Dropdown>
-                <DropdownTrigger>
-                  <Button isIconOnly size='sm' variant='light'>
-                    <VerticalDotsIcon className='text-default-300' />
-                  </Button>
-                </DropdownTrigger>
-                <DropdownMenu>
-                  <DropdownItem
-                    key='edit'
-                    onPress={() => {
-                      setBlogId(blogItem?._id);
-                      onOpen();
-                    }}
-                  >
-                    Edit
-                  </DropdownItem>
-                  {/* {blogItem?.status === 'active' ? (
+  // ⭐ Handle closing modal and clearing blogId
+  const handleCloseModal = useCallback(() => {
+    onOpenChange();
+    // Clear blogId after modal closes
+    setTimeout(() => {
+      setBlogId('');
+    }, 300); // Wait for modal close animation
+  }, [onOpenChange]);
+
+  const blogRenderCell = useCallback(
+    (blogItem, blogColumnKey) => {
+      try {
+        const cellValue = blogItem[blogColumnKey];
+
+        switch (blogColumnKey) {
+          case 'image?.url':
+            return (
+              <User
+                avatarProps={{ radius: 'lg', src: blogItem?.image?.url }}
+                name={cellValue}
+              />
+            );
+          case 'title':
+            return <div className='capitalize'>{blogItem.title}</div>;
+          case 'doc_type':
+            return (
+              <div className='capitalize'>
+                {blogItem.doc_type === 'blog' ? (
+                  <span className='text-blue-600'>Blog</span>
+                ) : (
+                  <span className='text-green-600'>Resource</span>
+                )}
+              </div>
+            );
+          case 'actions':
+            return (
+              <div className='flex justify-start items-center gap-2'>
+                <Dropdown>
+                  <DropdownTrigger>
+                    <Button isIconOnly size='sm' variant='light'>
+                      <VerticalDotsIcon className='text-default-300' />
+                    </Button>
+                  </DropdownTrigger>
+                  <DropdownMenu>
                     <DropdownItem
-                      key='inactive'
-                      onPress={() => {}}
-                      className='text-danger'
-                      color='danger'
+                      key='edit'
+                      onPress={() => handleEditBlog(blogItem?._id)}
                     >
-                      Inactive
+                      Edit
                     </DropdownItem>
-                  ) : (
-                    <DropdownItem
-                      key='active'
-                      onPress={() => {}}
-                      className='text-success'
-                      color='success'
-                    >
-                      Active
-                    </DropdownItem>
-                  )} */}
-                </DropdownMenu>
-              </Dropdown>
-            </div>
-          );
-        default:
-          return cellValue;
+                  </DropdownMenu>
+                </Dropdown>
+              </div>
+            );
+          default:
+            return cellValue;
+        }
+      } catch (error) {
+        console.error(`Error rendering cell ${blogColumnKey}:`, error);
+        return <span>Error</span>;
       }
-    } catch (error) {
-      console.error(`Error rendering cell ${blogColumnKey}:`, error);
-      return <span>Error</span>;
-    }
-  }, []);
+    },
+    [handleEditBlog],
+  );
 
   return (
     <div>
@@ -157,7 +176,10 @@ export default function BlogTableWrapper({
         <h1>All Blogs</h1>
         <div className='flex gap-4'>
           <Button
-            onPress={onOpen}
+            onPress={() => {
+              setBlogId(''); // ⭐ Clear blogId for new blog
+              onOpen();
+            }}
             className='bg-foreground text-background'
             endContent={<PlusIcon />}
             size='sm'
@@ -165,13 +187,8 @@ export default function BlogTableWrapper({
             Add Blog
           </Button>
         </div>
-        <BlogForm
-          isOpen={isOpen}
-          onOpenChange={onOpenChange}
-          blog={getSingleBlogData?.data}
-          setBlogId={setBlogId}
-        />
       </div>
+
       <UserTable
         data={paginatedBlogData}
         columns={blogColumns}
@@ -179,8 +196,18 @@ export default function BlogTableWrapper({
         renderCell={blogRenderCell}
         searchableFieldsName={blogSearchableFieldsName}
         onSearchChange={blogFilterData}
-        pagination={{ totalPages: blogTotalPages, currentPage: blogCurrentPage }}
+        pagination={{
+          totalPages: blogTotalPages,
+          currentPage: blogCurrentPage,
+        }}
         onPageChange={onBlogPageChange}
+      />
+
+      <BlogForm
+        isOpen={isOpen}
+        onOpenChange={handleCloseModal}
+        blog={getSingleBlogData?.data}
+        setBlogId={setBlogId}
       />
     </div>
   );

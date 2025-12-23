@@ -113,6 +113,15 @@ const Footer = () => {
                 </li>
                 <li>
                   <Link
+                    href='/resources'
+                    prefetch={false}
+                    className='text-blueGray-600 hover:text-blueGray-800 font-semibold block pb-2 text-sm'
+                  >
+                    Resources
+                  </Link>
+                </li>
+                <li>
+                  <Link
                     target='_blank'
                     rel='noopener noreferrer'
                     className='text-blueGray-600 hover:text-blueGray-800 font-semibold block pb-2 text-sm'

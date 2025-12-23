@@ -43,7 +43,7 @@ export const blogsSlice = createApi({
         params.append('limit', String(limit));
 
         return {
-          url: `/public/blog?${params.toString()}`,
+          url: `/public/admin/blog?${params.toString()}`,
           method: 'GET',
         };
       },

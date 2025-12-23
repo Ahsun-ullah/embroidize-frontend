@@ -17,6 +17,7 @@ export const productSchema = z.object({
 });
 export const blogSchema = z.object({
   title: z.string().min(1, 'Blog Title is required'),
+  doc_type: z.string().min(1, 'Doc Type is required'),
   slug: z.string().optional(),
   description: z.string().min(1, 'Description is required'),
   meta_title: z.string().min(1, 'Meta Title is required'),

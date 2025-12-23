@@ -1,8 +1,9 @@
 'use client';
 
+import { ErrorToast } from '@/components/Common/ErrorToast';
 import LoadingSpinner from '@/components/Common/LoadingSpinner';
-
 import QuillEditor from '@/components/Common/QuillEditor';
+import { SuccessToast } from '@/components/Common/SuccessToast';
 import {
   useAddBlogMutation,
   useAllBlogsQuery,
@@ -15,15 +16,14 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import { useRouter } from 'next/navigation';
 import { useEffect, useState } from 'react';
 import { Controller, useForm } from 'react-hook-form';
+import Select from 'react-select';
 import { ImageFileUpload } from './ImageDragAndDropInput';
 import { CreatableTagsInput } from './TagsInput';
-import { SuccessToast } from '@/components/Common/SuccessToast';
-import { ErrorToast } from '@/components/Common/ErrorToast';
 
 export function BlogForm({ blog, isOpen, onOpenChange, setBlogId }) {
   const router = useRouter();
-  const [description, setDescription] = useState(blog?.description || '');
-  const [slug, setSlug] = useState(blog?.slug || '');
+  const [description, setDescription] = useState('');
+  const [slug, setSlug] = useState('');
 
   const [addBlog] = useAddBlogMutation();
   const [updateBlog] = useUpdateBlogMutation();
@@ -36,11 +36,13 @@ export function BlogForm({ blog, isOpen, onOpenChange, setBlogId }) {
     formState: { errors, isSubmitting },
     reset,
     setValue,
+    watch,
   } = useForm({
     mode: 'onSubmit',
     resolver: zodResolver(blogSchema),
     defaultValues: {
       title: '',
+      doc_type: 'blog',
       slug: '',
       description: '',
       meta_description: '',
@@ -50,10 +52,15 @@ export function BlogForm({ blog, isOpen, onOpenChange, setBlogId }) {
     },
   });
 
+  // ⭐ Watch doc_type value
+  const docTypeValue = watch('doc_type');
+
+  // ⭐ Populate form when blog data changes
   useEffect(() => {
-    if (blog) {
+    if (blog && isOpen) {
       reset({
         title: blog.title ?? '',
+        doc_type: blog.doc_type ?? 'blog',
         slug: blog.slug ?? '',
         description: blog.description ?? '',
         meta_title: blog.meta_title ?? '',
@@ -64,20 +71,59 @@ export function BlogForm({ blog, isOpen, onOpenChange, setBlogId }) {
       setDescription(blog.description ?? '');
       setSlug(blog.slug ?? '');
     }
-    if (blog?.blog?._id) {
-      setSelectedCategory(blog.blog._id);
+  }, [blog, isOpen, reset]);
+
+  // ⭐ Clean up when modal closes
+  useEffect(() => {
+    if (!isOpen) {
+      // Reset form to default values
+      reset({
+        title: '',
+        doc_type: '',
+        slug: '',
+        description: '',
+        meta_description: '',
+        meta_title: '',
+        meta_keywords: [],
+        image: null,
+      });
+      // Clear local state
+      setDescription('');
+      setSlug('');
+      setBlogId('');
     }
-  }, [blog, reset]);
+  }, [isOpen, reset, setBlogId]);
 
   const handleNameChange = (e) => {
     const nameValue = e.target.value;
-    setSlug(slugify(nameValue));
+    const generatedSlug = slugify(nameValue);
+    setSlug(generatedSlug);
     setValue('title', nameValue);
+    setValue('slug', generatedSlug);
+  };
+
+  const handleCloseModal = () => {
+    // Clean everything before closing
+    reset({
+      title: '',
+      doc_type: '',
+      slug: '',
+      description: '',
+      meta_description: '',
+      meta_title: '',
+      meta_keywords: [],
+      image: null,
+    });
+    setDescription('');
+    setSlug('');
+    setBlogId('');
+    onOpenChange();
   };
 
   const onSubmit = async (data) => {
     try {
       const formData = new FormData();
+
       Object.entries(data).forEach(([key, value]) => {
         if (value !== null && value !== undefined) {
           if (key === 'image') {
@@ -96,62 +142,68 @@ export function BlogForm({ blog, isOpen, onOpenChange, setBlogId }) {
         }
       });
 
-
       if (blog?._id) {
+        // Update existing blog
         formData.append('id', blog._id);
         const response = await updateBlog(formData).unwrap();
+
         if (response.error) {
           ErrorToast('Error', response.error.data.message || 'API Error', 3000);
         } else {
           SuccessToast(
             'Success',
-            response.data.message || 'Action successfully done!',
+            response.message || 'Blog updated successfully!',
             3000,
           );
-          try {
-            await allBlogsRefetch();
-            reset();
-            setDescription('');
-            setBlogId('');
-            onOpenChange();
-            router.push('/admin/all-blogs');
-          } catch (err) {
-            console.error('Refetch failed:', err);
-            ErrorToast('Error', 'Failed to refresh blog list.', 3000);
-          }
+          setBlogId('');
+          await allBlogsRefetch();
+          handleCloseModal();
+          router.push('/admin/all-blogs');
         }
       } else {
+        // Create new blog
         const response = await addBlog(formData).unwrap();
+
         if (response.error) {
           ErrorToast('Error', response.error.data.message || 'API Error', 3000);
         } else {
           SuccessToast(
             'Success',
-            response.data.message || 'Action successfully done!',
+            response.message || 'Blog created successfully!',
             3000,
           );
-          allBlogsRefetch();
-          // reset();
-          // setDescription('');
-          // router.push('/admin/all-blogs');
+
+          await allBlogsRefetch();
+          handleCloseModal();
         }
       }
     } catch (error) {
       console.error('Error submitting form:', error);
-      ErrorToast('Error', error || 'API Error', 3000);
+      ErrorToast(
+        'Error',
+        error?.data?.message || error?.message || 'API Error',
+        3000,
+      );
     }
   };
+
+  // ⭐ Doc type options
+  const docTypeOptions = [
+    { value: 'blog', label: 'Blog' },
+    { value: 'resource', label: 'Resource' },
+  ];
 
   return (
     <Modal
       isOpen={isOpen}
-      onOpenChange={() => {
-        setBlogId(''), reset(), onOpenChange();
-      }}
+      onOpenChange={handleCloseModal}
+      onClose={handleCloseModal}
       scrollBehavior='inside'
       placement='center'
       size={'full'}
       className='max-w-6xl'
+      isDismissable={!isSubmitting}
+      isKeyboardDismissDisabled={isSubmitting}
     >
       <ModalContent>
         {(onClose) => (
@@ -164,8 +216,8 @@ export function BlogForm({ blog, isOpen, onOpenChange, setBlogId }) {
                 onSubmit={handleSubmit(onSubmit)}
                 className='grid grid-cols-3 gap-4'
               >
-                {/* blog Name */}
-                <div className='col-span-3'>
+                {/* Blog Title */}
+                <div className='col-span-2'>
                   <label
                     className='text-lg font-medium tracking-tight leading-5'
                     htmlFor='title'
@@ -186,7 +238,41 @@ export function BlogForm({ blog, isOpen, onOpenChange, setBlogId }) {
                   )}
                 </div>
 
-                {/* blog slug */}
+                {/* Doc Type */}
+                <div className='col-span-1'>
+                  <label
+                    className='text-lg font-medium tracking-tight leading-5'
+                    htmlFor='doc_type'
+                  >
+                    Doc Type <span className='text-red-600'>*</span>
+                  </label>
+                  <Controller
+                    name='doc_type'
+                    control={control}
+                    render={({ field }) => (
+                      <Select
+                        options={docTypeOptions}
+                        onChange={(selected) => {
+                          field.onChange(selected?.value || 'blog');
+                        }}
+                        value={docTypeOptions.find(
+                          (option) => option.value === field.value,
+                        )}
+                        placeholder='Select document type'
+                        className='react-select-container'
+                        classNamePrefix='react-select'
+                        isDisabled={isSubmitting}
+                      />
+                    )}
+                  />
+                  {errors.doc_type && (
+                    <p className='text-red-500 font-light'>
+                      {errors.doc_type.message}
+                    </p>
+                  )}
+                </div>
+
+                {/* Blog Slug */}
                 <div className='col-span-3'>
                   <label
                     className='text-lg font-medium tracking-tight leading-5'
@@ -196,10 +282,13 @@ export function BlogForm({ blog, isOpen, onOpenChange, setBlogId }) {
                   </label>
                   <input
                     id='slug'
-                    placeholder='Blog Slug'
-                    {...register('slug')}
+                    placeholder='blog-slug'
                     value={slug}
-                    onChange={(e) => setSlug(slugify(e.target.value))}
+                    onChange={(e) => {
+                      const newSlug = slugify(e.target.value);
+                      setSlug(newSlug);
+                      setValue('slug', newSlug);
+                    }}
                     className='flex w-full flex-wrap md:flex-nowrap gap-4 border-[1.8px] rounded-[4px] p-2'
                   />
                   {errors.slug && (
@@ -240,7 +329,7 @@ export function BlogForm({ blog, isOpen, onOpenChange, setBlogId }) {
                   )}
                 </div>
 
-                {/* meta_title  */}
+                {/* Meta Title */}
                 <div className='col-span-3'>
                   <label
                     className='text-lg font-medium tracking-tight leading-5'
@@ -250,7 +339,7 @@ export function BlogForm({ blog, isOpen, onOpenChange, setBlogId }) {
                   </label>
                   <input
                     id='meta_title'
-                    placeholder='Category Name'
+                    placeholder='Meta Title'
                     {...register('meta_title')}
                     className='flex w-full flex-wrap md:flex-nowrap gap-4 border-[1.8px] rounded-[4px] p-2'
                   />
@@ -260,6 +349,7 @@ export function BlogForm({ blog, isOpen, onOpenChange, setBlogId }) {
                     </p>
                   )}
                 </div>
+
                 {/* Meta Description */}
                 <div className='col-span-3'>
                   <label
@@ -300,7 +390,6 @@ export function BlogForm({ blog, isOpen, onOpenChange, setBlogId }) {
                       />
                     )}
                   />
-
                   {errors.meta_keywords && (
                     <p className='text-red-500 font-light'>
                       {errors.meta_keywords.message}
@@ -315,9 +404,7 @@ export function BlogForm({ blog, isOpen, onOpenChange, setBlogId }) {
                   </label>
                   <ImageFileUpload
                     label='Upload blog image (.jpg, .png, .webp). Min: 580px × 386px, Max: 5000px × 5000px'
-                    accept={
-                      ('image/png', 'image/jpg', 'image/webp', 'image/jpeg')
-                    }
+                    accept='image/png,image/jpg,image/webp,image/jpeg'
                     onDrop={(file) =>
                       setValue('image', file, { shouldDirty: true })
                     }
@@ -334,7 +421,7 @@ export function BlogForm({ blog, isOpen, onOpenChange, setBlogId }) {
                     className={`w-full md:w-auto px-6 py-3 rounded-md font-medium text-white
              bg-slate-800
               hover:bg-black  hover:shadow-lg
-              disabled:from-gray-400 disabled:to-gray-500 disabled:cursor-not-allowed
+              disabled:bg-gray-400 disabled:cursor-not-allowed
               transition-all duration-300 ease-in-out
               ${isSubmitting ? 'cursor-wait' : ''}`}
                   >

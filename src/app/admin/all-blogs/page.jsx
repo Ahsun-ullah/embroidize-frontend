@@ -8,6 +8,7 @@ export default function BlogPageInAdmin() {
   const blogColumns = [
     { name: 'IMAGE', uid: 'image?.url' },
     { name: 'BLOG TITLE', uid: 'title' },
+    { name: 'DOC TYPE', uid: 'doc_type' },
     { name: 'ACTIONS', uid: 'actions' },
   ];
 
@@ -17,7 +18,7 @@ export default function BlogPageInAdmin() {
         blogInitialData={blogsData?.data?.blogs}
         blogColumns={blogColumns}
         blogPageSize={5}
-        blogSearchableFieldsName={['title']}
+        blogSearchableFieldsName={['title', 'doc_type']}
       />
     </div>
   );
