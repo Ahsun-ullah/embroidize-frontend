@@ -39,7 +39,7 @@ export default function BlogTableWrapper({
   const {
     data: getSingleBlogData,
     isLoading: isSingleBlogLoading,
-    refetch: refetchSingleBlog, // ⭐ Get refetch function
+    refetch: refetchSingleBlog,
   } = useSingleBlogQuery(blogId, {
     skip: !blogId, // ⭐ Skip query when no blogId
     refetchOnMountOrArgChange: true, // ⭐ Always refetch on mount/arg change
@@ -94,7 +94,7 @@ export default function BlogTableWrapper({
     [blogInitialData, blogSearchableFieldsName],
   );
 
-  // ⭐ Handle opening modal with fresh data
+  // ⭐ Handle opening modal for editing with fresh data
   const handleEditBlog = useCallback(
     (id) => {
       setBlogId(id);
@@ -104,6 +104,12 @@ export default function BlogTableWrapper({
     },
     [onOpen],
   );
+
+  // ⭐ Handle opening modal for adding new blog
+  const handleAddBlog = useCallback(() => {
+    setBlogId(''); // ⭐ Clear blogId first
+    onOpen();
+  }, [onOpen]);
 
   // ⭐ Handle closing modal and clearing blogId
   const handleCloseModal = useCallback(() => {
@@ -176,10 +182,7 @@ export default function BlogTableWrapper({
         <h1>All Blogs</h1>
         <div className='flex gap-4'>
           <Button
-            onPress={() => {
-              setBlogId(''); // ⭐ Clear blogId for new blog
-              onOpen();
-            }}
+            onPress={handleAddBlog} // ⭐ Use handleAddBlog instead
             className='bg-foreground text-background'
             endContent={<PlusIcon />}
             size='sm'
@@ -206,7 +209,7 @@ export default function BlogTableWrapper({
       <BlogForm
         isOpen={isOpen}
         onOpenChange={handleCloseModal}
-        blog={getSingleBlogData?.data}
+        blog={blogId ? getSingleBlogData?.data : null} // ⭐ Only pass blog data if blogId exists
         setBlogId={setBlogId}
       />
     </div>
