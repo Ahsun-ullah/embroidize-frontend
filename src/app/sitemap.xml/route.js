@@ -1,4 +1,4 @@
-import { getBlogs } from '@/lib/apis/public/blog';
+import { getBlogs, getResources } from '@/lib/apis/public/blog';
 import { getCategories } from '@/lib/apis/public/category';
 import { getAllProductsPaginated } from '@/lib/apis/public/products';
 import { getSubCategories } from '@/lib/apis/public/subcategory';
@@ -10,6 +10,7 @@ export async function GET() {
 
     // const blogs = await getPosts();
     const { blogs } = await getBlogs();
+    const { resources } = await getResources();
     const products = await getAllProductsPaginated();
     const { categories } = await getCategories();
     const { subCategories } = await getSubCategories();
@@ -28,6 +29,8 @@ export async function GET() {
       ),
       '/blog',
       ...blogs.map((blog) => `/blog/${blog.slug}`),
+      '/resources',
+      ...resources.map((resource) => `/resources/${resource.slug}`),
     ];
 
     function escapeXml(str) {
