@@ -76,6 +76,9 @@ export default function RootLayout({ children }) {
         className={`${plusJakarta.className} antialiased text-gray-900 bg-white`}
         suppressHydrationWarning
       >
+        {/* Google Tag Manager */}
+        <GoogleTagManager gtmId='GTM-MLM7Q32D' />
+        
         {/* Google Analytics */}
         <Script
           src='https://www.googletagmanager.com/gtag/js?id=G-BJ81WDRVP5'
@@ -110,9 +113,6 @@ export default function RootLayout({ children }) {
             </NProgressProvider>
           </Suspense>
         </ClientProviders>
-
-        {/* Google Tag Manager */}
-        <GoogleTagManager gtmId='GTM-MLM7Q32D' />
       </body>
     </html>
   );
