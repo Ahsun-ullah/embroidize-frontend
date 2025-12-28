@@ -50,9 +50,6 @@ export default async function AllBlogsPageInFrontSite({ searchParams }) {
   const endIndex = startIndex + perPageData;
   const paginatedBlogs = blogs.slice(startIndex, endIndex);
 
-
-  console.log(blogs);
-
   return (
     <>
       <Header />

@@ -283,7 +283,7 @@ export default async function SingleBlogPage({ params }) {
             {/* Right Column - Featured Image (40%) */}
             <figure className='lg:col-span-2 relative w-full rounded-xl overflow-hidden shadow-xl'>
               <Image
-                src={resource?.image?.url}
+                src={resource?.image?.url || 'https://embroidize.com/og-banner.jpg'}
                 alt={resource?.title}
                 fill
                 priority

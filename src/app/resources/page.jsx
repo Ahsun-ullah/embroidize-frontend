@@ -40,11 +40,9 @@ export const metadata = {
 export default async function AllResourcesPageInFrontSite({ searchParams }) {
   const { resources } = await getResources();
 
-  console.log(resources);
-
   const currentPage = parseInt(searchParams?.page || '1', 10);
   const perPageData = 6;
-  const totalPages = Math.ceil(resources.length || [] / perPageData);
+  const totalPages = Math.ceil(resources.length / perPageData);
   const startIndex = (currentPage - 1) * perPageData;
   const endIndex = startIndex + perPageData;
   const paginatedResources = resources.slice(startIndex, endIndex);

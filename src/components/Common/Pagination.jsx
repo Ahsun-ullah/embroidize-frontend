@@ -20,7 +20,7 @@ const Pagination = ({ totalPages, perPageData }) => {
       startTransition(() => {
         const params = new URLSearchParams(searchParams.toString());
         params.set('page', String(newPage));
-        params.set('limit', String(currentPerPage));
+        params.set('limit', String(currentPerPage || 10));
         router.push(`?${params.toString()}`);
       });
     },
@@ -28,6 +28,9 @@ const Pagination = ({ totalPages, perPageData }) => {
   );
 
   if (totalPages <= 1) return null;
+  
+  console.log(perPageData);
+  console.log(totalPages);
 
   return (
     <div className='flex flex-col items-center gap-2 mt-4'>
