@@ -1,9 +1,7 @@
-import BlogSection from '@/components/user/HomePage/BlogSection';
 import Footer from '@/components/user/HomePage/Footer';
 import Header from '@/components/user/HomePage/Header';
 import PopularDesign from '@/components/user/HomePage/PopularDesign';
 import RecentProductsSection from '@/components/user/HomePage/RecentProductsSection';
-import { getBlogs } from '@/lib/apis/public/blog';
 import { getPopularProducts, getProducts } from '@/lib/apis/public/products';
 import Link from 'next/link';
 import { Suspense } from 'react';
@@ -73,13 +71,11 @@ export default async function Home() {
   const [popularPromise, recentPromise, blogsPromise] = [
     getPopularProducts('', 1, 12, { cache: 'no-store' }),
     getProducts('', 1, 8, { cache: 'no-store' }),
-    getBlogs({ cache: 'no-store' }),
   ];
 
-  const [popularProducts, recentProducts, { blogs }] = await Promise.all([
+  const [popularProducts, recentProducts] = await Promise.all([
     popularPromise,
     recentPromise,
-    blogsPromise,
   ]);
 
   return (
@@ -91,7 +87,6 @@ export default async function Home() {
       />
 
       <ProductUpdates />
-
       <Header />
 
       {/* hero section */}
@@ -156,33 +151,6 @@ export default async function Home() {
         </div>
       </section>
 
-      {/* popular section] */}
-      {/* <section
-        style={{ backgroundColor: '#fafafa' }}
-        className=' text-black my-8 py-6'
-      >
-        <div>
-          <div className='flex items-center justify-center '>
-            <h4
-              id='popular-designs-heading'
-              className='text-3xl font-bold text-center'
-            >
-              Popular embroidery designs
-            </h4>
-          </div>
-          <div className='flex items-center justify-center mt-2'>
-            <h4 className='font-semibold text-center'>
-              Browse Our Most Loved Designs.
-            </h4>
-          </div>
-        </div>
-      </section>
-      {popularProducts?.products && popularProducts?.products?.length > 0 && (
-        <Suspense fallback={<LoadingSpinner />}>
-          <PopularDesign popularProducts={popularProducts} />
-        </Suspense>
-      )} */}
-
       <section
         aria-labelledby='popular-designs-heading'
         className=' text-black my-8 py-6'
@@ -210,31 +178,6 @@ export default async function Home() {
         </Suspense>
       </section>
 
-      {/* recent products section */}
-      {/* <section
-        style={{ backgroundColor: '#fafafa' }}
-        className=' text-black my-8 py-6'
-      >
-        <div>
-          <div className='flex items-center justify-center'>
-            <h4 className='text-3xl font-bold text-center'>
-              Recent Approved Products
-            </h4>
-          </div>
-          <div className='flex items-center justify-center mt-4'>
-            <h4 className='font-semibold text-center'>
-              Our Newest Creations, Just for You.
-            </h4>
-          </div>
-        </div>
-      </section>
-
-      {recentProducts?.products && recentProducts?.products?.length > 0 && (
-        <Suspense fallback={<LoadingSpinner />}>
-          <RecentProductsSection recentProducts={recentProducts} />
-        </Suspense>
-      )} */}
-
       <section className=' text-black my-8 py-6'>
         <div className=' bg-[#fafafa] flex flex-col items-center justify-center gap-2 py-6 mb-6'>
           <h2 className='text-2xl sm:text-2xl md:text-3xl font-bold leading-snug'>
@@ -254,29 +197,6 @@ export default async function Home() {
           )}
         </Suspense>
       </section>
-
-      {blogs?.length > 0 && (
-        <>
-          <Suspense
-            fallback={
-              <div className='px-4'>
-                <div className='h-6 w-48 bg-gray-200 rounded animate-pulse mb-4' />
-                <GridSkeleton rows={1} cols={3} />
-              </div>
-            }
-          >
-            <BlogSection blogs={blogs} />
-          </Suspense>
-          <div className='flex justify-center items-center my-10'>
-            <Link
-              href='/blog'
-              className='bg-black rounded-full hover:bg-blue-400 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-blue-500 transition-colors text-white font-medium px-6 py-2'
-            >
-              View All
-            </Link>
-          </div>
-        </>
-      )}
 
       <Footer />
     </>

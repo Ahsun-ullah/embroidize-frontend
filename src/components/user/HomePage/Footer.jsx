@@ -77,18 +77,14 @@ const Footer = () => {
 
         {/* Useful Links Section */}
         <div className='w-full lg:w-6/12'>
-          <div className='flex flex-wrap items-top mb-6'>
-            {/* Useful Links Column */}
+          <div className='flex flex-wrap items-top mb-6 font-semibold'>
             <div className='w-full lg:w-4/12 ml-auto'>
-              <span className='block capitalize text-blueGray-500 text-lg font-bold mb-2'>
-                Useful Links :
-              </span>
-              <ul className='list-unstyled'>
+              <ul className='space-y-3'>
                 <li>
                   <Link
                     href='/'
                     prefetch={false}
-                    className='text-blueGray-600 hover:text-blueGray-800 font-semibold block pb-2 text-sm'
+                    className='text-gray-600 hover:underline transition-colors duration-200'
                   >
                     Home
                   </Link>
@@ -97,7 +93,7 @@ const Footer = () => {
                   <Link
                     href='/products'
                     prefetch={false}
-                    className='text-blueGray-600 hover:text-blueGray-800 font-semibold block pb-2 text-sm'
+                    className='text-gray-600 hover:underline transition-colors duration-200'
                   >
                     Products
                   </Link>
@@ -106,7 +102,7 @@ const Footer = () => {
                   <Link
                     href='/blog'
                     prefetch={false}
-                    className='text-blueGray-600 hover:text-blueGray-800 font-semibold block pb-2 text-sm'
+                    className='text-gray-600 hover:underline transition-colors duration-200'
                   >
                     Blogs
                   </Link>
@@ -115,7 +111,7 @@ const Footer = () => {
                   <Link
                     href='/resources'
                     prefetch={false}
-                    className='text-blueGray-600 hover:text-blueGray-800 font-semibold block pb-2 text-sm'
+                    className='text-gray-600 hover:underline transition-colors duration-200'
                   >
                     Resources
                   </Link>
@@ -124,63 +120,62 @@ const Footer = () => {
                   <Link
                     target='_blank'
                     rel='noopener noreferrer'
-                    className='text-blueGray-600 hover:text-blueGray-800 font-semibold block pb-2 text-sm'
-                    href={'https://www.etsy.com/shop/embroidize'}
+                    className='text-gray-600 hover:underline transition-colors duration-200 inline-flex items-center gap-1'
+                    href='https://www.etsy.com/shop/embroidize'
                   >
                     Etsy Shop
+                    <svg
+                      className='w-3 h-3'
+                      fill='none'
+                      stroke='currentColor'
+                      viewBox='0 0 24 24'
+                    >
+                      <path
+                        strokeLinecap='round'
+                        strokeLinejoin='round'
+                        strokeWidth={2}
+                        d='M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14'
+                      />
+                    </svg>
                   </Link>
                 </li>
               </ul>
-
-              {/* <Link
-                target='_blank'
-                rel='noopener noreferrer'
-                href='https://www.etsy.com/shop/embroidize'
-                className='flex items-center gap-2 rounded-full bg-gradient-to-r from-orange-400 to-red-500 px-3 py-1.5 text-sm text-white font-semibold shadow-md transition-all hover:scale-105 hover:shadow-lg mt-4'
-              >
-                <img
-                  src='/etsy.png'
-                  alt='Etsy'
-                  className='h-5 w-5 rounded-full bg-white p-0.5 shadow-sm transition-transform group-hover:rotate-6'
-                />
-                Visit Our Etsy Store
-              </Link> */}
             </div>
 
-            {/* Other Resources Column */}
             <div className='w-full lg:w-4/12'>
-              <span className='block capitalize text-blueGray-500 text-lg font-bold mb-2'>
-                Other Resources:
-              </span>
-              <ul className='list-unstyled'>
+              <ul className='space-y-3'>
                 <li>
                   <Link
-                    className='text-blueGray-600 hover:text-blueGray-800 font-semibold block pb-2 text-sm'
+                    className='text-gray-600 hover:underline transition-colors duration-200'
                     href='/terms-and-conditions'
+                    prefetch={false}
                   >
                     Terms &amp; Conditions
                   </Link>
                 </li>
                 <li>
                   <Link
-                    className='text-blueGray-600 hover:text-blueGray-800 font-semibold block pb-2 text-sm'
+                    className='text-gray-600 hover:underline transition-colors duration-200'
                     href='/privacy-policy'
+                    prefetch={false}
                   >
                     Privacy Policy
                   </Link>
                 </li>
                 <li>
                   <Link
-                    className='text-blueGray-600 hover:text-blueGray-800 font-semibold block pb-2 text-sm'
+                    className='text-gray-600 hover:underline transition-colors duration-200'
                     href='/about-us'
+                    prefetch={false}
                   >
                     About Us
                   </Link>
                 </li>
                 <li>
                   <Link
-                    className='text-blueGray-600 hover:text-blueGray-800 font-semibold block pb-2 text-sm'
+                    className='text-gray-600 hover:underline transition-colors duration-200'
                     href='/contact-us'
+                    prefetch={false}
                   >
                     Contact Us
                   </Link>

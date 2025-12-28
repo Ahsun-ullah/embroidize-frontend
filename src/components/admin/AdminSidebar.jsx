@@ -159,7 +159,7 @@ export default function AdminSidebar({ isCollapsed, setIsCollapsed }) {
             {!isCollapsed ? (
               <span className='sidebar-text '>
                 <i className='ri-news-line me-2'></i>
-                Blogs
+                Blogs And Resources
               </span>
             ) : (
               <Tooltip content={' All Blogs'}>

@@ -135,7 +135,7 @@ export default async function SingleBlogPage({ params }) {
                   // blog?.title?.rendered || 'Embroidery Design'
                 }
                 fill
-                className='object-cover'
+                className=''
                 priority
                 sizes='(max-width: 768px) 100vw, 700px'
                 itemProp='image'
@@ -183,7 +183,7 @@ export default async function SingleBlogPage({ params }) {
               </header>
 
               <section
-                className='porse custom-blog-content '
+                className='custom-blog-content '
                 style={{ fontSize: 18 }}
                 dangerouslySetInnerHTML={{
                   __html: blog?.description,

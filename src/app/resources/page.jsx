@@ -53,6 +53,10 @@ export default async function AllResourcesPageInFrontSite({ searchParams }) {
     <>
       <Header />
 
+      <h1 className='text-5xl text-center font-bold bg-slate-50 py-24'>
+        Resources to Help You Expand Your <br /> Embroidery Knowledge
+      </h1>
+
       {paginatedResources.length > 0 && (
         <>
           <section className='text-black my-8 py-6'>

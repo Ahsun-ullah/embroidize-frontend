@@ -36,7 +36,7 @@ export default async function ResourcesPageSidebarContent() {
                         post.title
                         // post.title.rendered
                       }
-                      className='w-full h-full object-cover'
+                      className='w-full h-full'
                     />
                   ) : null}
                 </div>
