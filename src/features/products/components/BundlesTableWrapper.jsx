@@ -52,7 +52,7 @@ export default function BundlesTableWrapper({
       case 'image':
         return (
           <Image
-            src={bundle.image?.url}
+            src={bundle.image?.url || '/og-banner.jpg'}
             alt={bundle.name}
             width={60}
             height={60}

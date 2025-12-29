@@ -1,7 +1,9 @@
 import Footer from '@/components/user/HomePage/Footer';
 import Header from '@/components/user/HomePage/Header';
 import PopularDesign from '@/components/user/HomePage/PopularDesign';
+import RecentBundleSection from '@/components/user/HomePage/RecentBundleSection';
 import RecentProductsSection from '@/components/user/HomePage/RecentProductsSection';
+import { getAllBundlesForDashboard } from '@/lib/apis/protected/bundles';
 import { getPopularProducts, getProducts } from '@/lib/apis/public/products';
 import Link from 'next/link';
 import { Suspense } from 'react';
@@ -68,15 +70,19 @@ function GridSkeleton({ rows = 2, cols = 6 }) {
 }
 
 export default async function Home() {
-  const [popularPromise, recentPromise, blogsPromise] = [
+  const [popularPromise, recentPromise, bundlePromise] = [
     getPopularProducts('', 1, 12, { cache: 'no-store' }),
     getProducts('', 1, 8, { cache: 'no-store' }),
+    getAllBundlesForDashboard('', 1, 4, { cache: 'no-store' }),
   ];
 
-  const [popularProducts, recentProducts] = await Promise.all([
+  const [popularProducts, recentProducts, bundles] = await Promise.all([
     popularPromise,
     recentPromise,
+    bundlePromise,
   ]);
+
+  console.log(bundles?.bundles);
 
   return (
     <>
@@ -151,6 +157,7 @@ export default async function Home() {
         </div>
       </section>
 
+      {/* Popular Bundle Designs Section */}
       <section
         aria-labelledby='popular-designs-heading'
         className=' text-black my-8 py-6'
@@ -178,6 +185,34 @@ export default async function Home() {
         </Suspense>
       </section>
 
+      {/* Popular Bundle Designs Section */}
+      <section
+        aria-labelledby='popular-bundles-heading'
+        className='text-black my-8 py-6'
+      >
+        <div className='bg-[#fafafa] flex flex-col items-center justify-center gap-2 py-6 mb-6'>
+          <h2
+            id='popular-bundles-heading'
+            className='text-2xl sm:text-2xl md:text-3xl font-bold leading-snug'
+          >
+            Popular Bundle Designs
+          </h2>
+
+          <p className='text-base sm:text-base md:text-lg font-medium text-gray-600'>
+            Browse our most loved bundle designs.
+          </p>
+        </div>
+
+        <Suspense fallback={<GridSkeleton />}>
+          {bundles?.bundles?.length ? (
+            <RecentBundleSection recentBundles={bundles} />
+          ) : (
+            <GridSkeleton />
+          )}
+        </Suspense>
+      </section>
+
+      {/* Recent Designs Section */}
       <section className=' text-black my-8 py-6'>
         <div className=' bg-[#fafafa] flex flex-col items-center justify-center gap-2 py-6 mb-6'>
           <h2 className='text-2xl sm:text-2xl md:text-3xl font-bold leading-snug'>

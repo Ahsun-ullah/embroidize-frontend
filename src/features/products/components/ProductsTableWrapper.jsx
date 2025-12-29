@@ -21,6 +21,7 @@ import {
   ModalContent,
   ModalFooter,
   ModalHeader,
+  Textarea,
   User,
 } from '@heroui/react';
 
@@ -33,7 +34,7 @@ import {
 } from '@/lib/redux/admin/categoryAndSubcategory/categoryAndSubcategorySlice';
 import { useDeleteProductMutation } from '@/lib/redux/admin/protectedProducts/protectedProductSlice';
 import { productStatusColor } from '@/utils/colorStatus/page';
-import { capitalize } from '@/utils/functions/page';
+import { capitalize, slugify } from '@/utils/functions/page';
 
 // React-Select Custom Styles
 const customSelectStyles = {
@@ -65,6 +66,9 @@ export default function ProductsTableWrapper({
   const [bundleName, setBundleName] = useState('');
   const [bundleImage, setBundleImage] = useState(null);
   const [bundleImagePreview, setBundleImagePreview] = useState('');
+  const [bundleSlug, setBundleSlug] = useState('');
+  const [bundleMetaTitle, setBundleMetaTitle] = useState('');
+  const [bundleMetaDescription, setBundleMetaDescription] = useState('');
 
   // --- API Hooks ---
   const { data: categoryData } = useGetPublicProductCategoriesQuery();
@@ -210,6 +214,22 @@ export default function ProductsTableWrapper({
     setIsBundleModalOpen(true);
   };
 
+  const generateSlug = (text) => {
+    return text
+      .toLowerCase()
+      .replace(/[^\w\s-]/g, '')
+      .replace(/\s+/g, '-')
+      .replace(/--+/g, '-')
+      .trim();
+  };
+
+  // Update bundleName handler
+  const handleBundleNameChange = (value) => {
+    setBundleName(value);
+    // Auto-generate slug using slugify
+    setBundleSlug(slugify(value, { lower: true, strict: true }));
+  };
+
   // --- Close Bundle Modal ---
   const handleCloseBundleModal = () => {
     setIsBundleModalOpen(false);
@@ -225,12 +245,13 @@ export default function ProductsTableWrapper({
       return;
     }
 
-    if (!bundleImage) {
-      ErrorToast('Error', 'Please select a bundle image', 3000);
+    if (!bundleSlug) {
+      ErrorToast('Error', 'Please enter a bundle slug', 3000);
       return;
     }
 
     setIsCreatingBundle(true);
+
     try {
       // Get token from cookies (client-side)
       const token = document.cookie
@@ -238,12 +259,15 @@ export default function ProductsTableWrapper({
         .find((row) => row.startsWith('token='))
         ?.split('=')[1];
 
-      console.log(token);
-
       const formData = new FormData();
       formData.append('name', bundleName.trim());
       formData.append('productIds', JSON.stringify(selectedIds));
-      formData.append('image', bundleImage);
+      formData.append('slug', bundleSlug);
+      formData.append('meta_title', bundleMetaTitle);
+      formData.append('meta_description', bundleMetaDescription);
+      if (bundleImage) {
+        formData.append('image', bundleImage);
+      }
 
       const apiUrl =
         process.env.NEXT_PUBLIC_BASE_API_URL_PROD ||
@@ -256,9 +280,9 @@ export default function ProductsTableWrapper({
 
       const response = await fetch(`${apiUrl}/admin/bundle-product`, {
         method: 'POST',
-        headers: headers, // ⭐ Now headers are passed correctly
+        headers: headers,
         body: formData,
-        credentials: 'include', // ⭐ Send cookies automatically
+        credentials: 'include',
       });
 
       const data = await response.json();
@@ -532,8 +556,9 @@ export default function ProductsTableWrapper({
       <Modal
         isOpen={isBundleModalOpen}
         onClose={handleCloseBundleModal}
-        size='2xl'
+        size='3xl'
         backdrop='blur'
+        scrollBehavior='inside'
       >
         <ModalContent>
           <ModalHeader className='flex flex-col gap-1'>
@@ -554,9 +579,43 @@ export default function ProductsTableWrapper({
                 label='Bundle Name'
                 placeholder='Enter bundle name'
                 value={bundleName}
-                onValueChange={setBundleName}
+                onValueChange={handleBundleNameChange}
                 isRequired
                 variant='bordered'
+              />
+
+              {/* Slug Input */}
+              <Input
+                label='Bundle Slug'
+                placeholder='bundle-name-slug'
+                value={bundleSlug}
+                onValueChange={(value) =>
+                  setBundleSlug(slugify(value, { lower: true, strict: true }))
+                }
+                isRequired
+                variant='bordered'
+                description='URL-friendly version (lowercase, hyphens only)'
+              />
+
+              {/* Meta Title Input */}
+              <Input
+                label='Meta Title'
+                placeholder='SEO title for search engines'
+                value={bundleMetaTitle}
+                onValueChange={setBundleMetaTitle}
+                variant='bordered'
+                description='Recommended: 50-60 characters'
+              />
+
+              {/* Meta Description Textarea */}
+              <Textarea
+                label='Meta Description'
+                placeholder='Brief description for search engines'
+                value={bundleMetaDescription}
+                onValueChange={setBundleMetaDescription}
+                variant='bordered'
+                minRows={3}
+                description='Recommended: 150-160 characters'
               />
 
               {/* Image Upload */}

@@ -33,6 +33,7 @@ export async function getProducts(searchQuery, currentPage, perPageData) {
 
   const data = result?.data?.data ?? [];
   const meta = result?.data?.meta ?? {};
+  
   return {
     products: data,
     totalCount: meta.total ?? 0,
