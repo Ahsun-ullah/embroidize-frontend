@@ -2,7 +2,6 @@ import ShareButtons from '@/components/Common/ShareButtons';
 import Footer from '@/components/user/HomePage/Footer';
 import Header from '@/components/user/HomePage/Header';
 import { getSingleBlog } from '@/lib/apis/public/blog';
-import Image from 'next/image';
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
 import 'quill/dist/quill.core.css';
@@ -213,85 +212,114 @@ export default async function SingleBlogPage({ params }) {
           className='bg-white rounded-2xl shadow-lg overflow-hidden'
         >
           {/* Hero Section */}
-          <div className='grid lg:grid-cols-5 gap-8 p-8 lg:p-12'>
-            {/* Left Column - Content (60%) */}
-            <div className='lg:col-span-3 flex flex-col justify-center space-y-6'>
-              {/* Publishing Date */}
-              <time
-                className='inline-block text-sm font-bold uppercase tracking-wide'
-                dateTime={resource?.createdAt}
-                itemProp='datePublished'
+          <div className='flex flex-col space-y-8 *:items-center px-8 lg:px-12 pt-12 pb-8 bg-gray-50'>
+            {/* Title */}
+            <h1
+              className='text-4xl lg:text-5xl font-bold text-gray-900 leading-tight tracking-tight'
+              itemProp='headline'
+            >
+              {resource?.title}
+            </h1>
+            {/* Publishing Date Badge */}
+            <time
+              className='inline-flex items-center gap-2 w-fit px-4 py-2 bg-blue-50 text-blue-700 text-sm font-semibold rounded-sm border border-blue-200'
+              dateTime={resource?.createdAt}
+              itemProp='datePublished'
+            >
+              <svg
+                className='w-4 h-4'
+                fill='none'
+                stroke='currentColor'
+                viewBox='0 0 24 24'
               >
-                {new Date(resource?.createdAt).toLocaleDateString('en-US', {
-                  year: 'numeric',
-                  month: 'long',
-                  day: 'numeric',
-                })}
-              </time>
+                <path
+                  strokeLinecap='round'
+                  strokeLinejoin='round'
+                  strokeWidth={2}
+                  d='M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z'
+                />
+              </svg>
+              {new Date(resource?.createdAt).toLocaleDateString('en-US', {
+                year: 'numeric',
+                month: 'long',
+                day: 'numeric',
+              })}
+            </time>
 
-              {/* Title */}
-              <h1
-                className='text-4xl lg:text-5xl font-bold text-gray-900 leading-tight'
-                itemProp='headline'
-              >
-                {resource?.title}
-              </h1>
+            {/* Meta Description */}
+            <p
+              className='text-xl text-gray-600 leading-relaxed'
+              itemProp='description'
+            >
+              {resource?.meta_description}
+            </p>
 
-              {/* Meta Description */}
-              <p
-                className='text-xl text-gray-600 leading-relaxed'
-                itemProp='description'
-              >
-                {resource?.meta_description}
-              </p>
-
-              {/* Author & Reading Time */}
-              <div className='flex flex-wrap items-center gap-4 pt-4 border-t border-gray-200'>
-                <div className='flex items-center gap-3'>
-                  <div className='w-10 h-10 bg-gradient-to-br from-blue-500 to-purple-600 rounded-full flex items-center justify-center text-white font-bold'>
-                    {(resource?.author || 'E')[0].toUpperCase()}
-                  </div>
-                  <div>
-                    <p className='text-sm font-medium text-gray-900'>
-                      {resource?.author || 'Embroidize Team'}
-                    </p>
-                    <meta
-                      itemProp='author'
-                      content={resource?.author || 'Embroidize Team'}
-                    />
-                  </div>
+            {/* Author & Meta Info Card */}
+            <div className='flex flex-col sm:flex-row sm:items-center sm:justify-between gap-6 p-6 bg-gradient-to-r from-gray-50 to-blue-50/30 rounded-xl border border-gray-200'>
+              {/* Author Info */}
+              <div className='flex items-center gap-4'>
+                <div className='w-12 h-12 bg-gradient-to-br from-blue-500 to-purple-600 rounded-full flex items-center justify-center text-white font-bold text-lg shadow-md'>
+                  {(resource?.author || 'E')[0].toUpperCase()}
                 </div>
-                <span className='text-gray-300'>•</span>
-                <span className='text-sm text-gray-600'>
+                <div>
+                  <p className='text-sm text-gray-500 font-medium'>
+                    Written by
+                  </p>
+                  <p className='text-base font-bold text-gray-900'>
+                    {resource?.author || 'Embroidize Team'}
+                  </p>
+                  <meta
+                    itemProp='author'
+                    content={resource?.author || 'Embroidize Team'}
+                  />
+                </div>
+              </div>
+
+              {/* Reading Time */}
+              <div className='flex items-center gap-2 px-4 py-2 bg-white rounded-lg border border-gray-200 shadow-sm'>
+                <svg
+                  className='w-5 h-5 text-gray-500'
+                  fill='none'
+                  stroke='currentColor'
+                  viewBox='0 0 24 24'
+                >
+                  <path
+                    strokeLinecap='round'
+                    strokeLinejoin='round'
+                    strokeWidth={2}
+                    d='M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z'
+                  />
+                </svg>
+                <span className='text-sm font-semibold text-gray-700'>
                   {readingTime} min read
                 </span>
               </div>
-
-              {/* Share Section */}
-              <div className='flex items-center gap-4 pt-4'>
-                <span className='text-sm font-medium text-gray-700'>
-                  Share:
-                </span>
-                <ShareButtons
-                  url={canonicalUrl}
-                  title={resource?.title}
-                  description={resource?.meta_description}
-                />
-              </div>
             </div>
 
-            {/* Right Column - Featured Image (40%) */}
-            <figure className='lg:col-span-2 relative w-full rounded-xl overflow-hidden shadow-xl'>
-              <Image
-                src={resource?.image?.url || 'https://embroidize.com/og-banner.jpg'}
-                alt={resource?.title}
-                fill
-                priority
-                className='hover:scale-105 transition-transform duration-500'
-                sizes='(max-width: 768px) 100vw, (max-width: 1024px) 50vw, 40vw'
-                itemProp='image'
+            {/* Share Section */}
+            <div className='flex flex-col sm:flex-row sm:items-center gap-4 pt-2'>
+              <span className='text-sm font-semibold text-gray-700 flex items-center gap-2'>
+                <svg
+                  className='w-5 h-5 text-gray-500'
+                  fill='none'
+                  stroke='currentColor'
+                  viewBox='0 0 24 24'
+                >
+                  <path
+                    strokeLinecap='round'
+                    strokeLinejoin='round'
+                    strokeWidth={2}
+                    d='M8.684 13.342C8.886 12.938 9 12.482 9 12c0-.482-.114-.938-.316-1.342m0 2.684a3 3 0 110-2.684m0 2.684l6.632 3.316m-6.632-6l6.632-3.316m0 0a3 3 0 105.367-2.684 3 3 0 00-5.367 2.684zm0 9.316a3 3 0 105.368 2.684 3 3 0 00-5.368-2.684z'
+                  />
+                </svg>
+                Share this article:
+              </span>
+              <ShareButtons
+                url={canonicalUrl}
+                title={resource?.title}
+                description={resource?.meta_description}
               />
-            </figure>
+            </div>
           </div>
 
           {/* Article Content */}
@@ -299,8 +327,7 @@ export default async function SingleBlogPage({ params }) {
             <div className='mx-4'>
               {/* Content Body */}
               <section
-                className='custom-blog-content max-w-none mt-8'
-                style={{ fontSize: 18 }}
+                className='prose prose-2xl custom-blog-content max-w-none mt-8'
                 dangerouslySetInnerHTML={{
                   __html: resource?.description,
                 }}

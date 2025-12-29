@@ -4,7 +4,7 @@ import mainLogo from '../../../../public/logo-black.png';
 
 const Footer = () => {
   return (
-    <footer className='py-6 bg-white border-t border-gray-200'>
+    <footer className='py-6 bg-[#f9f9f9] text-gray-700 mt-12]'>
       <div className='container flex flex-wrap text-left lg:text-left'>
         {/* Logo Section */}
         <div className='w-full lg:w-6/12 pb-6'>
@@ -187,8 +187,7 @@ const Footer = () => {
       </div>
 
       {/* Divider and Footer Info */}
-      <hr className='border-blue-500 my-2' />
-      <div className='flex flex-wrap items-center md:justify-between justify-between py-2 px-1'>
+      <div className='flex flex-wrap items-center md:justify-between justify-between py-2 px-1 border-t border-gray-300'>
         <div className='w-full md:w-4/12 px-4 mx-auto text-center'>
           <strong>Embroidize</strong>
           <p>&copy;{new Date().getFullYear()}. All rights reserved.</p>

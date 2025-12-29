@@ -53,15 +53,13 @@ p {
   line-height: 1.6;
 }
 
-
-.widget-visible iframe[title="chat widget"] {
+.widget-visible iframe[title='chat widget'] {
   right: 0px !important;
   position: fixed !important;
   /* bottom: 20px !important; */
   width: 350px !important;
   height: 520px !important;
 }
-
 
 .end-3 {
   inset-inline-end: 3.75rem;
@@ -283,45 +281,52 @@ p {
   max-width: 100%;
 }
 
-/* .prose :where(p):not(:where([class~='not-prose'], [class~='not-prose'] *)) {
+.prose :where(p):not(:where([class~='not-prose'], [class~='not-prose'] *)) {
   margin-top: 0.25em !important;
   margin-bottom: 0.25em !important;
-} */
-/* .prose
+}
+
+.prose
   :where(h1, h2, h3, h4, h5, h6):not(
     :where([class~='not-prose'], [class~='not-prose'] *)
   ) {
   margin-top: 0.5em !important;
   margin-bottom: 0.5em !important;
-} */
-/* .prose
+}
+
+.prose
   :where(ul, ol):not(:where([class~='not-prose'], [class~='not-prose'] *)) {
   margin-top: 0.25em !important;
-  margin-bottom: 0.25em !important; */
-/* } */
-/* .prose
+  margin-bottom: 0.25em !important;
+}
+
+.prose
   :where(blockquote):not(:where([class~='not-prose'], [class~='not-prose'] *)) {
   margin-top: 0.5em !important;
   margin-bottom: 0.5em !important;
-} */
-/* .prose :where(pre):not(:where([class~='not-prose'], [class~='not-prose'] *)) {
+}
+
+.prose :where(pre):not(:where([class~='not-prose'], [class~='not-prose'] *)) {
   margin-top: 0.5em !important;
   margin-bottom: 0.5em !important;
 }
+
 .prose :where(code):not(:where([class~='not-prose'], [class~='not-prose'] *)) {
   margin-top: 0.25em !important;
   margin-bottom: 0.25em !important;
-} */
+}
+
 .prose :where(img):not(:where([class~='not-prose'], [class~='not-prose'] *)) {
-  /* margin-top: 0.5em !important; */
-  /* margin-bottom: 0.5em !important; */
+  margin-top: 0.5em !important;
+  margin-bottom: 0.5em !important;
   display: block;
   max-width: 100%;
   height: auto;
 }
+
 .prose :where(table):not(:where([class~='not-prose'], [class~='not-prose'] *)) {
-  /* margin-top: 0.5em !important; */
-  /* margin-bottom: 0.5em !important; */
+  margin-top: 0.5em !important;
+  margin-bottom: 0.5em !important;
   width: 100%;
   border-collapse: collapse;
 }

@@ -1,5 +1,3 @@
-import { Divider } from '@heroui/react';
-import Image from 'next/image';
 import Link from 'next/link';
 import React from 'react';
 
@@ -12,11 +10,11 @@ const ResourceCard = React.memo(function ResourceCard({ data }) {
       <Link
         href={`/resources/${data?.slug}`}
         prefetch={false}
-        className='bg-white border rounded-2xl shadow-xl overflow-hidden group'
+        className='bg-slate-50  rounded-xl shadow-sm overflow-hidden group'
         aria-label={`View details for ${altText}`}
       >
         {/* Resource Image */}
-        <div className='relative w-full aspect-[3/2]'>
+        {/* <div className='relative w-full aspect-[3/2]'>
           <Image
             src={imageUrl || 'https://embroidize.com/og-banner.jpg'}
             alt={altText}
@@ -28,7 +26,7 @@ const ResourceCard = React.memo(function ResourceCard({ data }) {
           />
         </div>
 
-        <Divider />
+        <Divider /> */}
 
         {/* Resource Info */}
         <div className='border-default-600 dark:border-default-100 p-4 rounded-b-2xl'>
