@@ -2,6 +2,7 @@ import ShareButtons from '@/components/Common/ShareButtons';
 import Footer from '@/components/user/HomePage/Footer';
 import Header from '@/components/user/HomePage/Header';
 import { getSingleBlog } from '@/lib/apis/public/blog';
+import Image from 'next/image';
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
 import 'quill/dist/quill.core.css';
@@ -258,8 +259,14 @@ export default async function SingleBlogPage({ params }) {
             <div className='flex flex-col sm:flex-row sm:items-center sm:justify-between gap-6 p-6 bg-gradient-to-r from-gray-50 to-blue-50/30 rounded-xl border border-gray-200'>
               {/* Author Info */}
               <div className='flex items-center gap-4'>
-                <div className='w-12 h-12 bg-gradient-to-br from-blue-500 to-purple-600 rounded-full flex items-center justify-center text-white font-bold text-lg shadow-md'>
-                  {(resource?.author || 'E')[0].toUpperCase()}
+                <div className='w-9 h-9 rounded-full flex items-center justify-center bg-white border-2 border-white/30 shadow-lg flex-shrink-0 overflow-hidden'>
+                  <Image
+                    src='/favicon.ico'
+                    alt='Embroidize'
+                    width={36}
+                    height={36}
+                    className='object-contain'
+                  />
                 </div>
                 <div>
                   <p className='text-sm text-gray-500 font-medium'>
