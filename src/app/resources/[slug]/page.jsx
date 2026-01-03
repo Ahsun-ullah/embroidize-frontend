@@ -15,7 +15,7 @@ export async function generateMetadata({ params }) {
 
   if (!resource) return {};
 
-  const canonicalUrl = `https://embroidize.com/resource/${resource.slug}`;
+  const canonicalUrl = `https://embroidize.com/resources/${resource.slug}`;
 
   return {
     title: resource?.meta_title || resource?.title,
@@ -73,7 +73,7 @@ export default async function SingleBlogPage({ params }) {
 
   if (!resource) return notFound();
 
-  const canonicalUrl = `https://embroidize.com/resource/${resource.slug}`;
+  const canonicalUrl = `https://embroidize.com/resources/${resource.slug}`;
   const readingTime = Math.ceil(resource?.description.length / 200);
 
   // Enhanced JSON-LD Structured Data
@@ -102,7 +102,7 @@ export default async function SingleBlogPage({ params }) {
       name: 'Embroidize',
       logo: {
         '@type': 'ImageObject',
-        url: 'https://embroidize.com/logo.png',
+        url: 'https://embroidize-assets.nyc3.cdn.digitaloceanspaces.com/favicon-white.png',
       },
     },
     datePublished: resource?.createdAt,
@@ -128,7 +128,7 @@ export default async function SingleBlogPage({ params }) {
         '@type': 'ListItem',
         position: 2,
         name: 'Resources',
-        item: 'https://embroidize.com/resource',
+        item: 'https://embroidize.com/resources',
       },
       {
         '@type': 'ListItem',
@@ -168,7 +168,7 @@ export default async function SingleBlogPage({ params }) {
             <li className='text-gray-400'>/</li>
             <li>
               <Link
-                href='/resource'
+                href='/resources'
                 className='text-gray-600 hover:text-gray-900 transition-colors'
               >
                 Resources

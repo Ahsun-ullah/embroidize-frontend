@@ -15,6 +15,8 @@ export async function GET() {
     const { categories } = await getCategories();
     const { subCategories } = await getSubCategories();
 
+    console.log(products);
+
     const routes = [
       '',
       '/about-us',

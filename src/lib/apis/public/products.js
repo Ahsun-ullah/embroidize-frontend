@@ -33,7 +33,7 @@ export async function getProducts(searchQuery, currentPage, perPageData) {
 
   const data = result?.data?.data ?? [];
   const meta = result?.data?.meta ?? {};
-  
+
   return {
     products: data,
     totalCount: meta.total ?? 0,
@@ -61,7 +61,6 @@ export async function getAllProductsForDashboard(
 
   const data = result?.data?.data ?? [];
   const meta = result?.data?.meta ?? {};
-
 
   return {
     products: data,
@@ -102,19 +101,29 @@ export async function getSingleProduct(productId) {
 // get all products in sitemap
 export async function getAllProductsPaginated() {
   let page = 1;
-  const limit = 500;
+  const limit = 200; // Reduced limit
   let allProducts = [];
   let totalPages = 1;
 
   do {
-    const { products, totalPages: total } = await getProducts(
-      null,
-      page,
-      limit,
-    );
-    allProducts.push(...products);
-    totalPages = total;
-    page++;
+    try {
+      const { products, totalPages: total } = await getProducts(
+        null,
+        page,
+        limit,
+      );
+      allProducts.push(...products);
+      totalPages = total;
+      page++;
+
+      // Optional: small delay to prevent rate-limiting/overload
+      if (page % 5 === 0)
+        await new Promise((resolve) => setTimeout(resolve, 100));
+    } catch (err) {
+      console.error(`Failed at page ${page}:`, err);
+      // Logic for 1 retry if needed
+      break;
+    }
   } while (page <= totalPages);
 
   return allProducts;

@@ -11,13 +11,13 @@ export const metadata = {
   description:
     'Explore the latest embroidery design tutorials, tips, and updates from the Embroidize team.',
   alternates: {
-    canonical: 'https://embroidize.com/resource',
+    canonical: 'https://embroidize.com/resources',
   },
   openGraph: {
     title: 'Resource | Embroidize',
     description:
       'Explore the latest embroidery design tutorials, tips, and updates from the Embroidize team.',
-    url: 'https://embroidize.com/resource',
+    url: 'https://embroidize.com/resources',
     type: 'website',
     images: [
       {
@@ -39,6 +39,8 @@ export const metadata = {
 
 export default async function AllResourcesPageInFrontSite({ searchParams }) {
   const { resources } = await getResources();
+
+  console.log(resources);
 
   const currentPage = parseInt(searchParams?.page || '1', 10);
   const perPageData = 6;
