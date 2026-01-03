@@ -1,7 +1,6 @@
 import Footer from '@/components/user/HomePage/Footer';
 import Header from '@/components/user/HomePage/Header';
 import PopularDesign from '@/components/user/HomePage/PopularDesign';
-import RecentBundleSection from '@/components/user/HomePage/RecentBundleSection';
 import RecentProductsSection from '@/components/user/HomePage/RecentProductsSection';
 import { getAllBundlesForDashboard } from '@/lib/apis/protected/bundles';
 import { getPopularProducts, getProducts } from '@/lib/apis/public/products';
@@ -82,7 +81,7 @@ export default async function Home() {
     bundlePromise,
   ]);
 
-  console.log(bundles?.bundles);
+  // console.log(bundles?.bundles);
 
   return (
     <>
@@ -185,7 +184,7 @@ export default async function Home() {
         </Suspense>
       </section>
 
-      {/* Popular Bundle Designs Section */}
+      {/* Popular Bundle Designs Section
       <section
         aria-labelledby='popular-bundles-heading'
         className='text-black my-8 py-6'
@@ -210,7 +209,7 @@ export default async function Home() {
             <GridSkeleton />
           )}
         </Suspense>
-      </section>
+      </section> */}
 
       {/* Recent Designs Section */}
       <section className=' text-black my-8 py-6'>
