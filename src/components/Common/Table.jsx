@@ -29,7 +29,6 @@ const UserTable = ({
   const pages = pagination?.totalPages || 1;
   const currentPage = pagination?.currentPage || 1;
 
-
   const defaultTopContent = (
     <div className='flex flex-col gap-4'>
       {/* Added 'justify-center' to align items in the center horizontally */}
@@ -77,6 +76,7 @@ const UserTable = ({
         topContent={finalTopContent}
         selectedKeys={props.selectedKeys}
         selectionMode='multiple'
+        selectionBehavior='check'
         onSelectionChange={props.onSelectionChange}
       >
         <TableHeader columns={columns}>

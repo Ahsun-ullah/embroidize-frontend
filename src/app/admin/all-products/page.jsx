@@ -20,6 +20,7 @@ export default async function AllProductsListPage({ searchParams }) {
   );
 
   const columns = [
+    { name: 'SL NO', uid: 'serial_no' },
     { name: 'NAME', uid: 'name' },
     { name: 'CATEGORY', uid: 'category' },
     { name: 'SUB CATEGORY', uid: 'sub_category' },

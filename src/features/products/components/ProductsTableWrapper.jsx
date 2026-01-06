@@ -353,12 +353,20 @@ export default function ProductsTableWrapper({
       switch (columnKey) {
         case 'name':
           return (
-            <User
-              avatarProps={{ radius: 'lg', src: product?.image?.url }}
-              name={cellValue}
-            >
-              {product.name}
-            </User>
+            <div className='inline-block' onClick={(e) => e.stopPropagation()}>
+              <Link
+                href={`/product/${product.slug}`}
+                target='_blank'
+                className='hover:underline flex items-center'
+              >
+                <User
+                  avatarProps={{ radius: 'lg', src: product?.image?.url }}
+                  name={cellValue}
+                >
+                  {product.name}
+                </User>
+              </Link>
+            </div>
           );
         case 'status':
           return (
