@@ -38,8 +38,6 @@ export const metadata = {
 };
 
 export default async function AllBlogsPageInFrontSite({ searchParams }) {
-  // const blogs = await getPosts(); // wordpress blogs
-
   const { blogs } = await getBlogs();
 
   const currentPage = parseInt(searchParams?.page || '1', 10);
@@ -53,7 +51,10 @@ export default async function AllBlogsPageInFrontSite({ searchParams }) {
   return (
     <>
       <Header />
-      {/* <BlogSection blogs={paginatedBlogs} /> */}
+
+      <h1 className='text-center text-3xl font-bold my-8'>
+        Explore the latest embroidery design tutorials, tips.
+      </h1>
 
       {paginatedBlogs.length > 0 && (
         <>
@@ -71,7 +72,6 @@ export default async function AllBlogsPageInFrontSite({ searchParams }) {
           </div>
         </>
       )}
-
       <Footer />
     </>
   );

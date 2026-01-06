@@ -39,28 +39,24 @@ const ContactUsPage = () => {
     <>
       <Header />
 
-      <div className='bg-white text-gray-800 px-4 md:px-6 lg:px-8'>
-        <div className='max-w-4xl mx-auto py-12 md:py-20'>
-          <header className='text-center mb-12'>
-            <h1 className='text-4xl md:text-5xl font-bold tracking-tight text-gray-900'>
-              Contact Us
-            </h1>
+      <div className='text-center mx-10 my-10 md:mx-20 md:my-20 space-y-6'>
+        <h1 className='text-4xl md:text-5xl font-bold tracking-tight text-gray-900'>
+          Contact Us - Embroidize
+        </h1>
 
-            <p className='mt-4 text-lg md:text-xl text-gray-600'>
-              We’d love to hear from you! Whether you have{' '}
-              <strong>any requirement</strong>, face <strong>any issues</strong>
-              , are interested in <strong>any commercial work</strong>, or
-              simply want to share <strong>any advice</strong>, our team is
-              always ready to connect. Feel free to reach out and we’ll be happy
-              to assist you.
-            </p>
-          </header>
-
-          <section>
-            <ContactUsForm />
-          </section>
-        </div>
+        <p className='text-lg md:text-xl text-gray-600'>
+          We’d love to hear from you! Whether you have{' '}
+          <strong>any requirement</strong>, face <strong>any issues</strong>,
+          are interested in <strong>any commercial work</strong>, or simply want
+          to share <strong>any advice</strong>, our team is always ready to
+          connect. Feel free to reach out and we’ll be happy to assist you.
+        </p>
       </div>
+
+      <section className='mb-10'>
+        <ContactUsForm />
+      </section>
+
       <Footer />
     </>
   );

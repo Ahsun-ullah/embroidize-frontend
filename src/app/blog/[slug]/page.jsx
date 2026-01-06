@@ -13,13 +13,12 @@ export async function generateMetadata({ params }) {
   const slugData = params.slug;
   const blogData = await getSingleBlog(slugData);
   const blog = blogData?.blogs;
-  // const blog = await getPostBySlug(slugData);
 
   if (!blog) return {};
 
   return {
+    metadataBase: new URL('https://embroidize.com'),
     title: blog?.title,
-    // blog?.title?.rendered
     description:
       blog?.meta_description ||
       'Explore the latest embroidery design tutorials, tips, and updates from the Embroidize team.',
@@ -27,37 +26,34 @@ export async function generateMetadata({ params }) {
       canonical: `https://embroidize.com/blog/${blog.slug}`,
     },
     keywords: blog?.meta_keywords?.join(', '),
-    // blog?.tags?.join(', ')
     openGraph: {
       title: blog?.title,
-      // blog?.title?.rendered
       description: blog?.meta_description,
+      url: `https://embroidize.com/blog/${blog.slug}`,
+      siteName: 'Embroidize',
+
       images: [
         {
-          url: blog?.image?.url,
-          // blog?.featuredImage
+          url: blog?.image?.url.startsWith('http')
+            ? blog.image.url
+            : `https://embroidize.com${blog.image.url}`,
           width: 1200,
           height: 630,
           alt: blog?.title,
-          // blog?.title?.rendered || 'Embroidery Design'
         },
       ],
+      type: 'article',
     },
     twitter: {
       card: 'summary_large_image',
       title: blog?.title,
-      // blog?.title?.rendered
       description: blog?.meta_description,
-      images: [
-        blog?.image?.url,
-        // blog?.featuredImage || 'https://embroidize.com/og-banner.jpg'
-      ],
+      images: [blog?.image?.url],
     },
   };
 }
 
 export default async function SingleBlogPage({ params }) {
-  // const blog = await getPostBySlug(params.slug);
   const slugData = params.slug;
   const blogData = await getSingleBlog(slugData);
   const blog = blogData?.blogs;
@@ -72,13 +68,11 @@ export default async function SingleBlogPage({ params }) {
       '@id': `https://embroidize.com/blog/${blog.slug}`,
     },
     headline: blog?.title,
-    // blog?.title?.rendered
 
     description:
       blog?.meta_description ||
       'Explore the latest embroidery design tutorials, tips, and updates from the Embroidize team.',
     image: blog?.image?.url,
-    // blog?.featuredImage || 'https://embroidize.com/og-banner.jpg'
     author: {
       '@type': 'Organization',
       name: 'Embroidize',
@@ -92,10 +86,7 @@ export default async function SingleBlogPage({ params }) {
       },
     },
     datePublished: blog?.createdAt,
-    // blog?.date
-
     dateModified: blog?.updatedAt,
-    // blog?.modified || blog?.date
   };
 
   return (
@@ -126,14 +117,8 @@ export default async function SingleBlogPage({ params }) {
           >
             <figure className='relative w-full aspect-[3/2] mb-12 rounded-lg overflow-hidden shadow-md'>
               <Image
-                src={
-                  blog?.image?.url
-                  // blog?.featuredImage || 'https://embroidize.com/og-banner.jpg'
-                }
-                alt={
-                  blog?.title
-                  // blog?.title?.rendered || 'Embroidery Design'
-                }
+                src={blog?.image?.url}
+                alt={blog?.title}
                 fill
                 className=''
                 priority
@@ -145,39 +130,29 @@ export default async function SingleBlogPage({ params }) {
             <div className='rounded-lg overflow-hidden shadow-xl p-8'>
               <header className='mb-6'>
                 <h1 className='text-4xl font-bold mb-2' itemProp='headline'>
-                  {
-                    blog?.title
-                    // blog?.title?.rendered
-                  }
+                  {blog?.title}
                 </h1>
                 <time
                   className='block text-gray-600 text-sm'
-                  dateTime={
-                    blog?.createdAt
-                    // blog?.date
-                  }
+                  dateTime={blog?.createdAt}
                   itemProp='datePublished'
                 >
                   {new Date(blog?.createdAt).toISOString().split('T')[0]}
                 </time>
 
-                {blog?.meta_keywords?.length >
-                  //  blog?.tags?.length
-                  0 && (
+                {blog?.meta_keywords?.length > 0 && (
                   <div className='flex flex-wrap gap-2 mt-4'>
-                    {blog?.meta_keywords
-                      // blog.tags.
-                      .map((tag) => (
-                        <Link
-                          key={tag}
-                          href={`/search?searchQuery=${tag.split(' ').join('+')}`}
-                          prefetch={false}
-                          className='inline-block bg-gray-100 px-3 py-1 text-xs rounded-full text-gray-700 hover:bg-primary hover:text-white transition'
-                          aria-label={`View posts tagged with ${tag}`}
-                        >
-                          {tag}
-                        </Link>
-                      ))}
+                    {blog?.meta_keywords.map((tag) => (
+                      <Link
+                        key={tag}
+                        href={`/search?searchQuery=${tag.split(' ').join('+')}`}
+                        prefetch={false}
+                        className='inline-block bg-gray-100 px-3 py-1 text-xs rounded-full text-gray-700 hover:bg-primary hover:text-white transition'
+                        aria-label={`View posts tagged with ${tag}`}
+                      >
+                        {tag}
+                      </Link>
+                    ))}
                   </div>
                 )}
               </header>
@@ -187,7 +162,6 @@ export default async function SingleBlogPage({ params }) {
                 style={{ fontSize: 18 }}
                 dangerouslySetInnerHTML={{
                   __html: blog?.description,
-                  // blog?.content?.rendered
                 }}
                 itemProp='articleBody'
               />

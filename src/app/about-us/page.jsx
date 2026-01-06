@@ -38,18 +38,17 @@ export default function AboutUsPage() {
     <>
       <Header />
       <main className='container mx-auto px-6 py-16 text-gray-800'>
-        <div className='max-w-6xl mx-auto space-y-16'>
-          {/* Intro */}
-          <section className='text-center mt-8'>
-            <h1 className='text-4xl font-bold text-gray-900 mb-4'>
-              About Embroidize
-            </h1>
-            <p className='text-lg text-gray-600 max-w-2xl mx-auto'>
-              Where creativity meets convenience — your go-to hub for premium
-              embroidery designs.
-            </p>
-          </section>
+        {/* Intro */}
 
+        <h1 className='text-center text-4xl font-bold text-gray-900 '>
+          About Embroidize
+        </h1>
+        <p className='text-center text-lg text-gray-600 max-w-2xl mx-auto'>
+          Where creativity meets convenience — your go-to hub for premium
+          embroidery designs.
+        </p>
+
+        <div className='max-w-6xl mx-auto space-y-16'>
           {/* Mission Section */}
           <section className='grid md:grid-cols-2 gap-10 items-center p-8'>
             <div className='space-y-4'>

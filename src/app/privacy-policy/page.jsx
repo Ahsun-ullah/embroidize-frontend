@@ -10,7 +10,8 @@ export const metadata = {
   },
   openGraph: {
     title: 'Privacy Policy - Embroidize',
-    description: 'Read Embroidize’s Privacy Policy to understand how we collect, use, and protect your personal information when you download embroidery designs from our platform.',
+    description:
+      'Read Embroidize’s Privacy Policy to understand how we collect, use, and protect your personal information when you download embroidery designs from our platform.',
     url: 'https://embroidize.com',
     siteName: 'Embroidize',
     images: [
@@ -36,11 +37,13 @@ export default function PrivacyPolicyPage() {
   return (
     <>
       <Header />
-      <main className='container px-6 py-12 text-gray-800'>
+
+      <h1 className='text-4xl font-bold my-8 text-center'>
+        Privacy Policy – Embroidize
+      </h1>
+      
+      <main className='container px-6 mb-6 text-gray-800'>
         <div>
-          <h1 className='text-4xl font-bold mb-8 text-center'>
-            Privacy Policy – Embroidize
-          </h1>
           <div className='space-y-8 text-base leading-relaxed'>
             <p>
               At Embroidize, we are committed to safeguarding your personal
