@@ -486,7 +486,7 @@ export function ProductsForm({ product }) {
               })
             }
             className='
-    block w-full border-[1.8px] rounded-[4px] p-2 file:mr-4 file:py-2 file:px-4 file:rounded-full
+    block w-full border-[1.8px] rounded-[4px] p-8 file:mr-4 file:py-2 file:px-4 file:rounded-full
     file:border-0 file:text-sm file:font-semibold file:bg-slate-100 file:text-slate-700
     hover:file:bg-slate-200 transition
   '
