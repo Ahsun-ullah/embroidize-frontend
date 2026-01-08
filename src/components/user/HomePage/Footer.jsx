@@ -82,20 +82,20 @@ const Footer = () => {
               <ul className='space-y-3'>
                 <li>
                   <Link
-                    href='/'
-                    prefetch={false}
-                    className='text-gray-600 hover:underline transition-colors duration-200'
-                  >
-                    Home
-                  </Link>
-                </li>
-                <li>
-                  <Link
                     href='/products'
                     prefetch={false}
                     className='text-gray-600 hover:underline transition-colors duration-200'
                   >
                     Products
+                  </Link>
+                </li>
+                <li>
+                  <Link
+                    href='/Bundles'
+                    prefetch={false}
+                    className='text-gray-600 hover:underline transition-colors duration-200'
+                  >
+                    Bundles
                   </Link>
                 </li>
                 <li>
@@ -178,6 +178,15 @@ const Footer = () => {
                     prefetch={false}
                   >
                     Contact Us
+                  </Link>
+                </li>
+                <li>
+                  <Link
+                    className='text-gray-600 hover:underline transition-colors duration-200'
+                    href='/custom-embroidery-order'
+                    prefetch={false}
+                  >
+                    Custom Embroidery Order
                   </Link>
                 </li>
               </ul>

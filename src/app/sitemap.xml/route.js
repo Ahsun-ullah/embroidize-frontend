@@ -1,3 +1,4 @@
+import { getAllBundlesForDashboard } from '@/lib/apis/protected/bundles';
 import { getBlogs, getResources } from '@/lib/apis/public/blog';
 import { getCategories } from '@/lib/apis/public/category';
 import { getAllProductsPaginated } from '@/lib/apis/public/products';
@@ -14,8 +15,7 @@ export async function GET() {
     const products = await getAllProductsPaginated();
     const { categories } = await getCategories();
     const { subCategories } = await getSubCategories();
-
-    console.log(products);
+    const { bundles } = await getAllBundlesForDashboard();
 
     const routes = [
       '',
@@ -23,6 +23,7 @@ export async function GET() {
       '/contact-us',
       '/privacy-policy',
       '/terms-and-conditions',
+      '/custom-embroidery-order',
       '/products',
       ...products.map((product) => `/product/${product.slug}`),
       ...categories.map((category) => `/category/${category.slug}`),
@@ -33,6 +34,8 @@ export async function GET() {
       ...blogs.map((blog) => `/blog/${blog.slug}`),
       '/resources',
       ...resources.map((resource) => `/resources/${resource.slug}`),
+      '/bundles',
+      ...bundles.map((bundle) => `/bundles/${bundle.slug}`),
     ];
 
     function escapeXml(str) {
