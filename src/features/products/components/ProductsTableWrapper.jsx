@@ -240,49 +240,42 @@ export default function ProductsTableWrapper({
 
   // --- Submit Bundle Creation ---
   const handleSubmitBundle = async () => {
-    if (!bundleName.trim()) {
-      ErrorToast('Error', 'Please enter a bundle name', 3000);
-      return;
-    }
-
-    if (!bundleSlug) {
-      ErrorToast('Error', 'Please enter a bundle slug', 3000);
-      return;
-    }
+    if (!bundleName.trim())
+      return ErrorToast('Error', 'Please enter a bundle name', 3000);
+    if (!bundleSlug)
+      return ErrorToast('Error', 'Please enter a bundle slug', 3000);
+    if (selectedIds.length === 0)
+      return ErrorToast('Error', 'Please select at least one product', 3000);
 
     setIsCreatingBundle(true);
 
     try {
-      // Get token from cookies (client-side)
       const token = document.cookie
         .split('; ')
         .find((row) => row.startsWith('token='))
         ?.split('=')[1];
-
-      const formData = new FormData();
-      formData.append('name', bundleName.trim());
-      formData.append('productIds', JSON.stringify(selectedIds));
-      formData.append('slug', bundleSlug);
-      formData.append('meta_title', bundleMetaTitle);
-      formData.append('meta_description', bundleMetaDescription);
-      if (bundleImage) {
-        formData.append('image', bundleImage);
-      }
-
       const apiUrl =
         process.env.NEXT_PUBLIC_BASE_API_URL_PROD ||
         process.env.NEXT_PUBLIC_BASE_API_URL;
 
-      const headers = {};
-      if (token) {
-        headers['Authorization'] = `Bearer ${token}`;
+      const formData = new FormData();
+      formData.append('name', bundleName.trim());
+      formData.append('productIds', JSON.stringify(selectedIds)); // Sent as string for backend JSON.parse
+      formData.append('slug', bundleSlug);
+      formData.append('meta_title', bundleMetaTitle || '');
+      formData.append('meta_description', bundleMetaDescription || '');
+
+      if (bundleImage) {
+        formData.append('image', bundleImage); // Must match multer field name 'image'
       }
 
       const response = await fetch(`${apiUrl}/admin/bundle-product`, {
         method: 'POST',
-        headers: headers,
+        headers: {
+          Authorization: `Bearer ${token}`,
+          // DO NOT set Content-Type; browser handles it for FormData
+        },
         body: formData,
-        credentials: 'include',
       });
 
       const data = await response.json();
@@ -293,14 +286,17 @@ export default function ProductsTableWrapper({
           data.message || 'Bundle created successfully',
           3000,
         );
-        handleCloseBundleModal();
-        setSelectedKeys(new Set([]));
-        router.refresh();
+
+        // Use startTransition for a clean UI refresh [web:77]
+        startTransition(() => {
+          handleCloseBundleModal();
+          setSelectedKeys(new Set([])); // Clear selection
+          router.refresh(); // Update the list on the page
+        });
       } else {
         ErrorToast('Error', data.message || 'Failed to create bundle', 3000);
       }
     } catch (error) {
-      console.error('Bundle creation error:', error);
       ErrorToast('Error', 'Something went wrong', 3000);
     } finally {
       setIsCreatingBundle(false);
@@ -353,20 +349,12 @@ export default function ProductsTableWrapper({
       switch (columnKey) {
         case 'name':
           return (
-            <div className='inline-block' onClick={(e) => e.stopPropagation()}>
-              <Link
-                href={`/product/${product.slug}`}
-                target='_blank'
-                className='hover:underline flex items-center'
-              >
-                <User
-                  avatarProps={{ radius: 'lg', src: product?.image?.url }}
-                  name={cellValue}
-                >
-                  {product.name}
-                </User>
-              </Link>
-            </div>
+            <User
+              avatarProps={{ radius: 'lg', src: product?.image?.url }}
+              name={cellValue}
+            >
+              {product.name}
+            </User>
           );
         case 'status':
           return (

@@ -7,16 +7,16 @@ import { getAllBundlesForDashboard } from '@/lib/apis/protected/bundles';
 export const revalidate = 0;
 
 export const metadata = {
-  title: 'Bundles | Embroidize',
+  title: 'Embroidery Design Bundles | High-Quality Machine Embroidery Files',
   description:
-    'Explore our collection of product bundles, offering great value on machine embroidery designs.',
+    'Explore popular embroidery design bundles featuring high-quality, professionally digitized files. Perfect for machine embroidery projects with multiple formats included.',
   alternates: {
     canonical: 'https://embroidize.com/bundles',
   },
   openGraph: {
-    title: 'Bundles | Embroidize',
+    title: 'Embroidery Design Bundles | High-Quality Machine Embroidery Files',
     description:
-      'Explore our collection of product bundles, offering great value on machine embroidery designs.',
+      'Explore popular embroidery design bundles featuring high-quality, professionally digitized files. Perfect for machine embroidery projects with multiple formats included.',
     url: 'https://embroidize.com/bundles',
     type: 'website',
     images: [
@@ -30,9 +30,9 @@ export const metadata = {
   },
   twitter: {
     card: 'summary_large_image',
-    title: 'Bundles | Embroidize',
+    title: 'Embroidery Design Bundles | High-Quality Machine Embroidery Files',
     description:
-      'Explore our collection of product bundles, offering great value on machine embroidery designs.',
+      'Explore popular embroidery design bundles featuring high-quality, professionally digitized files. Perfect for machine embroidery projects with multiple formats included.',
     images: ['https://embroidize.com/og-banner.jpg'],
   },
 };

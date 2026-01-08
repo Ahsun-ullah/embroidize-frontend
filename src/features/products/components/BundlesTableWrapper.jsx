@@ -66,7 +66,7 @@ export default function BundlesTableWrapper({
             alt={bundle.name}
             width={60}
             height={60}
-            className='rounded-md object-cover'
+            className='rounded-md'
           />
         );
       case 'name':
@@ -95,7 +95,7 @@ export default function BundlesTableWrapper({
               size='sm'
               variant='light'
               as={Link}
-              href={`/admin/bundle-products/${bundle._id}`}
+              href={`/admin/bundle-products/${bundle.slug}`}
             >
               <Eye size={18} />
             </Button>

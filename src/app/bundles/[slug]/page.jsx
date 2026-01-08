@@ -73,7 +73,7 @@ export default async function SingleBundlePage({ params, searchParams }) {
           {bundleData?.name}
         </h1>
 
-        <div className='flex justify-center mb-10'>
+        {/* <div className='flex justify-center mb-10'>
           <img
             src={
               bundleData?.image?.url.startsWith('http')
@@ -83,7 +83,7 @@ export default async function SingleBundlePage({ params, searchParams }) {
             alt={bundleData?.name}
             className='max-w-4xl w-full h-auto rounded-lg shadow-md'
           />
-        </div>
+        </div> */}
 
         {/* Product Grid */}
         <div className='grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6'>

@@ -7,16 +7,16 @@ import { getBlogs } from '@/lib/apis/public/blog';
 export const revalidate = 0;
 
 export const metadata = {
-  title: 'Blog | Embroidize',
+  title: 'Blog | Machine Embroidery Tips & Design Ideas',
   description:
-    'Explore the latest embroidery design tutorials, tips, and updates from the Embroidize team.',
+    'Explore the world of machine embroidery! Get expert tips, trending designs, and creative inspiration for your next embroidery projects.',
   alternates: {
     canonical: 'https://embroidize.com/blog',
   },
   openGraph: {
-    title: 'Blog | Embroidize',
+    title: 'Blog | Machine Embroidery Tips & Design Ideas',
     description:
-      'Explore the latest embroidery design tutorials, tips, and updates from the Embroidize team.',
+      'Explore the world of machine embroidery! Get expert tips, trending designs, and creative inspiration for your next embroidery projects.',
     url: 'https://embroidize.com/blog',
     type: 'website',
     images: [
@@ -30,9 +30,9 @@ export const metadata = {
   },
   twitter: {
     card: 'summary_large_image',
-    title: 'Blog | Embroidize',
+    title: 'Blog | Machine Embroidery Tips & Design Ideas',
     description:
-      'Explore the latest embroidery design tutorials, tips, and updates from the Embroidize team.',
+      'Explore the world of machine embroidery! Get expert tips, trending designs, and creative inspiration for your next embroidery projects.',
     images: ['https://embroidize.com/og-banner.jpg'],
   },
 };

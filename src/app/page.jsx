@@ -71,9 +71,9 @@ function GridSkeleton({ rows = 2, cols = 6 }) {
 
 export default async function Home() {
   const [popularPromise, recentPromise, bundlePromise] = [
-    getPopularProducts('', 1, 12, { cache: 'no-store' }),
+    getPopularProducts('', 1, 8, { cache: 'no-store' }),
     getProducts('', 1, 8, { cache: 'no-store' }),
-    getAllBundlesForDashboard('', 1, 4, { cache: 'no-store' }),
+    getAllBundlesForDashboard('', 1, 8, { cache: 'no-store' }),
   ];
 
   const [popularProducts, recentProducts, bundles] = await Promise.all([
