@@ -52,15 +52,14 @@ export async function getAllBundlesForDashboard(search, page, limit) {
   }
 }
 
-export async function getSingleBundle(bundleId) {
+export async function getSingleBundle(bundleSlug) {
   try {
-    const url = buildURL(`/public/bundles/${bundleId}`);
+    const url = buildURL(`/public/bundles/${bundleSlug}`);
     const data = await getJSON(url);
-
 
     return data?.data?.bundle || null;
   } catch (error) {
-    console.error(`Error fetching bundle ${bundleId}:`, error);
+    console.error(`Error fetching bundle ${bundleSlug}:`, error);
     return null;
   }
 }

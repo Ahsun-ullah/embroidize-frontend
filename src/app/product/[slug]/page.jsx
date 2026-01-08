@@ -102,11 +102,6 @@ export default async function ProductDetails({ params }) {
     <>
       <Header />
 
-      {/* Server-rendered JSON-LD visible in View Source */}
-      {/* <script
-        type='application/ld+json'
-        dangerouslySetInnerHTML={{ __html: JSON.stringify(productSchema) }}
-      /> */}
       <script
         type='application/ld+json'
         dangerouslySetInnerHTML={{

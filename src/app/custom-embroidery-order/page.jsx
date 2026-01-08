@@ -6,14 +6,26 @@ import Link from 'next/link';
 
 export async function generateMetadata() {
   return {
-    title: 'Custom Embroidery Order | Digitize Your Design Fast',
+    title: 'Custom Embroidery Digitizing Service',
     description:
-      'Order custom embroidery digitizing online. Upload your artwork, choose options, and receive high‑quality embroidery files quickly.',
+      'Upload a image or artwork, add requirements, and receive a production‑ready embroidery file with fast turnaround and meticulous quality checks.',
     robots: 'index,follow',
     openGraph: {
-      title: 'Custom Embroidery Order',
+      title: 'Custom Embroidery Digitizing Service',
       description:
-        'Upload embroidery designs and order digitized files online. Fast turnaround, premium quality, professional support.',
+        'Upload a image or artwork, add requirements, and receive a production‑ready embroidery file with fast turnaround and meticulous quality checks.',
+      url: 'https://www.embroidize.com/custom-embroidery-order',
+      siteName: 'Embroidize',
+      images: [
+        {
+          url: 'https://www.embroidize.com/og-image-custom-embroidery-order.jpg',
+          width: 1200,
+          height: 630,
+          alt: 'Custom Embroidery Order',
+        },
+      ],
+      locale: 'en_US',
+      type: 'website',
     },
   };
 }

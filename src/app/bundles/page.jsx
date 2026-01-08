@@ -1,5 +1,5 @@
+import BundleCard from '@/components/Common/BundleCard';
 import Pagination from '@/components/Common/Pagination';
-import ProductCard from '@/components/Common/ProductCard';
 import Footer from '@/components/user/HomePage/Footer';
 import Header from '@/components/user/HomePage/Header';
 import { getAllBundlesForDashboard } from '@/lib/apis/protected/bundles';
@@ -63,7 +63,7 @@ export default async function AllBundles({ searchParams }) {
             <>
               <div className='grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6'>
                 {bundles.map((item, index) => (
-                  <ProductCard key={item._id} item={item} index={index} />
+                  <BundleCard key={item._id} item={item} index={index} />
                 ))}
               </div>
               {/* Pagination Component */}

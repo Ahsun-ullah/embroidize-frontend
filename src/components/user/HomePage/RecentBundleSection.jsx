@@ -1,5 +1,5 @@
+import BundleCard from '@/components/Common/BundleCard';
 import LoadingSpinner from '@/components/Common/LoadingSpinner';
-import ProductCard from '@/components/Common/ProductCard';
 import Link from 'next/link';
 import { Suspense } from 'react';
 
@@ -14,7 +14,7 @@ const RecentBundleSection = ({ recentBundles }) => {
             <Suspense fallback={<LoadingSpinner />}>
               {allBundles?.length > 0 &&
                 allBundles.map((item, index) => (
-                  <ProductCard key={item._id} item={item} index={index} />
+                  <BundleCard key={item._id} item={item} index={index} />
                 ))}
             </Suspense>
           </div>

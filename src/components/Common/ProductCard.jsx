@@ -39,7 +39,7 @@ const ProductCard = React.memo(function ProductCard({ item, index = 0 }) {
     : `$${Number(item?.price || 0).toFixed(2)}`;
   const downloadCount = Number(item?.downloadCount || 0);
 
-  const isLCP = index === 0; // only the very first card in the grid
+  const isLCP = index === 0;
 
   const blur = item?.image?.blurDataURL || blurDataURL(600, 400);
 
@@ -67,11 +67,9 @@ const ProductCard = React.memo(function ProductCard({ item, index = 0 }) {
             src={imageUrl}
             alt={productName}
             fill
-            // Keep bytes down + let the browser choose smaller sources
             quality={78}
             sizes='(max-width:640px) 100vw, (max-width:1024px) 50vw, 33vw'
             className='object-cover object-center transition-transform duration-300 group-hover:scale-105'
-            // LCP boost for the first card only
             priority={isLCP}
             fetchPriority={isLCP ? 'high' : 'auto'}
             placeholder='blur'

@@ -1,9 +1,16 @@
 'use client';
 
+import { ErrorToast } from '@/components/Common/ErrorToast';
+import { SuccessToast } from '@/components/Common/SuccessToast';
 import {
   Button,
   Image,
   Input,
+  Modal,
+  ModalBody,
+  ModalContent,
+  ModalFooter,
+  ModalHeader,
   Pagination,
   Table,
   TableBody,
@@ -11,6 +18,7 @@ import {
   TableColumn,
   TableHeader,
   TableRow,
+  useDisclosure,
 } from '@heroui/react';
 import { Eye, Plus, Search, Trash2 } from 'lucide-react';
 import Link from 'next/link';
@@ -28,7 +36,9 @@ export default function BundlesTableWrapper({
     searchParams.get('search') || '',
   );
 
-  console.log(pagination);
+  const { isOpen, onOpen, onOpenChange } = useDisclosure();
+  const [selectedBundleId, setSelectedBundleId] = useState(null);
+  const [isDeleting, setIsDeleting] = useState(false);
 
   const handleSearch = (value) => {
     const params = new URLSearchParams(searchParams.toString());
@@ -105,9 +115,67 @@ export default function BundlesTableWrapper({
     }
   };
 
-  const handleDelete = async (id) => {
-    // Implement delete logic
-    console.log('Delete bundle:', id);
+  const handleDelete = (id) => {
+    setSelectedBundleId(id);
+    onOpen();
+  };
+
+  const confirmDelete = async () => {
+    if (!selectedBundleId) return;
+
+    setIsDeleting(true);
+
+    try {
+      const token = document.cookie
+        .split('; ')
+        .find((row) => row.startsWith('token='))
+        ?.split('=')[1];
+
+      // 2. Base API URL
+      const apiUrl =
+        process.env.NEXT_PUBLIC_BASE_API_URL_PROD ||
+        process.env.NEXT_PUBLIC_BASE_API_URL;
+
+      // 3. Prepare headers
+      const headers = {
+        'Content-Type': 'application/json',
+      };
+      if (token) {
+        headers['Authorization'] = `Bearer ${token}`;
+      }
+
+      // 4. Await response object first to check .ok
+      const res = await fetch(`${apiUrl}/bundles/${selectedBundleId}`, {
+        method: 'DELETE',
+        headers,
+      });
+
+      // 5. Parse the JSON body
+      const result = await res.json();
+
+      // 6. Handle HTTP errors
+      if (!res.ok) {
+        throw new Error(result.message || 'Failed to delete bundle');
+      }
+
+      // Success Handling
+      SuccessToast(
+        'Success',
+        result?.message || 'Action successfully done!',
+        3000,
+      );
+
+      // Refresh or update local state here if needed
+      startTransition(() => {
+        router.refresh();
+        onOpenChange(false);
+      });
+    } catch (error) {
+      ErrorToast('Error', error.message || 'Action Failed', 3000);
+    } finally {
+      setIsDeleting(false);
+      setSelectedBundleId(null);
+    }
   };
 
   return (
@@ -167,6 +235,36 @@ export default function BundlesTableWrapper({
           showShadow
         />
       </div>
+
+      <Modal isOpen={isOpen} onOpenChange={onOpenChange} backdrop='blur'>
+        <ModalContent>
+          {(onClose) => (
+            <>
+              <ModalHeader className='flex flex-col gap-1'>
+                Confirm Deletion
+              </ModalHeader>
+              <ModalBody>
+                <p>
+                  Are you sure you want to delete this bundle? This action can
+                  be undone later as it is a soft delete.
+                </p>
+              </ModalBody>
+              <ModalFooter>
+                <Button variant='light' onPress={onClose}>
+                  Cancel
+                </Button>
+                <Button
+                  color='danger'
+                  isLoading={isDeleting}
+                  onPress={confirmDelete}
+                >
+                  Delete Bundle
+                </Button>
+              </ModalFooter>
+            </>
+          )}
+        </ModalContent>
+      </Modal>
     </div>
   );
 }

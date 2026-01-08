@@ -7,6 +7,7 @@ import { getPopularProducts, getProducts } from '@/lib/apis/public/products';
 import Link from 'next/link';
 import { Suspense } from 'react';
 import ProductUpdates from './products/ProductUpdates';
+import RecentBundleSection from '@/components/user/HomePage/RecentBundleSection';
 // for dynamic data fetching and no caching
 export const dynamic = 'force-dynamic';
 export const fetchCache = 'force-no-store';
@@ -80,8 +81,6 @@ export default async function Home() {
     recentPromise,
     bundlePromise,
   ]);
-
-  // console.log(bundles?.bundles);
 
   return (
     <>
@@ -184,7 +183,7 @@ export default async function Home() {
         </Suspense>
       </section>
 
-      {/* Popular Bundle Designs Section
+      {/* Popular Bundle Designs Section */}
       <section
         aria-labelledby='popular-bundles-heading'
         className='text-black my-8 py-6'
@@ -209,7 +208,7 @@ export default async function Home() {
             <GridSkeleton />
           )}
         </Suspense>
-      </section> */}
+      </section>
 
       {/* Recent Designs Section */}
       <section className=' text-black my-8 py-6'>
