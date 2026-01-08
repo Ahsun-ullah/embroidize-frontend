@@ -260,20 +260,19 @@ export default function ProductsTableWrapper({
 
       const formData = new FormData();
       formData.append('name', bundleName.trim());
-      formData.append('productIds', JSON.stringify(selectedIds)); // Sent as string for backend JSON.parse
+      formData.append('productIds', JSON.stringify(selectedIds));
       formData.append('slug', bundleSlug);
       formData.append('meta_title', bundleMetaTitle || '');
       formData.append('meta_description', bundleMetaDescription || '');
 
       if (bundleImage) {
-        formData.append('image', bundleImage); // Must match multer field name 'image'
+        formData.append('image', bundleImage);
       }
 
       const response = await fetch(`${apiUrl}/admin/bundle-product`, {
         method: 'POST',
         headers: {
           Authorization: `Bearer ${token}`,
-          // DO NOT set Content-Type; browser handles it for FormData
         },
         body: formData,
       });
@@ -287,12 +286,10 @@ export default function ProductsTableWrapper({
           3000,
         );
 
-        // Use startTransition for a clean UI refresh [web:77]
-        startTransition(() => {
-          handleCloseBundleModal();
-          setSelectedKeys(new Set([])); // Clear selection
-          router.refresh(); // Update the list on the page
-        });
+        setSelectedKeys(new Set([]));
+        handleCloseBundleModal();
+        router.refresh();
+        router.push('/admin/bundle-products');
       } else {
         ErrorToast('Error', data.message || 'Failed to create bundle', 3000);
       }

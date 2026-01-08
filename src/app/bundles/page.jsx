@@ -2,6 +2,7 @@ import BundleCard from '@/components/Common/BundleCard';
 import Pagination from '@/components/Common/Pagination';
 import Footer from '@/components/user/HomePage/Footer';
 import Header from '@/components/user/HomePage/Header';
+import { BreadCrumb } from '@/features/products/components/BreadCrumb';
 import { getAllBundlesForDashboard } from '@/lib/apis/protected/bundles';
 
 export const revalidate = 0;
@@ -55,6 +56,13 @@ export default async function AllBundles({ searchParams }) {
       <Header />
 
       <div className='container mx-auto px-4 flex flex-col justify-between'>
+        <BreadCrumb
+          items={[
+            { label: 'Home', href: '/' },
+            { label: 'Bundles', href: '/bundles' },
+          ]}
+        />
+
         <h1 className='text-3xl font-bold my-6 text-gray-900'>
           Browse All Bundle Collections from Embroidize
         </h1>

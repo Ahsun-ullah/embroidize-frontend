@@ -2,7 +2,9 @@ import Pagination from '@/components/Common/Pagination'; // Adjust path if neede
 import ProductCard from '@/components/Common/ProductCard';
 import Footer from '@/components/user/HomePage/Footer';
 import Header from '@/components/user/HomePage/Header';
+import { BreadCrumb } from '@/features/products/components/BreadCrumb';
 import { getSingleBundle } from '@/lib/apis/protected/bundles';
+import { capitalize } from '@/utils/functions/page';
 import { notFound } from 'next/navigation';
 
 export async function generateMetadata({ params }) {
@@ -68,8 +70,19 @@ export default async function SingleBundlePage({ params, searchParams }) {
     <>
       <Header />
 
-      <section className='container mx-auto px-4 text-black mb-8 py-6'>
-        <h1 className='text-center capitalize text-3xl font-bold mb-4 text-gray-900'>
+      <section className='container mx-auto text-black'>
+        <BreadCrumb
+          items={[
+            { label: 'Home', href: '/' },
+            { label: 'Bundles', href: '/bundles' },
+            {
+              label: `${capitalize(bundleData?.name)}`,
+              href: `/bundles/${bundleData?.slug}`,
+            },
+          ]}
+        />
+
+        <h1 className='text-center capitalize text-3xl font-bold my-16  text-gray-900'>
           {bundleData?.name}
         </h1>
 
@@ -86,7 +99,7 @@ export default async function SingleBundlePage({ params, searchParams }) {
         </div> */}
 
         {/* Product Grid */}
-        <div className='grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6'>
+        <div className='grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-3 gap-6'>
           {paginatedProducts.length > 0 ? (
             paginatedProducts.map((item, index) => (
               <ProductCard key={item._id} item={item} index={index} />
