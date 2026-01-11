@@ -2,7 +2,11 @@ import Pagination from '@/components/Common/Pagination';
 import ProductCard from '@/components/Common/ProductCard';
 import Footer from '@/components/user/HomePage/Footer';
 import Header from '@/components/user/HomePage/Header';
-import { getPopularProducts, getProducts } from '@/lib/apis/public/products';
+import {
+  getAdminChoiceProducts,
+  getPopularProducts,
+  getProducts,
+} from '@/lib/apis/public/products';
 import Link from 'next/link';
 import ProductUpdates from './ProductUpdates';
 
@@ -57,10 +61,13 @@ export default async function AllProductsPage({ searchParams }) {
   const currentPage = parseInt(searchParams?.page) || 1;
   const perPageData = parseInt(searchParams?.limit) || 20;
   const isPopular = searchParams?.filter === 'popular';
+  const isAdminChoice = searchParams?.filter === 'embroidize-choice';
 
   const productData = isPopular
     ? await getPopularProducts('', currentPage, perPageData)
-    : await getProducts('', currentPage, perPageData);
+    : isAdminChoice
+      ? await getAdminChoiceProducts('', currentPage, perPageData)
+      : await getProducts('', currentPage, perPageData);
 
   const { products, totalCount, totalPages } = {
     ...productData,
@@ -83,7 +90,7 @@ export default async function AllProductsPage({ searchParams }) {
               <Link
                 href='/products'
                 prefetch={false}
-                className={`px-4 py-2 rounded ${!isPopular ? 'bg-black text-white' : 'border'}`}
+                className={`px-4 py-2 rounded ${!isPopular && !isAdminChoice ? 'bg-black text-white' : 'border'}`}
               >
                 All Products
               </Link>
@@ -93,6 +100,13 @@ export default async function AllProductsPage({ searchParams }) {
                 className={`px-4 py-2 rounded ${isPopular ? 'bg-black text-white' : 'border'}`}
               >
                 Popular Products
+              </Link>
+              <Link
+                href='/products?filter=embroidize-choice'
+                prefetch={false}
+                className={`px-4 py-2 rounded ${isAdminChoice ? 'bg-black text-white' : 'border'}`}
+              >
+                Embroidize Choice Products
               </Link>
             </div>
 

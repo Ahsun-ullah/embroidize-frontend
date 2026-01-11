@@ -22,6 +22,8 @@ export default function MostDownloadedProductsTableWrapper({
   const router = useRouter();
   const searchParams = useSearchParams();
 
+  console.log(router.pathname);
+
   // Get initial values from URL
   const [dateInputs, setDateInputs] = useState({
     startDate: searchParams.get('startDate') || '',
@@ -45,7 +47,6 @@ export default function MostDownloadedProductsTableWrapper({
     });
 
     // Reset to page 1 on filter change
-    params.set('page', '1');
     router.push(`?${params.toString()}`);
   };
 
@@ -118,7 +119,13 @@ export default function MostDownloadedProductsTableWrapper({
       case 'sub_category':
         return <>{item.product.sub_category?.name || '-'}</>;
       case 'downloadCount':
-        return <>{item.downloadCount}</>;
+        return (
+          <>
+            {searchParams.get('startDate')
+              ? item.downloadCount
+              : item.product.downloadCount}
+          </>
+        );
       case 'fileTypes':
         return <p className='uppercase'>{item.fileTypes?.join(', ') || '-'}</p>;
       case 'actions':

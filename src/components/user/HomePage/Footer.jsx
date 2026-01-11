@@ -186,7 +186,7 @@ const Footer = () => {
                     href='/custom-embroidery-order'
                     prefetch={false}
                   >
-                    Custom Embroidery Order
+                    Custom Digitizing
                   </Link>
                 </li>
               </ul>

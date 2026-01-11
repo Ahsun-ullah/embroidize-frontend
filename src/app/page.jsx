@@ -1,13 +1,18 @@
+import AdminChoiceDesign from '@/components/user/HomePage/AdminChoiceSection';
 import Footer from '@/components/user/HomePage/Footer';
 import Header from '@/components/user/HomePage/Header';
 import PopularDesign from '@/components/user/HomePage/PopularDesign';
+import RecentBundleSection from '@/components/user/HomePage/RecentBundleSection';
 import RecentProductsSection from '@/components/user/HomePage/RecentProductsSection';
 import { getAllBundlesForDashboard } from '@/lib/apis/protected/bundles';
-import { getPopularProducts, getProducts } from '@/lib/apis/public/products';
+import {
+  getAdminChoiceProducts,
+  getPopularProducts,
+  getProducts,
+} from '@/lib/apis/public/products';
 import Link from 'next/link';
 import { Suspense } from 'react';
 import ProductUpdates from './products/ProductUpdates';
-import RecentBundleSection from '@/components/user/HomePage/RecentBundleSection';
 // for dynamic data fetching and no caching
 export const dynamic = 'force-dynamic';
 export const fetchCache = 'force-no-store';
@@ -70,17 +75,20 @@ function GridSkeleton({ rows = 2, cols = 6 }) {
 }
 
 export default async function Home() {
-  const [popularPromise, recentPromise, bundlePromise] = [
+  const [popularPromise, adminChoicePromise, recentPromise, bundlePromise] = [
     getPopularProducts('', 1, 8, { cache: 'no-store' }),
+    getAdminChoiceProducts('', 1, 8, { cache: 'no-store' }),
     getProducts('', 1, 8, { cache: 'no-store' }),
     getAllBundlesForDashboard('', 1, 8, { cache: 'no-store' }),
   ];
 
-  const [popularProducts, recentProducts, bundles] = await Promise.all([
-    popularPromise,
-    recentPromise,
-    bundlePromise,
-  ]);
+  const [popularProducts, adminChoiceProducts, recentProducts, bundles] =
+    await Promise.all([
+      popularPromise,
+      adminChoicePromise,
+      recentPromise,
+      bundlePromise,
+    ]);
 
   return (
     <>
@@ -155,7 +163,7 @@ export default async function Home() {
         </div>
       </section>
 
-      {/* Popular Bundle Designs Section */}
+      {/* Popular Embroidery Designs Section */}
       <section
         aria-labelledby='popular-designs-heading'
         className=' text-black my-8 py-6'
@@ -165,7 +173,7 @@ export default async function Home() {
             id='popular-designs-heading'
             className='text-2xl sm:text-2xl md:text-3xl font-bold leading-snug'
           >
-            Popular embroidery designs
+            Most Trending Designs of the month
           </h2>
 
           <p className='text-base sm:text-base md:text-lg font-medium text-gray-600'>
@@ -177,6 +185,34 @@ export default async function Home() {
           {/* Make sure PopularDesign is a **server component** (no 'use client') */}
           {popularProducts?.products?.length ? (
             <PopularDesign popularProducts={popularProducts} />
+          ) : (
+            <GridSkeleton />
+          )}
+        </Suspense>
+      </section>
+
+      {/* Admin Choice Embroidery Designs Section */}
+      <section
+        aria-labelledby='popular-designs-heading'
+        className=' text-black my-8 py-6'
+      >
+        <div className='bg-[#fafafa] flex flex-col items-center justify-center gap-2 py-6 mb-6'>
+          <h2
+            id='popular-designs-heading'
+            className='text-2xl sm:text-2xl md:text-3xl font-bold leading-snug'
+          >
+            Embroidize Choice Embroidery Designs
+          </h2>
+
+          <p className='text-base sm:text-base md:text-lg font-medium text-gray-600'>
+            Browse our most loved designs.
+          </p>
+        </div>
+
+        <Suspense fallback={<GridSkeleton />}>
+          {/* Make sure AdminChoiceDesign is a **server component** (no 'use client') */}
+          {adminChoiceProducts?.products?.length ? (
+            <AdminChoiceDesign adminChoiceProducts={adminChoiceProducts} />
           ) : (
             <GridSkeleton />
           )}

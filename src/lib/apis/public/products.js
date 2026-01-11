@@ -83,6 +83,8 @@ export async function getPopularProducts(
 
   const result = await getJSON(url);
 
+  console.log(result);
+
   const data = result?.data?.data ?? [];
   const meta = result?.data?.meta ?? {};
   return {
@@ -91,6 +93,46 @@ export async function getPopularProducts(
     page: meta.page ?? 1,
     totalPages: meta.totalPages ?? 1,
   };
+}
+// admin choice products
+export async function getAdminChoiceProducts(
+  searchQuery,
+  currentPage = 1,
+  perPageData = 12,
+) {
+  try {
+    const url = buildURL('/public/admin-choice/products', {
+      search: searchQuery || undefined,
+      page: currentPage,
+      limit: perPageData,
+    });
+
+    // 2. Fetch the JSON data
+    const result = await getJSON(url);
+
+    console.log(result);
+
+    // 3. Extract data from your standard response wrapper [web:47][web:52]
+    // Your backend returns { data: { data: [...], meta: {...} } }
+    const products = result?.data?.data ?? [];
+    const meta = result?.data?.meta ?? {};
+
+    return {
+      products: products,
+      totalCount: meta.total ?? 0,
+      page: meta.page ?? 1,
+      limit: meta.limit ?? perPageData,
+      totalPages: meta.totalPages ?? 1,
+    };
+  } catch (error) {
+    console.error('Error fetching admin choice products:', error);
+    return {
+      products: [],
+      totalCount: 0,
+      page: 1,
+      totalPages: 1,
+    };
+  }
 }
 
 export async function getSingleProduct(productId) {

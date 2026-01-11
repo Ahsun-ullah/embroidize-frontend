@@ -5,6 +5,7 @@ import { blurDataURL } from '@/utils/blur';
 import Image from 'next/image';
 import Link from 'next/link';
 import React from 'react';
+import AdminChoiceStar from './AdminChoiceStar';
 import SkuFlag from './SkuFlag';
 
 function DownloadIcon(props) {
@@ -57,6 +58,13 @@ const ProductCard = React.memo(function ProductCard({ item, index = 0 }) {
       {item?.sku_code && userInfoData?.role === 'admin' && (
         <SkuFlag sku={item.sku_code} />
       )}
+      {/* Admin Choice Star */}
+      {item?.sku_code && userInfoData?.role === 'admin' && (
+        <div className='absolute top-[0.1 px] left-2 z-10'>
+          <AdminChoiceStar status={item.isAdminChoice} />
+        </div>
+      )}
+
       <Link
         href={productLink}
         className='block group'

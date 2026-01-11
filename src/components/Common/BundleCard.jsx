@@ -16,8 +16,6 @@ const BundleCard = React.memo(function BundleCard({ item, index = 0 }) {
   const isLCP = index === 0;
   const blur = item?.image?.blurDataURL || blurDataURL(600, 400);
 
-  console.log(item);
-
   return (
     <div className='bg-white rounded-2xl shadow-xl overflow-hidden relative'>
       <Link

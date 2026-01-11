@@ -3,8 +3,8 @@ import ProductCard from '@/components/Common/ProductCard';
 import Link from 'next/link';
 import { Suspense } from 'react';
 
-const PopularDesign = ({ popularProducts }) => {
-  const { products: allProducts } = popularProducts;
+const AdminChoiceDesign = ({ adminChoiceProducts }) => {
+  const { products: allProducts } = adminChoiceProducts;
 
   return (
     <>
@@ -20,7 +20,7 @@ const PopularDesign = ({ popularProducts }) => {
           </div>
           <div className='flex justify-center items-center mt-14'>
             <Link
-              href='/products?filter=popular'
+              href='/products?filter=embroidize-choice'
               prefetch={false}
               className='bg-black rounded-full hover:bg-blue-400 text-white font-medium px-6 py-2'
             >
@@ -33,4 +33,4 @@ const PopularDesign = ({ popularProducts }) => {
   );
 };
 
-export default PopularDesign;
+export default AdminChoiceDesign;

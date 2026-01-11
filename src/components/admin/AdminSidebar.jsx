@@ -84,20 +84,7 @@ export default function AdminSidebar({ isCollapsed, setIsCollapsed }) {
             )}
           </Link>
         </li>
-        <li>
-          <Link href='/admin/embroidize-choice-products'>
-            {!isCollapsed ? (
-              <span className='sidebar-text '>
-                <i className='ri-file-list-fill me-2'></i>
-                All Embroidize Choice Products
-              </span>
-            ) : (
-              <Tooltip content={'All Embroidize Choice Products'}>
-                <i className='ri-file-list-fill'></i>
-              </Tooltip>
-            )}
-          </Link>
-        </li>
+
         <li>
           <Link href='/admin/users'>
             {!isCollapsed ? (
