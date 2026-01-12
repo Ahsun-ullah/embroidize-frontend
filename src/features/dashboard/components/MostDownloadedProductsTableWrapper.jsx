@@ -22,8 +22,6 @@ export default function MostDownloadedProductsTableWrapper({
   const router = useRouter();
   const searchParams = useSearchParams();
 
-  console.log(router.pathname);
-
   // Get initial values from URL
   const [dateInputs, setDateInputs] = useState({
     startDate: searchParams.get('startDate') || '',
@@ -52,27 +50,27 @@ export default function MostDownloadedProductsTableWrapper({
 
   const applyPreset = (value, unit, label) => {
     // 1. Set Active State for UI
-    setActivePreset(label); // e.g., 'Today', '1M', 'ALL'
+    setActivePreset(label);
 
     // 2. Handle 'ALL' (Clear filters)
     if (value === 'all') {
       setDateInputs({ startDate: '', endDate: '' });
-      updateURL({ startDate: '', endDate: '' });
+      setActivePreset('ALL');
+      router.push(window.location.pathname);
       return;
     }
 
     const today = new Date();
-    let start = new Date(today); // Clone today
-    let end = new Date(today); // Clone today
+    let start = new Date(today);
+    let end = new Date(today);
 
     // 3. Handle Specific Day Presets
     if (value === 'today') {
-      // Start = Today, End = Today
     } else if (value === 'yesterday') {
-      // Start = Yesterday, End = Yesterday
       start.setDate(today.getDate() - 1);
       end.setDate(today.getDate() - 1);
     }
+
     // 4. Handle Ranges (1D, 7D, 1M etc.)
     else if (unit === 'days') {
       start.setDate(today.getDate() - value);
@@ -119,13 +117,16 @@ export default function MostDownloadedProductsTableWrapper({
       case 'sub_category':
         return <>{item.product.sub_category?.name || '-'}</>;
       case 'downloadCount':
-        return (
-          <>
-            {searchParams.get('startDate')
-              ? item.downloadCount
-              : item.product.downloadCount}
-          </>
+        const hasFilter = !!(
+          searchParams.get('startDate') || searchParams.get('endDate')
         );
+
+        const displayCount = hasFilter
+          ? (item.downloadCount ?? 0)
+          : (item.product?.downloadCount ?? 0);
+
+        return <span className='font-medium'>{displayCount}</span>;
+
       case 'fileTypes':
         return <p className='uppercase'>{item.fileTypes?.join(', ') || '-'}</p>;
       case 'actions':
@@ -146,7 +147,7 @@ export default function MostDownloadedProductsTableWrapper({
       default:
         return cellValue;
     }
-  }, []);
+  }, [searchParams]);
 
   // --- Filter Bar UI ---
   const topContent = (

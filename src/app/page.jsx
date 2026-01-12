@@ -173,7 +173,7 @@ export default async function Home() {
             id='popular-designs-heading'
             className='text-2xl sm:text-2xl md:text-3xl font-bold leading-snug'
           >
-            Most Trending Designs of the month
+            Most Trending Designs Of The Month
           </h2>
 
           <p className='text-base sm:text-base md:text-lg font-medium text-gray-600'>
@@ -205,7 +205,7 @@ export default async function Home() {
           </h2>
 
           <p className='text-base sm:text-base md:text-lg font-medium text-gray-600'>
-            Browse our most loved designs.
+            Best designs we recommend.
           </p>
         </div>
 

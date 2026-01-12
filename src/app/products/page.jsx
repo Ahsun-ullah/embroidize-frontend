@@ -14,29 +14,54 @@ export const revalidate = 0;
 
 export async function generateMetadata({ searchParams }) {
   const isPopular = searchParams?.filter === 'popular';
+  const isAdminChoice = searchParams?.filter === 'embroidize-choice';
 
   const baseTitle = 'Machine Embroidery Designs';
   const baseDescription =
     'Welcome to our premium collection of machine embroidery designs, fully compatible with all embroidery machines. Instantly download high-quality embroidery files in CND, DST, EXP, HUS, JEF, PES, VP3, and XXX formats.';
 
-  const popularTitle = 'Popular Embroidery Designs - Embroidize';
+  const popularTitle = 'Popular Embroidery Designs - Top Downloads';
   const popularDescription =
     'Explore our most downloaded and loved machine embroidery designs. Popular formats like DST, PES, JEF, and more available for instant download.';
 
+  const adminChoiceTitle = 'Embroidize Choice - Premium Embroidery Designs';
+  const adminChoiceDescription =
+    'Discover our curated selection of premium embroidery designs, handpicked by our team for quality and uniqueness.';
+
   return {
-    title: isPopular ? popularTitle : baseTitle,
-    description: isPopular ? popularDescription : baseDescription,
+    title: isPopular
+      ? popularTitle
+      : isAdminChoice
+        ? adminChoiceTitle
+        : baseTitle,
+    description: isPopular
+      ? popularDescription
+      : isAdminChoice
+        ? adminChoiceDescription
+        : baseDescription,
     alternates: {
       canonical: isPopular
         ? 'https://embroidize.com/products?filter=popular'
-        : 'https://embroidize.com/products',
+        : isAdminChoice
+          ? 'https://embroidize.com/products?filter=embroidize-choice'
+          : 'https://embroidize.com/products',
     },
     openGraph: {
-      title: isPopular ? popularTitle : baseTitle,
-      description: isPopular ? popularDescription : baseDescription,
+      title: isPopular
+        ? popularTitle
+        : isAdminChoice
+          ? adminChoiceTitle
+          : baseTitle,
+      description: isPopular
+        ? popularDescription
+        : isAdminChoice
+          ? adminChoiceDescription
+          : baseDescription,
       url: isPopular
         ? 'https://embroidize.com/products?filter=popular'
-        : 'https://embroidize.com/products',
+        : isAdminChoice
+          ? 'https://embroidize.com/products?filter=embroidize-choice'
+          : 'https://embroidize.com/products',
       siteName: 'Embroidize',
       images: [
         {
@@ -50,8 +75,16 @@ export async function generateMetadata({ searchParams }) {
     },
     twitter: {
       card: 'summary_large_image',
-      title: isPopular ? popularTitle : baseTitle,
-      description: isPopular ? popularDescription : baseDescription,
+      title: isPopular
+        ? popularTitle
+        : isAdminChoice
+          ? adminChoiceTitle
+          : baseTitle,
+      description: isPopular
+        ? popularDescription
+        : isAdminChoice
+          ? adminChoiceDescription
+          : baseDescription,
       images: ['https://embroidize.com/og-banner.jpg'],
     },
   };
@@ -92,21 +125,21 @@ export default async function AllProductsPage({ searchParams }) {
                 prefetch={false}
                 className={`px-4 py-2 rounded ${!isPopular && !isAdminChoice ? 'bg-black text-white' : 'border'}`}
               >
-                All Products
+                All
               </Link>
               <Link
                 href='/products?filter=popular'
                 prefetch={false}
                 className={`px-4 py-2 rounded ${isPopular ? 'bg-black text-white' : 'border'}`}
               >
-                Popular Products
+                Popular
               </Link>
               <Link
                 href='/products?filter=embroidize-choice'
                 prefetch={false}
                 className={`px-4 py-2 rounded ${isAdminChoice ? 'bg-black text-white' : 'border'}`}
               >
-                Embroidize Choice Products
+                Embroidize Choice
               </Link>
             </div>
 
