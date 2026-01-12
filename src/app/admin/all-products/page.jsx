@@ -19,6 +19,7 @@ export default async function AllProductsListPage({ searchParams }) {
     subCategoryId,
   );
 
+
   const columns = [
     { name: 'Admin Choice', uid: 'isAdminChoice' },
     { name: 'SL NO', uid: 'serial_no' },

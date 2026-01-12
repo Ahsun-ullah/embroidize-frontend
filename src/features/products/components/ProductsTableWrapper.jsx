@@ -56,7 +56,7 @@ const customSelectStyles = {
 
 export default function ProductsTableWrapper({
   initialData = [],
-  pagination = {},
+  pagination,
   columns,
 }) {
   const router = useRouter();
@@ -122,32 +122,72 @@ export default function ProductsTableWrapper({
     return Array.from(selectedKeys);
   }, [selectedKeys, initialData]);
 
+  // --- URL Update Logic ---
   const updateURL = useCallback(
     (updates) => {
-      startTransition(() => {
-        const params = new URLSearchParams(searchParams.toString());
-        Object.entries(updates).forEach(([key, value]) => {
-          if (value) params.set(key, value);
-          else params.delete(key);
-        });
-        if ('category' in updates) params.delete('sub_category');
-        params.set('page', '1');
-        router.push(`?${params.toString()}`);
+      const params = new URLSearchParams(searchParams.toString());
+
+      Object.entries(updates).forEach(([key, value]) => {
+        if (value) {
+          params.set(key, value);
+        } else {
+          params.delete(key);
+        }
       });
+
+      if ('category' in updates) {
+        params.delete('sub_category');
+      }
+
+      params.set('page', '1');
+      router.push(`?${params.toString()}`);
     },
     [searchParams, router],
   );
 
-  const onSearchChange = (val) => {
-    setSearchValue(val);
-    updateURL({ search: val });
-  };
+  // --- Handlers ---
+  const onSearchChange = useCallback(
+    (val) => {
+      setSearchValue(val);
+      updateURL({ search: val });
+    },
+    [updateURL],
+  );
 
-  const onSearchClear = () => {
+  const onSearchClear = useCallback(() => {
     setSearchValue('');
     updateURL({ search: '' });
-  };
+  }, [updateURL]);
 
+  const onCategoryChange = useCallback(
+    (option) => {
+      updateURL({ category: option?.value || '' });
+    },
+    [updateURL],
+  );
+
+  const onSubCategoryChange = useCallback(
+    (option) => {
+      updateURL({ sub_category: option?.value || '' });
+    },
+    [updateURL],
+  );
+
+  const handleClearAllFilters = useCallback(() => {
+    setSearchValue('');
+    router.push('?page=1');
+  }, [router]);
+
+  const onPageChange = useCallback(
+    (newPage) => {
+      const params = new URLSearchParams(searchParams.toString());
+      params.set('page', newPage.toString());
+      router.push(`?${params.toString()}`);
+    },
+    [searchParams, router],
+  );
+
+  // --- Bundle Image Handler ---
   const handleBundleImageChange = (e) => {
     const file = e.target.files?.[0];
     if (file) {
@@ -156,8 +196,28 @@ export default function ProductsTableWrapper({
         return;
       }
       setBundleImage(file);
-      setBundleImagePreview(URL.createObjectURL(file));
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        setBundleImagePreview(reader.result);
+      };
+      reader.readAsDataURL(file);
     }
+  };
+
+  // --- Open Bundle Modal ---
+  const handleOpenBundleModal = () => {
+    if (selectedIds.length === 0) {
+      ErrorToast('Error', 'Please select at least one product', 3000);
+      return;
+    }
+    setIsBundleModalOpen(true);
+  };
+
+  // Update bundleName handler
+  const handleBundleNameChange = (value) => {
+    setBundleName(value);
+    // Auto-generate slug using slugify
+    setBundleSlug(slugify(value, { lower: true, strict: true }));
   };
 
   const handleCloseBundleModal = () => {
@@ -316,7 +376,8 @@ export default function ProductsTableWrapper({
   const topContent = useMemo(
     () => (
       <div className='flex flex-col gap-4 mb-4'>
-        <div className='flex flex-wrap gap-3 items-end'>
+        <div className='flex flex-wrap gap-3 items-end justify-start relative'>
+          {/* Search Input */}
           <Input
             isClearable
             className='w-full sm:max-w-[30%]'
@@ -325,31 +386,57 @@ export default function ProductsTableWrapper({
             onValueChange={onSearchChange}
             onClear={onSearchClear}
           />
+
+          {/* Category Select */}
           <div className='w-full sm:max-w-[20%]'>
             <Select
+              instanceId='category-select'
               placeholder='Category'
               options={categoryOptions}
               value={activeCategoryOption}
-              onChange={(opt) => updateURL({ category: opt?.value || '' })}
+              onChange={onCategoryChange}
               styles={customSelectStyles}
             />
           </div>
+
+          {/* Sub-Category Select */}
           <div className='w-full sm:max-w-[20%]'>
             <Select
+              instanceId='sub-category-select'
               placeholder='Sub-Category'
-              isDisabled={!selectedCategoryId}
+              isDisabled={
+                !selectedCategoryId || subCategoryOptions.length === 0
+              }
               options={subCategoryOptions}
               value={activeSubCategoryOption}
-              onChange={(opt) => updateURL({ sub_category: opt?.value || '' })}
+              onChange={onSubCategoryChange}
               styles={customSelectStyles}
+              noOptionsMessage={() =>
+                selectedCategoryId
+                  ? 'No sub-categories found'
+                  : 'Select a category first'
+              }
             />
           </div>
+
+          {/* Clear All Button */}
+          {(searchValue || selectedCategoryId || selectedSubCategoryId) && (
+            <button
+              className='text-red-500 hover:text-red-700 font-bold ml-2 self-center'
+              onClick={handleClearAllFilters}
+              title='Clear all filters'
+            >
+              ✕
+            </button>
+          )}
         </div>
 
+        {/* Action Buttons when items are selected */}
         {selectedIds.length > 0 && (
           <div className='flex items-center gap-3 p-3 bg-blue-50 rounded-lg border border-blue-200'>
             <span className='text-sm font-medium text-blue-700'>
-              {selectedIds.length} items selected
+              {selectedIds.length} item{selectedIds.length > 1 ? 's' : ''}{' '}
+              selected
             </span>
             <div className='flex gap-2 ml-auto'>
               <Button
@@ -387,8 +474,15 @@ export default function ProductsTableWrapper({
       subCategoryOptions,
       activeCategoryOption,
       activeSubCategoryOption,
+      selectedCategoryId,
+      selectedSubCategoryId,
       selectedIds.length,
-      isUpdatingChoice,
+      onSearchChange,
+      onSearchClear,
+      onCategoryChange,
+      onSubCategoryChange,
+      handleClearAllFilters,
+      handleOpenBundleModal,
     ],
   );
 
@@ -398,7 +492,7 @@ export default function ProductsTableWrapper({
         <h1 className='text-xl font-bold'>
           Total {pagination?.total || 0} Products
         </h1>
-        <Link href='/admin/add-products'>
+        <Link href='/admin/add-products' prefetch={false}>
           <Button
             className='bg-foreground text-background'
             endContent={<PlusIcon />}
@@ -414,7 +508,7 @@ export default function ProductsTableWrapper({
         columns={columns}
         pageSize={pagination?.limit || 10}
         renderCell={renderCell}
-        onPageChange={(p) => updateURL({ page: p })}
+        onPageChange={onPageChange}
         pagination={pagination}
         topContent={topContent}
         selectedKeys={selectedKeys}
