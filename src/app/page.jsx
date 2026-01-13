@@ -163,7 +163,6 @@ export default async function Home() {
         </div>
       </section>
 
-      {/* Popular Embroidery Designs Section */}
       <section
         aria-labelledby='popular-designs-heading'
         className=' text-black my-8 py-6'
@@ -171,9 +170,10 @@ export default async function Home() {
         <div className='bg-[#fafafa] flex flex-col items-center justify-center gap-2 py-6 mb-6'>
           <h2
             id='popular-designs-heading'
-            className='text-2xl sm:text-2xl md:text-3xl font-bold leading-snug'
+            className='text-2xl sm:text-2xl md:text-3xl text-center font-bold leading-snug'
           >
-            Most Trending Designs Of The Month
+            Most Trending Designs Of{' '}
+            <span className='block sm:inline'>The Month</span>
           </h2>
 
           <p className='text-base sm:text-base md:text-lg font-medium text-gray-600'>
@@ -199,7 +199,7 @@ export default async function Home() {
         <div className='bg-[#fafafa] flex flex-col items-center justify-center gap-2 py-6 mb-6'>
           <h2
             id='popular-designs-heading'
-            className='text-2xl sm:text-2xl md:text-3xl font-bold leading-snug'
+            className='text-2xl sm:text-2xl md:text-3xl text-center font-bold leading-snug'
           >
             Embroidize Choice Embroidery Designs
           </h2>
@@ -227,7 +227,7 @@ export default async function Home() {
         <div className='bg-[#fafafa] flex flex-col items-center justify-center gap-2 py-6 mb-6'>
           <h2
             id='popular-bundles-heading'
-            className='text-2xl sm:text-2xl md:text-3xl font-bold leading-snug'
+            className='text-2xl sm:text-2xl md:text-3xl text-center font-bold leading-snug'
           >
             Popular Bundle Designs
           </h2>
@@ -249,7 +249,7 @@ export default async function Home() {
       {/* Recent Designs Section */}
       <section className=' text-black my-8 py-6'>
         <div className=' bg-[#fafafa] flex flex-col items-center justify-center gap-2 py-6 mb-6'>
-          <h2 className='text-2xl sm:text-2xl md:text-3xl font-bold leading-snug'>
+          <h2 className='text-2xl sm:text-2xl md:text-3xl text-center font-bold leading-snug'>
             Recent Approved Products
           </h2>
 

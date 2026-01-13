@@ -45,7 +45,7 @@ const Footer = () => {
               <i className='ri-pinterest-fill rounded-full bg-black text-white p-2 text-base'></i>
             </Link>
             <Link
-              href='https://www.facebook.com/profile.php?id=61575701980267'
+              href='https://www.facebook.com/embroidize'
               target='_blank'
               aria-label='facebook-button'
             >
@@ -91,7 +91,7 @@ const Footer = () => {
                 </li>
                 <li>
                   <Link
-                    href='/Bundles'
+                    href='/bundles'
                     prefetch={false}
                     className='text-gray-600 hover:underline transition-colors duration-200'
                   >
@@ -142,7 +142,7 @@ const Footer = () => {
               </ul>
             </div>
 
-            <div className='w-full lg:w-4/12'>
+            <div className='w-full lg:w-4/12 mt-3 lg:mt-0'>
               <ul className='space-y-3'>
                 <li>
                   <Link

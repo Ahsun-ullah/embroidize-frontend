@@ -86,7 +86,7 @@ export default function TermsAndConditions() {
     },
     {
       title: '10. Governing Law & Jurisdiction',
-      content: `These Terms and Conditions shall be governed by and construed in accordance with the laws of [Your Country/State]. Any disputes arising shall be settled in the appropriate courts of [City/Country].`,
+      content: `These Terms and Conditions shall be governed by and construed in accordance with the laws of the Government. Any disputes arising under these Terms and Conditions shall be resolved in the appropriate courts of the Government.`,
     },
     {
       title: '11. Privacy Policy',

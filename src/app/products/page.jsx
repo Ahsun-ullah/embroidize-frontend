@@ -118,35 +118,50 @@ export default async function AllProductsPage({ searchParams }) {
           Browse All Digital Embroidery Designs from Embroidize
         </h1>
         <section className='text-black mb-8 py-6'>
-          <div className='flex justify-between gap-4 mb-8'>
-            <div className='flex justify-between gap-4'>
+          <div className='flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-8'>
+            {/* Filter Buttons Container: Scrolls on mobile, wraps on tablet, flex on desktop */}
+            <div className='flex items-center gap-2 overflow-x-auto pb-2 md:pb-0 w-full md:w-auto no-scrollbar'>
               <Link
                 href='/products'
                 prefetch={false}
-                className={`px-4 py-2 rounded ${!isPopular && !isAdminChoice ? 'bg-black text-white' : 'border'}`}
+                className={`px-4 py-2 text-sm whitespace-nowrap rounded transition-colors ${
+                  !isPopular && !isAdminChoice
+                    ? 'bg-black text-white'
+                    : 'border border-gray-200 hover:bg-gray-50'
+                }`}
               >
                 All
               </Link>
               <Link
                 href='/products?filter=popular'
                 prefetch={false}
-                className={`px-4 py-2 rounded ${isPopular ? 'bg-black text-white' : 'border'}`}
+                className={`px-4 py-2 text-sm whitespace-nowrap rounded transition-colors ${
+                  isPopular
+                    ? 'bg-black text-white'
+                    : 'border border-gray-200 hover:bg-gray-50'
+                }`}
               >
                 Popular
               </Link>
               <Link
                 href='/products?filter=embroidize-choice'
                 prefetch={false}
-                className={`px-4 py-2 rounded ${isAdminChoice ? 'bg-black text-white' : 'border'}`}
+                className={`px-4 py-2 text-sm whitespace-nowrap rounded transition-colors ${
+                  isAdminChoice
+                    ? 'bg-black text-white'
+                    : 'border border-gray-200 hover:bg-gray-50'
+                }`}
               >
                 Embroidize Choice
               </Link>
             </div>
 
-            <div className='px-4 py-2 border rounded bg-slate-50'>
+            {/* Result Count: Stays full width on mobile, auto width on desktop */}
+            <div className='w-full md:w-auto px-4 py-2 border rounded bg-slate-50 text-sm text-center md:text-left text-gray-600 font-medium'>
               {totalCount} Results Found
             </div>
           </div>
+
           <div className='grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6'>
             {products.map((item, index) => (
               // <ProductCard key={item._id} item={item} />
