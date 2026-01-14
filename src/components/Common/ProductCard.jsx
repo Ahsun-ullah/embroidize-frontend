@@ -59,7 +59,7 @@ const ProductCard = React.memo(function ProductCard({ item, index = 0 }) {
         <SkuFlag sku={item.sku_code} />
       )}
       {/* Admin Choice Star */}
-      {item?.sku_code && userInfoData?.role === 'admin' && (
+      {item?.isAdminChoice && userInfoData?.role === 'admin' && (
         <div className='absolute top-[0.1 px] left-2 z-10'>
           <AdminChoiceStar status={item.isAdminChoice} />
         </div>
