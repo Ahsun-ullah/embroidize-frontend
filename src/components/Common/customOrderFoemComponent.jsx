@@ -44,7 +44,7 @@ const schema = z.object({
   sizeUnit: z.enum(['in', 'cm']),
 });
 
-export default function CustomOrderForm() {
+export default function CustomOrderForm({ orderForm }) {
   const {
     register,
     handleSubmit,
@@ -121,7 +121,7 @@ export default function CustomOrderForm() {
   };
 
   return (
-    <section className='mx-auto mb-14 max-w-xl'>
+    <section id={orderForm} className='mx-auto mb-14 max-w-xl'>
       <h2 className='mb-6 text-center text-2xl font-bold'>Order Form</h2>
 
       {/* Drag & Drop */}

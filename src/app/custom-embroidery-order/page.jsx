@@ -31,12 +31,12 @@ export async function generateMetadata() {
 }
 
 const gallery = [
-  '/images/gallery1.jpg',
-  '/images/gallery2.jpg',
-  '/images/gallery3.jpg',
-  '/images/gallery4.jpg',
-  '/images/gallery5.jpg',
-  '/images/gallery6.jpg',
+  '/images/gallery1.png',
+  '/images/gallery2.png',
+  '/images/gallery3.png',
+  '/images/gallery4.png',
+  '/images/gallery5.png',
+  '/images/gallery6.png',
 ];
 
 export default function CustomEmbroideryOrderPage() {
@@ -46,37 +46,45 @@ export default function CustomEmbroideryOrderPage() {
 
       {/* Hero */}
       <section className='relative isolate overflow-hidden bg-slate-50'>
-        <div className='mx-auto max-w-7xl px-4 py-6 sm:px-6 lg:px-8'>
+        <div className='mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8'>
           <div className='grid items-center gap-10 lg:grid-cols-2'>
-            <div className='text-white'>
-              <p className='mb-4 inline-block rounded-md bg-black px-3 py-1 text-sm tracking-widest text-white/90 font-semibold'>
+            {/* Image Container: order-first on mobile, order-last on desktop */}
+            <div className='relative order-first lg:order-last flex justify-center'>
+              <div className='relative aspect-square w-full max-w-[350px] sm:max-w-[450px] lg:w-full'>
+                <Image
+                  src='https://embroidize-assets.nyc3.cdn.digitaloceanspaces.com/custom-order-page-banner-image.png'
+                  alt='custom embroidery banner'
+                  fill
+                  className='object-contain'
+                  priority
+                />
+              </div>
+            </div>
+
+            {/* Text Content: order-last on mobile, order-first on desktop */}
+            <div className='text-center lg:text-left order-last lg:order-first'>
+              <p className='mb-4 inline-block rounded-md bg-black px-3 py-1 text-xs sm:text-sm tracking-widest text-white font-semibold uppercase'>
                 Premium Digitizing
               </p>
-              <h1 className='text-2xl font-extrabold leading-tight sm:text-5xl'>
-                Custom Embroidery Order
+              <h1 className='text-3xl font-extrabold leading-tight text-slate-900 sm:text-5xl lg:text-6xl'>
+                Custom Embroidery{' '}
+                <span className='block lg:inline text-black'>Order</span>
               </h1>
-              <p className='mt-2 max-w-xl text-sm text-white/80'>
+              <p className='mx-auto lg:mx-0 mt-4 max-w-xl text-base text-slate-600 leading-relaxed'>
                 Upload a design, add requirements, and receive a
                 production‑ready embroidery file with fast turnaround and
                 meticulous quality checks.
               </p>
 
-              <Link
-                href='#order-form'
-                className='mt-2 inline-flex items-center justify-center rounded-md bg-black px-5 py-3 text-sm font-semibold text-white transition hover:bg-white/90 hover:text-black focus:outline-none focus:ring-2 focus:ring-black focus:ring-offset-2'
-              >
-                Start Order
-              </Link>
-            </div>
-
-            <div className='relative aspect-[16/10] w-full overflow-hidden rounded-xl ring-1 ring-white/10'>
-              <Image
-                src='/custom.png'
-                alt='Embroidery fabric close-up'
-                fill
-                className='object-cover'
-                priority
-              />
+              <div className='mt-8 flex flex-col sm:flex-row justify-center lg:justify-start gap-4'>
+                <Link
+                  href='#order-form'
+                  role='button'
+                  className='inline-flex items-center justify-center rounded-md bg-black px-8 py-4 text-base font-bold text-white transition hover:bg-slate-800 shadow-lg active:scale-95'
+                >
+                  Start Order Now
+                </Link>
+              </div>
             </div>
           </div>
         </div>
@@ -110,32 +118,37 @@ export default function CustomEmbroideryOrderPage() {
         </section>
 
         {/* Gallery (SSR) */}
-        <section className='mx-auto max-w-7xl px-4 pb-8 sm:px-6 lg:px-8'>
-          <h2 className='mb-6 text-center text-2xl font-bold'>Our Gallery</h2>
-          <div className='grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-6'>
+        <section className='mx-auto max-w-7xl px-4 pb-12 sm:px-6 lg:px-8'>
+          <h2 className='mb-8 text-center text-2xl font-bold tracking-tight text-slate-900 sm:text-3xl'>
+            Our Gallery
+          </h2>
+
+          <div className='grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3'>
             {gallery.map((img, i) => (
               <div
                 key={i}
-                className='group relative aspect-square overflow-hidden rounded-lg border border-zinc-200 bg-zinc-50'
+                className='group relative aspect-[16/9] overflow-hidden rounded-xl border border-zinc-200 bg-white shadow-sm'
               >
                 <Image
                   src={img}
                   alt={`Embroidery example ${i + 1}`}
                   fill
-                  className='object-cover transition-transform duration-300 group-hover:scale-105'
+                  className='object-contain p-2 transition-transform duration-300 group-hover:scale-105'
+                  sizes='(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw'
                   priority={i < 2}
                 />
               </div>
             ))}
           </div>
-          <CustomOrderForm />
+
+          {/* Form Section with Responsive Margin */}
+          <div className='mt-16 sm:mt-24'>
+            <CustomOrderForm orderForm='order-form' />
+          </div>
         </section>
 
         {/* Order Form (Client component) */}
-        <section
-          id='order-form'
-          className='mx-auto max-w-7xl px-4 py-12 sm:px-6 lg:px-8'
-        >
+        <section className='mx-auto max-w-7xl px-4 py-12 sm:px-6 lg:px-8'>
           <div>
             <h2 className='text-2xl font-bold'>How It Works</h2>
 
@@ -195,18 +208,47 @@ export default function CustomEmbroideryOrderPage() {
         </section>
 
         {/* Testimonials */}
-        <section className='mx-auto max-w-7xl px-4 py-12 sm:px-6 lg:px-8'>
-          <h2 className='text-center text-2xl font-bold'>Testimonials</h2>
-          <div className='mt-8 grid gap-6 md:grid-cols-2'>
+        <section className='mx-auto max-w-7xl px-4 py-16 sm:px-6 lg:px-8'>
+          <div className='text-center'>
+            <h2 className='text-3xl font-extrabold tracking-tight text-slate-900 sm:text-4xl'>
+              What Our Clients Say
+            </h2>
+            <p className='mt-4 text-lg text-slate-600 max-w-2xl mx-auto'>
+              Trusted by embroidery shop owners and independent designers
+              worldwide for premium digitizing.
+            </p>
+          </div>
+
+          <div className='mt-12 grid gap-8 sm:grid-cols-2 lg:grid-cols-3'>
             <Testimonial
-              quote='Amazing speed and service—my go‑to for embroidery files.'
-              author='Customer A'
-              role='Shop Owner'
+              quote='The digitizing quality is exceptional. Even the most intricate small details in our floral designs came out perfectly on the first run.'
+              author='Sarah Jenkins'
+              role='Boutique Shop Owner'
             />
             <Testimonial
-              quote='Easy process and great communication. Highly recommended.'
-              author='Customer B'
-              role='Fashion Designer'
+              quote='Incredible turnaround time. I uploaded a custom logo at night and had a production-ready file in my inbox by morning. Highly recommend!'
+              author='Michael Chen'
+              role='Custom Apparel Designer'
+            />
+            <Testimonial
+              quote="I've used many digitizing services, but Embroidize's attention to stitch density and pathing is unmatched. No thread breaks at all."
+              author='Elena Rodriguez'
+              role='Industrial Embroidery Lab'
+            />
+            <Testimonial
+              quote="The 'Before and After' comparisons on their site are exactly what you get. They really know how to translate complex gradients into stitches."
+              author='David Thompson'
+              role='Freelance Graphic Artist'
+            />
+            <Testimonial
+              quote='Their customer support is fantastic. They helped me adjust a file for a specific fabric type without any extra hassle.'
+              author='Amanda Foster'
+              role='Home Decor Specialist'
+            />
+            <Testimonial
+              quote='Finally a service that understands commercial embroidery standards. The files are clean, efficient, and ready for high-volume production.'
+              author='Robert Miller'
+              role='Textile Manufacturer'
             />
           </div>
         </section>
