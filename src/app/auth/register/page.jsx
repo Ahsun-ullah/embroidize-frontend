@@ -1,7 +1,6 @@
 'use client';
 
 import Link from 'next/link';
-import { useRouter } from 'next/navigation';
 import { useState } from 'react';
 
 import EmailOtp from '@/components/Common/EmailOtp';
@@ -11,12 +10,18 @@ import { useGenerateOtpMutation } from '@/lib/redux/public/auth/authSlice';
 import { handleApiError } from '@/lib/utils/handleError';
 import { Card, CardBody, CardHeader, Input } from '@heroui/react';
 import Image from 'next/image';
+import { useSearchParams } from 'next/navigation';
 import mainLogo from '../../../../public/logo-black.png';
 
 const Register = () => {
-  const router = useRouter();
   const [step, setStep] = useState(1);
   const [userDetailsData, setUserDetailsData] = useState(null);
+
+  const searchParams = useSearchParams();
+  const pathName = searchParams.get('pathName');
+
+  console.log(pathName);
+
   const [generateOtp, { isLoading: otpGenerateIsLoading }] =
     useGenerateOtpMutation();
 
@@ -180,6 +185,7 @@ const Register = () => {
           step={step}
           setStep={setStep}
           userDetailsData={userDetailsData}
+          pathName={pathName}
         />
       )}
 

@@ -3,14 +3,13 @@ import {
   useUserRegisterMutation,
   useVerifyOtpMutation,
 } from '@/lib/redux/public/auth/authSlice';
-import Cookies from 'js-cookie';
-import { useRouter, usePathname } from 'next/navigation';
-import { useState, useEffect } from 'react';
-import EmailOtpComponent from './EmailOtpComponent';
 import { handleApiError } from '@/lib/utils/handleError';
-import { SuccessToast } from './SuccessToast';
+import Cookies from 'js-cookie';
+import { usePathname, useRouter } from 'next/navigation';
+import { useEffect, useState } from 'react';
+import EmailOtpComponent from './EmailOtpComponent';
 
-const EmailOtp = ({ step, setStep, userDetailsData }) => {
+const EmailOtp = ({ step, setStep, userDetailsData, pathName }) => {
   const router = useRouter();
   const pathname = usePathname();
   const [otp, setOtp] = useState(['', '', '', '', '', '']);
@@ -60,12 +59,6 @@ const EmailOtp = ({ step, setStep, userDetailsData }) => {
 
       const registerResult = await userRegister(userDetailsData).unwrap();
 
-      SuccessToast(
-        'Success',
-        registerResult?.message || 'Registration successful!',
-        3000,
-      );
-
       const loginPayload = {
         email: userDetailsData.email,
         password: userDetailsData.password,
@@ -77,8 +70,14 @@ const EmailOtp = ({ step, setStep, userDetailsData }) => {
 
       setIsNavigating(true);
       const role = loginResult?.data?.role;
-      const destination = role === 'admin' ? '/admin' : '/';
-      router.push(destination);
+
+      // Determine final destination
+      const finalDestination = role === 'admin' ? '/admin' : pathName || '/';
+
+      // Redirect to thank you page with destination and user info
+      router.push(
+        `/auth/thank-you?redirect=${encodeURIComponent(finalDestination)}&email=${encodeURIComponent(userDetailsData.email)}&new_user=true`,
+      );
     } catch (error) {
       handleApiError(error, 'Something went wrong. Please try again.');
     }

@@ -153,7 +153,11 @@ const Login = () => {
               <p className='mb-0'>
                 Don't have an account?
                 <Link
-                  href='/auth/register'
+                  href={
+                    pathName
+                      ? `/auth/register?pathName=${pathName}`
+                      : '/auth/register'
+                  }
                   prefetch={false}
                   className='font-semibold ml-1 text-blue-500 underline'
                 >
@@ -172,9 +176,7 @@ const Login = () => {
 
         {/* Footer */}
         <div className='text-center'>
-          <p className='mb-0'>
-            &copy; {new Date().getFullYear()} Embroidize.
-          </p>
+          <p className='mb-0'>&copy; {new Date().getFullYear()} Embroidize.</p>
         </div>
       </div>
     </>
