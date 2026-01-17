@@ -1,4 +1,4 @@
-import CustomOrderForm from '@/components/Common/CustomOrderFoemComponent';
+import CustomOrderForm from '@/components/Common/CustomOrderForm';
 import Footer from '@/components/user/HomePage/Footer';
 import Header from '@/components/user/HomePage/Header';
 import Image from 'next/image';
