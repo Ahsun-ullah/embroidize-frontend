@@ -9,8 +9,8 @@ import { useState } from 'react';
 import CategoryMenu from '@/components/Common/CategoryMenu';
 import SearchBox from '@/components/Common/SearchBox';
 
-import mobileLogo from '../../../../public/favicon.png';
-import mainLogo from '../../../../public/logo-black.png';
+const mainLogo = '/logo-black.png';
+const mobileLogo = '/favicon.png';
 
 import dynamic from 'next/dynamic';
 

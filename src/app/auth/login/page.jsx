@@ -11,7 +11,7 @@ import Image from 'next/image';
 import Link from 'next/link';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { useState } from 'react';
-import mainLogo from '../../../../public/logo-black.png';
+const mainLogo = '/logo-black.png';
 
 const Login = () => {
   const router = useRouter();

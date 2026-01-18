@@ -11,7 +11,7 @@ import { handleApiError } from '@/lib/utils/handleError';
 import { Card, CardBody, CardHeader, Input } from '@heroui/react';
 import Image from 'next/image';
 import { useSearchParams } from 'next/navigation';
-import mainLogo from '../../../../public/logo-black.png';
+const mainLogo = '/logo-black.png';
 
 const Register = () => {
   const [step, setStep] = useState(1);

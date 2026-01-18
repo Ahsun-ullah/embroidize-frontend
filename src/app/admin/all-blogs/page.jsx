@@ -3,7 +3,7 @@ import BlogTableWrapper from '@/features/products/components/BlogTableWrapper';
 import { useAllBlogsQuery } from '@/lib/redux/admin/blogs/blogsSlice';
 
 export default function BlogPageInAdmin() {
-  const { data: blogsData, refetch: allBlogsRefetch } = useAllBlogsQuery();
+  const { data: blogsData } = useAllBlogsQuery();
 
   const blogColumns = [
     { name: 'IMAGE', uid: 'image?.url' },
