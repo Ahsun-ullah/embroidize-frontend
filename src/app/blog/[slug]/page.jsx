@@ -18,7 +18,7 @@ export async function generateMetadata({ params }) {
 
   return {
     metadataBase: new URL('https://embroidize.com'),
-    title: blog?.title,
+    title: blog?.meta_title,
     description:
       blog?.meta_description ||
       'Explore the latest embroidery design tutorials, tips, and updates from the Embroidize team.',
@@ -27,7 +27,7 @@ export async function generateMetadata({ params }) {
     },
     keywords: blog?.meta_keywords?.join(', '),
     openGraph: {
-      title: blog?.title,
+      title: blog?.meta_title,
       description: blog?.meta_description,
       url: `https://embroidize.com/blog/${blog.slug}`,
       siteName: 'Embroidize',
@@ -39,14 +39,14 @@ export async function generateMetadata({ params }) {
             : `https://embroidize.com${blog.image.url}`,
           width: 1200,
           height: 630,
-          alt: blog?.title,
+          alt: blog?.meta_title,
         },
       ],
       type: 'article',
     },
     twitter: {
       card: 'summary_large_image',
-      title: blog?.title,
+      title: blog?.meta_title,
       description: blog?.meta_description,
       images: [blog?.image?.url],
     },
@@ -67,7 +67,7 @@ export default async function SingleBlogPage({ params }) {
       '@type': 'WebPage',
       '@id': `https://embroidize.com/blog/${blog.slug}`,
     },
-    headline: blog?.title,
+    headline: blog?.meta_title,
 
     description:
       blog?.meta_description ||
