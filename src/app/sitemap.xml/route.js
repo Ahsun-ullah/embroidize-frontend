@@ -1,76 +1,53 @@
-import { getAllBundlesForDashboard } from '@/lib/apis/protected/bundles';
-import { getBlogs, getResources } from '@/lib/apis/public/blog';
-import { getCategories } from '@/lib/apis/public/category';
-import { getAllProductsPaginated } from '@/lib/apis/public/products';
-import { getSubCategories } from '@/lib/apis/public/subcategory';
+
+import { getProductsForSitemap } from '@/lib/apis/public/products';
+
 export const dynamic = 'force-dynamic';
 
 export async function GET() {
   try {
     const baseUrl = process.env.NEXT_PUBLIC_BASE_URL_CLIENT;
 
-    // const blogs = await getPosts();
-    const { blogs } = await getBlogs();
-    const { resources } = await getResources();
-    const products = await getAllProductsPaginated();
-    const { categories } = await getCategories();
-    const { subCategories } = await getSubCategories();
-    const { bundles } = await getAllBundlesForDashboard();
+    // Get dynamic count of products
+    const { total } = await getProductsForSitemap(0, 1);
+    const productsPerSitemap = 2000;
+    const numProductSitemaps = Math.ceil(total / productsPerSitemap);
 
-    const routes = [
-      '',
-      '/about-us',
-      '/contact-us',
-      '/privacy-policy',
-      '/terms-and-conditions',
-      '/custom-embroidery-order',
-      '/products',
-      ...products.map((product) => `/product/${product.slug}`),
-      ...categories.map((category) => `/category/${category.slug}`),
-      ...subCategories.map(
-        (subCategory) => `/${subCategory?.category?.slug}/${subCategory.slug}`,
-      ),
-      '/blog',
-      ...blogs.map((blog) => `/blog/${blog.slug}`),
-      '/resources',
-      ...resources.map((resource) => `/resources/${resource.slug}`),
-      '/bundles',
-      ...bundles.map((bundle) => `/bundles/${bundle.slug}`),
-    ];
+    const sitemapIndex = `<?xml version="1.0" encoding="UTF-8"?>
+<sitemapindex xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
+  <sitemap>
+    <loc>${baseUrl}/sitemap-static.xml</loc>
+    <lastmod>${new Date().toISOString()}</lastmod>
+  </sitemap>
+  <sitemap>
+    <loc>${baseUrl}/sitemap-categories.xml</loc>
+    <lastmod>${new Date().toISOString()}</lastmod>
+  </sitemap>
+  <sitemap>
+    <loc>${baseUrl}/sitemap-blog.xml</loc>
+    <lastmod>${new Date().toISOString()}</lastmod>
+  </sitemap>
+  <sitemap>
+    <loc>${baseUrl}/sitemap-bundles.xml</loc>
+    <lastmod>${new Date().toISOString()}</lastmod>
+  </sitemap>
+  ${Array.from(
+    { length: numProductSitemaps },
+    (_, i) => `
+  <sitemap>
+    <loc>${baseUrl}/product-sitemap.xml?id=${i}</loc>
+    <lastmod>${new Date().toISOString()}</lastmod>
+  </sitemap>`,
+  ).join('')}
+</sitemapindex>`;
 
-    function escapeXml(str) {
-      return str
-        .replace(/&/g, '&amp;')
-        .replace(/</g, '&lt;')
-        .replace(/>/g, '&gt;')
-        .replace(/"/g, '&quot;')
-        .replace(/'/g, '&apos;');
-    }
-
-    const sitemap = `<?xml version="1.0" encoding="UTF-8"?>
-    <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
-      ${routes
-        .map(
-          (route) => `
-        <url>
-          <loc>${escapeXml(`${baseUrl}${route}`)}</loc>
-          <changefreq>weekly</changefreq>
-          <priority>${route === '' ? '1.0' : '0.8'}</priority>
-          <lastmod>${new Date().toISOString()}</lastmod>
-        </url>`,
-        )
-        .join('')}
-    </urlset>`;
-
-    return new Response(sitemap, {
+    return new Response(sitemapIndex, {
       headers: {
         'Content-Type': 'application/xml',
-        'Cache-Control': 'public, max-age=0, s-maxage=3600',
+        'Cache-Control': 'public, max-age=3600, s-maxage=7200',
       },
     });
   } catch (error) {
-    console.error('Sitemap generation failed:', error);
-
+    console.error('Sitemap index generation failed:', error);
     return new Response('Internal Server Error', { status: 500 });
   }
 }

@@ -143,7 +143,7 @@ export async function getSingleProduct(productId) {
 // get all products in sitemap
 export async function getAllProductsPaginated() {
   let page = 1;
-  const limit = 200; // Reduced limit
+  const limit = 200;
   let allProducts = [];
   let totalPages = 1;
 
@@ -169,4 +169,25 @@ export async function getAllProductsPaginated() {
   } while (page <= totalPages);
 
   return allProducts;
+}
+
+// Fetch products for sitemap (only slug and updatedAt)
+export async function getProductsForSitemap(skip = 0, limit = 2000) {
+  const url = buildURL('/public/product/sitemap', {
+    skip,
+    limit,
+  });
+
+  try {
+    const result = await getJSON(url);
+    const data = result?.data ?? {};
+
+    return {
+      products: data.products ?? [],
+      total: data.total ?? 0,
+    };
+  } catch (error) {
+    console.error('Error fetching products for sitemap:', error);
+    return { products: [], total: 0 };
+  }
 }
