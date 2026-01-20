@@ -1,3 +1,5 @@
+'use client';
+
 import {
   userInfoSlice,
   useUserInfoQuery,
@@ -79,7 +81,7 @@ const ProfileDropdown = () => {
 
         <DropdownItem key='logout' color='danger'>
           <Link
-            href={'/auth/login'}
+            href='/auth/login'
             onClick={() => {
               Cookies.remove('token');
               dispatch(userInfoSlice.util.resetApiState());

@@ -221,9 +221,9 @@ export default function ProductDownloadCard({ data }) {
 
   return (
     <>
-      <Card
-        isFooterBlurred
-        className='relative flex flex-col p-8 overflow-hidden gap-4'
+      <div
+
+        className='relative flex flex-col p-8 overflow-hidden gap-4 border rounded-3xl bg-white'
       >
         {data?.sku_code && userInfoData?.role === 'admin' && (
           <SkuFlag sku={data.sku_code} />
@@ -263,7 +263,7 @@ export default function ProductDownloadCard({ data }) {
             <Download color='#ffffff' strokeWidth={3} /> Free Download
           </Button>
         )}
-      </Card>
+      </div>
 
       {/* Facebook Browser Warning Modal */}
       {showFacebookWarning && (

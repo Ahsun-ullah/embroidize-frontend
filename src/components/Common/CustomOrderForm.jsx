@@ -10,38 +10,54 @@ import { SuccessToast } from './SuccessToast';
 const MAX_FILE_MB = 18;
 const bytesFromMB = (mb) => mb * 1024 * 1024;
 
-// Schema
+// Schema: only name & email required
 const schema = z.object({
   name: z.string().min(1, 'Name is required.'),
   email: z.string().email('Email is invalid.'),
-  details: z.string().min(1, 'Order details required.'),
+  details: z.string().optional(),
+
   file: z
-    .custom(
-      (file) => file instanceof File && file.size > 0,
-      'Please upload a design file.',
-    )
+    .custom((file) => !file || (file instanceof File && file.size > 0))
     .refine(
-      (file) => file && file.size <= bytesFromMB(MAX_FILE_MB),
+      (file) => !file || file.size <= bytesFromMB(MAX_FILE_MB),
       `Max file size ${MAX_FILE_MB}MB`,
-    ),
-  fileFormat: z.enum(['DST', 'PES', 'EMB', 'PDF', 'PNG', 'All'], {
-    required_error: 'Choose a format',
-  }),
-  turnaround: z.enum(['Standard (4–8h)', 'Rush (2–4h)', 'Next Day'], {
-    required_error: 'Choose turnaround',
-  }),
-  complexity: z.enum(['Simple', 'Medium', 'Complex'], {
-    required_error: 'Choose complexity',
-  }),
-  sizeWidth: z.coerce
-    .number()
-    .min(0.1, 'Enter width')
-    .max(100, 'Width too large'),
-  sizeHeight: z.coerce
-    .number()
-    .min(0.1, 'Enter height')
-    .max(100, 'Height too large'),
-  sizeUnit: z.enum(['in', 'cm']),
+    )
+    .optional(),
+
+  // Transform empty strings to undefined, then make optional
+  fileFormat: z
+    .enum(['DST', 'PES', 'EMB', 'PDF', 'PNG', 'All'])
+    .optional()
+    .or(z.literal(''))
+    .transform((val) => (val === '' ? undefined : val)),
+
+  turnaround: z
+    .enum(['Standard (4–8h)', 'Rush (2–4h)', 'Next Day'])
+    .optional()
+    .or(z.literal(''))
+    .transform((val) => (val === '' ? undefined : val)),
+
+  complexity: z
+    .enum(['Simple', 'Medium', 'Complex'])
+    .optional()
+    .or(z.literal(''))
+    .transform((val) => (val === '' ? undefined : val)),
+
+  sizeWidth: z
+    .string()
+    .transform((val) => (val === '' ? undefined : parseFloat(val)))
+    .pipe(z.number().min(0.1).max(100).optional()),
+
+  sizeHeight: z
+    .string()
+    .transform((val) => (val === '' ? undefined : parseFloat(val)))
+    .pipe(z.number().min(0.1).max(100).optional()),
+
+  sizeUnit: z
+    .enum(['in', 'cm'])
+    .optional()
+    .or(z.literal(''))
+    .transform((val) => (val === '' ? undefined : val)),
 });
 
 export default function CustomOrderForm({ orderForm }) {
@@ -158,14 +174,14 @@ export default function CustomOrderForm({ orderForm }) {
       const fd = new FormData();
       fd.append('name', data.name);
       fd.append('email', data.email);
-      fd.append('details', data.details);
-      fd.append('designReference', data.file);
-      fd.append('fileFormat', data.fileFormat);
-      fd.append('turnaround', data.turnaround);
-      fd.append('complexity', data.complexity);
-      fd.append('sizeWidth', String(data.sizeWidth));
-      fd.append('sizeHeight', String(data.sizeHeight));
-      fd.append('sizeUnit', data.sizeUnit);
+      if (data.details) fd.append('details', data.details);
+      if (data.file) fd.append('designReference', data.file);
+      if (data.fileFormat) fd.append('fileFormat', data.fileFormat);
+      if (data.turnaround) fd.append('turnaround', data.turnaround);
+      if (data.complexity) fd.append('complexity', data.complexity);
+      if (data.sizeWidth) fd.append('sizeWidth', String(data.sizeWidth));
+      if (data.sizeHeight) fd.append('sizeHeight', String(data.sizeHeight));
+      if (data.sizeUnit) fd.append('sizeUnit', data.sizeUnit);
 
       const res = await fetch(
         `${process.env.NEXT_PUBLIC_BASE_API_URL_PROD}/public/orders/custom`,
@@ -181,7 +197,6 @@ export default function CustomOrderForm({ orderForm }) {
         throw new Error(result.message || 'Failed to submit order');
       }
 
-      // Success - Show toast with order number
       const successMessage = result.data?.orderNumber
         ? `${result.message || 'Order submitted successfully!'} Order #${result.data.orderNumber}`
         : result.message || 'Order submitted successfully!';
@@ -202,7 +217,6 @@ export default function CustomOrderForm({ orderForm }) {
         sizeHeight: '',
       });
 
-      // Clear file state
       setSelectedFile(null);
       setFileMessage({ type: '', text: '' });
       if (inputRef.current) {
@@ -219,7 +233,7 @@ export default function CustomOrderForm({ orderForm }) {
   };
 
   return (
-    <section id={orderForm} className='mx-auto mb-14 max-w-xl'>
+    <section id={orderForm} className='mx-auto mb-14 max-w-xl px-4 sm:px-0'>
       <h2 className='mb-6 text-center text-2xl font-bold'>Custom Order Form</h2>
 
       {/* Drag & Drop */}
@@ -290,7 +304,7 @@ export default function CustomOrderForm({ orderForm }) {
       )}
 
       <form onSubmit={handleSubmit(onSubmit)} noValidate className='grid gap-4'>
-        {/* Name / Email */}
+        {/* Name / Email (required) */}
         <div className='grid gap-4 sm:grid-cols-2'>
           <label className='grid gap-1'>
             <span className={baseLabel}>
@@ -326,12 +340,10 @@ export default function CustomOrderForm({ orderForm }) {
           </label>
         </div>
 
-        {/* File Format / Turnaround */}
+        {/* File Format / Turnaround (optional) */}
         <div className='grid gap-4 sm:grid-cols-2'>
           <label className='grid gap-1'>
-            <span className={baseLabel}>
-              File Format <span className='text-red-500'>*</span>
-            </span>
+            <span className={baseLabel}>File Format</span>
             <select
               {...register('fileFormat')}
               className={baseField}
@@ -351,9 +363,7 @@ export default function CustomOrderForm({ orderForm }) {
           </label>
 
           <label className='grid gap-1'>
-            <span className={baseLabel}>
-              Turnaround <span className='text-red-500'>*</span>
-            </span>
+            <span className={baseLabel}>Turnaround</span>
             <select
               {...register('turnaround')}
               className={baseField}
@@ -370,12 +380,10 @@ export default function CustomOrderForm({ orderForm }) {
           </label>
         </div>
 
-        {/* Size / Complexity */}
+        {/* Size / Complexity (optional) */}
         <div className='grid gap-4 sm:grid-cols-2'>
           <label className='grid gap-1'>
-            <span className={baseLabel}>
-              Size <span className='text-red-500'>*</span>
-            </span>
+            <span className={baseLabel}>Size</span>
             <div className='flex gap-2'>
               <input
                 type='number'
@@ -410,9 +418,7 @@ export default function CustomOrderForm({ orderForm }) {
           </label>
 
           <label className='grid gap-1'>
-            <span className={baseLabel}>
-              Complexity <span className='text-red-500'>*</span>
-            </span>
+            <span className={baseLabel}>Complexity</span>
             <select
               {...register('complexity')}
               className={baseField}
@@ -429,15 +435,12 @@ export default function CustomOrderForm({ orderForm }) {
           </label>
         </div>
 
-        {/* Additional Details */}
+        {/* Additional Details (optional) */}
         <label className='grid gap-1'>
-          <span className={baseLabel}>
-            Additional Details <span className='text-red-500'>*</span>
-          </span>
+          <span className={baseLabel}>Additional Details</span>
           <textarea
             rows={4}
             {...register('details')}
-            required
             disabled={isSubmitting}
             placeholder='Please describe your design requirements, color preferences, special instructions, etc.'
             className={baseField}

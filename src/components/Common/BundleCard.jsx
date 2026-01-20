@@ -17,7 +17,7 @@ const BundleCard = React.memo(function BundleCard({ item, index = 0 }) {
   const blur = item?.image?.blurDataURL || blurDataURL(600, 400);
 
   return (
-    <div className='bg-white rounded-2xl shadow-xl overflow-hidden relative'>
+    <div className='bg-white rounded-3xl border overflow-hidden relative'>
       <Link
         href={productLink}
         className='block group'

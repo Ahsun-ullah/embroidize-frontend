@@ -2,7 +2,6 @@
 
 import LoadingSpinner from '@/components/Common/LoadingSpinner';
 import { capitalize } from '@/utils/functions/page';
-import { Card } from '@heroui/react';
 import { marked } from 'marked';
 import Link from 'next/link';
 import { Suspense, useState } from 'react';
@@ -63,11 +62,8 @@ export const SingleProductComponent = ({
         <div className='flex flex-col gap-6 w-full rounded-2xl h-fit'>
           <ProductDownloadCard data={singleProductData} />
 
-          <div className='flex flex-col gap-4 bg-slate-50 p-4 rounded-2xl'>
-            <Card
-              isFooterBlurred
-              className='flex flex-col hover:bg-black/5 transition'
-            >
+          <div className='flex flex-col gap-4 bg-[#f9f9f9] p-4 rounded-2xl'>
+            <div className='flex flex-col hover:bg-black/5 transition border-2 border-black rounded-3xl'>
               {singleProductData?.product_pdf?.url && (
                 <a
                   href={singleProductData.product_pdf.url}
@@ -89,15 +85,12 @@ export const SingleProductComponent = ({
                   <span>MORE SEWING INFO (PDF)</span>
                 </a>
               )}
-            </Card>
+            </div>
 
             {/* Cards */}
             <div className='flex flex-col sm:flex-row justify-between gap-4 w-full'>
               {/* Card 1 */}
-              <Card
-                isFooterBlurred
-                className='flex flex-col items-center justify-center p-4 hover:bg-black/5 transition-all  rounded-2xl flex-1 gap-2'
-              >
+              <div className='flex flex-col items-center justify-center p-4 border rounded-3xl hover:bg-black/5 transition-all flex-1 gap-2'>
                 <svg
                   xmlns='http://www.w3.org/2000/svg'
                   width='24'
@@ -118,13 +111,10 @@ export const SingleProductComponent = ({
                   <br />
                   License
                 </p>
-              </Card>
+              </div>
 
               {/* Card 2 */}
-              <Card
-                isFooterBlurred
-                className='flex flex-col items-center justify-center p-4 hover:bg-black/5 transition-all  rounded-2xl flex-1 gap-2'
-              >
+              <div className='flex flex-col items-center justify-center p-4 hover:bg-black/5 transition-all  border rounded-3xl flex-1 gap-2'>
                 <svg
                   xmlns='http://www.w3.org/2000/svg'
                   width='24'
@@ -145,13 +135,10 @@ export const SingleProductComponent = ({
                   <br />
                   Support
                 </p>
-              </Card>
+              </div>
 
               {/* Card 3 */}
-              <Card
-                isFooterBlurred
-                className='flex flex-col items-center justify-center p-4 hover:bg-black/5 transition-all  rounded-2xl flex-1 gap-2'
-              >
+              <div className='flex flex-col items-center justify-center p-4 hover:bg-black/5 transition-all  border rounded-3xl flex-1 gap-2'>
                 <svg
                   xmlns='http://www.w3.org/2000/svg'
                   width='24'
@@ -172,7 +159,7 @@ export const SingleProductComponent = ({
                   <br />
                   Use
                 </p>
-              </Card>
+              </div>
             </div>
           </div>
         </div>

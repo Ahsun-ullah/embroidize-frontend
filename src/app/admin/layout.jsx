@@ -1,7 +1,7 @@
 'use client';
+
 import { AuthProvider } from '@/lib/providers/AuthProvider';
 import { useState } from 'react';
-import AdminFooter from '../../components/admin/AdminFooter';
 import AdminHeader from '../../components/admin/AdminHeader';
 import AdminSidebar from '../../components/admin/AdminSidebar';
 
@@ -15,16 +15,26 @@ export default function AdminLayout({ children }) {
       loginPath='/auth/login'
       defaultRedirect='/'
     >
-      <div className='admin-layout'>
+      <div className='min-h-screen bg-slate-50'>
         <AdminHeader isCollapsed={isCollapsed} />
         <AdminSidebar
-          setIsCollapsed={setIsCollapsed}
           isCollapsed={isCollapsed}
+          setIsCollapsed={setIsCollapsed}
         />
-        <div className={`admin-main  ${isCollapsed ? 'collapsed' : ''}`}>
-          <main className='admin-content '>{children}</main>
+
+        {/* main content area */}
+        <div
+          className={`
+            pt-16
+            transition-all
+            ${isCollapsed ? 'pl-16' : 'pl-64'}
+          `}
+        >
+          <main className='px-4 md:px-6 py-6 mb-16'>{children}</main>
+          <p className='text-center pb-4'>
+            All rights reserved © Embroidize 2024
+          </p>
         </div>
-        <AdminFooter isCollapsed={isCollapsed} />
       </div>
     </AuthProvider>
   );

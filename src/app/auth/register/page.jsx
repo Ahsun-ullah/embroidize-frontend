@@ -8,7 +8,7 @@ import LoadingSpinner from '@/components/Common/LoadingSpinner';
 import { SuccessToast } from '@/components/Common/SuccessToast';
 import { useGenerateOtpMutation } from '@/lib/redux/public/auth/authSlice';
 import { handleApiError } from '@/lib/utils/handleError';
-import { Card, CardBody, CardHeader, Input } from '@heroui/react';
+import { Input } from '@heroui/react';
 import Image from 'next/image';
 import { useSearchParams } from 'next/navigation';
 const mainLogo = '/logo-black.png';
@@ -55,8 +55,8 @@ const Register = () => {
   return (
     <div className='flex flex-col h-screen items-center justify-center gap-10 px-4 sm:px-6 lg:px-8'>
       {step === 1 && (
-        <Card className='w-full max-w-md p-6 sm:w-3/4 md:w-2/3 lg:w-1/2 xl:w-1/3'>
-          <CardHeader className='flex flex-col items-center'>
+        <div className='w-full max-w-md p-6 sm:w-3/4 md:w-2/3 lg:w-1/2 xl:w-1/3 border border-slate-400 rounded-3xl'>
+          <div className='flex flex-col items-center'>
             <div>
               <Link
                 href='/'
@@ -74,12 +74,12 @@ const Register = () => {
               </Link>
             </div>
 
-            <p className='text-base  font-bold text-center'>
+            <p className='text-base font-semibold text-center mb-4'>
               Please fill the all fields for registration.
             </p>
-          </CardHeader>
+          </div>
 
-          <CardBody className='overflow-visible py-2'>
+          <div className='overflow-visible py-2'>
             <form onSubmit={handleSubmit}>
               <div className='mb-4'>
                 <label htmlFor='name' className='form-label'>
@@ -176,8 +176,8 @@ const Register = () => {
                 </Link>
               </p>
             </div>
-          </CardBody>
-        </Card>
+          </div>
+        </div>
       )}
 
       {step === 2 && (

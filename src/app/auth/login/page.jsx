@@ -5,7 +5,7 @@ import ForgotPasswordModal from '@/components/Common/ForgotPasswordForm';
 import LoadingSpinner from '@/components/Common/LoadingSpinner';
 import { SuccessToast } from '@/components/Common/SuccessToast';
 import { useLogInMutation } from '@/lib/redux/public/auth/authSlice';
-import { Card, CardBody, CardHeader, Input } from '@heroui/react';
+import { Input } from '@heroui/react';
 import Cookies from 'js-cookie';
 import Image from 'next/image';
 import Link from 'next/link';
@@ -68,8 +68,8 @@ const Login = () => {
   return (
     <>
       <div className='flex flex-col h-screen items-center justify-center gap-10 px-4 sm:px-6 lg:px-8'>
-        <Card className='w-full max-w-md p-6 sm:w-3/4 md:w-2/3 lg:w-1/2 xl:w-1/3'>
-          <CardHeader className='flex flex-col items-center'>
+        <div className='w-full max-w-md p-6 sm:w-3/4 md:w-2/3 lg:w-1/2 xl:w-1/3 border border-slate-400 rounded-3xl'>
+          <div className='flex flex-col items-center'>
             <div>
               <Link
                 href='/'
@@ -87,12 +87,12 @@ const Login = () => {
               </Link>
             </div>
 
-            <p className='text-base  font-bold text-center'>
+            <p className='text-base font-semibold mb-4 text-center'>
               Sign in to continue to Embroidize.
             </p>
-          </CardHeader>
+          </div>
 
-          <CardBody className='overflow-visible py-2'>
+          <div className='overflow-visible py-2'>
             <form onSubmit={handleSubmit}>
               {/* Email */}
               <div className='mb-4'>
@@ -171,8 +171,8 @@ const Login = () => {
               isOpen={isModalOpen}
               onClose={() => setIsModalOpen(false)}
             />
-          </CardBody>
-        </Card>
+          </div>
+        </div>
 
         {/* Footer */}
         <div className='text-center'>

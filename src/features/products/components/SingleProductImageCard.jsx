@@ -1,7 +1,6 @@
 'use client';
 
 import LoadingSpinner from '@/components/Common/LoadingSpinner';
-import { Card } from '@heroui/react';
 import Image from 'next/image';
 import { useState } from 'react';
 
@@ -12,10 +11,7 @@ export const SingleProductImageCard = ({ data, onImageLoad }) => {
   const imageAlt = data?.title || 'Product image';
 
   return (
-    <Card
-      isFooterBlurred
-      className='relative aspect-[3/2] w-full md:w-[688px] md:h-[459px] lg:w-[580px] lg:h-[533px] xl:w-[768px] xl:h-[509px] overflow-hidden'
-    >
+    <div className='relative aspect-[3/2] w-full md:w-[688px] md:h-[459px] lg:w-[580px] lg:h-[533px] xl:w-[768px] xl:h-[509px] overflow-hidden border rounded-3xl ]'>
       {isLoading && (
         <div className='absolute inset-0 z-10 flex items-center justify-center '>
           <LoadingSpinner />
@@ -35,6 +31,6 @@ export const SingleProductImageCard = ({ data, onImageLoad }) => {
         }}
         priority
       />
-    </Card>
+    </div>
   );
 };
