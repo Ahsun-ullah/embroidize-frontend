@@ -14,7 +14,7 @@ export async function generateMetadata() {
       title: 'Custom Embroidery Digitizing Service',
       description:
         'Upload a image or artwork, add requirements, and receive a production‑ready embroidery file with fast turnaround and meticulous quality checks.',
-      url: 'https://www.embroidize.com/custom-embroidery-order',
+      url: 'https://www.embroidize.com/custom-embroidery-digitizing-service',
       siteName: 'Embroidize',
       images: [
         {

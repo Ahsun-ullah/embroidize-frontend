@@ -77,15 +77,7 @@ export const Header = () => {
             <SearchBox />
           </NavbarContent>
 
-          {/* <NavbarContent justify='center' className='flex-1'>
-            <Link
-              href='/custom-embroidery-order'
-              className='flex items-center gap-2 px-4 py-2 text-lg font-bold r    hover:text-slate-500 duration-200 whitespace-nowrap'
-            >
-              <i className='ri-magic-line text-gray-600 hover:text-slate-500 text-lg' aria-hidden='true' />
-              <span>Custom Digitizing</span>
-            </Link>
-          </NavbarContent> */}
+        
 
           <NavbarContent justify='end' className='flex-1'>
             <UserProfileDropdown />
