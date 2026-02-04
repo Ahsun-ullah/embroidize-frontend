@@ -20,8 +20,6 @@ const Register = () => {
   const searchParams = useSearchParams();
   const pathName = searchParams.get('pathName');
 
-  console.log(pathName);
-
   const [generateOtp, { isLoading: otpGenerateIsLoading }] =
     useGenerateOtpMutation();
 
@@ -31,7 +29,7 @@ const Register = () => {
 
     const data = {
       name: formData.get('name'),
-      email: formData.get('email')?.toString().toLowerCase(),
+      email: formData.get('email')?.toString().trim().toLowerCase(),
       password: formData.get('password'),
     };
 

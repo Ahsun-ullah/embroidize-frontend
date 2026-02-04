@@ -49,13 +49,22 @@ const EmailOtp = ({ step, setStep, userDetailsData, pathName }) => {
     e.preventDefault();
 
     const fullOtp = otp.join('');
+
+    if (!/^\d{6}$/.test(fullOtp)) {
+      return handleApiError(null, 'Please enter the 6-digit OTP.');
+    }
+
     const email = userDetailsData?.email;
 
+    if (!userDetailsData?.email) {
+      return handleApiError(
+        null,
+        'Session expired. Please start registration again.',
+      );
+    }
+
     try {
-      await verifyOtp({
-        email,
-        otp: parseInt(fullOtp, 10),
-      }).unwrap();
+      await verifyOtp({ email, otp: fullOtp }).unwrap();
 
       const registerResult = await userRegister(userDetailsData).unwrap();
 

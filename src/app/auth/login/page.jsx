@@ -26,11 +26,14 @@ const Login = () => {
     e.preventDefault();
 
     const formData = new FormData(e.target);
-    const data = {
-      email: formData.get('email').toLowerCase(),
-      password: formData.get('password'),
-    };
+    const email = formData.get('email')?.toString().trim().toLowerCase();
+    const password = formData.get('password')?.toString() ?? '';
 
+    if (!email || !password) {
+      return ErrorToast('Error', 'Email and password are required', 3000);
+    }
+
+    const data = { email, password };
     try {
       const response = await logIn(data);
       if (response.error) {
