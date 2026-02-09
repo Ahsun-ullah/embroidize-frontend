@@ -46,6 +46,22 @@ export const authSlice = createApi({
         };
       },
     }),
+
+    googleAuth: builder.mutation({
+      query: (body) => ({
+        url: '/public/auth/google',
+        method: 'POST',
+        body,
+      }),
+    }),
+    appleAuth: builder.mutation({
+      query: (body) => ({
+        url: '/auth/apple',
+        method: 'POST',
+        body,
+      }),
+    }),
+
     forgetPassword: builder.mutation({
       query: (body) => {
         return {
@@ -74,4 +90,6 @@ export const {
   useResetPasswordMutation,
   useGenerateOtpMutation,
   useVerifyOtpMutation,
+  useGoogleAuthMutation,
+  useAppleAuthMutation,
 } = authSlice;

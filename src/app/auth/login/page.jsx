@@ -1,5 +1,6 @@
 'use client';
 
+import SocialLoginButtons from '@/components/auth/SocialLoginButtons';
 import { ErrorToast } from '@/components/Common/ErrorToast';
 import ForgotPasswordModal from '@/components/Common/ForgotPasswordForm';
 import LoadingSpinner from '@/components/Common/LoadingSpinner';
@@ -95,8 +96,8 @@ const Login = () => {
             </p>
           </div>
 
-          <div className='overflow-visible py-2'>
-            <form onSubmit={handleSubmit}>
+          <div className='overflow-visible pb-2'>
+            <form onSubmit={handleSubmit} className='pb-6'>
               {/* Email */}
               <div className='mb-4'>
                 <label htmlFor='email' className='form-label'>
@@ -150,6 +151,8 @@ const Login = () => {
                 )}
               </div>
             </form>
+
+            <SocialLoginButtons showThankYou={false} />
 
             {/* Register link */}
             <div className='mt-5 text-center'>
