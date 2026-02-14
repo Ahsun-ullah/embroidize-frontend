@@ -43,7 +43,9 @@ jobs:
           mkdir -p deploy-package/.next/server
           cp -r .next/server/* deploy-package/.next/server/
           cp .next/BUILD_ID deploy-package/.next/
+          cp .next/*.json deploy-package/.next/
           cp -r public deploy-package/
+
 
 
       - name: Deploy to server
