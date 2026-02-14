@@ -2,6 +2,9 @@
 import BlogTableWrapper from '@/features/products/components/BlogTableWrapper';
 import { useAllBlogsQuery } from '@/lib/redux/admin/blogs/blogsSlice';
 
+export const dynamic = 'force-dynamic';
+
+
 export default function BlogPageInAdmin() {
   const { data: blogsData } = useAllBlogsQuery();
 
