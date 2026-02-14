@@ -22,7 +22,7 @@ jobs:
       - name: Install dependencies
         run: npm ci
 
-            - name: Build Next.js
+      - name: Build Next.js
         run: npm run build
         env:
           NODE_ENV: production
@@ -34,7 +34,6 @@ jobs:
           NEXT_PUBLIC_GOOGLE_CLIENT_ID: ${{ secrets.NEXT_PUBLIC_GOOGLE_CLIENT_ID }}
           NEXT_PUBLIC_APPLE_CLIENT_ID: ${{ secrets.NEXT_PUBLIC_APPLE_CLIENT_ID }}
           NEXT_PUBLIC_APPLE_REDIRECT_URI: ${{ secrets.NEXT_PUBLIC_APPLE_REDIRECT_URI }}
-
 
       - name: Prepare deployment files
         run: |
@@ -62,19 +61,11 @@ jobs:
           key: ${{ secrets.SSH_PRIVATE_KEY }}
           port: ${{ secrets.SSH_PORT }}
           script: |
-            # Move new build to production
             rm -rf /var/www/embroidize-frontend/.next/standalone
             mv /var/www/embroidize-frontend-new /var/www/embroidize-frontend/.next/standalone
-            
-            # Copy environment file
             cp /var/www/embroidize-frontend/.env.production /var/www/embroidize-frontend/.next/standalone/.env.production 2>/dev/null || true
-            
-            # Ensure cache directory exists
             mkdir -p /var/www/embroidize-frontend/.next/standalone/.next/cache/images
-            
-            # Zero-downtime reload
             pm2 reload embroidize-frontend --update-env
-            
-            # Verify deployment
             sleep 3
             pm2 status
+
