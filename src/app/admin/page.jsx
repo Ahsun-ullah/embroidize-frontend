@@ -4,6 +4,8 @@ import { getDashboardStatsAPI } from '@/lib/apis/protected/users';
 import { getProducts } from '@/lib/apis/public/products';
 import Link from 'next/link';
 
+export const dynamic = 'force-dynamic';
+
 export default async function AdminDashboard() {
   // 1. Fetch Aggregated Stats from Backend (Fast)
   const stats = await getDashboardStatsAPI();
