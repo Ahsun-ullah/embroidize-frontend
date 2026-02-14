@@ -22,10 +22,19 @@ jobs:
       - name: Install dependencies
         run: npm ci
 
-      - name: Build Next.js
+            - name: Build Next.js
         run: npm run build
         env:
           NODE_ENV: production
+          NEXT_PUBLIC_NODE_ENV: ${{ secrets.NEXT_PUBLIC_NODE_ENV }}
+          NEXT_PUBLIC_BASE_URL_CLIENT: ${{ secrets.NEXT_PUBLIC_BASE_URL_CLIENT }}
+          NEXT_PUBLIC_BASE_API_URL_PROD: ${{ secrets.NEXT_PUBLIC_BASE_API_URL_PROD }}
+          NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY: ${{ secrets.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY }}
+          NEXT_PUBLIC_WORD_PRESS_LINK: ${{ secrets.NEXT_PUBLIC_WORD_PRESS_LINK }}
+          NEXT_PUBLIC_GOOGLE_CLIENT_ID: ${{ secrets.NEXT_PUBLIC_GOOGLE_CLIENT_ID }}
+          NEXT_PUBLIC_APPLE_CLIENT_ID: ${{ secrets.NEXT_PUBLIC_APPLE_CLIENT_ID }}
+          NEXT_PUBLIC_APPLE_REDIRECT_URI: ${{ secrets.NEXT_PUBLIC_APPLE_REDIRECT_URI }}
+
 
       - name: Prepare deployment files
         run: |
