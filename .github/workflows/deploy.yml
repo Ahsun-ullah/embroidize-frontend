@@ -35,12 +35,16 @@ jobs:
           NEXT_PUBLIC_APPLE_CLIENT_ID: ${{ secrets.NEXT_PUBLIC_APPLE_CLIENT_ID }}
           NEXT_PUBLIC_APPLE_REDIRECT_URI: ${{ secrets.NEXT_PUBLIC_APPLE_REDIRECT_URI }}
 
-      - name: Prepare deployment files
+            - name: Prepare deployment files
         run: |
           mkdir -p deploy-package
           cp -r .next/standalone/* deploy-package/
-          cp -r public deploy-package/
           cp -r .next/static deploy-package/.next/
+          mkdir -p deploy-package/.next/server
+          cp -r .next/server/* deploy-package/.next/server/
+          cp .next/BUILD_ID deploy-package/.next/
+          cp -r public deploy-package/
+
           
       - name: Deploy to server
         uses: appleboy/scp-action@v0.1.7
