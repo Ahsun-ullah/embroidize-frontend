@@ -1,0 +1,71 @@
+name: Deploy to Production
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Build Next.js
+        run: npm run build
+        env:
+          NODE_ENV: production
+
+      - name: Prepare deployment files
+        run: |
+          mkdir -p deploy-package
+          cp -r .next/standalone/* deploy-package/
+          cp -r public deploy-package/
+          cp -r .next/static deploy-package/.next/
+          
+      - name: Deploy to server
+        uses: appleboy/scp-action@v0.1.7
+        with:
+          host: ${{ secrets.SSH_HOST }}
+          username: ${{ secrets.SSH_USER }}
+          key: ${{ secrets.SSH_PRIVATE_KEY }}
+          port: ${{ secrets.SSH_PORT }}
+          source: "deploy-package/*"
+          target: "/var/www/embroidize-frontend-new"
+          strip_components: 1
+
+      - name: Reload PM2 with zero downtime
+        uses: appleboy/ssh-action@v1.0.3
+        with:
+          host: ${{ secrets.SSH_HOST }}
+          username: ${{ secrets.SSH_USER }}
+          key: ${{ secrets.SSH_PRIVATE_KEY }}
+          port: ${{ secrets.SSH_PORT }}
+          script: |
+            # Move new build to production
+            rm -rf /var/www/embroidize-frontend/.next/standalone
+            mv /var/www/embroidize-frontend-new /var/www/embroidize-frontend/.next/standalone
+            
+            # Copy environment file
+            cp /var/www/embroidize-frontend/.env.production /var/www/embroidize-frontend/.next/standalone/.env.production 2>/dev/null || true
+            
+            # Ensure cache directory exists
+            mkdir -p /var/www/embroidize-frontend/.next/standalone/.next/cache/images
+            
+            # Zero-downtime reload
+            pm2 reload embroidize-frontend --update-env
+            
+            # Verify deployment
+            sleep 3
+            pm2 status
