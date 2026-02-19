@@ -1,5 +1,7 @@
 'use client';
 
+export const dynamic = 'force-dynamic';
+
 import { AuthProvider } from '@/lib/providers/AuthProvider';
 import { useState } from 'react';
 import AdminHeader from '../../components/admin/AdminHeader';

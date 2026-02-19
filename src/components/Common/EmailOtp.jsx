@@ -8,6 +8,7 @@ import Cookies from 'js-cookie';
 import { usePathname, useRouter } from 'next/navigation';
 import { useEffect, useState } from 'react';
 import EmailOtpComponent from './EmailOtpComponent';
+import GlobalLoadingPage from './GlobalLoadingPage';
 
 const EmailOtp = ({ step, setStep, userDetailsData, pathName }) => {
   const router = useRouter();
@@ -23,6 +24,17 @@ const EmailOtp = ({ step, setStep, userDetailsData, pathName }) => {
   useEffect(() => {
     setIsNavigating(false);
   }, [pathname]);
+
+  useEffect(() => {
+    if (!userDetailsData) {
+      handleApiError(null, 'Session expired. Please start registration again.');
+      setStep(1);
+    }
+  }, [userDetailsData, setStep]);
+
+  if (!userDetailsData) {
+    return <GlobalLoadingPage />;
+  }
 
   const handlePaste = (e, index) => {
     e.preventDefault();
@@ -49,13 +61,22 @@ const EmailOtp = ({ step, setStep, userDetailsData, pathName }) => {
     e.preventDefault();
 
     const fullOtp = otp.join('');
+
+    if (!/^\d{6}$/.test(fullOtp)) {
+      return handleApiError(null, 'Please enter the 6-digit OTP.');
+    }
+
     const email = userDetailsData?.email;
 
+    if (!userDetailsData) {
+      return handleApiError(
+        null,
+        'Session expired. Please start registration again.',
+      );
+    }
+
     try {
-      await verifyOtp({
-        email,
-        otp: parseInt(fullOtp, 10),
-      }).unwrap();
+      await verifyOtp({ email, otp: fullOtp }).unwrap();
 
       const registerResult = await userRegister(userDetailsData).unwrap();
 

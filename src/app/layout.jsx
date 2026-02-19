@@ -36,12 +36,25 @@ export const metadata = {
 export default function RootLayout({ children }) {
   return (
     <html lang='en' className='scroll-smooth'>
-      {/* Tawk.to Scripts in head */}
-      <Script
-        id='tawk-script'
-        strategy='afterInteractive'
-        dangerouslySetInnerHTML={{
-          __html: `
+      <head>
+        {/* Google Identity Services */}
+        <Script
+          src='https://accounts.google.com/gsi/client'
+          strategy='afterInteractive'
+        />
+
+        {/* Apple Sign In */}
+        <Script
+          src='https://appleid.cdn-apple.com/appleauth/static/jsapi/appleid/1/en_US/appleid.auth.js'
+          strategy='afterInteractive'
+        />
+
+        {/* Tawk.to Scripts in head */}
+        <Script
+          id='tawk-script'
+          strategy='afterInteractive'
+          dangerouslySetInnerHTML={{
+            __html: `
             var Tawk_API=Tawk_API||{}, Tawk_LoadStart=new Date();
             (function(){
               var s1=document.createElement("script"),s0=document.getElementsByTagName("script")[0];
@@ -52,14 +65,14 @@ export default function RootLayout({ children }) {
               s0.parentNode.insertBefore(s1,s0);
             })();
           `,
-        }}
-      />
+          }}
+        />
 
-      <Script
-        id='tawk-iframe-fix'
-        strategy='afterInteractive'
-        dangerouslySetInnerHTML={{
-          __html: `
+        <Script
+          id='tawk-iframe-fix'
+          strategy='afterInteractive'
+          dangerouslySetInnerHTML={{
+            __html: `
             function fixTawkIframes() {
               document.querySelectorAll('iframe[title="chat widget"]').forEach((iframe) => {
                 iframe.style.setProperty('right', '0px', 'important');
@@ -69,8 +82,9 @@ export default function RootLayout({ children }) {
             fixTawkIframes();
             setInterval(fixTawkIframes, 1000);
           `,
-        }}
-      />
+          }}
+        />
+      </head>
 
       <body
         className={`${plusJakarta.className} antialiased text-gray-900 bg-white`}
@@ -78,12 +92,12 @@ export default function RootLayout({ children }) {
       >
         {/* Google Tag Manager */}
         <GoogleTagManager gtmId='GTM-MLM7Q32D' />
-        
+
         {/* Google Analytics */}
-        <Script
+        {/* <Script
           src='https://www.googletagmanager.com/gtag/js?id=G-BJ81WDRVP5'
           strategy='afterInteractive'
-        />
+        /> */}
 
         <Script
           id='gtag-init'

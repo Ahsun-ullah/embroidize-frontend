@@ -1,5 +1,6 @@
 'use client';
 
+import SocialLoginButtons from '@/components/auth/SocialLoginButtons';
 import { ErrorToast } from '@/components/Common/ErrorToast';
 import ForgotPasswordModal from '@/components/Common/ForgotPasswordForm';
 import LoadingSpinner from '@/components/Common/LoadingSpinner';
@@ -26,11 +27,14 @@ const Login = () => {
     e.preventDefault();
 
     const formData = new FormData(e.target);
-    const data = {
-      email: formData.get('email').toLowerCase(),
-      password: formData.get('password'),
-    };
+    const email = formData.get('email')?.toString().trim().toLowerCase();
+    const password = formData.get('password')?.toString() ?? '';
 
+    if (!email || !password) {
+      return ErrorToast('Error', 'Email and password are required', 3000);
+    }
+
+    const data = { email, password };
     try {
       const response = await logIn(data);
       if (response.error) {
@@ -92,8 +96,8 @@ const Login = () => {
             </p>
           </div>
 
-          <div className='overflow-visible py-2'>
-            <form onSubmit={handleSubmit}>
+          <div className='overflow-visible pb-2'>
+            <form onSubmit={handleSubmit} className='pb-6'>
               {/* Email */}
               <div className='mb-4'>
                 <label htmlFor='email' className='form-label'>
@@ -147,6 +151,8 @@ const Login = () => {
                 )}
               </div>
             </form>
+
+            <SocialLoginButtons showThankYou={false} />
 
             {/* Register link */}
             <div className='mt-5 text-center'>

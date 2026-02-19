@@ -9,7 +9,7 @@ export async function GET() {
     { url: '/contact-us', priority: '0.8' },
     { url: '/privacy-policy', priority: '0.5' },
     { url: '/terms-and-conditions', priority: '0.5' },
-    { url: '/custom-embroidery-order', priority: '0.9' },
+    { url: '/custom-embroidery-digitizing-service', priority: '0.9' },
     { url: '/products', priority: '0.9' },
   ];
 

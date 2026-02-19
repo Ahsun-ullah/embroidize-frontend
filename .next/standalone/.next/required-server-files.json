@@ -1,0 +1,959 @@
+{
+  "version": 1,
+  "config": {
+    "env": {},
+    "webpack": null,
+    "eslint": {
+      "ignoreDuringBuilds": false
+    },
+    "typescript": {
+      "ignoreBuildErrors": false,
+      "tsconfigPath": "tsconfig.json"
+    },
+    "distDir": ".next",
+    "cleanDistDir": true,
+    "assetPrefix": "",
+    "cacheMaxMemorySize": 52428800,
+    "configOrigin": "next.config.js",
+    "useFileSystemPublicRoutes": true,
+    "generateEtags": true,
+    "pageExtensions": [
+      "tsx",
+      "ts",
+      "jsx",
+      "js"
+    ],
+    "poweredByHeader": true,
+    "compress": true,
+    "images": {
+      "deviceSizes": [
+        640,
+        750,
+        828,
+        1080,
+        1200,
+        1920,
+        2048,
+        3840
+      ],
+      "imageSizes": [
+        16,
+        32,
+        48,
+        64,
+        96,
+        128,
+        256,
+        384
+      ],
+      "path": "/_next/image",
+      "loader": "default",
+      "loaderFile": "",
+      "domains": [],
+      "disableStaticImages": false,
+      "minimumCacheTTL": 60,
+      "formats": [
+        "image/avif",
+        "image/webp"
+      ],
+      "dangerouslyAllowSVG": false,
+      "contentSecurityPolicy": "script-src 'none'; frame-src 'none'; sandbox;",
+      "contentDispositionType": "attachment",
+      "remotePatterns": [
+        {
+          "protocol": "https",
+          "hostname": "www.embroidize.com",
+          "pathname": "/**"
+        },
+        {
+          "protocol": "https",
+          "hostname": "embroidize-assets.nyc3.cdn.digitaloceanspaces.com",
+          "pathname": "/**"
+        },
+        {
+          "protocol": "https",
+          "hostname": "embroidize.com",
+          "pathname": "/**"
+        },
+        {
+          "protocol": "https",
+          "hostname": "tan-dogfish-413907.hostingersite.com",
+          "pathname": "/**"
+        },
+        {
+          "protocol": "https",
+          "hostname": "embroidize-assets.nyc3.digitaloceanspaces.com",
+          "pathname": "/**"
+        },
+        {
+          "protocol": "https",
+          "hostname": "res.cloudinary.com",
+          "pathname": "/**"
+        }
+      ],
+      "unoptimized": false
+    },
+    "devIndicators": {
+      "position": "bottom-left"
+    },
+    "onDemandEntries": {
+      "maxInactiveAge": 60000,
+      "pagesBufferLength": 5
+    },
+    "amp": {
+      "canonicalBase": ""
+    },
+    "basePath": "",
+    "sassOptions": {},
+    "trailingSlash": false,
+    "i18n": null,
+    "productionBrowserSourceMaps": false,
+    "excludeDefaultMomentLocales": true,
+    "serverRuntimeConfig": {},
+    "publicRuntimeConfig": {},
+    "reactProductionProfiling": false,
+    "reactStrictMode": true,
+    "reactMaxHeadersLength": 6000,
+    "httpAgentOptions": {
+      "keepAlive": true
+    },
+    "logging": {},
+    "compiler": {
+      "removeConsole": false
+    },
+    "expireTime": 31536000,
+    "staticPageGenerationTimeout": 60,
+    "output": "standalone",
+    "modularizeImports": {
+      "@mui/icons-material": {
+        "transform": "@mui/icons-material/{{member}}"
+      },
+      "lodash": {
+        "transform": "lodash/{{member}}"
+      }
+    },
+    "outputFileTracingRoot": "E:\\Work\\MY\\my-startup\\embroidize-frontend",
+    "experimental": {
+      "useSkewCookie": false,
+      "nodeMiddleware": false,
+      "cacheLife": {
+        "default": {
+          "stale": 300,
+          "revalidate": 900,
+          "expire": 4294967294
+        },
+        "seconds": {
+          "stale": 0,
+          "revalidate": 1,
+          "expire": 60
+        },
+        "minutes": {
+          "stale": 300,
+          "revalidate": 60,
+          "expire": 3600
+        },
+        "hours": {
+          "stale": 300,
+          "revalidate": 3600,
+          "expire": 86400
+        },
+        "days": {
+          "stale": 300,
+          "revalidate": 86400,
+          "expire": 604800
+        },
+        "weeks": {
+          "stale": 300,
+          "revalidate": 604800,
+          "expire": 2592000
+        },
+        "max": {
+          "stale": 300,
+          "revalidate": 2592000,
+          "expire": 4294967294
+        }
+      },
+      "cacheHandlers": {},
+      "cssChunking": true,
+      "multiZoneDraftMode": false,
+      "appNavFailHandling": false,
+      "prerenderEarlyExit": true,
+      "serverMinification": true,
+      "serverSourceMaps": false,
+      "linkNoTouchStart": false,
+      "caseSensitiveRoutes": false,
+      "clientSegmentCache": false,
+      "dynamicOnHover": false,
+      "preloadEntriesOnStart": true,
+      "clientRouterFilter": true,
+      "clientRouterFilterRedirects": false,
+      "fetchCacheKeyPrefix": "",
+      "middlewarePrefetch": "flexible",
+      "optimisticClientCache": true,
+      "manualClientBasePath": false,
+      "cpus": 7,
+      "memoryBasedWorkersCount": false,
+      "imgOptConcurrency": null,
+      "imgOptTimeoutInSeconds": 7,
+      "imgOptMaxInputPixels": 268402689,
+      "imgOptSequentialRead": null,
+      "isrFlushToDisk": true,
+      "workerThreads": false,
+      "optimizeCss": true,
+      "nextScriptWorkers": false,
+      "scrollRestoration": false,
+      "externalDir": false,
+      "disableOptimizedLoading": false,
+      "gzipSize": true,
+      "craCompat": false,
+      "esmExternals": true,
+      "fullySpecified": false,
+      "swcTraceProfiling": false,
+      "forceSwcTransforms": false,
+      "largePageDataBytes": 128000,
+      "typedRoutes": false,
+      "typedEnv": false,
+      "parallelServerCompiles": false,
+      "parallelServerBuildTraces": false,
+      "ppr": false,
+      "authInterrupts": false,
+      "webpackMemoryOptimizations": false,
+      "optimizeServerReact": true,
+      "viewTransition": false,
+      "routerBFCache": false,
+      "removeUncaughtErrorAndRejectionListeners": false,
+      "validateRSCRequestHeaders": false,
+      "staleTimes": {
+        "dynamic": 0,
+        "static": 300
+      },
+      "serverComponentsHmrCache": true,
+      "staticGenerationMaxConcurrency": 8,
+      "staticGenerationMinPagesPerWorker": 25,
+      "dynamicIO": false,
+      "inlineCss": false,
+      "useCache": false,
+      "globalNotFound": false,
+      "devtoolNewPanelUI": false,
+      "devtoolSegmentExplorer": false,
+      "browserDebugInfoInTerminal": false,
+      "optimizeRouterScrolling": false,
+      "strictNextHead": true,
+      "optimizePackageImports": [
+        "lucide-react",
+        "date-fns",
+        "lodash-es",
+        "ramda",
+        "antd",
+        "react-bootstrap",
+        "ahooks",
+        "@ant-design/icons",
+        "@headlessui/react",
+        "@headlessui-float/react",
+        "@heroicons/react/20/solid",
+        "@heroicons/react/24/solid",
+        "@heroicons/react/24/outline",
+        "@visx/visx",
+        "@tremor/react",
+        "rxjs",
+        "@mui/material",
+        "@mui/icons-material",
+        "recharts",
+        "react-use",
+        "effect",
+        "@effect/schema",
+        "@effect/platform",
+        "@effect/platform-node",
+        "@effect/platform-browser",
+        "@effect/platform-bun",
+        "@effect/sql",
+        "@effect/sql-mssql",
+        "@effect/sql-mysql2",
+        "@effect/sql-pg",
+        "@effect/sql-sqlite-node",
+        "@effect/sql-sqlite-bun",
+        "@effect/sql-sqlite-wasm",
+        "@effect/sql-sqlite-react-native",
+        "@effect/rpc",
+        "@effect/rpc-http",
+        "@effect/typeclass",
+        "@effect/experimental",
+        "@effect/opentelemetry",
+        "@material-ui/core",
+        "@material-ui/icons",
+        "@tabler/icons-react",
+        "mui-core",
+        "react-icons/ai",
+        "react-icons/bi",
+        "react-icons/bs",
+        "react-icons/cg",
+        "react-icons/ci",
+        "react-icons/di",
+        "react-icons/fa",
+        "react-icons/fa6",
+        "react-icons/fc",
+        "react-icons/fi",
+        "react-icons/gi",
+        "react-icons/go",
+        "react-icons/gr",
+        "react-icons/hi",
+        "react-icons/hi2",
+        "react-icons/im",
+        "react-icons/io",
+        "react-icons/io5",
+        "react-icons/lia",
+        "react-icons/lib",
+        "react-icons/lu",
+        "react-icons/md",
+        "react-icons/pi",
+        "react-icons/ri",
+        "react-icons/rx",
+        "react-icons/si",
+        "react-icons/sl",
+        "react-icons/tb",
+        "react-icons/tfi",
+        "react-icons/ti",
+        "react-icons/vsc",
+        "react-icons/wi"
+      ],
+      "trustHostHeader": false,
+      "isExperimentalCompile": false
+    },
+    "htmlLimitedBots": "Mediapartners-Google|Chrome-Lighthouse|Slurp|DuckDuckBot|baiduspider|yandex|sogou|bitlybot|tumblr|vkShare|quora link preview|redditbot|ia_archiver|Bingbot|BingPreview|applebot|facebookexternalhit|facebookcatalog|Twitterbot|LinkedInBot|Slackbot|Discordbot|WhatsApp|SkypeUriPreview|Yeti",
+    "bundlePagesRouterDependencies": false,
+    "configFileName": "next.config.js",
+    "turbopack": {
+      "root": "E:\\Work\\MY\\my-startup\\embroidize-frontend"
+    },
+    "_originalRedirects": [
+      {
+        "source": "/:path*",
+        "has": [
+          {
+            "type": "host",
+            "value": "www.embroidize.com"
+          }
+        ],
+        "destination": "https://embroidize.com/:path*",
+        "permanent": true
+      },
+      {
+        "source": "/blog/10-free-christmas-machine-embroidery-designs-for-your-holiday-projects",
+        "destination": "/blog/free-christmas-machine-embroidery-designs",
+        "permanent": true
+      },
+      {
+        "source": "/category/animals",
+        "destination": "/category/animals-wildlife-embroidery-designs",
+        "permanent": true
+      },
+      {
+        "source": "/category/floral-garden",
+        "destination": "/category/floral-botanical-embroidery-designs",
+        "permanent": true
+      },
+      {
+        "source": "/animals/baby-animals",
+        "destination": "/animals-wildlife-embroidery-designs/baby-animals-embroidery-designs",
+        "permanent": true
+      },
+      {
+        "source": "/animals/birds",
+        "destination": "/animals-wildlife-embroidery-designs/birds-embroidery-designs",
+        "permanent": true
+      },
+      {
+        "source": "/animals/bugs-insects",
+        "destination": "/animals-wildlife-embroidery-designs/insects-bugs-embroidery-designs",
+        "permanent": true
+      },
+      {
+        "source": "/animals/cats",
+        "destination": "/animals-wildlife-embroidery-designs/cats-embroidery-designs",
+        "permanent": true
+      },
+      {
+        "source": "/animals/dinosaurs",
+        "destination": "/animals-wildlife-embroidery-designs/dinosaurs-embroidery-designs",
+        "permanent": true
+      },
+      {
+        "source": "/animals/dogs",
+        "destination": "/animals-wildlife-embroidery-designs/dogs-embroidery-designs",
+        "permanent": true
+      },
+      {
+        "source": "/animals/farm-animals",
+        "destination": "/animals-wildlife-embroidery-designs/farm-animals-embroidery-designs",
+        "permanent": true
+      },
+      {
+        "source": "/animals/horses",
+        "destination": "/animals-wildlife-embroidery-designs/horses-embroidery-designs",
+        "permanent": true
+      },
+      {
+        "source": "/animals/reptiles",
+        "destination": "/animals-wildlife-embroidery-designs/reptiles-amphibians-embroidery-designs",
+        "permanent": true
+      },
+      {
+        "source": "/animals/wild-animals",
+        "destination": "/animals-wildlife-embroidery-designs/wild-animals-embroidery-designs",
+        "permanent": true
+      },
+      {
+        "source": "/animals/woodland-animals",
+        "destination": "/animals-wildlife-embroidery-designs/woodland-animals-embroidery-designs",
+        "permanent": true
+      },
+      {
+        "source": "/animals/marine-mammals",
+        "destination": "/animals-wildlife-embroidery-designs/marine-life-sea-creatures-embroidery-designs",
+        "permanent": true
+      },
+      {
+        "source": "/animals/fish-shells",
+        "destination": "/animals-wildlife-embroidery-designs/marine-life-sea-creatures-embroidery-designs",
+        "permanent": true
+      },
+      {
+        "source": "/floral-garden/bouquets-bunches",
+        "destination": "/floral-botanical-embroidery-designs/floral-bouquets-embroidery-designs",
+        "permanent": true
+      },
+      {
+        "source": "/floral-garden/single-flowers-plants",
+        "destination": "/floral-botanical-embroidery-designs/single-flowers-specimens-embroidery-designs",
+        "permanent": true
+      },
+      {
+        "source": "/holiday-celebration-embroidery-designs/anniversary-embroidery-designs",
+        "destination": "/holiday-celebration-embroidery-designs/anniversary-wedding-embroidery-designs",
+        "permanent": true
+      },
+      {
+        "source": "/holiday-celebration-embroidery-designs/baptism",
+        "destination": "/holiday-celebration-embroidery-designs/christening-baptism-embroidery-designs",
+        "permanent": true
+      },
+      {
+        "source": "/holiday-celebration-embroidery-designs/birthdays",
+        "destination": "/holiday-celebration-embroidery-designs/birthday-embroidery-designs",
+        "permanent": true
+      },
+      {
+        "source": "/holiday-celebration-embroidery-designs/christmas",
+        "destination": "/holiday-celebration-embroidery-designs/christmas-embroidery-designs",
+        "permanent": true
+      },
+      {
+        "source": "/holiday-celebration-embroidery-designs/easter",
+        "destination": "/holiday-celebration-embroidery-designs/easter-embroidery-designs",
+        "permanent": true
+      },
+      {
+        "source": "/holiday-celebration-embroidery-designs/fathers-day",
+        "destination": "/holiday-celebration-embroidery-designs/fathers-day-embroidery-designs",
+        "permanent": true
+      },
+      {
+        "source": "/holiday-celebration-embroidery-designs/graduation",
+        "destination": "/holiday-celebration-embroidery-designs/graduation-embroidery-designs",
+        "permanent": true
+      },
+      {
+        "source": "/holiday-celebration-embroidery-designs/halloween",
+        "destination": "/holiday-celebration-embroidery-designs/halloween-embroidery-designs",
+        "permanent": true
+      },
+      {
+        "source": "/holiday-celebration-embroidery-designs/independence-day",
+        "destination": "/holiday-celebration-embroidery-designs/independence-day-embroidery-designs",
+        "permanent": true
+      },
+      {
+        "source": "/holiday-celebration-embroidery-designs/mothers-day",
+        "destination": "/holiday-celebration-embroidery-designs/mothers-day-embroidery-designs",
+        "permanent": true
+      },
+      {
+        "source": "/holiday-celebration-embroidery-designs/st-patricks-day",
+        "destination": "/holiday-celebration-embroidery-designs/st-patricks-day-embroidery-designs",
+        "permanent": true
+      },
+      {
+        "source": "/holiday-celebration-embroidery-designs/thanksgiving",
+        "destination": "/holiday-celebration-embroidery-designs/thanksgiving-embroidery-designs",
+        "permanent": true
+      },
+      {
+        "source": "/holiday-celebration-embroidery-designs/valentines-day",
+        "destination": "/holiday-celebration-embroidery-designs/valentines-day-embroidery-designs",
+        "permanent": true
+      },
+      {
+        "source": "/animals/animal-quotes",
+        "destination": "/category/animals-wildlife-embroidery-designs",
+        "permanent": true
+      },
+      {
+        "source": "/floral-garden/floral-wreaths",
+        "destination": "/floral-botanical-embroidery-designs/floral-bouquets-embroidery-designs",
+        "permanent": true
+      },
+      {
+        "source": "/floral-garden/outdoor-quotes",
+        "destination": "/floral-botanical-embroidery-designs/floral-bouquets-embroidery-designs",
+        "permanent": true
+      },
+      {
+        "source": "/floral-garden/forest-trees",
+        "destination": "/floral-botanical-embroidery-designs/botanical-foliage-plants-embroidery-designs",
+        "permanent": true
+      },
+      {
+        "source": "/floral-garden/outline-flowers",
+        "destination": "/floral-botanical-embroidery-designs/botanical-illustration-embroidery-designs",
+        "permanent": true
+      },
+      {
+        "source": "/category/work-occupation",
+        "destination": "/category/professions-hobbies-embroidery-designs",
+        "permanent": true
+      },
+      {
+        "source": "/work-occupation/farm-country",
+        "destination": "/professions-hobbies-embroidery-designs/farming-agriculture-embroidery-designs",
+        "permanent": true
+      },
+      {
+        "source": "/category/hobbies-sports",
+        "destination": "/category/sports-acitivities-embroidery-designs",
+        "permanent": true
+      },
+      {
+        "source": "/hobbies-sports/camping-fishing",
+        "destination": "/sports-acitivities-embroidery-designs/fishing-hunting-embroidery-designs",
+        "permanent": true
+      },
+      {
+        "source": "/hobbies-sports/sports",
+        "destination": "/sports-acitivities-embroidery-designs/team-sports-embroidery-designs",
+        "permanent": true
+      },
+      {
+        "source": "/hobbies-sports/dance-drama",
+        "destination": "/sports-acitivities-embroidery-designs/gaming-geek-embroidery-designs",
+        "permanent": true
+      },
+      {
+        "source": "/hobbies-sports/adult-games",
+        "destination": "/sports-acitivities-embroidery-designs/board-games-puzzles-embroidery-designs",
+        "permanent": true
+      },
+      {
+        "source": "/hobbies-sports/music",
+        "destination": "/sports-acitivities-embroidery-designs/music-dance-embroidery-designs",
+        "permanent": true
+      },
+      {
+        "source": "/hobbies-sports/wellness-self-care",
+        "destination": "/home-living-embroidery-designs/wellness-self-care",
+        "permanent": true
+      },
+      {
+        "source": "/hobbies-sports/sewing-crafts",
+        "destination": "/professions-hobbies-embroidery-designs/sewing-quilting-embroidery-designs",
+        "permanent": true
+      },
+      {
+        "source": "/category/fashion-beauty",
+        "destination": "/category/fashion-apparel-embroidery-designs",
+        "permanent": true
+      },
+      {
+        "source": "/fashion-beauty/accessories",
+        "destination": "/fashion-apparel-embroidery-designs/bags-purses-embroidery-designs",
+        "permanent": true
+      },
+      {
+        "source": "/fashion-beauty/beauty",
+        "destination": "/fashion-apparel-embroidery-designs/makeup-cosmetics-embroidery-designs",
+        "permanent": true
+      },
+      {
+        "source": "/fashion-beauty/boho",
+        "destination": "/fashion-apparel-embroidery-designs/jewelry-charms-embroidery-designs",
+        "permanent": true
+      },
+      {
+        "source": "/fashion-beauty/clothing",
+        "destination": "/fashion-apparel-embroidery-designs/clothing-footwear-embroidery-designs",
+        "permanent": true
+      },
+      {
+        "source": "/category/home-living",
+        "destination": "/category/home-living-embroidery-designs",
+        "permanent": true
+      },
+      {
+        "source": "/home-living/bed-bath",
+        "destination": "/home-living-embroidery-designs/bathroom-linens-embroidery-designs",
+        "permanent": true
+      },
+      {
+        "source": "/home-living/bathroom",
+        "destination": "/home-living-embroidery-designs/bathroom-linens-embroidery-designs",
+        "permanent": true
+      },
+      {
+        "source": "/home-living/bedroom",
+        "destination": "/home-living-embroidery-designs/housewarming-welcoming-home-embroidery-designs",
+        "permanent": true
+      },
+      {
+        "source": "/home-living/kitchen-cooking",
+        "destination": "/home-living-embroidery-designs/kitchen-dining-embroidery-designs",
+        "permanent": true
+      },
+      {
+        "source": "/home-living/cleaning",
+        "destination": "/home-living-embroidery-designs/household-chores-items-embroidery-designs",
+        "permanent": true
+      },
+      {
+        "source": "/category/kids-babies",
+        "destination": "/category/kids-babies-embroidery-designs",
+        "permanent": true
+      },
+      {
+        "source": "/kids-babies-embroidery-designs",
+        "destination": "/category/kids-babies-embroidery-designs",
+        "permanent": true
+      },
+      {
+        "source": "/kids-babies/babies-kids-quotes",
+        "destination": "/kids-babies-embroidery-designs/nursery-quotes-embroidery-designs",
+        "permanent": true
+      },
+      {
+        "source": "/kids-babies/boys-girls",
+        "destination": "/kids-babies-embroidery-designs/toys-playtime-embroidery-designs",
+        "permanent": true
+      },
+      {
+        "source": "/kids-babies/circus-clowns",
+        "destination": "/kids-babies-embroidery-designs/circus-clowns-embroidery-designs",
+        "permanent": true
+      },
+      {
+        "source": "/kids-babies/cowboy-cowgirl",
+        "destination": "/kids-babies-embroidery-designs/western-rodeo-embroidery-designs",
+        "permanent": true
+      },
+      {
+        "source": "/kids-babies/fairy-tales",
+        "destination": "/kids-babies-embroidery-designs/fantasy-fairy-tales-embroidery-designs",
+        "permanent": true
+      },
+      {
+        "source": "/kids-babies/nursery",
+        "destination": "/kids-babies-embroidery-designs/nursery-rhymes-embroidery-designs",
+        "permanent": true
+      },
+      {
+        "source": "/kids-babies/pirates",
+        "destination": "/kids-babies-embroidery-designs/pirates-adventure-embroidery-designs",
+        "permanent": true
+      },
+      {
+        "source": "/kids-babies/teddy-bears",
+        "destination": "/kids-babies-embroidery-designs/teddy-bears-embroidery-designs",
+        "permanent": true
+      },
+      {
+        "source": "/kids-babies/teenagers",
+        "destination": "/kids-babies-embroidery-designs/tween-teen-embroidery-designs",
+        "permanent": true
+      },
+      {
+        "source": "/kids-babies/kids-games",
+        "destination": "/kids-babies-embroidery-designs/kids-activity-embroidery-designs",
+        "permanent": true
+      },
+      {
+        "source": "/kids-babies/robots-space",
+        "destination": "/kids-babies-embroidery-designs/robots-space-embroidery-designs",
+        "permanent": true
+      },
+      {
+        "source": "/babies-kids/robots-space",
+        "destination": "/kids-babies-embroidery-designs/robots-space-embroidery-designs",
+        "permanent": true
+      },
+      {
+        "source": "/category/travel-season",
+        "destination": "/category/travel-vacation-embroidery-designs",
+        "permanent": true
+      },
+      {
+        "source": "/travel-season/beach-nautical",
+        "destination": "/travel-vacation-embroidery-designs/beach-nautical-embroidery-designs",
+        "permanent": true
+      },
+      {
+        "source": "/travel-season/summer",
+        "destination": "/travel-vacation-embroidery-designs/summer-vacation-embroidery-designs",
+        "permanent": true
+      },
+      {
+        "source": "/travel-season/vacation",
+        "destination": "/travel-vacation-embroidery-designs/camping-outdoor-adventure-embroidery-designs",
+        "permanent": true
+      },
+      {
+        "source": "/travel-season/transportation",
+        "destination": "/travel-vacation-embroidery-designs/road-trip-transportation-embroidery-designs",
+        "permanent": true
+      },
+      {
+        "source": "/travel-season/travel-quotes",
+        "destination": "/travel-vacation-embroidery-designs/travel-quote-saying-embroidery-designs",
+        "permanent": true
+      },
+      {
+        "source": "/travel-season/spring",
+        "destination": "/travel-vacation-embroidery-designs/world-landmark-maps-embroidery-designs",
+        "permanent": true
+      },
+      {
+        "source": "/travel-season/autumn",
+        "destination": "/travel-vacation-embroidery-designs/autumn-fall-leaves-embroidery-designs",
+        "permanent": true
+      },
+      {
+        "source": "/travel-season/winter",
+        "destination": "/travel-vacation-embroidery-designs/winter-holiday-travel-embroidery-designs",
+        "permanent": true
+      },
+      {
+        "source": "/category/school-education",
+        "destination": "/category/school-academic-embroidery-designs",
+        "permanent": true
+      },
+      {
+        "source": "/category/sports-acitivities-embroidery-designs",
+        "destination": "/category/sports-activities-embroidery-designs",
+        "permanent": true
+      },
+      {
+        "source": "/school-education/back-to-school",
+        "destination": "/school-academic-embroidery-designs/back-to-school-embroidery-designs",
+        "permanent": true
+      },
+      {
+        "source": "/category/family-friends",
+        "destination": "/category/family-friendship-embroidery-designs",
+        "permanent": true
+      },
+      {
+        "source": "/family-friends/adoption",
+        "destination": "/family-friendship-embroidery-designs/adoption-forever-family-embroidery-designs",
+        "permanent": true
+      },
+      {
+        "source": "/family-friends/family-quotes",
+        "destination": "/family-friendship-embroidery-designs/family-quotes-sayings-embroidery-designs",
+        "permanent": true
+      },
+      {
+        "source": "/family-friends/friends",
+        "destination": "/family-friendship-embroidery-designs/best-friend-embroidery-designs",
+        "permanent": true
+      },
+      {
+        "source": "/family-friends/friends-quotes",
+        "destination": "/family-friendship-embroidery-designs/friend-quotes-sayings-embroidery-designs",
+        "permanent": true
+      },
+      {
+        "source": "/floral-and-garden/floral-wreaths",
+        "destination": "/floral-botanical-embroidery-designs/floral-bouquets-embroidery-designs",
+        "permanent": true
+      },
+      {
+        "source": "/babies-and-kids/back-to-school",
+        "destination": "/school-academic-embroidery-designs/back-to-school-embroidery-designs",
+        "permanent": true
+      },
+      {
+        "source": "/fashion-and-beauty/clothing",
+        "destination": "/fashion-apparel-embroidery-designs/clothing-footwear-embroidery-designs",
+        "permanent": true
+      },
+      {
+        "source": "/house-and-home/food-and-dining",
+        "destination": "/food-drink-embroidery-designs/kitchen-dinning-embroidery-designs",
+        "permanent": true
+      },
+      {
+        "source": "/fashion-apparel-embroidery-designs/accessories",
+        "destination": "/fashion-apparel-embroidery-designs/bags-purses-embroidery-designs",
+        "permanent": true
+      },
+      {
+        "source": "/family-friends/awareness-and-inspiration",
+        "destination": "/family-friendship-embroidery-designs/sibling-embroidery-designs",
+        "permanent": true
+      },
+      {
+        "source": "/family-friends/mother",
+        "destination": "/family-friendship-embroidery-designs/mother-mom-quotes-embroidery-designs",
+        "permanent": true
+      },
+      {
+        "source": "/food-beverages/dessert-sweets",
+        "destination": "/food-drink-embroidery-designs/sweet-treats-dessert-embroidery-designs",
+        "permanent": true
+      },
+      {
+        "source": "/food-beverages/food-dining",
+        "destination": "/food-drink-embroidery-designs/kitchen-dinning-embroidery-designs",
+        "permanent": true
+      },
+      {
+        "source": "/food-beverages/tea-coffee",
+        "destination": "/food-drink-embroidery-designs/coffee-tea-embroidery-designs",
+        "permanent": true
+      },
+      {
+        "source": "/food-beverages/wine-drinks",
+        "destination": "/food-drink-embroidery-designs/wine-cocktail-embroidery-designs",
+        "permanent": true
+      },
+      {
+        "source": "/house-home/cleaning",
+        "destination": "/home-living-embroidery-designs/household-chores-items-embroidery-designs",
+        "permanent": true
+      },
+      {
+        "source": "/holiday-celebration-embroidery-designs/anniversary",
+        "destination": "/holiday-celebration-embroidery-designs/anniversary-wedding-embroidery-designs",
+        "permanent": true
+      },
+      {
+        "source": "/holiday-celebration-embroidery-designs/baptism-embroidery-designs",
+        "destination": "/holiday-celebration-embroidery-designs/christening-baptism-embroidery-designs",
+        "permanent": true
+      },
+      {
+        "source": "/home-living-embroidery-designs/housewarning-welcoming-home-embroidery-designs",
+        "destination": "/home-living-embroidery-designs/housewarming-welcoming-home-embroidery-designs",
+        "permanent": true
+      },
+      {
+        "source": "/product",
+        "destination": "/products",
+        "permanent": true
+      },
+      {
+        "source": "/product/spooky-vibes-halloween-fun-embroidery-design",
+        "destination": "/product/spooky-vibes-embroidery-design-halloween-machine-embroidery-file",
+        "permanent": true
+      },
+      {
+        "source": "/product/flying-bats-embroidery-spooky-halloween-design",
+        "destination": "/product/halloween-bat-embroidery-design-machine-embroidery-file",
+        "permanent": true
+      },
+      {
+        "source": "/product/flying-bats-embroidery-design",
+        "destination": "/product/bat-flying-embroidery-design-halloween-spooky-bats-embroidery-file",
+        "permanent": true
+      },
+      {
+        "source": "/product/dog-ghost-embroidery-design-halloween-ghost-dogs-with-pumpkins",
+        "destination": "/product/ghost-dogs-pumpkins-halloween-embroidery-design",
+        "permanent": true
+      },
+      {
+        "source": "/product/braided-girl-with-roses-2-sketch-embroidery",
+        "destination": "/product/sleeping-koala-on-pillow-cute-animal-embroidery-design",
+        "permanent": true
+      },
+      {
+        "source": "/product/enjoy-every-moment-script-2-machine-embroidery",
+        "destination": "/product/thank-you-quote-machine-embroidery-design",
+        "permanent": true
+      },
+      {
+        "source": "/product/3-colorful-birds-watercolor-embroidery-design-design",
+        "destination": "/product/3-colorful-birds-watercolor-embroidery-design",
+        "permanent": true
+      },
+      {
+        "source": "/product/christmas-unicorn-reindeer-embroidery-design-festive-holiday-machine-embroidery-file",
+        "destination": "/product/christmas-unicorn-reindeer-holiday-machine-embroidery-file",
+        "permanent": true
+      },
+      {
+        "source": "/product/baseball-mom-heart-2-machine-embroidery-design",
+        "destination": "/product/dog-mom-machine-embroidery-design",
+        "permanent": true
+      },
+      {
+        "source": "/product/pink-heart-butterflies-valentine-embroidery-design",
+        "destination": "/product/winter-pine-forest-scene-monogram-embroidery-design",
+        "permanent": true
+      },
+      {
+        "source": "/product/santa-hat-embroidery-design",
+        "destination": "/product/baroque-santa-hat-embroidery-red-gold-filigree-design",
+        "permanent": true
+      },
+      {
+        "source": "/custom-embroidery-order",
+        "destination": "/custom-embroidery-digitizing-service",
+        "permanent": true
+      },
+      {
+        "source": "/product/free-heart-corner-embroidery-design",
+        "destination": "/product/floral-hearts-machine-embroidery-design",
+        "permanent": true
+      }
+    ]
+  },
+  "appDir": "E:\\Work\\MY\\my-startup\\embroidize-frontend",
+  "relativeAppDir": "",
+  "files": [
+    ".next\\routes-manifest.json",
+    ".next\\server\\pages-manifest.json",
+    ".next\\build-manifest.json",
+    ".next\\prerender-manifest.json",
+    ".next\\server\\functions-config-manifest.json",
+    ".next\\server\\middleware-manifest.json",
+    ".next\\server\\middleware-build-manifest.js",
+    ".next\\server\\middleware-react-loadable-manifest.js",
+    ".next\\react-loadable-manifest.json",
+    ".next\\server\\app-paths-manifest.json",
+    ".next\\app-path-routes-manifest.json",
+    ".next\\app-build-manifest.json",
+    ".next\\server\\server-reference-manifest.js",
+    ".next\\server\\server-reference-manifest.json",
+    ".next\\BUILD_ID",
+    ".next\\server\\next-font-manifest.js",
+    ".next\\server\\next-font-manifest.json",
+    ".next\\required-server-files.json",
+    ".next\\static\\css\\286a3343f7e8267c.css",
+    ".next\\static\\css\\3c5fa574916ec19e.css",
+    ".next\\static\\css\\3d5e1e0ca361c81e.css",
+    ".next\\static\\css\\aa94488fb30f8d6e.css",
+    ".next\\static\\css\\bcd3ca5273627146.css",
+    ".next\\static\\css\\c7c5e8ad1e475882.css",
+    ".next\\static\\css\\ce178d2b3058a5fe.css"
+  ],
+  "ignore": [
+    "node_modules\\next\\dist\\compiled\\@ampproject\\toolbox-optimizer\\**\\*"
+  ]
+}

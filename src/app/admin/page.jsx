@@ -1,3 +1,5 @@
+export const dynamic = 'force-dynamic';
+
 import DashboardCharts from '@/features/dashboard/components/DashboardCharts';
 import { getCustomOrderStats } from '@/lib/apis/protected/customOrders';
 import { getDashboardStatsAPI } from '@/lib/apis/protected/users';
@@ -16,7 +18,6 @@ export default async function AdminDashboard() {
   if (!stats) {
     return <div>Error loading dashboard data.</div>;
   }
-
 
   const {
     totalUsers,

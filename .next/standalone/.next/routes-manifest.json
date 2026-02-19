@@ -1,0 +1,1029 @@
+{
+  "version": 3,
+  "pages404": true,
+  "caseSensitive": false,
+  "basePath": "",
+  "redirects": [
+    {
+      "source": "/:path+/",
+      "destination": "/:path+",
+      "internal": true,
+      "statusCode": 308,
+      "regex": "^(?:/((?:[^/]+?)(?:/(?:[^/]+?))*))/$"
+    },
+    {
+      "source": "/:path*",
+      "has": [
+        {
+          "type": "host",
+          "value": "www.embroidize.com"
+        }
+      ],
+      "destination": "https://embroidize.com/:path*",
+      "statusCode": 308,
+      "regex": "^(?!/_next)(?:/((?:[^/]+?)(?:/(?:[^/]+?))*))?(?:/)?$"
+    },
+    {
+      "source": "/blog/10-free-christmas-machine-embroidery-designs-for-your-holiday-projects",
+      "destination": "/blog/free-christmas-machine-embroidery-designs",
+      "statusCode": 308,
+      "regex": "^(?!/_next)/blog/10-free-christmas-machine-embroidery-designs-for-your-holiday-projects(?:/)?$"
+    },
+    {
+      "source": "/category/animals",
+      "destination": "/category/animals-wildlife-embroidery-designs",
+      "statusCode": 308,
+      "regex": "^(?!/_next)/category/animals(?:/)?$"
+    },
+    {
+      "source": "/category/floral-garden",
+      "destination": "/category/floral-botanical-embroidery-designs",
+      "statusCode": 308,
+      "regex": "^(?!/_next)/category/floral-garden(?:/)?$"
+    },
+    {
+      "source": "/animals/baby-animals",
+      "destination": "/animals-wildlife-embroidery-designs/baby-animals-embroidery-designs",
+      "statusCode": 308,
+      "regex": "^(?!/_next)/animals/baby-animals(?:/)?$"
+    },
+    {
+      "source": "/animals/birds",
+      "destination": "/animals-wildlife-embroidery-designs/birds-embroidery-designs",
+      "statusCode": 308,
+      "regex": "^(?!/_next)/animals/birds(?:/)?$"
+    },
+    {
+      "source": "/animals/bugs-insects",
+      "destination": "/animals-wildlife-embroidery-designs/insects-bugs-embroidery-designs",
+      "statusCode": 308,
+      "regex": "^(?!/_next)/animals/bugs-insects(?:/)?$"
+    },
+    {
+      "source": "/animals/cats",
+      "destination": "/animals-wildlife-embroidery-designs/cats-embroidery-designs",
+      "statusCode": 308,
+      "regex": "^(?!/_next)/animals/cats(?:/)?$"
+    },
+    {
+      "source": "/animals/dinosaurs",
+      "destination": "/animals-wildlife-embroidery-designs/dinosaurs-embroidery-designs",
+      "statusCode": 308,
+      "regex": "^(?!/_next)/animals/dinosaurs(?:/)?$"
+    },
+    {
+      "source": "/animals/dogs",
+      "destination": "/animals-wildlife-embroidery-designs/dogs-embroidery-designs",
+      "statusCode": 308,
+      "regex": "^(?!/_next)/animals/dogs(?:/)?$"
+    },
+    {
+      "source": "/animals/farm-animals",
+      "destination": "/animals-wildlife-embroidery-designs/farm-animals-embroidery-designs",
+      "statusCode": 308,
+      "regex": "^(?!/_next)/animals/farm-animals(?:/)?$"
+    },
+    {
+      "source": "/animals/horses",
+      "destination": "/animals-wildlife-embroidery-designs/horses-embroidery-designs",
+      "statusCode": 308,
+      "regex": "^(?!/_next)/animals/horses(?:/)?$"
+    },
+    {
+      "source": "/animals/reptiles",
+      "destination": "/animals-wildlife-embroidery-designs/reptiles-amphibians-embroidery-designs",
+      "statusCode": 308,
+      "regex": "^(?!/_next)/animals/reptiles(?:/)?$"
+    },
+    {
+      "source": "/animals/wild-animals",
+      "destination": "/animals-wildlife-embroidery-designs/wild-animals-embroidery-designs",
+      "statusCode": 308,
+      "regex": "^(?!/_next)/animals/wild-animals(?:/)?$"
+    },
+    {
+      "source": "/animals/woodland-animals",
+      "destination": "/animals-wildlife-embroidery-designs/woodland-animals-embroidery-designs",
+      "statusCode": 308,
+      "regex": "^(?!/_next)/animals/woodland-animals(?:/)?$"
+    },
+    {
+      "source": "/animals/marine-mammals",
+      "destination": "/animals-wildlife-embroidery-designs/marine-life-sea-creatures-embroidery-designs",
+      "statusCode": 308,
+      "regex": "^(?!/_next)/animals/marine-mammals(?:/)?$"
+    },
+    {
+      "source": "/animals/fish-shells",
+      "destination": "/animals-wildlife-embroidery-designs/marine-life-sea-creatures-embroidery-designs",
+      "statusCode": 308,
+      "regex": "^(?!/_next)/animals/fish-shells(?:/)?$"
+    },
+    {
+      "source": "/floral-garden/bouquets-bunches",
+      "destination": "/floral-botanical-embroidery-designs/floral-bouquets-embroidery-designs",
+      "statusCode": 308,
+      "regex": "^(?!/_next)/floral-garden/bouquets-bunches(?:/)?$"
+    },
+    {
+      "source": "/floral-garden/single-flowers-plants",
+      "destination": "/floral-botanical-embroidery-designs/single-flowers-specimens-embroidery-designs",
+      "statusCode": 308,
+      "regex": "^(?!/_next)/floral-garden/single-flowers-plants(?:/)?$"
+    },
+    {
+      "source": "/holiday-celebration-embroidery-designs/anniversary-embroidery-designs",
+      "destination": "/holiday-celebration-embroidery-designs/anniversary-wedding-embroidery-designs",
+      "statusCode": 308,
+      "regex": "^(?!/_next)/holiday-celebration-embroidery-designs/anniversary-embroidery-designs(?:/)?$"
+    },
+    {
+      "source": "/holiday-celebration-embroidery-designs/baptism",
+      "destination": "/holiday-celebration-embroidery-designs/christening-baptism-embroidery-designs",
+      "statusCode": 308,
+      "regex": "^(?!/_next)/holiday-celebration-embroidery-designs/baptism(?:/)?$"
+    },
+    {
+      "source": "/holiday-celebration-embroidery-designs/birthdays",
+      "destination": "/holiday-celebration-embroidery-designs/birthday-embroidery-designs",
+      "statusCode": 308,
+      "regex": "^(?!/_next)/holiday-celebration-embroidery-designs/birthdays(?:/)?$"
+    },
+    {
+      "source": "/holiday-celebration-embroidery-designs/christmas",
+      "destination": "/holiday-celebration-embroidery-designs/christmas-embroidery-designs",
+      "statusCode": 308,
+      "regex": "^(?!/_next)/holiday-celebration-embroidery-designs/christmas(?:/)?$"
+    },
+    {
+      "source": "/holiday-celebration-embroidery-designs/easter",
+      "destination": "/holiday-celebration-embroidery-designs/easter-embroidery-designs",
+      "statusCode": 308,
+      "regex": "^(?!/_next)/holiday-celebration-embroidery-designs/easter(?:/)?$"
+    },
+    {
+      "source": "/holiday-celebration-embroidery-designs/fathers-day",
+      "destination": "/holiday-celebration-embroidery-designs/fathers-day-embroidery-designs",
+      "statusCode": 308,
+      "regex": "^(?!/_next)/holiday-celebration-embroidery-designs/fathers-day(?:/)?$"
+    },
+    {
+      "source": "/holiday-celebration-embroidery-designs/graduation",
+      "destination": "/holiday-celebration-embroidery-designs/graduation-embroidery-designs",
+      "statusCode": 308,
+      "regex": "^(?!/_next)/holiday-celebration-embroidery-designs/graduation(?:/)?$"
+    },
+    {
+      "source": "/holiday-celebration-embroidery-designs/halloween",
+      "destination": "/holiday-celebration-embroidery-designs/halloween-embroidery-designs",
+      "statusCode": 308,
+      "regex": "^(?!/_next)/holiday-celebration-embroidery-designs/halloween(?:/)?$"
+    },
+    {
+      "source": "/holiday-celebration-embroidery-designs/independence-day",
+      "destination": "/holiday-celebration-embroidery-designs/independence-day-embroidery-designs",
+      "statusCode": 308,
+      "regex": "^(?!/_next)/holiday-celebration-embroidery-designs/independence-day(?:/)?$"
+    },
+    {
+      "source": "/holiday-celebration-embroidery-designs/mothers-day",
+      "destination": "/holiday-celebration-embroidery-designs/mothers-day-embroidery-designs",
+      "statusCode": 308,
+      "regex": "^(?!/_next)/holiday-celebration-embroidery-designs/mothers-day(?:/)?$"
+    },
+    {
+      "source": "/holiday-celebration-embroidery-designs/st-patricks-day",
+      "destination": "/holiday-celebration-embroidery-designs/st-patricks-day-embroidery-designs",
+      "statusCode": 308,
+      "regex": "^(?!/_next)/holiday-celebration-embroidery-designs/st-patricks-day(?:/)?$"
+    },
+    {
+      "source": "/holiday-celebration-embroidery-designs/thanksgiving",
+      "destination": "/holiday-celebration-embroidery-designs/thanksgiving-embroidery-designs",
+      "statusCode": 308,
+      "regex": "^(?!/_next)/holiday-celebration-embroidery-designs/thanksgiving(?:/)?$"
+    },
+    {
+      "source": "/holiday-celebration-embroidery-designs/valentines-day",
+      "destination": "/holiday-celebration-embroidery-designs/valentines-day-embroidery-designs",
+      "statusCode": 308,
+      "regex": "^(?!/_next)/holiday-celebration-embroidery-designs/valentines-day(?:/)?$"
+    },
+    {
+      "source": "/animals/animal-quotes",
+      "destination": "/category/animals-wildlife-embroidery-designs",
+      "statusCode": 308,
+      "regex": "^(?!/_next)/animals/animal-quotes(?:/)?$"
+    },
+    {
+      "source": "/floral-garden/floral-wreaths",
+      "destination": "/floral-botanical-embroidery-designs/floral-bouquets-embroidery-designs",
+      "statusCode": 308,
+      "regex": "^(?!/_next)/floral-garden/floral-wreaths(?:/)?$"
+    },
+    {
+      "source": "/floral-garden/outdoor-quotes",
+      "destination": "/floral-botanical-embroidery-designs/floral-bouquets-embroidery-designs",
+      "statusCode": 308,
+      "regex": "^(?!/_next)/floral-garden/outdoor-quotes(?:/)?$"
+    },
+    {
+      "source": "/floral-garden/forest-trees",
+      "destination": "/floral-botanical-embroidery-designs/botanical-foliage-plants-embroidery-designs",
+      "statusCode": 308,
+      "regex": "^(?!/_next)/floral-garden/forest-trees(?:/)?$"
+    },
+    {
+      "source": "/floral-garden/outline-flowers",
+      "destination": "/floral-botanical-embroidery-designs/botanical-illustration-embroidery-designs",
+      "statusCode": 308,
+      "regex": "^(?!/_next)/floral-garden/outline-flowers(?:/)?$"
+    },
+    {
+      "source": "/category/work-occupation",
+      "destination": "/category/professions-hobbies-embroidery-designs",
+      "statusCode": 308,
+      "regex": "^(?!/_next)/category/work-occupation(?:/)?$"
+    },
+    {
+      "source": "/work-occupation/farm-country",
+      "destination": "/professions-hobbies-embroidery-designs/farming-agriculture-embroidery-designs",
+      "statusCode": 308,
+      "regex": "^(?!/_next)/work-occupation/farm-country(?:/)?$"
+    },
+    {
+      "source": "/category/hobbies-sports",
+      "destination": "/category/sports-acitivities-embroidery-designs",
+      "statusCode": 308,
+      "regex": "^(?!/_next)/category/hobbies-sports(?:/)?$"
+    },
+    {
+      "source": "/hobbies-sports/camping-fishing",
+      "destination": "/sports-acitivities-embroidery-designs/fishing-hunting-embroidery-designs",
+      "statusCode": 308,
+      "regex": "^(?!/_next)/hobbies-sports/camping-fishing(?:/)?$"
+    },
+    {
+      "source": "/hobbies-sports/sports",
+      "destination": "/sports-acitivities-embroidery-designs/team-sports-embroidery-designs",
+      "statusCode": 308,
+      "regex": "^(?!/_next)/hobbies-sports/sports(?:/)?$"
+    },
+    {
+      "source": "/hobbies-sports/dance-drama",
+      "destination": "/sports-acitivities-embroidery-designs/gaming-geek-embroidery-designs",
+      "statusCode": 308,
+      "regex": "^(?!/_next)/hobbies-sports/dance-drama(?:/)?$"
+    },
+    {
+      "source": "/hobbies-sports/adult-games",
+      "destination": "/sports-acitivities-embroidery-designs/board-games-puzzles-embroidery-designs",
+      "statusCode": 308,
+      "regex": "^(?!/_next)/hobbies-sports/adult-games(?:/)?$"
+    },
+    {
+      "source": "/hobbies-sports/music",
+      "destination": "/sports-acitivities-embroidery-designs/music-dance-embroidery-designs",
+      "statusCode": 308,
+      "regex": "^(?!/_next)/hobbies-sports/music(?:/)?$"
+    },
+    {
+      "source": "/hobbies-sports/wellness-self-care",
+      "destination": "/home-living-embroidery-designs/wellness-self-care",
+      "statusCode": 308,
+      "regex": "^(?!/_next)/hobbies-sports/wellness-self-care(?:/)?$"
+    },
+    {
+      "source": "/hobbies-sports/sewing-crafts",
+      "destination": "/professions-hobbies-embroidery-designs/sewing-quilting-embroidery-designs",
+      "statusCode": 308,
+      "regex": "^(?!/_next)/hobbies-sports/sewing-crafts(?:/)?$"
+    },
+    {
+      "source": "/category/fashion-beauty",
+      "destination": "/category/fashion-apparel-embroidery-designs",
+      "statusCode": 308,
+      "regex": "^(?!/_next)/category/fashion-beauty(?:/)?$"
+    },
+    {
+      "source": "/fashion-beauty/accessories",
+      "destination": "/fashion-apparel-embroidery-designs/bags-purses-embroidery-designs",
+      "statusCode": 308,
+      "regex": "^(?!/_next)/fashion-beauty/accessories(?:/)?$"
+    },
+    {
+      "source": "/fashion-beauty/beauty",
+      "destination": "/fashion-apparel-embroidery-designs/makeup-cosmetics-embroidery-designs",
+      "statusCode": 308,
+      "regex": "^(?!/_next)/fashion-beauty/beauty(?:/)?$"
+    },
+    {
+      "source": "/fashion-beauty/boho",
+      "destination": "/fashion-apparel-embroidery-designs/jewelry-charms-embroidery-designs",
+      "statusCode": 308,
+      "regex": "^(?!/_next)/fashion-beauty/boho(?:/)?$"
+    },
+    {
+      "source": "/fashion-beauty/clothing",
+      "destination": "/fashion-apparel-embroidery-designs/clothing-footwear-embroidery-designs",
+      "statusCode": 308,
+      "regex": "^(?!/_next)/fashion-beauty/clothing(?:/)?$"
+    },
+    {
+      "source": "/category/home-living",
+      "destination": "/category/home-living-embroidery-designs",
+      "statusCode": 308,
+      "regex": "^(?!/_next)/category/home-living(?:/)?$"
+    },
+    {
+      "source": "/home-living/bed-bath",
+      "destination": "/home-living-embroidery-designs/bathroom-linens-embroidery-designs",
+      "statusCode": 308,
+      "regex": "^(?!/_next)/home-living/bed-bath(?:/)?$"
+    },
+    {
+      "source": "/home-living/bathroom",
+      "destination": "/home-living-embroidery-designs/bathroom-linens-embroidery-designs",
+      "statusCode": 308,
+      "regex": "^(?!/_next)/home-living/bathroom(?:/)?$"
+    },
+    {
+      "source": "/home-living/bedroom",
+      "destination": "/home-living-embroidery-designs/housewarming-welcoming-home-embroidery-designs",
+      "statusCode": 308,
+      "regex": "^(?!/_next)/home-living/bedroom(?:/)?$"
+    },
+    {
+      "source": "/home-living/kitchen-cooking",
+      "destination": "/home-living-embroidery-designs/kitchen-dining-embroidery-designs",
+      "statusCode": 308,
+      "regex": "^(?!/_next)/home-living/kitchen-cooking(?:/)?$"
+    },
+    {
+      "source": "/home-living/cleaning",
+      "destination": "/home-living-embroidery-designs/household-chores-items-embroidery-designs",
+      "statusCode": 308,
+      "regex": "^(?!/_next)/home-living/cleaning(?:/)?$"
+    },
+    {
+      "source": "/category/kids-babies",
+      "destination": "/category/kids-babies-embroidery-designs",
+      "statusCode": 308,
+      "regex": "^(?!/_next)/category/kids-babies(?:/)?$"
+    },
+    {
+      "source": "/kids-babies-embroidery-designs",
+      "destination": "/category/kids-babies-embroidery-designs",
+      "statusCode": 308,
+      "regex": "^(?!/_next)/kids-babies-embroidery-designs(?:/)?$"
+    },
+    {
+      "source": "/kids-babies/babies-kids-quotes",
+      "destination": "/kids-babies-embroidery-designs/nursery-quotes-embroidery-designs",
+      "statusCode": 308,
+      "regex": "^(?!/_next)/kids-babies/babies-kids-quotes(?:/)?$"
+    },
+    {
+      "source": "/kids-babies/boys-girls",
+      "destination": "/kids-babies-embroidery-designs/toys-playtime-embroidery-designs",
+      "statusCode": 308,
+      "regex": "^(?!/_next)/kids-babies/boys-girls(?:/)?$"
+    },
+    {
+      "source": "/kids-babies/circus-clowns",
+      "destination": "/kids-babies-embroidery-designs/circus-clowns-embroidery-designs",
+      "statusCode": 308,
+      "regex": "^(?!/_next)/kids-babies/circus-clowns(?:/)?$"
+    },
+    {
+      "source": "/kids-babies/cowboy-cowgirl",
+      "destination": "/kids-babies-embroidery-designs/western-rodeo-embroidery-designs",
+      "statusCode": 308,
+      "regex": "^(?!/_next)/kids-babies/cowboy-cowgirl(?:/)?$"
+    },
+    {
+      "source": "/kids-babies/fairy-tales",
+      "destination": "/kids-babies-embroidery-designs/fantasy-fairy-tales-embroidery-designs",
+      "statusCode": 308,
+      "regex": "^(?!/_next)/kids-babies/fairy-tales(?:/)?$"
+    },
+    {
+      "source": "/kids-babies/nursery",
+      "destination": "/kids-babies-embroidery-designs/nursery-rhymes-embroidery-designs",
+      "statusCode": 308,
+      "regex": "^(?!/_next)/kids-babies/nursery(?:/)?$"
+    },
+    {
+      "source": "/kids-babies/pirates",
+      "destination": "/kids-babies-embroidery-designs/pirates-adventure-embroidery-designs",
+      "statusCode": 308,
+      "regex": "^(?!/_next)/kids-babies/pirates(?:/)?$"
+    },
+    {
+      "source": "/kids-babies/teddy-bears",
+      "destination": "/kids-babies-embroidery-designs/teddy-bears-embroidery-designs",
+      "statusCode": 308,
+      "regex": "^(?!/_next)/kids-babies/teddy-bears(?:/)?$"
+    },
+    {
+      "source": "/kids-babies/teenagers",
+      "destination": "/kids-babies-embroidery-designs/tween-teen-embroidery-designs",
+      "statusCode": 308,
+      "regex": "^(?!/_next)/kids-babies/teenagers(?:/)?$"
+    },
+    {
+      "source": "/kids-babies/kids-games",
+      "destination": "/kids-babies-embroidery-designs/kids-activity-embroidery-designs",
+      "statusCode": 308,
+      "regex": "^(?!/_next)/kids-babies/kids-games(?:/)?$"
+    },
+    {
+      "source": "/kids-babies/robots-space",
+      "destination": "/kids-babies-embroidery-designs/robots-space-embroidery-designs",
+      "statusCode": 308,
+      "regex": "^(?!/_next)/kids-babies/robots-space(?:/)?$"
+    },
+    {
+      "source": "/babies-kids/robots-space",
+      "destination": "/kids-babies-embroidery-designs/robots-space-embroidery-designs",
+      "statusCode": 308,
+      "regex": "^(?!/_next)/babies-kids/robots-space(?:/)?$"
+    },
+    {
+      "source": "/category/travel-season",
+      "destination": "/category/travel-vacation-embroidery-designs",
+      "statusCode": 308,
+      "regex": "^(?!/_next)/category/travel-season(?:/)?$"
+    },
+    {
+      "source": "/travel-season/beach-nautical",
+      "destination": "/travel-vacation-embroidery-designs/beach-nautical-embroidery-designs",
+      "statusCode": 308,
+      "regex": "^(?!/_next)/travel-season/beach-nautical(?:/)?$"
+    },
+    {
+      "source": "/travel-season/summer",
+      "destination": "/travel-vacation-embroidery-designs/summer-vacation-embroidery-designs",
+      "statusCode": 308,
+      "regex": "^(?!/_next)/travel-season/summer(?:/)?$"
+    },
+    {
+      "source": "/travel-season/vacation",
+      "destination": "/travel-vacation-embroidery-designs/camping-outdoor-adventure-embroidery-designs",
+      "statusCode": 308,
+      "regex": "^(?!/_next)/travel-season/vacation(?:/)?$"
+    },
+    {
+      "source": "/travel-season/transportation",
+      "destination": "/travel-vacation-embroidery-designs/road-trip-transportation-embroidery-designs",
+      "statusCode": 308,
+      "regex": "^(?!/_next)/travel-season/transportation(?:/)?$"
+    },
+    {
+      "source": "/travel-season/travel-quotes",
+      "destination": "/travel-vacation-embroidery-designs/travel-quote-saying-embroidery-designs",
+      "statusCode": 308,
+      "regex": "^(?!/_next)/travel-season/travel-quotes(?:/)?$"
+    },
+    {
+      "source": "/travel-season/spring",
+      "destination": "/travel-vacation-embroidery-designs/world-landmark-maps-embroidery-designs",
+      "statusCode": 308,
+      "regex": "^(?!/_next)/travel-season/spring(?:/)?$"
+    },
+    {
+      "source": "/travel-season/autumn",
+      "destination": "/travel-vacation-embroidery-designs/autumn-fall-leaves-embroidery-designs",
+      "statusCode": 308,
+      "regex": "^(?!/_next)/travel-season/autumn(?:/)?$"
+    },
+    {
+      "source": "/travel-season/winter",
+      "destination": "/travel-vacation-embroidery-designs/winter-holiday-travel-embroidery-designs",
+      "statusCode": 308,
+      "regex": "^(?!/_next)/travel-season/winter(?:/)?$"
+    },
+    {
+      "source": "/category/school-education",
+      "destination": "/category/school-academic-embroidery-designs",
+      "statusCode": 308,
+      "regex": "^(?!/_next)/category/school-education(?:/)?$"
+    },
+    {
+      "source": "/category/sports-acitivities-embroidery-designs",
+      "destination": "/category/sports-activities-embroidery-designs",
+      "statusCode": 308,
+      "regex": "^(?!/_next)/category/sports-acitivities-embroidery-designs(?:/)?$"
+    },
+    {
+      "source": "/school-education/back-to-school",
+      "destination": "/school-academic-embroidery-designs/back-to-school-embroidery-designs",
+      "statusCode": 308,
+      "regex": "^(?!/_next)/school-education/back-to-school(?:/)?$"
+    },
+    {
+      "source": "/category/family-friends",
+      "destination": "/category/family-friendship-embroidery-designs",
+      "statusCode": 308,
+      "regex": "^(?!/_next)/category/family-friends(?:/)?$"
+    },
+    {
+      "source": "/family-friends/adoption",
+      "destination": "/family-friendship-embroidery-designs/adoption-forever-family-embroidery-designs",
+      "statusCode": 308,
+      "regex": "^(?!/_next)/family-friends/adoption(?:/)?$"
+    },
+    {
+      "source": "/family-friends/family-quotes",
+      "destination": "/family-friendship-embroidery-designs/family-quotes-sayings-embroidery-designs",
+      "statusCode": 308,
+      "regex": "^(?!/_next)/family-friends/family-quotes(?:/)?$"
+    },
+    {
+      "source": "/family-friends/friends",
+      "destination": "/family-friendship-embroidery-designs/best-friend-embroidery-designs",
+      "statusCode": 308,
+      "regex": "^(?!/_next)/family-friends/friends(?:/)?$"
+    },
+    {
+      "source": "/family-friends/friends-quotes",
+      "destination": "/family-friendship-embroidery-designs/friend-quotes-sayings-embroidery-designs",
+      "statusCode": 308,
+      "regex": "^(?!/_next)/family-friends/friends-quotes(?:/)?$"
+    },
+    {
+      "source": "/floral-and-garden/floral-wreaths",
+      "destination": "/floral-botanical-embroidery-designs/floral-bouquets-embroidery-designs",
+      "statusCode": 308,
+      "regex": "^(?!/_next)/floral-and-garden/floral-wreaths(?:/)?$"
+    },
+    {
+      "source": "/babies-and-kids/back-to-school",
+      "destination": "/school-academic-embroidery-designs/back-to-school-embroidery-designs",
+      "statusCode": 308,
+      "regex": "^(?!/_next)/babies-and-kids/back-to-school(?:/)?$"
+    },
+    {
+      "source": "/fashion-and-beauty/clothing",
+      "destination": "/fashion-apparel-embroidery-designs/clothing-footwear-embroidery-designs",
+      "statusCode": 308,
+      "regex": "^(?!/_next)/fashion-and-beauty/clothing(?:/)?$"
+    },
+    {
+      "source": "/house-and-home/food-and-dining",
+      "destination": "/food-drink-embroidery-designs/kitchen-dinning-embroidery-designs",
+      "statusCode": 308,
+      "regex": "^(?!/_next)/house-and-home/food-and-dining(?:/)?$"
+    },
+    {
+      "source": "/fashion-apparel-embroidery-designs/accessories",
+      "destination": "/fashion-apparel-embroidery-designs/bags-purses-embroidery-designs",
+      "statusCode": 308,
+      "regex": "^(?!/_next)/fashion-apparel-embroidery-designs/accessories(?:/)?$"
+    },
+    {
+      "source": "/family-friends/awareness-and-inspiration",
+      "destination": "/family-friendship-embroidery-designs/sibling-embroidery-designs",
+      "statusCode": 308,
+      "regex": "^(?!/_next)/family-friends/awareness-and-inspiration(?:/)?$"
+    },
+    {
+      "source": "/family-friends/mother",
+      "destination": "/family-friendship-embroidery-designs/mother-mom-quotes-embroidery-designs",
+      "statusCode": 308,
+      "regex": "^(?!/_next)/family-friends/mother(?:/)?$"
+    },
+    {
+      "source": "/food-beverages/dessert-sweets",
+      "destination": "/food-drink-embroidery-designs/sweet-treats-dessert-embroidery-designs",
+      "statusCode": 308,
+      "regex": "^(?!/_next)/food-beverages/dessert-sweets(?:/)?$"
+    },
+    {
+      "source": "/food-beverages/food-dining",
+      "destination": "/food-drink-embroidery-designs/kitchen-dinning-embroidery-designs",
+      "statusCode": 308,
+      "regex": "^(?!/_next)/food-beverages/food-dining(?:/)?$"
+    },
+    {
+      "source": "/food-beverages/tea-coffee",
+      "destination": "/food-drink-embroidery-designs/coffee-tea-embroidery-designs",
+      "statusCode": 308,
+      "regex": "^(?!/_next)/food-beverages/tea-coffee(?:/)?$"
+    },
+    {
+      "source": "/food-beverages/wine-drinks",
+      "destination": "/food-drink-embroidery-designs/wine-cocktail-embroidery-designs",
+      "statusCode": 308,
+      "regex": "^(?!/_next)/food-beverages/wine-drinks(?:/)?$"
+    },
+    {
+      "source": "/house-home/cleaning",
+      "destination": "/home-living-embroidery-designs/household-chores-items-embroidery-designs",
+      "statusCode": 308,
+      "regex": "^(?!/_next)/house-home/cleaning(?:/)?$"
+    },
+    {
+      "source": "/holiday-celebration-embroidery-designs/anniversary",
+      "destination": "/holiday-celebration-embroidery-designs/anniversary-wedding-embroidery-designs",
+      "statusCode": 308,
+      "regex": "^(?!/_next)/holiday-celebration-embroidery-designs/anniversary(?:/)?$"
+    },
+    {
+      "source": "/holiday-celebration-embroidery-designs/baptism-embroidery-designs",
+      "destination": "/holiday-celebration-embroidery-designs/christening-baptism-embroidery-designs",
+      "statusCode": 308,
+      "regex": "^(?!/_next)/holiday-celebration-embroidery-designs/baptism-embroidery-designs(?:/)?$"
+    },
+    {
+      "source": "/home-living-embroidery-designs/housewarning-welcoming-home-embroidery-designs",
+      "destination": "/home-living-embroidery-designs/housewarming-welcoming-home-embroidery-designs",
+      "statusCode": 308,
+      "regex": "^(?!/_next)/home-living-embroidery-designs/housewarning-welcoming-home-embroidery-designs(?:/)?$"
+    },
+    {
+      "source": "/product",
+      "destination": "/products",
+      "statusCode": 308,
+      "regex": "^(?!/_next)/product(?:/)?$"
+    },
+    {
+      "source": "/product/spooky-vibes-halloween-fun-embroidery-design",
+      "destination": "/product/spooky-vibes-embroidery-design-halloween-machine-embroidery-file",
+      "statusCode": 308,
+      "regex": "^(?!/_next)/product/spooky-vibes-halloween-fun-embroidery-design(?:/)?$"
+    },
+    {
+      "source": "/product/flying-bats-embroidery-spooky-halloween-design",
+      "destination": "/product/halloween-bat-embroidery-design-machine-embroidery-file",
+      "statusCode": 308,
+      "regex": "^(?!/_next)/product/flying-bats-embroidery-spooky-halloween-design(?:/)?$"
+    },
+    {
+      "source": "/product/flying-bats-embroidery-design",
+      "destination": "/product/bat-flying-embroidery-design-halloween-spooky-bats-embroidery-file",
+      "statusCode": 308,
+      "regex": "^(?!/_next)/product/flying-bats-embroidery-design(?:/)?$"
+    },
+    {
+      "source": "/product/dog-ghost-embroidery-design-halloween-ghost-dogs-with-pumpkins",
+      "destination": "/product/ghost-dogs-pumpkins-halloween-embroidery-design",
+      "statusCode": 308,
+      "regex": "^(?!/_next)/product/dog-ghost-embroidery-design-halloween-ghost-dogs-with-pumpkins(?:/)?$"
+    },
+    {
+      "source": "/product/braided-girl-with-roses-2-sketch-embroidery",
+      "destination": "/product/sleeping-koala-on-pillow-cute-animal-embroidery-design",
+      "statusCode": 308,
+      "regex": "^(?!/_next)/product/braided-girl-with-roses-2-sketch-embroidery(?:/)?$"
+    },
+    {
+      "source": "/product/enjoy-every-moment-script-2-machine-embroidery",
+      "destination": "/product/thank-you-quote-machine-embroidery-design",
+      "statusCode": 308,
+      "regex": "^(?!/_next)/product/enjoy-every-moment-script-2-machine-embroidery(?:/)?$"
+    },
+    {
+      "source": "/product/3-colorful-birds-watercolor-embroidery-design-design",
+      "destination": "/product/3-colorful-birds-watercolor-embroidery-design",
+      "statusCode": 308,
+      "regex": "^(?!/_next)/product/3-colorful-birds-watercolor-embroidery-design-design(?:/)?$"
+    },
+    {
+      "source": "/product/christmas-unicorn-reindeer-embroidery-design-festive-holiday-machine-embroidery-file",
+      "destination": "/product/christmas-unicorn-reindeer-holiday-machine-embroidery-file",
+      "statusCode": 308,
+      "regex": "^(?!/_next)/product/christmas-unicorn-reindeer-embroidery-design-festive-holiday-machine-embroidery-file(?:/)?$"
+    },
+    {
+      "source": "/product/baseball-mom-heart-2-machine-embroidery-design",
+      "destination": "/product/dog-mom-machine-embroidery-design",
+      "statusCode": 308,
+      "regex": "^(?!/_next)/product/baseball-mom-heart-2-machine-embroidery-design(?:/)?$"
+    },
+    {
+      "source": "/product/pink-heart-butterflies-valentine-embroidery-design",
+      "destination": "/product/winter-pine-forest-scene-monogram-embroidery-design",
+      "statusCode": 308,
+      "regex": "^(?!/_next)/product/pink-heart-butterflies-valentine-embroidery-design(?:/)?$"
+    },
+    {
+      "source": "/product/santa-hat-embroidery-design",
+      "destination": "/product/baroque-santa-hat-embroidery-red-gold-filigree-design",
+      "statusCode": 308,
+      "regex": "^(?!/_next)/product/santa-hat-embroidery-design(?:/)?$"
+    },
+    {
+      "source": "/custom-embroidery-order",
+      "destination": "/custom-embroidery-digitizing-service",
+      "statusCode": 308,
+      "regex": "^(?!/_next)/custom-embroidery-order(?:/)?$"
+    },
+    {
+      "source": "/product/free-heart-corner-embroidery-design",
+      "destination": "/product/floral-hearts-machine-embroidery-design",
+      "statusCode": 308,
+      "regex": "^(?!/_next)/product/free-heart-corner-embroidery-design(?:/)?$"
+    }
+  ],
+  "headers": [],
+  "rewrites": {
+    "beforeFiles": [],
+    "afterFiles": [],
+    "fallback": []
+  },
+  "dynamicRoutes": [
+    {
+      "page": "/admin/bundle-products/[id]",
+      "regex": "^/admin/bundle\\-products/([^/]+?)(?:/)?$",
+      "routeKeys": {
+        "nxtPid": "nxtPid"
+      },
+      "namedRegex": "^/admin/bundle\\-products/(?<nxtPid>[^/]+?)(?:/)?$"
+    },
+    {
+      "page": "/blog/[slug]",
+      "regex": "^/blog/([^/]+?)(?:/)?$",
+      "routeKeys": {
+        "nxtPslug": "nxtPslug"
+      },
+      "namedRegex": "^/blog/(?<nxtPslug>[^/]+?)(?:/)?$"
+    },
+    {
+      "page": "/bundles/[slug]",
+      "regex": "^/bundles/([^/]+?)(?:/)?$",
+      "routeKeys": {
+        "nxtPslug": "nxtPslug"
+      },
+      "namedRegex": "^/bundles/(?<nxtPslug>[^/]+?)(?:/)?$"
+    },
+    {
+      "page": "/category/[slug]",
+      "regex": "^/category/([^/]+?)(?:/)?$",
+      "routeKeys": {
+        "nxtPslug": "nxtPslug"
+      },
+      "namedRegex": "^/category/(?<nxtPslug>[^/]+?)(?:/)?$"
+    },
+    {
+      "page": "/product/[slug]",
+      "regex": "^/product/([^/]+?)(?:/)?$",
+      "routeKeys": {
+        "nxtPslug": "nxtPslug"
+      },
+      "namedRegex": "^/product/(?<nxtPslug>[^/]+?)(?:/)?$"
+    },
+    {
+      "page": "/resources/[slug]",
+      "regex": "^/resources/([^/]+?)(?:/)?$",
+      "routeKeys": {
+        "nxtPslug": "nxtPslug"
+      },
+      "namedRegex": "^/resources/(?<nxtPslug>[^/]+?)(?:/)?$"
+    },
+    {
+      "page": "/[categorySlug]/[subCategorySlug]",
+      "regex": "^/([^/]+?)/([^/]+?)(?:/)?$",
+      "routeKeys": {
+        "nxtPcategorySlug": "nxtPcategorySlug",
+        "nxtPsubCategorySlug": "nxtPsubCategorySlug"
+      },
+      "namedRegex": "^/(?<nxtPcategorySlug>[^/]+?)/(?<nxtPsubCategorySlug>[^/]+?)(?:/)?$"
+    }
+  ],
+  "staticRoutes": [
+    {
+      "page": "/",
+      "regex": "^/(?:/)?$",
+      "routeKeys": {},
+      "namedRegex": "^/(?:/)?$"
+    },
+    {
+      "page": "/_not-found",
+      "regex": "^/_not\\-found(?:/)?$",
+      "routeKeys": {},
+      "namedRegex": "^/_not\\-found(?:/)?$"
+    },
+    {
+      "page": "/about-us",
+      "regex": "^/about\\-us(?:/)?$",
+      "routeKeys": {},
+      "namedRegex": "^/about\\-us(?:/)?$"
+    },
+    {
+      "page": "/admin",
+      "regex": "^/admin(?:/)?$",
+      "routeKeys": {},
+      "namedRegex": "^/admin(?:/)?$"
+    },
+    {
+      "page": "/admin/add-products",
+      "regex": "^/admin/add\\-products(?:/)?$",
+      "routeKeys": {},
+      "namedRegex": "^/admin/add\\-products(?:/)?$"
+    },
+    {
+      "page": "/admin/all-blogs",
+      "regex": "^/admin/all\\-blogs(?:/)?$",
+      "routeKeys": {},
+      "namedRegex": "^/admin/all\\-blogs(?:/)?$"
+    },
+    {
+      "page": "/admin/all-products",
+      "regex": "^/admin/all\\-products(?:/)?$",
+      "routeKeys": {},
+      "namedRegex": "^/admin/all\\-products(?:/)?$"
+    },
+    {
+      "page": "/admin/bundle-products",
+      "regex": "^/admin/bundle\\-products(?:/)?$",
+      "routeKeys": {},
+      "namedRegex": "^/admin/bundle\\-products(?:/)?$"
+    },
+    {
+      "page": "/admin/categories",
+      "regex": "^/admin/categories(?:/)?$",
+      "routeKeys": {},
+      "namedRegex": "^/admin/categories(?:/)?$"
+    },
+    {
+      "page": "/admin/contact-submissions",
+      "regex": "^/admin/contact\\-submissions(?:/)?$",
+      "routeKeys": {},
+      "namedRegex": "^/admin/contact\\-submissions(?:/)?$"
+    },
+    {
+      "page": "/admin/custom-orders",
+      "regex": "^/admin/custom\\-orders(?:/)?$",
+      "routeKeys": {},
+      "namedRegex": "^/admin/custom\\-orders(?:/)?$"
+    },
+    {
+      "page": "/admin/downloads",
+      "regex": "^/admin/downloads(?:/)?$",
+      "routeKeys": {},
+      "namedRegex": "^/admin/downloads(?:/)?$"
+    },
+    {
+      "page": "/admin/users",
+      "regex": "^/admin/users(?:/)?$",
+      "routeKeys": {},
+      "namedRegex": "^/admin/users(?:/)?$"
+    },
+    {
+      "page": "/auth/login",
+      "regex": "^/auth/login(?:/)?$",
+      "routeKeys": {},
+      "namedRegex": "^/auth/login(?:/)?$"
+    },
+    {
+      "page": "/auth/register",
+      "regex": "^/auth/register(?:/)?$",
+      "routeKeys": {},
+      "namedRegex": "^/auth/register(?:/)?$"
+    },
+    {
+      "page": "/auth/thank-you",
+      "regex": "^/auth/thank\\-you(?:/)?$",
+      "routeKeys": {},
+      "namedRegex": "^/auth/thank\\-you(?:/)?$"
+    },
+    {
+      "page": "/blog",
+      "regex": "^/blog(?:/)?$",
+      "routeKeys": {},
+      "namedRegex": "^/blog(?:/)?$"
+    },
+    {
+      "page": "/bundles",
+      "regex": "^/bundles(?:/)?$",
+      "routeKeys": {},
+      "namedRegex": "^/bundles(?:/)?$"
+    },
+    {
+      "page": "/contact-us",
+      "regex": "^/contact\\-us(?:/)?$",
+      "routeKeys": {},
+      "namedRegex": "^/contact\\-us(?:/)?$"
+    },
+    {
+      "page": "/custom-embroidery-digitizing-service",
+      "regex": "^/custom\\-embroidery\\-digitizing\\-service(?:/)?$",
+      "routeKeys": {},
+      "namedRegex": "^/custom\\-embroidery\\-digitizing\\-service(?:/)?$"
+    },
+    {
+      "page": "/favicon.ico",
+      "regex": "^/favicon\\.ico(?:/)?$",
+      "routeKeys": {},
+      "namedRegex": "^/favicon\\.ico(?:/)?$"
+    },
+    {
+      "page": "/free-machine-embroidery-designs",
+      "regex": "^/free\\-machine\\-embroidery\\-designs(?:/)?$",
+      "routeKeys": {},
+      "namedRegex": "^/free\\-machine\\-embroidery\\-designs(?:/)?$"
+    },
+    {
+      "page": "/privacy-policy",
+      "regex": "^/privacy\\-policy(?:/)?$",
+      "routeKeys": {},
+      "namedRegex": "^/privacy\\-policy(?:/)?$"
+    },
+    {
+      "page": "/product-sitemap.xml",
+      "regex": "^/product\\-sitemap\\.xml(?:/)?$",
+      "routeKeys": {},
+      "namedRegex": "^/product\\-sitemap\\.xml(?:/)?$"
+    },
+    {
+      "page": "/products",
+      "regex": "^/products(?:/)?$",
+      "routeKeys": {},
+      "namedRegex": "^/products(?:/)?$"
+    },
+    {
+      "page": "/reset-password",
+      "regex": "^/reset\\-password(?:/)?$",
+      "routeKeys": {},
+      "namedRegex": "^/reset\\-password(?:/)?$"
+    },
+    {
+      "page": "/resources",
+      "regex": "^/resources(?:/)?$",
+      "routeKeys": {},
+      "namedRegex": "^/resources(?:/)?$"
+    },
+    {
+      "page": "/robots.txt",
+      "regex": "^/robots\\.txt(?:/)?$",
+      "routeKeys": {},
+      "namedRegex": "^/robots\\.txt(?:/)?$"
+    },
+    {
+      "page": "/search",
+      "regex": "^/search(?:/)?$",
+      "routeKeys": {},
+      "namedRegex": "^/search(?:/)?$"
+    },
+    {
+      "page": "/sitemap-blog.xml",
+      "regex": "^/sitemap\\-blog\\.xml(?:/)?$",
+      "routeKeys": {},
+      "namedRegex": "^/sitemap\\-blog\\.xml(?:/)?$"
+    },
+    {
+      "page": "/sitemap-bundles.xml",
+      "regex": "^/sitemap\\-bundles\\.xml(?:/)?$",
+      "routeKeys": {},
+      "namedRegex": "^/sitemap\\-bundles\\.xml(?:/)?$"
+    },
+    {
+      "page": "/sitemap-categories.xml",
+      "regex": "^/sitemap\\-categories\\.xml(?:/)?$",
+      "routeKeys": {},
+      "namedRegex": "^/sitemap\\-categories\\.xml(?:/)?$"
+    },
+    {
+      "page": "/sitemap-static.xml",
+      "regex": "^/sitemap\\-static\\.xml(?:/)?$",
+      "routeKeys": {},
+      "namedRegex": "^/sitemap\\-static\\.xml(?:/)?$"
+    },
+    {
+      "page": "/sitemap.xml",
+      "regex": "^/sitemap\\.xml(?:/)?$",
+      "routeKeys": {},
+      "namedRegex": "^/sitemap\\.xml(?:/)?$"
+    },
+    {
+      "page": "/terms-and-conditions",
+      "regex": "^/terms\\-and\\-conditions(?:/)?$",
+      "routeKeys": {},
+      "namedRegex": "^/terms\\-and\\-conditions(?:/)?$"
+    },
+    {
+      "page": "/user/user-details",
+      "regex": "^/user/user\\-details(?:/)?$",
+      "routeKeys": {},
+      "namedRegex": "^/user/user\\-details(?:/)?$"
+    }
+  ],
+  "dataRoutes": [],
+  "rsc": {
+    "header": "RSC",
+    "varyHeader": "RSC, Next-Router-State-Tree, Next-Router-Prefetch, Next-Router-Segment-Prefetch",
+    "prefetchHeader": "Next-Router-Prefetch",
+    "didPostponeHeader": "x-nextjs-postponed",
+    "contentTypeHeader": "text/x-component",
+    "suffix": ".rsc",
+    "prefetchSuffix": ".prefetch.rsc",
+    "prefetchSegmentHeader": "Next-Router-Segment-Prefetch",
+    "prefetchSegmentSuffix": ".segment.rsc",
+    "prefetchSegmentDirSuffix": ".segments"
+  },
+  "rewriteHeaders": {
+    "pathHeader": "x-nextjs-rewritten-path",
+    "queryHeader": "x-nextjs-rewritten-query"
+  }
+}

@@ -183,7 +183,7 @@ const Footer = () => {
                 <li>
                   <Link
                     className='text-gray-600 hover:underline transition-colors duration-200'
-                    href='/custom-embroidery-order'
+                    href='/custom-embroidery-digitizing-service'
                     prefetch={false}
                   >
                     Custom Digitizing

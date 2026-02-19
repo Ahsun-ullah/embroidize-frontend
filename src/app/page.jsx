@@ -10,6 +10,7 @@ import {
   getPopularProducts,
   getProducts,
 } from '@/lib/apis/public/products';
+import Image from 'next/image';
 import Link from 'next/link';
 import { Suspense } from 'react';
 import ProductUpdates from './products/ProductUpdates';
@@ -101,71 +102,65 @@ export default async function Home() {
       <ProductUpdates />
       <Header />
 
-      {/* hero section */}
-      {/* <section className='w-full flex items-center overflow-hidden'>
-        <div className='flex items-center justify-center w-full m-[30px] sm:m-[40px] md:m-[40px] lg:m-[60px] xl:m-[70px] 2xl:m-[80px]'>
-          <div className='flex flex-col items-center justify-center '>
-            <h1 className='text-3xl sm:text-3xl md:text-4xl lg:text-5xl font-bold my-2 text-center'>
-              Free Machine Embroidery Designs
-            </h1>
-            <p className='text-base sm:text-base md:text-lg text-center my-2 max-w-2xl'>
-              All you need for your next machine embroidery project. <br /> The
-              highest quality for free.
-            </p>
-            <Link
-              href='/products'
-              prefetch={false}
-              className=' text-black text-xs sm:text-base md:text-lg font-bold transition duration-300 ease-in-out hover:opacity-60 focus:opacity-60 px-4 py-1 rounded-full mt-4'
-              passHref
-            >
-              <span
-                style={{
-                  padding: '9px 24px',
-                  borderRadius: '9999px',
-                }}
-                className='button rounded-md'
+      <section className='w-full overflow-hidden'>
+        <div className='mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-12 sm:py-16 lg:py-20'>
+          <div className='flex flex-col lg:flex-row items-center justify-between gap-10 lg:gap-16'>
+            {/* LEFT: Text */}
+            <div className='w-full lg:w-1/2 text-center lg:text-left'>
+              <h1
+                style={{ fontFamily: 'Inter, sans-serif', fontWeight: 700 }}
+                className='text-3xl sm:text-4xl lg:text-5xl font-bold tracking-tight'
               >
-                Download Now
-              </span>
-            </Link>
-          </div>
-        </div>
-      </section> */}
+                Free Machine Embroidery Designs
+              </h1>
 
-      <section className='w-full flex items-center overflow-hidden'>
-        <div className='flex items-center justify-center w-full m-[30px] sm:m-[40px] md:m-[40px] lg:m-[60px] xl:m-[70px] 2xl:m-[80px]'>
-          <div className='flex flex-col items-center justify-center'>
-            <h1
-              style={{
-                fontFamily: 'Inter, sans-serif',
-                fontWeight: 700,
-              }}
-              className='text-3xl sm:text-3xl md:text-4xl lg:text-5xl font-bold my-2 text-center'
-            >
-              Free Machine Embroidery Designs
-            </h1>
-            <p className='text-base sm:text-base md:text-lg text-center my-2 max-w-2xl'>
-              All you need for your next machine embroidery project. <br /> The
-              highest quality for free.
-            </p>
-            <Link
-              href='/products'
-              className='text-black text-xs sm:text-base md:text-lg font-bold hover:opacity-60 px-4 py-1 rounded-full mt-4'
-            >
-              <span
-                style={{ padding: '9px 24px', borderRadius: '9999px' }}
-                className='button rounded-md'
+              <p className='mt-4 text-base md:text-lg text-gray-700 max-w-2xl mx-auto lg:mx-0'>
+                All you need for your next machine embroidery project.
+                <br className='hidden sm:block' />
+                The highest quality for free.
+              </p>
+
+              <Link
+                href='/products'
+                className='mt-6 inline-flex items-center justify-center rounded-full bg-black px-6 py-3 text-sm sm:text-base font-semibold text-white hover:opacity-90'
               >
-                Download Now
-              </span>
-            </Link>
+                Browse Designs
+              </Link>
+            </div>
+
+            {/* RIGHT: Big Image (animated) */}
+            <div className='w-full lg:w-1/2 flex justify-center lg:justify-end'>
+              <Link
+                href='/custom-embroidery-digitizing-service'
+                aria-label='Download designs'
+                className='
+             animate-float
+            rounded-2xl bg-white/90 backdrop-blur
+            shadow-2xl ring-1 ring-black/10
+            transition-transform duration-300 hover:scale-[1.02]
+            p-3
+          '
+              >
+                {/* Bigger + controlled size */}
+                <div className='relative overflow-hidden rounded-xl h-[14rem] w-[22rem] sm:h-[15rem] sm:w-[23rem]'>
+                  <Image
+                    src='/hero-image.jpeg'
+                    alt='Free embroidery designs preview'
+                    fill
+                    priority
+                    sizes='(min-width: 1024px) 560px, (min-width: 640px) 90vw, 100vw'
+                    className='object-cover'
+                  />
+                </div>
+              </Link>
+            </div>
           </div>
         </div>
       </section>
 
       <section
         aria-labelledby='popular-designs-heading'
-        className=' text-black my-8 py-6'
+        className=' text-black mb-8 py-6'
       >
         <div className='bg-[#fafafa] flex flex-col items-center justify-center gap-2 py-6 mb-6'>
           <h2

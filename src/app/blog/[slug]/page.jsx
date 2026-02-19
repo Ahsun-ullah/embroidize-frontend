@@ -115,7 +115,7 @@ export default async function SingleBlogPage({ params }) {
             itemScope
             itemType='https://schema.org/Article'
           >
-            <figure className='relative w-full aspect-[3/2] mb-12 rounded-lg overflow-hidden shadow-md'>
+            <figure className='relative w-full aspect-[1055/575] mb-12 rounded-lg overflow-hidden shadow-md'>
               <Image
                 src={blog?.image?.url}
                 alt={blog?.title}

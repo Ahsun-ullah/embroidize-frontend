@@ -1,0 +1,11 @@
+User-agent: *
+    Disallow: /api/
+    Disallow: /admin/
+    Disallow: /auth/
+    Disallow: /reset-password
+    Disallow: /user
+    Disallow: /search
+    Allow: /
+
+
+  Sitemap: https://embroidize.com/sitemap.xml
