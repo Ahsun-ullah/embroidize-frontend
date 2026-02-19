@@ -30,30 +30,6 @@
         "x-next-revalidate-tag-token"
       ]
     },
-    "/custom-embroidery-digitizing-service": {
-      "experimentalBypassFor": [
-        {
-          "type": "header",
-          "key": "Next-Action"
-        },
-        {
-          "type": "header",
-          "key": "content-type",
-          "value": "multipart/form-data;.*"
-        }
-      ],
-      "initialRevalidateSeconds": false,
-      "srcRoute": "/custom-embroidery-digitizing-service",
-      "dataRoute": "/custom-embroidery-digitizing-service.rsc",
-      "allowHeader": [
-        "host",
-        "x-matched-path",
-        "x-prerender-revalidate",
-        "x-prerender-revalidate-if-generated",
-        "x-next-revalidated-tags",
-        "x-next-revalidate-tag-token"
-      ]
-    },
     "/robots.txt": {
       "initialHeaders": {
         "cache-control": "public, max-age=0, s-maxage=3600",
@@ -107,6 +83,30 @@
         "x-next-revalidate-tag-token"
       ]
     },
+    "/about-us": {
+      "experimentalBypassFor": [
+        {
+          "type": "header",
+          "key": "Next-Action"
+        },
+        {
+          "type": "header",
+          "key": "content-type",
+          "value": "multipart/form-data;.*"
+        }
+      ],
+      "initialRevalidateSeconds": false,
+      "srcRoute": "/about-us",
+      "dataRoute": "/about-us.rsc",
+      "allowHeader": [
+        "host",
+        "x-matched-path",
+        "x-prerender-revalidate",
+        "x-prerender-revalidate-if-generated",
+        "x-next-revalidated-tags",
+        "x-next-revalidate-tag-token"
+      ]
+    },
     "/contact-us": {
       "experimentalBypassFor": [
         {
@@ -146,6 +146,30 @@
       "initialRevalidateSeconds": false,
       "srcRoute": "/privacy-policy",
       "dataRoute": "/privacy-policy.rsc",
+      "allowHeader": [
+        "host",
+        "x-matched-path",
+        "x-prerender-revalidate",
+        "x-prerender-revalidate-if-generated",
+        "x-next-revalidated-tags",
+        "x-next-revalidate-tag-token"
+      ]
+    },
+    "/custom-embroidery-digitizing-service": {
+      "experimentalBypassFor": [
+        {
+          "type": "header",
+          "key": "Next-Action"
+        },
+        {
+          "type": "header",
+          "key": "content-type",
+          "value": "multipart/form-data;.*"
+        }
+      ],
+      "initialRevalidateSeconds": false,
+      "srcRoute": "/custom-embroidery-digitizing-service",
+      "dataRoute": "/custom-embroidery-digitizing-service.rsc",
       "allowHeader": [
         "host",
         "x-matched-path",
@@ -251,7 +275,7 @@
         "x-next-revalidate-tag-token"
       ]
     },
-    "/about-us": {
+    "/admin/contact-submissions": {
       "experimentalBypassFor": [
         {
           "type": "header",
@@ -264,8 +288,8 @@
         }
       ],
       "initialRevalidateSeconds": false,
-      "srcRoute": "/about-us",
-      "dataRoute": "/about-us.rsc",
+      "srcRoute": "/admin/contact-submissions",
+      "dataRoute": "/admin/contact-submissions.rsc",
       "allowHeader": [
         "host",
         "x-matched-path",
@@ -290,30 +314,6 @@
       "initialRevalidateSeconds": false,
       "srcRoute": "/admin/all-blogs",
       "dataRoute": "/admin/all-blogs.rsc",
-      "allowHeader": [
-        "host",
-        "x-matched-path",
-        "x-prerender-revalidate",
-        "x-prerender-revalidate-if-generated",
-        "x-next-revalidated-tags",
-        "x-next-revalidate-tag-token"
-      ]
-    },
-    "/admin/contact-submissions": {
-      "experimentalBypassFor": [
-        {
-          "type": "header",
-          "key": "Next-Action"
-        },
-        {
-          "type": "header",
-          "key": "content-type",
-          "value": "multipart/form-data;.*"
-        }
-      ],
-      "initialRevalidateSeconds": false,
-      "srcRoute": "/admin/contact-submissions",
-      "dataRoute": "/admin/contact-submissions.rsc",
       "allowHeader": [
         "host",
         "x-matched-path",
@@ -351,8 +351,8 @@
   "dynamicRoutes": {},
   "notFoundRoutes": [],
   "preview": {
-    "previewModeId": "701ae371305565531c2de620d6794892",
-    "previewModeSigningKey": "895e4d2a50ece009bc8b6b46d957cc361e0beb363f3547f76af19984680b3df6",
-    "previewModeEncryptionKey": "32ac7f6cce163a74baa2a4cf51f711db4f55937d10d7fb839101bc4ede445cd3"
+    "previewModeId": "2b8a66963df1dc923a44c630052bfe65",
+    "previewModeSigningKey": "2ac6b2557f3e9cdba875808097c68965eae15d569fa0014ef0b43b6510b68770",
+    "previewModeEncryptionKey": "516ed4518cd4518c10ad24b8a26724a4730cad7373e6206976ac67ba2185a9ac"
   }
 }
