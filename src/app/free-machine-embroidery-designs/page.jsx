@@ -2,7 +2,6 @@ import LoadingSpinner from '@/components/Common/LoadingSpinner';
 import ProductCard from '@/components/Common/ProductCard';
 import SearchBox from '@/components/Common/SearchBox';
 import UserProfileDropdown from '@/components/Common/UserProfileDropdown';
-import Footer from '@/components/user/HomePage/Footer';
 import { getPopularProducts } from '@/lib/apis/public/products';
 import { Navbar as HeroUINavbar, NavbarContent } from '@heroui/navbar';
 import Image from 'next/image';
@@ -366,16 +365,17 @@ export default async function LandingPage() {
 
       {/* How It Works Section */}
       <section className='py-14 bg-white'>
-        <div className='max-w-6xl mx-auto px-4 sm:px-6 lg:px-8'>
+        <div className='mx-auto max-w-7xl px-4 sm:px-6 lg:px-8'>
           {/* Heading */}
-          <div className='text-center mb-10'>
-            <h2 className='text-2xl sm:text-3xl font-bold text-gray-900'>
+
+          <div className='text-center mb-12'>
+            <h2 className='text-3xl sm:text-4xl font-bold text-gray-900'>
               How It Works
             </h2>
           </div>
 
           {/* Steps */}
-          <div className='grid grid-cols-1 md:grid-cols-3 gap-6 mb-14'>
+          <div className='grid grid-cols-1 md:grid-cols-3 gap-8  mb-16'>
             {/* Step 1 */}
             <div className='bg-gray-50 p-6 text-center rounded-md'>
               <div className='w-12 h-12 mx-auto mb-4 bg-black rounded-full flex items-center justify-center'>
@@ -393,10 +393,10 @@ export default async function LandingPage() {
                   />
                 </svg>
               </div>
-              <h3 className='text-base font-bold text-gray-900 mb-2'>
+              <h3 className='text-xl font-bold text-gray-900 mb-2'>
                 Create Free Account
               </h3>
-              <div className='flex items-center justify-center text-gray-700 text-sm font-semibold'>
+              <div className='flex items-center justify-center text-gray-700 text-base font-semibold'>
                 <svg
                   className='w-4 h-4 mr-2 text-black'
                   fill='none'
@@ -431,10 +431,10 @@ export default async function LandingPage() {
                   />
                 </svg>
               </div>
-              <h3 className='text-base font-bold text-gray-900 mb-2'>
+              <h3 className='text-xl font-bold text-gray-900 mb-2'>
                 Browse 13k+ Designs
               </h3>
-              <div className='flex items-center justify-center text-gray-700 text-sm font-semibold'>
+              <div className='flex items-center justify-center text-gray-700 text-base font-semibold'>
                 <svg
                   className='w-4 h-4 mr-2 text-black'
                   fill='none'
@@ -469,10 +469,10 @@ export default async function LandingPage() {
                   />
                 </svg>
               </div>
-              <h3 className='text-base font-bold text-gray-900 mb-2'>
+              <h3 className='text-xl font-bold text-gray-900 mb-2'>
                 Download Instantly
               </h3>
-              <div className='flex items-center justify-center text-gray-700 text-sm font-semibold'>
+              <div className='flex items-center justify-center text-gray-700 text-base font-semibold'>
                 <svg
                   className='w-4 h-4 mr-2 text-black'
                   fill='none'
@@ -492,13 +492,13 @@ export default async function LandingPage() {
           </div>
 
           {/* Trusted Section */}
-          <div className='text-center'>
-            <h3 className='text-xl sm:text-2xl font-bold text-gray-900 mb-6'>
+          <div className='text-center my-8'>
+            <h3 className='text-2xl sm:text-3xl font-bold text-gray-900 mb-6'>
               Trusted by Embroidery Lovers Worldwide
             </h3>
 
             <div className='grid grid-cols-1 sm:grid-cols-2 gap-y-4 gap-x-10 max-w-3xl mx-auto text-left'>
-              <div className='flex items-center font-bold text-gray-800'>
+              <div className='flex items-center font-bold text-gray-800 text-lg'>
                 <svg
                   className='w-5 h-5 mr-3 text-black'
                   fill='none'
@@ -515,7 +515,7 @@ export default async function LandingPage() {
                 13,000+ Designs Available
               </div>
 
-              <div className='flex items-center font-bold text-gray-800'>
+              <div className='flex items-center font-bold text-gray-800 text-lg'>
                 <svg
                   className='w-5 h-5 mr-3 text-black'
                   fill='none'
@@ -532,7 +532,7 @@ export default async function LandingPage() {
                 Free for Personal & Commercial Use
               </div>
 
-              <div className='flex items-center font-bold text-gray-800'>
+              <div className='flex items-center font-bold text-gray-800 text-lg'>
                 <svg
                   className='w-5 h-5 mr-3 text-black'
                   fill='none'
@@ -549,7 +549,7 @@ export default async function LandingPage() {
                 New Designs Added Daily
               </div>
 
-              <div className='flex items-center font-bold text-gray-800'>
+              <div className='flex items-center font-bold text-gray-800 text-lg'>
                 <svg
                   className='w-5 h-5 mr-3 text-black'
                   fill='none'
@@ -598,7 +598,71 @@ export default async function LandingPage() {
         </div>
       </section>
 
-      <Footer />
+      <footer className='bg-[#f9f9f9] text-gray-700'>
+        <div className='container flex flex-wrap text-left lg:text-left'>
+          {/* Logo Section */}
+          <div className='w-full lg:w-6/12'>
+            <Link
+              href='/'
+              prefetch={false}
+              className='relative block w-[160px] h-[80px] sm:w-[120px] sm:h-[60px] md:w-[160px] md:h-[80px]'
+              aria-label='Navigate to homepage'
+            >
+              <Image
+                src={mainLogo || ''}
+                alt='Company Logo'
+                fill
+                sizes='(min-width: 640px) 100px, 120px'
+                priority
+                className='object-contain'
+              />
+            </Link>
+          </div>
+
+          {/* Useful Links Section */}
+          <div className='flex gap-8 flex-wrap items-center justify-start lg:justify-end w-full lg:w-6/12'>
+            <Link
+              className='text-gray-600 hover:underline transition-colors duration-200'
+              href='/terms-and-conditions'
+              prefetch={false}
+            >
+              Terms &amp; Conditions
+            </Link>
+
+            <Link
+              className='text-gray-600 hover:underline transition-colors duration-200'
+              href='/privacy-policy'
+              prefetch={false}
+            >
+              Privacy Policy
+            </Link>
+
+            <Link
+              className='text-gray-600 hover:underline transition-colors duration-200'
+              href='/about-us'
+              prefetch={false}
+            >
+              About Us
+            </Link>
+
+            <Link
+              className='text-gray-600 hover:underline transition-colors duration-200'
+              href='/contact-us'
+              prefetch={false}
+            >
+              Contact Us
+            </Link>
+          </div>
+        </div>
+
+        {/* Divider and Footer Info */}
+        <div className='flex flex-wrap items-center md:justify-between justify-between py-2 px-1 border-t border-gray-300'>
+          <div className='w-full md:w-4/12 px-4 mx-auto text-center'>
+            <strong>Embroidize</strong>
+            <p>&copy;{new Date().getFullYear()}. All rights reserved.</p>
+          </div>
+        </div>
+      </footer>
     </>
   );
 }
