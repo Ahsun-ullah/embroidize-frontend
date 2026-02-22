@@ -20,7 +20,7 @@ const BlogCard = React.memo(function BlogCard({ data }) {
         aria-label={`View details for ${altText}`}
       >
         {/* Blog Image */}
-        <div className='relative w-full aspect-[3/2]'>
+        <div className='relative w-full aspect-[1055/575]'>
           <Image
             src={imageUrl || 'https://embroidize.com/og-banner.jpg'}
             alt={altText}

@@ -32,7 +32,7 @@ export default async function BlogPageSidebarContent() {
                 className='flex flex-col gap-4 w-60% lg:w-full'
               >
                 {/* Thumbnail */}
-                <div className=' bg-gray-200  aspect-[3/2] rounded-lg overflow-hidden shadow-md'>
+                <div className=' bg-gray-200  aspect-[1055/575] rounded-lg overflow-hidden shadow-md'>
                   {post?.image?.url ? (
                     // post.featuredImage
                     <img
