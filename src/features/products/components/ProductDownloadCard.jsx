@@ -7,7 +7,6 @@ import { useUserInfoQuery } from '@/lib/redux/common/user/userInfoSlice';
 import { formatNumber } from '@/utils/functions/page';
 import {
   Button,
-  Card,
   Modal,
   ModalBody,
   ModalContent,
@@ -221,10 +220,7 @@ export default function ProductDownloadCard({ data }) {
 
   return (
     <>
-      <div
-
-        className='relative flex flex-col p-8 overflow-hidden gap-4 border rounded-3xl bg-white'
-      >
+      <div className='relative flex flex-col p-8 overflow-hidden gap-4 border rounded-3xl bg-white'>
         {data?.sku_code && userInfoData?.role === 'admin' && (
           <SkuFlag sku={data.sku_code} />
         )}
