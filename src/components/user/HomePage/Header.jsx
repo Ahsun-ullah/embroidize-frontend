@@ -82,7 +82,7 @@ export const Header = () => {
               prefetch={false}
               className='text-gray-800 font-bold hover:text-blue-600 transition-colors focus:outline-none focus-visible:ring focus-visible:ring-gray-400 rounded px-2 py-1'
             >
-              Subscriptions
+              Pricing
             </Link>
           </NavbarContent>
           <NavbarContent justify='end' className='flex-1'>

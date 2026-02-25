@@ -21,7 +21,7 @@ export default function SubscriptionsPage() {
   console.log(userInfoData);
 
   // ✅ Get the user's active plan ID safely (null if not logged in / no subscription)
-  const activePlanId = userInfoData?.subscription?.planId ?? null;
+  const activePlanId = userInfoData?.subscription?.planId?._id ?? null;
 
   useEffect(() => {
     const searchParams = new URLSearchParams(window.location.search);
@@ -87,7 +87,7 @@ export default function SubscriptionsPage() {
     <>
       <Header />
 
-      <div className='min-h-screen bg-white py-16 px-4'>
+      <div className='min-h-screen bg-white py-6 pb-16 px-4'>
         <div className='max-w-7xl mx-auto'>
           {/* Page heading */}
           <div className='text-center mb-14'>
@@ -143,7 +143,13 @@ export default function SubscriptionsPage() {
                     <div className='p-6 flex flex-col flex-1'>
                       {/* Plan name + interval */}
                       <div className='mb-5'>
-                        <h2 className='text-xl font-bold'>{plan.name}</h2>
+                        <h2
+                          className={`text-xl font-bold ${
+                            isPopular ? 'text-white' : 'text-gray-500'
+                          }`}
+                        >
+                          {plan.name}
+                        </h2>
                         <p
                           className={`text-sm capitalize mt-1 ${
                             isPopular ? 'text-white' : 'text-gray-500'
@@ -212,25 +218,6 @@ export default function SubscriptionsPage() {
                             </span>
                           </li>
                         ))}
-
-                        {plan.dailyLimit != null && (
-                          <li className='flex items-start gap-2 text-sm'>
-                            <span
-                              className={`mt-0.5 flex-shrink-0 ${
-                                isPopular ? 'text-white' : 'text-black'
-                              }`}
-                            >
-                              ✓
-                            </span>
-                            <span
-                              className={
-                                isPopular ? 'text-gray-300' : 'text-gray-600'
-                              }
-                            >
-                              Daily {plan.dailyLimit} Files Download
-                            </span>
-                          </li>
-                        )}
                       </ul>
 
                       {/* ✅ Pass isActivePlan to PurchaseButton */}

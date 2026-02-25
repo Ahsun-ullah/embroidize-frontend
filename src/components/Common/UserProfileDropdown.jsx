@@ -121,6 +121,16 @@ export default function UserProfileDropdown() {
               </DropdownItem>
               <DropdownItem>
                 <Link
+                  href='/user/my-plan'
+                  prefetch={false}
+                  className='flex text-base gap-1 font-medium'
+                >
+                  <i className='ri-account-circle-fill' aria-hidden='true'></i>
+                  My Plan
+                </Link>
+              </DropdownItem>
+              <DropdownItem>
+                <Link
                   href='/user/user-details?tabName=downloads'
                   prefetch={false}
                   className='flex text-base gap-1 font-medium'
