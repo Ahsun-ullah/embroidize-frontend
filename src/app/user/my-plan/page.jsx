@@ -71,8 +71,12 @@ export default function MyPlanPage() {
     );
   }
 
-  // ─── Not subscribed ───────────────────────────────────────────────
-  if (!subscription || subscription.status !== 'active') {
+  // ─── Not subscribed / expired ─────────────────────────────────────
+  if (
+    !subscription ||
+    subscription.status === 'expired' ||
+    subscription.status === 'canceled'
+  ) {
     return (
       <>
         <Header />
@@ -113,6 +117,9 @@ export default function MyPlanPage() {
 
   const isOneTime = !subscription.stripeSubscriptionId;
 
+  // ✅ Cancellation state
+  const isCancelled = subscription.cancelAtPeriodEnd === true;
+
   const usagePercent =
     plan?.downloadLimit && plan.downloadLimit > 0
       ? Math.min(
@@ -139,14 +146,34 @@ export default function MyPlanPage() {
   // ─── Main ─────────────────────────────────────────────────────────
   return (
     <>
-      <div className='min-h-screen '>
-        {/* ── SIMPLE CLEAN HERO ───────────────────────────────────── */}
-        <div className='bg-gradient-to-br from-violet-600 via-violet-700 to-indigo-800'>
+      <div className='min-h-screen'>
+        {/* ── HERO ────────────────────────────────────────────────── */}
+        <div
+          className={`bg-gradient-to-br ${isCancelled ? 'from-orange-500 via-orange-600 to-red-700' : 'from-violet-600 via-violet-700 to-indigo-800'}`}
+        >
           <div className='max-w-5xl mx-auto px-6 py-14'>
+            {/* ✅ Cancellation warning banner */}
+            {isCancelled && (
+              <div className='bg-white/10 border border-white/20 rounded-2xl px-5 py-4 mb-8 flex items-start gap-3'>
+                <span className='text-xl flex-shrink-0'>⚠️</span>
+                <div>
+                  <p className='text-white font-bold text-sm'>
+                    Subscription Cancelled
+                  </p>
+                  <p className='text-orange-100 text-xs mt-0.5 leading-relaxed'>
+                    You still have full access until{' '}
+                    <span className='font-bold text-white'>
+                      {formatDate(subscription.periodEndDate)}
+                    </span>
+                    . After that, your plan will expire and downloads will stop.
+                  </p>
+                </div>
+              </div>
+            )}
+
             <div className='flex flex-col md:flex-row md:items-center md:justify-between gap-6'>
               {/* Left */}
               <div className='flex items-center gap-5'>
-                {/* Avatar circle */}
                 <div className='w-16 h-16 rounded-2xl bg-white/10 border border-white/20 flex items-center justify-center flex-shrink-0 backdrop-blur-sm'>
                   <span className='text-2xl font-black text-white'>
                     {plan?.name?.[0] ?? 'P'}
@@ -154,18 +181,28 @@ export default function MyPlanPage() {
                 </div>
                 <div>
                   <div className='flex items-center gap-2 mb-1'>
-                    <span className='w-2 h-2 rounded-full bg-emerald-400' />
-                    <span className='text-xs font-semibold text-violet-200 uppercase tracking-widest'>
-                      Active Plan
+                    {/* ✅ Dynamic status dot + label */}
+                    <span
+                      className={`w-2 h-2 rounded-full ${isCancelled ? 'bg-orange-300' : 'bg-emerald-400'}`}
+                    />
+                    <span
+                      className={`text-xs font-semibold uppercase tracking-widest ${isCancelled ? 'text-orange-200' : 'text-violet-200'}`}
+                    >
+                      {isCancelled ? 'Cancels at period end' : 'Active Plan'}
                     </span>
                   </div>
                   <h1 className='text-2xl md:text-3xl font-extrabold text-white tracking-tight'>
                     {plan?.name ?? 'My Plan'}
                   </h1>
-                  <p className='text-violet-300 text-sm mt-1'>
+                  {/* ✅ Dynamic subtitle */}
+                  <p
+                    className={`text-sm mt-1 ${isCancelled ? 'text-orange-200' : 'text-violet-300'}`}
+                  >
                     {isOneTime
                       ? 'One-time payment · Lifetime access'
-                      : `Billed ${plan?.billingInterval}ly · Renews ${formatDate(subscription.periodEndDate)}`}
+                      : isCancelled
+                        ? `Access until ${formatDate(subscription.periodEndDate)}`
+                        : `Billed ${plan?.billingInterval}ly · Renews ${formatDate(subscription.periodEndDate)}`}
                   </p>
                 </div>
               </div>
@@ -175,7 +212,9 @@ export default function MyPlanPage() {
                 <p className='text-3xl font-extrabold text-white'>
                   {plan?.price != null ? `$${plan.price}` : 'Free'}
                 </p>
-                <p className='text-violet-300 text-xs mt-1'>
+                <p
+                  className={`text-xs mt-1 ${isCancelled ? 'text-orange-200' : 'text-violet-300'}`}
+                >
                   {isOneTime
                     ? 'one-time payment'
                     : `per ${plan?.billingInterval}`}
@@ -196,7 +235,6 @@ export default function MyPlanPage() {
                   ? `of ${plan.downloadLimit}`
                   : 'Unlimited',
                 color: 'text-violet-600',
-                bg: 'bg-violet-50',
                 dot: 'bg-violet-400',
               },
               {
@@ -206,7 +244,6 @@ export default function MyPlanPage() {
                   ? `of ${plan.dailyLimit} today`
                   : 'Unlimited',
                 color: 'text-indigo-600',
-                bg: 'bg-indigo-50',
                 dot: 'bg-indigo-400',
               },
               {
@@ -216,18 +253,27 @@ export default function MyPlanPage() {
                   ? 'Lifetime access'
                   : `${plan?.billingInterval}ly billing`,
                 color: 'text-emerald-600',
-                bg: 'bg-emerald-50',
                 dot: 'bg-emerald-400',
               },
               {
-                label: isOneTime ? 'Access' : 'Renews',
-                value: isOneTime
-                  ? 'Forever'
-                  : formatDate(subscription.periodEndDate),
-                sub: isOneTime ? 'No expiry date' : 'Next billing date',
-                color: 'text-amber-600',
-                bg: 'bg-amber-50',
-                dot: 'bg-amber-400',
+                // ✅ Dynamic 4th stat card
+                label: isCancelled
+                  ? 'Expires'
+                  : isOneTime
+                    ? 'Access'
+                    : 'Renews',
+                value: isCancelled
+                  ? formatDate(subscription.periodEndDate)
+                  : isOneTime
+                    ? 'Forever'
+                    : formatDate(subscription.periodEndDate),
+                sub: isCancelled
+                  ? 'After this, access ends'
+                  : isOneTime
+                    ? 'No expiry date'
+                    : 'Next billing date',
+                color: isCancelled ? 'text-red-500' : 'text-amber-600',
+                dot: isCancelled ? 'bg-red-400' : 'bg-amber-400',
               },
             ].map((stat, i) => (
               <div
@@ -287,11 +333,7 @@ export default function MyPlanPage() {
                       </div>
                       {usagePercent !== null ? (
                         <span
-                          className={`text-xs font-bold px-2.5 py-1 rounded-full ${
-                            usagePercent >= 90
-                              ? 'bg-red-50 text-red-500'
-                              : 'bg-violet-50 text-violet-600'
-                          }`}
+                          className={`text-xs font-bold px-2.5 py-1 rounded-full ${usagePercent >= 90 ? 'bg-red-50 text-red-500' : 'bg-violet-50 text-violet-600'}`}
                         >
                           {usagePercent}% used
                         </span>
@@ -325,7 +367,7 @@ export default function MyPlanPage() {
                         <p className='text-2xl font-extrabold text-slate-800'>
                           {subscription.dailyDownloadCount}
                           {plan?.dailyLimit && (
-                            <span className=' text-slate-500 text-base font-normal'>
+                            <span className='text-slate-500 text-base font-normal'>
                               /{plan.dailyLimit}
                             </span>
                           )}
@@ -333,13 +375,7 @@ export default function MyPlanPage() {
                       </div>
                       {dailyUsagePercent !== null ? (
                         <span
-                          className={`text-xs font-bold px-2.5 py-1 rounded-full ${
-                            dailyUsagePercent >= 90
-                              ? 'bg-red-50 text-red-500'
-                              : dailyUsagePercent >= 60
-                                ? 'bg-amber-50 text-amber-600'
-                                : 'bg-indigo-50 text-indigo-600'
-                          }`}
+                          className={`text-xs font-bold px-2.5 py-1 rounded-full ${dailyUsagePercent >= 90 ? 'bg-red-50 text-red-500' : dailyUsagePercent >= 60 ? 'bg-amber-50 text-amber-600' : 'bg-indigo-50 text-indigo-600'}`}
                         >
                           {dailyUsagePercent}% used
                         </span>
@@ -404,7 +440,7 @@ export default function MyPlanPage() {
 
             {/* ── RIGHT 2/5 ────────────────────────────────────── */}
             <div className='lg:col-span-2 space-y-5'>
-              {/* Billing / Lifetime */}
+              {/* Billing / Lifetime / Cancelled */}
               {isOneTime ? (
                 <div className='bg-gradient-to-br from-violet-600 to-indigo-700 text-white rounded-2xl p-6'>
                   <div className='w-12 h-12 bg-white/10 border border-white/20 rounded-2xl flex items-center justify-center mb-5 text-2xl'>
@@ -426,7 +462,53 @@ export default function MyPlanPage() {
                     </p>
                   </div>
                 </div>
+              ) : isCancelled ? (
+                // ✅ Cancelled state card
+                <div className='bg-white border border-orange-100 rounded-2xl overflow-hidden shadow-sm'>
+                  <div className='px-6 py-4 border-b border-orange-50 bg-orange-50'>
+                    <h2 className='text-sm font-bold text-orange-700 uppercase tracking-widest'>
+                      Subscription Cancelled
+                    </h2>
+                  </div>
+                  <div className='p-6'>
+                    <p className='text-xs text-slate-400 uppercase tracking-wider mb-1'>
+                      Access ends on
+                    </p>
+                    <p className='text-xl font-extrabold text-red-500 mb-2'>
+                      {formatDate(subscription.periodEndDate)}
+                    </p>
+                    <p className='text-xs text-slate-400 leading-relaxed mb-5'>
+                      You cancelled your subscription. You still have full
+                      access until the date above. Resubscribe anytime to keep
+                      your downloads going.
+                    </p>
+
+                    <Divider className='mb-5 bg-slate-50' />
+
+                    <button
+                      onClick={handleManagePlan}
+                      disabled={isRedirecting}
+                      className='w-full py-3 rounded-xl text-sm font-bold bg-violet-600 text-white hover:bg-violet-700 transition-all duration-200 disabled:bg-slate-100 disabled:text-slate-400 disabled:cursor-not-allowed shadow-sm shadow-violet-200 mb-3'
+                    >
+                      {isRedirecting ? (
+                        <span className='flex items-center justify-center gap-2'>
+                          <span className='w-4 h-4 border-2 border-white/40 border-t-white rounded-full animate-spin' />
+                          Redirecting...
+                        </span>
+                      ) : (
+                        'Resubscribe →'
+                      )}
+                    </button>
+
+                    {error && (
+                      <div className='bg-red-50 border border-red-100 rounded-xl px-4 py-3'>
+                        <p className='text-xs text-red-500'>{error}</p>
+                      </div>
+                    )}
+                  </div>
+                </div>
               ) : (
+                // ✅ Active recurring billing card
                 <div className='bg-white border border-slate-100 rounded-2xl overflow-hidden shadow-sm'>
                   <div className='px-6 py-4 border-b border-slate-50'>
                     <h2 className='text-sm font-bold text-slate-700 uppercase tracking-widest'>

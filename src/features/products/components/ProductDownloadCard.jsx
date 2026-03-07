@@ -165,22 +165,39 @@ export default function ProductDownloadCard({ data }) {
         try {
           const errorJson = await res.json();
           errorMessage = errorJson?.error?.message || errorMessage;
-          errorTitle = errorJson?.message;
+          errorTitle = errorJson?.message || errorTitle;
 
+          // ✅ Handles both 'Limit Reached' (subscribed) and 'Limit reached' (free user)
           if (
-            errorTitle === 'Limit reached' &&
-            /Download limit of (\d+) per (\d+[dhm]) reached\./.test(
-              errorMessage,
-            ) &&
-            errorJson?.status === 403
+            errorJson?.status === 403 &&
+            errorTitle?.toLowerCase() === 'limit reached'
           ) {
             showLimit = true;
-            const match = errorMessage.match(
+
+            // "You have reached your daily download limit of 1."
+            const dailyMatch = errorMessage.match(
+              /daily download limit of (\d+)/i,
+            );
+
+            // "You have reached your subscription download limit of 50 for this period."
+            const periodMatch = errorMessage.match(
+              /subscription download limit of (\d+)/i,
+            );
+
+            // "Download limit of 1 per 1d reached." (free user legacy format)
+            const legacyMatch = errorMessage.match(
               /Download limit of (\d+) per (\d+[dhm]) reached\./,
             );
-            if (match) {
-              limitData.count = match[1];
-              limitData.duration = match[2];
+
+            if (dailyMatch) {
+              limitData.count = dailyMatch[1];
+              limitData.duration = 'day';
+            } else if (periodMatch) {
+              limitData.count = periodMatch[1];
+              limitData.duration = 'period';
+            } else if (legacyMatch) {
+              limitData.count = legacyMatch[1];
+              limitData.duration = legacyMatch[2];
             }
           }
         } catch {
@@ -391,12 +408,28 @@ export default function ProductDownloadCard({ data }) {
               Download Limit Reached
             </h2>
             <p className='text-gray-600 mb-3'>
-              You've reached your download limit of{' '}
-              <b>{limitModalData.count}</b> downloads per{' '}
-              <b>{formatDuration(limitModalData.duration)} (24 hours)</b>.
-              Please try again after{' '}
-              <b>{formatDuration(limitModalData.duration)}</b>.
+              {limitModalData.duration === 'period' ? (
+                <>
+                  You've reached your subscription download limit of{' '}
+                  <b>{limitModalData.count}</b> downloads for this billing
+                  period. Your limit will reset on your next renewal date.
+                </>
+              ) : limitModalData.duration === 'day' ? (
+                <>
+                  You've reached your daily download limit of{' '}
+                  <b>{limitModalData.count}</b> downloads. Please try again
+                  tomorrow.
+                </>
+              ) : (
+                <>
+                  You've reached your download limit of{' '}
+                  <b>{limitModalData.count}</b> downloads per{' '}
+                  <b>{formatDuration(limitModalData.duration)}</b>. Please try
+                  again after <b>{formatDuration(limitModalData.duration)}</b>.
+                </>
+              )}
             </p>
+
             <button
               className='bg-primary text-white px-5 py-2 rounded-lg mt-4'
               onClick={() => setShowLimitModal(false)}
