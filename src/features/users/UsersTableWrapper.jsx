@@ -134,49 +134,172 @@ export default function UsersTableWrapper({
     }
   }, []);
 
+  const [isExporting, setIsExporting] = useState(false);
+
+  const convertUsersToCSV = (users) => {
+    const headers = ['Email', 'Name', 'Country', 'Date'];
+
+    const escapeCSVValue = (value) => {
+      const stringValue = value == null ? '' : String(value);
+      return `"${stringValue.replace(/"/g, '""')}"`;
+    };
+
+    const rows = users.map((user) => [
+      escapeCSVValue(user.email),
+      escapeCSVValue(user.name),
+      escapeCSVValue(user.country),
+      escapeCSVValue(user.date),
+    ]);
+
+    return [headers.join(','), ...rows.map((row) => row.join(','))].join('\n');
+  };
+
+  const downloadCSV = (csvContent, fileName) => {
+    const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+    const url = window.URL.createObjectURL(blob);
+
+    const link = document.createElement('a');
+    link.href = url;
+    link.setAttribute('download', fileName);
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+
+    window.URL.revokeObjectURL(url);
+  };
+
+  const handleExport = async () => {
+    try {
+      setIsExporting(true);
+
+      const params = new URLSearchParams();
+      if (filters.search) params.set('search', filters.search);
+      if (filters.minDownloads)
+        params.set('minDownloads', filters.minDownloads);
+      if (filters.startDate) params.set('startDate', filters.startDate);
+      if (filters.endDate) params.set('endDate', filters.endDate);
+      params.set('export', 'true');
+
+      const apiUrl = process.env.NEXT_PUBLIC_BASE_API_URL_PROD;
+      if (!apiUrl) {
+        throw new Error('Missing NEXT_PUBLIC_BASE_API_URL_PROD');
+      }
+
+      const token =
+        localStorage.getItem('token') ||
+        document.cookie
+          .split('; ')
+          .find((row) => row.startsWith('token='))
+          ?.split('=')[1];
+
+      const headers = new Headers();
+      if (token) {
+        headers.set('Authorization', `Bearer ${token}`);
+      }
+
+      const response = await fetch(`${apiUrl}/all-users?${params.toString()}`, {
+        method: 'GET',
+        headers,
+        cache: 'no-store',
+      });
+
+      if (!response.ok) {
+        throw new Error(`Export request failed with status ${response.status}`);
+      }
+
+      const result = await response.json();
+      const users = result?.data?.users ?? [];
+
+      if (!Array.isArray(users) || users.length === 0) {
+        alert('No data found for export.');
+        return;
+      }
+
+      const csv = convertUsersToCSV(users);
+      const fileName =
+        filters.startDate && filters.endDate
+          ? `users-${filters.startDate}-to-${filters.endDate}.csv`
+          : 'users-export.csv';
+
+      downloadCSV(csv, fileName);
+    } catch (error) {
+      console.error('Export failed:', error);
+      alert('Failed to export users.');
+    } finally {
+      setIsExporting(false);
+    }
+  };
+
   // --- Custom Filter Bar ---
   const topContent = (
-    <div className='flex flex-col gap-4 mb-4'>
-      <div className='flex flex-wrap gap-3 items-end justify-center relative'>
+    <div className='mb-4'>
+      <div className='flex flex-nowrap items-end gap-3 overflow-x-auto'>
         <Input
           isClearable
-          className='w-full sm:max-w-[30%]'
+          className='min-w-[260px] flex-[2]'
+          label='Search'
+          labelPlacement='outside'
           placeholder='Search name or email...'
           value={filters.search}
           onValueChange={(val) => handleFilterChange('search', val)}
           onClear={() => handleFilterChange('search', '')}
         />
+
         <Input
           type='number'
-          className='w-full sm:max-w-[20%]'
+          className='min-w-[180px] flex-1'
+          label='Min Downloads'
+          labelPlacement='outside'
           placeholder='Min Downloads'
           value={filters.minDownloads}
           onValueChange={(val) => handleFilterChange('minDownloads', val)}
         />
+
         <Input
           type='date'
-          className='w-full sm:max-w-[20%]'
+          className='min-w-[180px] flex-1'
+          label='Start Date'
+          labelPlacement='outside'
           value={filters.startDate}
           onChange={(e) => handleFilterChange('startDate', e.target.value)}
         />
+
         <Input
           type='date'
-          className='w-full sm:max-w-[20%]'
+          className='min-w-[180px] flex-1'
+          label='End Date'
+          labelPlacement='outside'
           value={filters.endDate}
           onChange={(e) => handleFilterChange('endDate', e.target.value)}
         />
 
-        <button
-          className='text-red-400 hover:text-gray-600 transition-opacity font-extrabold absolute top-0 right-0 mt-1 mr-1'
+        <Button
+          className='min-w-fit'
+          variant='flat'
+          color='default'
           onClick={() => {
-            const newFilters = { ...filters, startDate: '', endDate: '' };
+            const newFilters = {
+              ...filters,
+              search: '',
+              minDownloads: '',
+              startDate: '',
+              endDate: '',
+            };
             setFilters(newFilters);
             updateURL(newFilters);
           }}
-          title='Clear dates'
         >
-          ✕
-        </button>
+          Clear Filters
+        </Button>
+
+        <Button
+          className='min-w-fit'
+          color='primary'
+          onPress={handleExport}
+          isLoading={isExporting}
+        >
+          Export
+        </Button>
       </div>
     </div>
   );

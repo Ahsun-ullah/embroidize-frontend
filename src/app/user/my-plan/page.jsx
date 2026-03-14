@@ -59,14 +59,12 @@ export default function MyPlanPage() {
   if (userLoading) {
     return (
       <>
-        <Header />
         <div className='min-h-screen flex items-center justify-center bg-slate-50'>
           <div className='flex flex-col items-center gap-4'>
             <div className='w-10 h-10 border-[3px] border-violet-500 border-t-transparent rounded-full animate-spin' />
             <p className='text-slate-400 text-sm'>Loading your plan...</p>
           </div>
         </div>
-        <Footer />
       </>
     );
   }
@@ -79,7 +77,6 @@ export default function MyPlanPage() {
   ) {
     return (
       <>
-        <Header />
         <div className='min-h-screen bg-slate-50 flex items-center justify-center px-4'>
           <div className='max-w-sm w-full'>
             <div className='bg-white rounded-3xl p-10 text-center shadow-sm border border-slate-100'>
@@ -100,7 +97,6 @@ export default function MyPlanPage() {
             </div>
           </div>
         </div>
-        <Footer />
       </>
     );
   }

@@ -9,7 +9,7 @@ export async function GET() {
 
     // Get dynamic count of products
     const { total } = await getProductsForSitemap(0, 1);
-    const productsPerSitemap = 2000;
+    const productsPerSitemap = 1000;
     const numProductSitemaps = Math.ceil(total / productsPerSitemap);
 
     const sitemapIndex = `<?xml version="1.0" encoding="UTF-8"?>
