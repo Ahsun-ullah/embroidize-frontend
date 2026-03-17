@@ -8,6 +8,7 @@ import {
 } from '@/lib/redux/common/user/userInfoSlice';
 import { Tab, Tabs } from '@heroui/react';
 import Cookies from 'js-cookie';
+import Link from 'next/link';
 import { useEffect, useMemo, useState } from 'react';
 import ChangePasswordForm from './UserChangePasswordForm';
 import UserProfile from './UserProfile';
@@ -229,18 +230,24 @@ export default function UserDetailsComponent({ defaultTab = 'account' }) {
                   >
                     {/* Desktop */}
                     <div className='hidden md:grid grid-cols-12 gap-4 items-center'>
-                      <div className='col-span-1'>
+                      <Link
+                        href={`/product/${product?.slug}`}
+                        className='col-span-1'
+                      >
                         <img
                           src={imageUrl}
                           alt={product?.name}
                           className='w-10 h-10 object-cover rounded-lg border border-gray-100'
                         />
-                      </div>
+                      </Link>
 
                       <div className='col-span-5'>
-                        <p className='text-sm font-semibold text-gray-800 line-clamp-1'>
+                        <Link
+                          href={`/product/${product?.slug}`}
+                          className='text-sm font-semibold text-gray-800 line-clamp-1'
+                        >
                           {product?.name}
-                        </p>
+                        </Link>
                         <p className='text-xs text-gray-400 mt-0.5'>
                           {formatTime(downloadedAt)}
                         </p>
@@ -400,55 +407,78 @@ export default function UserDetailsComponent({ defaultTab = 'account' }) {
   ]);
 
   return (
-    <div className='py-10'>
+    <div className=' py-6 sm:py-8 md:py-10'>
       <div className='flex items-center justify-center'>
-        <Tabs
-          aria-label='User Tabs'
-          selectedKey={activeTab}
-          onSelectionChange={setActiveTab}
-          color='secondary'
-          variant='bordered'
-          size='sm'
-          placement='top'
-          className='bg-white !border-black'
-        >
-          <Tab
-            key='account'
-            title={
-              <div
-                className={`flex items-center justify-start space-x-2 text-xs md:text-xl ${activeTab === 'account' ? 'text-white' : 'text-black'}`}
-              >
-                <i className='ri-account-circle-fill' />
-                <span>Account</span>
-              </div>
-            }
-          />
-          <Tab
-            key='password'
-            title={
-              <div
-                className={`flex items-center space-x-2 text-xs md:text-xl ${activeTab === 'password' ? 'text-white' : 'text-black'}`}
-              >
-                <i className='ri-lock-password-fill' />
-                <span>Change Password</span>
-              </div>
-            }
-          />
-          <Tab
-            key='downloads'
-            title={
-              <div
-                className={`flex items-center space-x-2 text-xs md:text-xl ${activeTab === 'downloads' ? 'text-white' : 'text-black'}`}
-              >
-                <i className='ri-download-fill' />
-                <span>Downloads</span>
-              </div>
-            }
-          />
-        </Tabs>
+        <div className='w-full max-w-full overflow-x-auto flex items-center justify-center'>
+          <Tabs
+            aria-label='User Tabs'
+            selectedKey={activeTab}
+            onSelectionChange={setActiveTab}
+            color='secondary'
+            variant='bordered'
+            size='sm'
+            placement='top'
+            className='flex-nowrap min-w-max'
+          >
+            {/* Account */}
+            <Tab
+              key='account'
+              title={
+                <div
+                  className={`flex items-center gap-1 sm:gap-2 px-1 sm:px-2 ${
+                    activeTab === 'account' ? 'text-white' : 'text-black'
+                  }`}
+                >
+                  <i className='ri-account-circle-fill text-base sm:text-lg md:text-xl' />
+                  <span className='text-[11px] sm:text-sm md:text-base whitespace-nowrap'>
+                    <span className='sm:inline hidden'>Account</span>
+                    <span className='sm:hidden'>Acc</span>
+                  </span>
+                </div>
+              }
+            />
+
+            {/* Password */}
+            <Tab
+              key='password'
+              title={
+                <div
+                  className={`flex items-center gap-1 sm:gap-2 px-1 sm:px-2 ${
+                    activeTab === 'password' ? 'text-white' : 'text-black'
+                  }`}
+                >
+                  <i className='ri-lock-password-fill text-base sm:text-lg md:text-xl' />
+                  <span className='text-[11px] sm:text-sm md:text-base whitespace-nowrap'>
+                    <span className='hidden sm:inline'>Change Password</span>
+                    <span className='sm:hidden'>Pass</span>
+                  </span>
+                </div>
+              }
+            />
+
+            {/* Downloads */}
+            <Tab
+              key='downloads'
+              title={
+                <div
+                  className={`flex items-center gap-1 sm:gap-2 px-1 sm:px-2 ${
+                    activeTab === 'downloads' ? 'text-white' : 'text-black'
+                  }`}
+                >
+                  <i className='ri-download-fill text-base sm:text-lg md:text-xl' />
+                  <span className='text-[11px] sm:text-sm md:text-base whitespace-nowrap'>
+                    <span className='hidden sm:inline'>Downloads</span>
+                    <span className='sm:hidden'>Down</span>
+                  </span>
+                </div>
+              }
+            />
+          </Tabs>
+        </div>
       </div>
 
-      <div className='w-full px-4 sm:px-6 mt-6'>
+      {/* Content */}
+      <div className='w-full px-3 sm:px-6 mt-4 sm:mt-6'>
         {activeTab === 'account' && <UserProfile />}
         {activeTab === 'downloads' && renderDownloadTab}
         {activeTab === 'password' && <ChangePasswordForm />}

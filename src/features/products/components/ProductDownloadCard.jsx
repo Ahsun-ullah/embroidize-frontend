@@ -14,11 +14,12 @@ import {
 } from '@heroui/react';
 import Cookies from 'js-cookie';
 import { Check, Download } from 'lucide-react';
-import { usePathname } from 'next/navigation';
+import { usePathname, useRouter } from 'next/navigation';
 import { useEffect, useState } from 'react';
 
 export default function ProductDownloadCard({ data }) {
   const pathName = usePathname();
+  const router = useRouter();
   const [isLoading, setIsLoading] = useState(false);
   const [showLimitModal, setShowLimitModal] = useState(false);
   const [showFormatSheet, setShowFormatSheet] = useState(false);
@@ -159,57 +160,28 @@ export default function ProductDownloadCard({ data }) {
       if (!res.ok) {
         let errorMessage = 'Could not download the ZIP file';
         let errorTitle = 'Download Failed';
-        let showLimit = false;
-        let limitData = { count: null, duration: null };
 
         try {
           const errorJson = await res.json();
+
           errorMessage = errorJson?.error?.message || errorMessage;
           errorTitle = errorJson?.message || errorTitle;
 
-          // ✅ Handles both 'Limit Reached' (subscribed) and 'Limit reached' (free user)
-          if (
-            errorJson?.status === 403 &&
-            errorTitle?.toLowerCase() === 'limit reached'
-          ) {
-            showLimit = true;
+          if (errorJson?.status === 403 && errorTitle === 'Limit Reached') {
+            const limitData = {
+              type: errorJson?.error?.limitType,
+              count: errorJson?.error?.limit,
+              duration: errorJson?.error?.duration || null,
+            };
 
-            // "You have reached your daily download limit of 1."
-            const dailyMatch = errorMessage.match(
-              /daily download limit of (\d+)/i,
-            );
-
-            // "You have reached your subscription download limit of 50 for this period."
-            const periodMatch = errorMessage.match(
-              /subscription download limit of (\d+)/i,
-            );
-
-            // "Download limit of 1 per 1d reached." (free user legacy format)
-            const legacyMatch = errorMessage.match(
-              /Download limit of (\d+) per (\d+[dhm]) reached\./,
-            );
-
-            if (dailyMatch) {
-              limitData.count = dailyMatch[1];
-              limitData.duration = 'day';
-            } else if (periodMatch) {
-              limitData.count = periodMatch[1];
-              limitData.duration = 'period';
-            } else if (legacyMatch) {
-              limitData.count = legacyMatch[1];
-              limitData.duration = legacyMatch[2];
-            }
+            setLimitModalData(limitData);
+            setShowLimitModal(true);
+            setIsLoading(false);
+            return;
           }
         } catch {
           const errorText = await res.text();
           errorMessage = errorText || errorMessage;
-        }
-
-        if (showLimit) {
-          setLimitModalData(limitData);
-          setShowLimitModal(true);
-          setIsLoading(false);
-          return;
         }
 
         ErrorToast(errorTitle, errorMessage, 3000);
@@ -234,6 +206,8 @@ export default function ProductDownloadCard({ data }) {
       setShowFormatSheet(false);
     }
   };
+
+  console.log(limitModalData);
 
   return (
     <>
@@ -399,43 +373,90 @@ export default function ProductDownloadCard({ data }) {
 
       {/* Download Limit Modal */}
       {showLimitModal && (
-        <div className='fixed inset-0 bg-black/40 flex items-center justify-center z-50'>
-          <div className='bg-white rounded-2xl p-8 max-w-xl w-full text-center'>
-            <div className='mx-auto mb-4 w-14 h-14 rounded-full bg-red-100 text-red-600 flex items-center justify-center text-2xl'>
+        <div className='fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50'>
+          <div className='bg-white rounded-2xl p-8 max-w-lg w-full text-center shadow-xl animate-fadeIn'>
+            {/* Icon */}
+            <div className='mx-auto mb-4 w-16 h-16 rounded-full bg-red-100 text-red-600 flex items-center justify-center text-3xl'>
               ⛔
             </div>
+
+            {/* Title */}
             <h2 className='text-2xl font-semibold mb-2'>
               Download Limit Reached
             </h2>
-            <p className='text-gray-600 mb-3'>
-              {limitModalData.duration === 'period' ? (
+
+            {/* Dynamic Message */}
+            <p className='text-gray-600 mb-4'>
+              {limitModalData.type === 'period' && (
                 <>
-                  You've reached your subscription download limit of{' '}
-                  <b>{limitModalData.count}</b> downloads for this billing
-                  period. Your limit will reset on your next renewal date.
+                  You've used all <b>{limitModalData.count}</b> downloads for
+                  this billing period.
+                  <br />
+                  <span className='text-sm text-gray-500'>
+                    Upgrade to continue downloading instantly.
+                  </span>
                 </>
-              ) : limitModalData.duration === 'day' ? (
+              )}
+
+              {limitModalData.type === 'daily' && (
                 <>
-                  You've reached your daily download limit of{' '}
-                  <b>{limitModalData.count}</b> downloads. Please try again
-                  tomorrow.
+                  You've reached your daily limit of{' '}
+                  <b>{limitModalData.count}</b> downloads.
+                  <br />
+                  <span className='text-sm text-gray-500'>
+                    Upgrade for higher daily limits and unlimited access.
+                  </span>
                 </>
-              ) : (
+              )}
+
+              {limitModalData.type === 'free' && (
                 <>
-                  You've reached your download limit of{' '}
-                  <b>{limitModalData.count}</b> downloads per{' '}
-                  <b>{formatDuration(limitModalData.duration)}</b>. Please try
-                  again after <b>{formatDuration(limitModalData.duration)}</b>.
+                  Free plan limit reached ({limitModalData.count} downloads /{' '}
+                  {formatDuration(limitModalData.duration)}).
+                  <br />
+                  <span className='text-sm text-gray-500'>
+                    Unlock unlimited downloads with a premium plan.
+                  </span>
                 </>
               )}
             </p>
 
-            <button
-              className='bg-primary text-white px-5 py-2 rounded-lg mt-4'
-              onClick={() => setShowLimitModal(false)}
-            >
-              Okay, got it
-            </button>
+            {/* Value Proposition */}
+            <div className='bg-gray-50 rounded-lg p-4 mb-5 text-left text-sm text-gray-700'>
+              <ul className='space-y-1'>
+                <li>✅ Unlimited or higher download limits</li>
+                <li>⚡ Faster access to all premium designs</li>
+                <li>📁 All formats included (PES, DST, EXP, etc.)</li>
+                <li>🚫 No waiting or restrictions</li>
+              </ul>
+            </div>
+
+            {/* CTA Buttons */}
+            <div className='flex gap-3 justify-center'>
+              <button
+                className='bg-primary hover:bg-primary/90 text-white px-6 py-2 rounded-lg font-medium transition'
+                onClick={() => {
+                  setShowLimitModal(false);
+                  router.push('/subscriptions');
+                }}
+              >
+                Upgrade Now 🚀
+              </button>
+
+              <button
+                className='border border-gray-300 text-gray-700 px-5 py-2 rounded-lg hover:bg-gray-100 transition'
+                onClick={() => setShowLimitModal(false)}
+              >
+                Maybe Later
+              </button>
+            </div>
+
+            {/* Optional Footer Hint */}
+            {limitModalData.type !== 'period' && (
+              <p className='text-xs text-gray-400 mt-4'>
+                Limits reset automatically based on your plan.
+              </p>
+            )}
           </div>
         </div>
       )}

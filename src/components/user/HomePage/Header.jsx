@@ -21,73 +21,126 @@ const UserProfileDropdown = dynamic(
 
 export const Header = () => {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  const [isSearchFocused, setIsSearchFocused] = useState(false);
 
   const toggleMenu = () => setIsMobileMenuOpen((prev) => !prev);
 
   return (
     <>
-      <HeroUINavbar maxWidth='full' className='h-[5.5rem] z-50'>
-        <div className='container mx-auto flex items-center justify-center gap-x-4'>
-          <NavbarContent justify='start' className='flex-1'>
-            <Link
-              href='/'
-              prefetch={false}
-              aria-label='Go to homepage'
-              className='relative w-[30px] h-[30px] sm:w-[60px] sm:h-[60px] md:w-[120px] md:h-[80px]'
+      <HeroUINavbar
+        maxWidth='full'
+        className='h-auto min-h-[64px] sm:min-h-[76px] px-2 sm:px-4 md:px-6 z-50'
+      >
+        <div className='container  flex w-full items-center content-between gap-2 sm:gap-4'>
+          {/* Left side */}
+          <div
+            className={`flex items-center gap-2 sm:gap-4 transition-all duration-300 ${
+              isSearchFocused
+                ? 'w-0 overflow-hidden opacity-0 lg:w-auto lg:overflow-visible lg:opacity-100'
+                : 'w-auto opacity-100'
+            }`}
+          >
+            <NavbarContent
+              justify='start'
+              className='flex flex-[0_0_auto] items-center gap-2 sm:gap-4'
             >
-              <Image
-                src={mobileLogo}
-                alt='Embroidize Logo'
-                fill
-                priority
-                sizes='(max-width: 640px) 80px'
-                className='object-contain block sm:hidden'
-              />
+              <Link
+                href='/'
+                prefetch={false}
+                aria-label='Go to homepage'
+                className='relative block h-[34px] w-[34px] sm:h-[52px] sm:w-[95px] md:h-[72px] md:w-[110px] shrink-0'
+              >
+                <Image
+                  src={mobileLogo}
+                  alt='Embroidize Logo'
+                  fill
+                  priority
+                  sizes='(max-width: 640px) 34px, 110px'
+                  className='object-contain block sm:hidden'
+                />
+                <Image
+                  src={mainLogo}
+                  alt='Embroidize Logo'
+                  fill
+                  priority
+                  sizes='(min-width: 640px) 110px'
+                  className='object-contain hidden sm:block'
+                />
+              </Link>
 
-              <Image
-                src={mainLogo}
-                alt='Embroidize Logo'
-                fill
-                priority
-                sizes='(min-width: 640px) 120px'
-                className='object-contain hidden sm:block'
-              />
-            </Link>
-
-            <div className='sm:flex items-center gap-x-2 text-base font-bold text-gray-700 sm:ms-6 md:ms-8'>
               <button
                 onClick={toggleMenu}
-                className='flex items-center gap-2 text-gray-800 font-bold focus:outline-none focus-visible:ring focus-visible:ring-gray-400 rounded'
+                className='flex items-center gap-2 rounded font-bold text-gray-800 focus:outline-none focus-visible:ring focus-visible:ring-gray-400'
                 aria-expanded={isMobileMenuOpen}
                 aria-controls='category-menu'
                 type='button'
               >
                 <i
-                  className={`${
+                  className={`text-[20px] sm:text-[22px] ${
                     isMobileMenuOpen ? 'ri-menu-2-line' : 'ri-menu-3-line'
                   }`}
                   aria-hidden='true'
                 />
-                <span className='hidden sm:inline font-bold'>Categories</span>
+                <span className='hidden md:inline text-sm lg:text-base'>
+                  Categories
+                </span>
               </button>
-            </div>
-          </NavbarContent>
-          <NavbarContent justify='center' className='flex-1'>
-            <SearchBox />
-          </NavbarContent>
+            </NavbarContent>
+          </div>
 
-          <NavbarContent justify='center' className='flex-1'>
-            <Link
-              href='/subscriptions'
-              prefetch={false}
-              className='text-gray-800 font-bold hover:text-blue-600 transition-colors focus:outline-none focus-visible:ring focus-visible:ring-gray-400 rounded px-2 py-1'
+          {/* Search */}
+          <div className='min-w-0 flex-1 transition-all duration-300 flex items-center justify-center'>
+            <div
+              className={`w-full transition-all duration-300 ${
+                isSearchFocused ? 'max-w-full ' : 'max-w-[720px]  '
+              }`}
             >
-              Pricing
-            </Link>
-          </NavbarContent>
-          <NavbarContent justify='end' className='flex-1'>
-            <UserProfileDropdown />
-          </NavbarContent>
+              <SearchBox onFocusChange={setIsSearchFocused} />
+            </div>
+          </div>
+
+          {isSearchFocused && (
+            <button
+              type='button'
+              onClick={() => setIsSearchFocused(false)}
+              className='shrink-0 text-sm font-medium text-gray-700 lg:hidden'
+            >
+              Cancel
+            </button>
+          )}
+
+          {/* Right side */}
+          <div
+            className={`flex items-center gap-1 sm:gap-2 md:gap-3 transition-all duration-300 ${
+              isSearchFocused
+                ? 'w-0 overflow-hidden opacity-0 lg:w-auto lg:overflow-visible lg:opacity-100'
+                : 'w-auto opacity-100'
+            }`}
+          >
+            <NavbarContent
+              justify='end'
+              className='flex flex-[0_0_auto] items-center gap-1 sm:gap-2 md:gap-3'
+            >
+              {/* <Link
+                href='/subscriptions'
+                prefetch={false}
+                aria-label='Subscriptions'
+                className='flex items-center justify-center rounded px-2 py-2 font-bold text-gray-800 transition-colors hover:text-blue-600 focus:outline-none focus-visible:ring focus-visible:ring-gray-400'
+              >
+                <i
+                  className='ri-vip-crown-line text-[20px] sm:text-[22px]'
+                  aria-hidden='true'
+                />
+                <span className='hidden sm:inline ml-2 text-sm md:text-base'>
+                  Subscriptions
+                </span>
+              </Link> */}
+
+              <div className='shrink-0'>
+                <UserProfileDropdown />
+              </div>
+            </NavbarContent>
+          </div>
         </div>
       </HeroUINavbar>
 
@@ -95,7 +148,9 @@ export const Header = () => {
 
       <div
         id='category-menu'
-        className='bg-white overflow-auto transition-all ease-out duration-500 transform'
+        className={`bg-white overflow-hidden transition-all duration-300 ease-in-out ${
+          isMobileMenuOpen ? 'max-h-[600px] opacity-100' : 'max-h-0 opacity-0'
+        }`}
       >
         <CategoryMenu isMobileMenuOpen={isMobileMenuOpen} />
       </div>

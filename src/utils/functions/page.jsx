@@ -59,3 +59,41 @@ export function formatNumber(num) {
   if (num >= 1_000) return (num / 1_000).toFixed(1).replace(/\.0$/, '') + 'K';
   return num.toString();
 }
+
+export const formatWindow = (window) => {
+  if (!window) return '';
+
+  const match = window.match(/^(\d+)([dhm])$/i);
+  if (!match) return window; // fallback
+
+  const value = parseInt(match[1], 10);
+  const unit = match[2].toLowerCase();
+
+  const unitMap = {
+    d: value === 1 ? 'day' : 'days',
+    h: value === 1 ? 'hour' : 'hours',
+    m: value === 1 ? 'minute' : 'minutes',
+  };
+
+  return `${value} ${unitMap[unit]}`;
+};
+
+export const formatCountdown = (ms) => {
+  if (!ms || ms <= 0) return 'Available now';
+
+  const totalSeconds = Math.floor(ms / 1000);
+  const h = Math.floor(totalSeconds / 3600);
+  const m = Math.floor((totalSeconds % 3600) / 60);
+  const s = totalSeconds % 60;
+
+  return `${h}h ${m}m ${s}s`;
+};
+
+export const formatDate = (dateStr) => {
+  if (!dateStr) return 'No expiry';
+  return new Date(dateStr).toLocaleDateString('en-US', {
+    year: 'numeric',
+    month: 'short',
+    day: 'numeric',
+  });
+};
