@@ -1,5 +1,6 @@
 'use client';
 
+import DownloadLimitModal from '@/components/Common/DownloadLimitModal';
 import { ErrorToast } from '@/components/Common/ErrorToast';
 import LoadingSpinner from '@/components/Common/LoadingSpinner';
 import SkuFlag from '@/components/Common/SkuFlag';
@@ -373,92 +374,11 @@ export default function ProductDownloadCard({ data }) {
 
       {/* Download Limit Modal */}
       {showLimitModal && (
-        <div className='fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50'>
-          <div className='bg-white rounded-2xl p-8 max-w-lg w-full text-center shadow-xl animate-fadeIn'>
-            {/* Icon */}
-            <div className='mx-auto mb-4 w-16 h-16 rounded-full bg-red-100 text-red-600 flex items-center justify-center text-3xl'>
-              ⛔
-            </div>
-
-            {/* Title */}
-            <h2 className='text-2xl font-semibold mb-2'>
-              Download Limit Reached
-            </h2>
-
-            {/* Dynamic Message */}
-            <p className='text-gray-600 mb-4'>
-              {limitModalData.type === 'period' && (
-                <>
-                  You've used all <b>{limitModalData.count}</b> downloads for
-                  this billing period.
-                  <br />
-                  <span className='text-sm text-gray-500'>
-                    Upgrade to continue downloading instantly.
-                  </span>
-                </>
-              )}
-
-              {limitModalData.type === 'daily' && (
-                <>
-                  You've reached your daily limit of{' '}
-                  <b>{limitModalData.count}</b> downloads.
-                  <br />
-                  <span className='text-sm text-gray-500'>
-                    Upgrade for higher daily limits and unlimited access.
-                  </span>
-                </>
-              )}
-
-              {limitModalData.type === 'free' && (
-                <>
-                  Free plan limit reached ({limitModalData.count} downloads /{' '}
-                  {formatDuration(limitModalData.duration)}).
-                  <br />
-                  <span className='text-sm text-gray-500'>
-                    Unlock unlimited downloads with a premium plan.
-                  </span>
-                </>
-              )}
-            </p>
-
-            {/* Value Proposition */}
-            <div className='bg-gray-50 rounded-lg p-4 mb-5 text-left text-sm text-gray-700'>
-              <ul className='space-y-1'>
-                <li>✅ Unlimited or higher download limits</li>
-                <li>⚡ Faster access to all premium designs</li>
-                <li>📁 All formats included (PES, DST, EXP, etc.)</li>
-                <li>🚫 No waiting or restrictions</li>
-              </ul>
-            </div>
-
-            {/* CTA Buttons */}
-            <div className='flex gap-3 justify-center'>
-              <button
-                className='bg-primary hover:bg-primary/90 text-white px-6 py-2 rounded-lg font-medium transition'
-                onClick={() => {
-                  setShowLimitModal(false);
-                  router.push('/subscriptions');
-                }}
-              >
-                Upgrade Now 🚀
-              </button>
-
-              <button
-                className='border border-gray-300 text-gray-700 px-5 py-2 rounded-lg hover:bg-gray-100 transition'
-                onClick={() => setShowLimitModal(false)}
-              >
-                Maybe Later
-              </button>
-            </div>
-
-            {/* Optional Footer Hint */}
-            {limitModalData.type !== 'period' && (
-              <p className='text-xs text-gray-400 mt-4'>
-                Limits reset automatically based on your plan.
-              </p>
-            )}
-          </div>
-        </div>
+        <DownloadLimitModal
+          limitModalData={limitModalData}
+          onClose={() => setShowLimitModal(false)}
+          formatDuration={formatDuration}
+        />
       )}
     </>
   );

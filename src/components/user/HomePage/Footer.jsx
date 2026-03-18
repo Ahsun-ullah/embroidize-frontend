@@ -118,6 +118,15 @@ const Footer = () => {
                 </li>
                 <li>
                   <Link
+                    href='/user/my-plan'
+                    prefetch={false}
+                    className='text-gray-600 hover:underline transition-colors duration-200'
+                  >
+                    My Plan
+                  </Link>
+                </li>
+                <li>
+                  <Link
                     target='_blank'
                     rel='noopener noreferrer'
                     className='text-gray-600 hover:underline transition-colors duration-200 inline-flex items-center gap-1'
@@ -187,6 +196,15 @@ const Footer = () => {
                     prefetch={false}
                   >
                     Custom Digitizing
+                  </Link>
+                </li>
+                <li>
+                  <Link
+                    className='text-gray-600 hover:underline transition-colors duration-200'
+                    href='/subscriptions'
+                    prefetch={false}
+                  >
+                    Subscriptions
                   </Link>
                 </li>
               </ul>
