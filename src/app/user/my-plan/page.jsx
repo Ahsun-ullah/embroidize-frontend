@@ -132,71 +132,113 @@ export default function MyPlanPage() {
       {/* ── FREE USER BLOCK ─────────────────────────────────────────────────── */}
       {isFreeUser && (
         <div className='max-w-5xl mx-auto px-6 mt-6'>
-          <div className='bg-white border border-slate-100 rounded-2xl p-6 shadow-sm'>
-            <h2 className='text-sm font-bold text-slate-700 uppercase tracking-widest mb-4'>
+          <div className='bg-white border border-slate-100 rounded-2xl p-6 shadow-sm space-y-6'>
+            {/* Header */}
+            <h2 className='text-xs font-bold text-slate-500 uppercase tracking-widest'>
               Free Plan Usage
             </h2>
 
-            <div className='flex items-center justify-between mb-3'>
-              <p className='text-lg font-extrabold text-slate-800'>
-                {usedDownloads}
-                <span className='text-slate-400 text-sm font-normal'>
-                  /{limit}
-                </span>
-              </p>
+            {/* Usage */}
+            <div className='flex items-center justify-between'>
+              <div>
+                <p className='text-2xl font-extrabold text-slate-900'>
+                  {usedDownloads}
+                  <span className='text-slate-400 text-sm ml-1'>/{limit}</span>
+                </p>
+                <p className='text-xs text-slate-400'>
+                  {limit} downloads /{' '}
+                  {formatWindow(userInfoData?.downloadWindow)}
+                </p>
+              </div>
 
               <span
                 className={`text-xs font-semibold px-3 py-1 rounded-full ${
                   remaining === 0
-                    ? 'bg-red-50 text-red-500'
-                    : 'bg-violet-50 text-violet-600'
+                    ? 'bg-red-100 text-red-600'
+                    : 'bg-violet-100 text-violet-700'
                 }`}
               >
                 {remaining > 0 ? `${remaining} left` : 'Limit reached'}
               </span>
             </div>
 
-            <div className='w-full bg-slate-100 rounded-full h-2 mb-3'>
+            {/* Progress */}
+            <div className='w-full bg-slate-100 rounded-full h-2 overflow-hidden'>
               <div
-                className={`h-full rounded-full ${
-                  limit > 0 && usedDownloads / limit >= 0.9
+                className={`h-full rounded-full transition-all duration-500 ${
+                  usedDownloads / limit >= 0.9
                     ? 'bg-red-500'
-                    : limit > 0 && usedDownloads / limit >= 0.6
+                    : usedDownloads / limit >= 0.6
                       ? 'bg-amber-400'
                       : 'bg-violet-500'
                 }`}
                 style={{
-                  width: `${
-                    limit > 0 ? Math.min((usedDownloads / limit) * 100, 100) : 0
-                  }%`,
+                  width: `${Math.min((usedDownloads / limit) * 100, 100)}%`,
                 }}
               />
             </div>
 
-            <p className='text-sm text-slate-500 mb-2'>
-              {limit} downloads per {formatWindow(userInfoData?.downloadWindow)}
-            </p>
+            {/* 🔥 VISUAL COUNTDOWN BLOCK */}
+            <div
+              className={`rounded-2xl p-5 text-center border ${
+                timeLeft > 0
+                  ? 'bg-gradient-to-br from-red-50 to-white border-red-200'
+                  : 'bg-gradient-to-br from-green-50 to-white border-green-200'
+              }`}
+            >
+              {timeLeft > 0 ? (
+                <>
+                  <div className='text-red-500 text-sm font-semibold mb-1'>
+                    Download Locked
+                  </div>
 
-            <p className='text-xs text-slate-400 mb-4'>
-              {timeLeft > 0
-                ? `Next download available in ${formatCountdown(timeLeft)}`
-                : 'You can download again now'}
-            </p>
+                  {/* BIG COUNTDOWN */}
+                  <div className='text-3xl font-extrabold text-red-600 tracking-wide animate-pulse'>
+                    {formatCountdown(timeLeft)}
+                  </div>
 
+                  <p className='text-xs text-slate-500 mt-1'>
+                    Next download available in
+                  </p>
+
+                  {/* Glow ring effect */}
+                  <div className='mt-4 flex justify-center'>
+                    <div className='w-20 h-20 rounded-full border-4 border-red-200 flex items-center justify-center shadow-inner animate-pulse'>
+                      ⏳
+                    </div>
+                  </div>
+                </>
+              ) : (
+                <>
+                  <div className='text-green-600 text-sm font-semibold mb-1'>
+                    Ready to Download 🎉
+                  </div>
+
+                  <div className='text-lg font-bold text-green-700'>
+                    No waiting — go ahead!
+                  </div>
+                </>
+              )}
+            </div>
+
+            {/* CTA
             {remaining === 0 && (
-              <p className='text-xs text-red-500 mb-4 font-medium'>
-                You've reached your limit. Upgrade to continue instantly 🚀
-              </p>
-            )}
+              <div className='text-center space-y-3'>
+                <p className='text-sm text-red-500 font-medium'>
+                  Skip the wait and download instantly 🚀
+                </p>
 
-            <div className='flex gap-3'>
-              <button
-                onClick={() => router.push('/subscriptions')}
-                className='bg-violet-600 text-white px-5 py-2 rounded-lg text-sm font-semibold hover:bg-violet-700 transition'
-              >
-                Upgrade for Unlimited 🚀
-              </button>
+                <button
+                  onClick={() => router.push('/subscriptions')}
+                  className='bg-violet-600 text-white px-6 py-2 rounded-lg text-sm font-semibold hover:bg-violet-700 transition shadow'
+                >
+                  Upgrade Now
+                </button>
+              </div>
+            )} */}
 
+            {/* Browse */}
+            <div className='flex justify-center'>
               <button
                 onClick={() => router.push('/products')}
                 className='border border-slate-200 text-slate-600 px-5 py-2 rounded-lg text-sm hover:bg-slate-50 transition'

@@ -40,7 +40,6 @@ export const metadata = {
 export default async function AllResourcesPageInFrontSite({ searchParams }) {
   const { resources } = await getResources();
 
-  console.log(resources);
 
   const currentPage = parseInt(searchParams?.page || '1', 10);
   const perPageData = 6;

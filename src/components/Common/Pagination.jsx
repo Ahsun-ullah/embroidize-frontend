@@ -28,9 +28,7 @@ const Pagination = ({ totalPages, perPageData }) => {
   );
 
   if (totalPages <= 1) return null;
-  
-  console.log(perPageData);
-  console.log(totalPages);
+
 
   return (
     <div className='flex flex-col items-center gap-2 mt-4'>

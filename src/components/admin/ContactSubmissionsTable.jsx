@@ -44,7 +44,6 @@ export function ContactSubmissionsTable({ columns }) {
       }
       );
       const data = await response.json();
-      console.log(data);
       setSubmissions(data?.data || []);
     };
 

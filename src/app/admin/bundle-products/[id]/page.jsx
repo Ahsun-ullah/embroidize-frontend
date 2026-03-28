@@ -6,7 +6,6 @@ export default async function SingleBundlePage({ params }) {
 
   const bundle = await getSingleBundle(id);
 
-  console.log(bundle);
 
   //   if (!bundle) {
   //     notFound();

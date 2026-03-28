@@ -61,6 +61,17 @@ export default function SocialLoginButtons({ showThankYou = true }) {
                 idToken: response.credential,
               }).unwrap();
 
+
+              // ✅ TRACK SIGNUP (ONLY FOR NEW USERS)
+              if (typeof window !== 'undefined' && result?.data?.isNew) {
+                window.dataLayer = window.dataLayer || [];
+                window.dataLayer.push({
+                  event: 'signup_success',
+                  email: result.data.email,
+                  method: 'google',
+                });
+              }
+
               Cookies.set('token', result.data.token);
 
               if (showThankYou) {

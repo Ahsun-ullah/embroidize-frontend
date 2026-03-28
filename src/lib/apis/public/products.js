@@ -83,7 +83,6 @@ export async function getPopularProducts(
 
   const result = await getJSON(url);
 
-  console.log(result);
 
   const data = result?.data?.data ?? [];
   const meta = result?.data?.meta ?? {};
@@ -110,7 +109,6 @@ export async function getAdminChoiceProducts(
     // 2. Fetch the JSON data
     const result = await getJSON(url);
 
-    console.log(result);
 
     // 3. Extract data from your standard response wrapper [web:47][web:52]
     // Your backend returns { data: { data: [...], meta: {...} } }

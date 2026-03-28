@@ -80,6 +80,16 @@ const EmailOtp = ({ step, setStep, userDetailsData, pathName }) => {
 
       const registerResult = await userRegister(userDetailsData).unwrap();
 
+      // ✅ TRACK SIGNUP SUCCESS (GTM / dataLayer)
+      if (typeof window !== 'undefined') {
+        window.dataLayer = window.dataLayer || [];
+        window.dataLayer.push({
+          event: 'signup_success',
+          email: userDetailsData.email,
+          method: 'email',
+        });
+      }
+
       const loginPayload = {
         email: userDetailsData.email,
         password: userDetailsData.password,

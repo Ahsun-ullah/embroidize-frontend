@@ -18,7 +18,6 @@ export default function SubscriptionsPage() {
 
   const { data: userInfoData } = useUserInfoQuery();
 
-  console.log(userInfoData);
 
   // ✅ Get the user's active plan ID safely (null if not logged in / no subscription)
   const activePlanId = userInfoData?.subscription?.planId?._id ?? null;

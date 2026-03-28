@@ -13,13 +13,13 @@ export async function generateMetadata() {
     robots: 'index,follow',
     alternates: {
       canonical:
-        'https://www.embroidize.com/custom-embroidery-digitizing-service',
+        'https://embroidize.com/custom-embroidery-digitizing-service',
     },
     openGraph: {
       title: 'Custom Embroidery Digitizing Service | Starting at $5',
       description:
         'Upload your logo or artwork and receive machine‑ready embroidery files with fast turnaround and unlimited revisions.',
-      url: 'https://www.embroidize.com/custom-embroidery-digitizing-service',
+      url: 'https://embroidize.com/custom-embroidery-digitizing-service',
       siteName: 'Embroidize',
       images: [
         {

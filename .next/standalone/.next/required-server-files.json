@@ -913,8 +913,8 @@
         "permanent": true
       },
       {
-        "source": "/custom-embroidery-order",
-        "destination": "/custom-embroidery-digitizing-service",
+        "source": "/category/work-and-occupation",
+        "destination": "/category/professions-hobbies-embroidery-designs",
         "permanent": true
       },
       {
@@ -945,8 +945,8 @@
     ".next\\server\\next-font-manifest.js",
     ".next\\server\\next-font-manifest.json",
     ".next\\required-server-files.json",
+    ".next\\static\\css\\111a39e463c96dc1.css",
     ".next\\static\\css\\286a3343f7e8267c.css",
-    ".next\\static\\css\\3c5fa574916ec19e.css",
     ".next\\static\\css\\3d5e1e0ca361c81e.css",
     ".next\\static\\css\\aa94488fb30f8d6e.css",
     ".next\\static\\css\\bcd3ca5273627146.css",

@@ -20,7 +20,6 @@ export async function getAllCustomOrdersForDashboard(
     const apiUrl = process.env.NEXT_PUBLIC_BASE_API_URL_PROD;
     const url = new URL(`${apiUrl}/admin/orders/custom`);
 
-    console.log(url);
 
     // Append query parameters matching your backend API
     url.searchParams.set('page', String(page));

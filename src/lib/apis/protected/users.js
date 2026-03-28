@@ -21,7 +21,7 @@ export async function getUsers(
     const apiUrl = process.env.NEXT_PUBLIC_BASE_API_URL_PROD;
     const url = new URL(`${apiUrl}/all-users`);
 
- 
+
 
     // Append all params
     url.searchParams.set('page', String(page));
@@ -129,7 +129,6 @@ export async function getDownloadStats(
 
     const responseData = await response.json();
 
-    console.log(responseData);
 
     return {
       data: responseData?.data?.data || [],

@@ -37,10 +37,17 @@ export const blogsSlice = createApi({
       }),
     }),
     allBlogs: builder.query({
-      query: ({ page = 1, limit = 10 } = {}) => {
+      query: ({ page = 1, limit = 10, search = '' } = {}) => {
         const params = new URLSearchParams();
+
         params.append('page', String(page));
         params.append('limit', String(limit));
+
+
+        if (search) {
+          params.append('search', search);
+        }
+
 
         return {
           url: `/public/admin/blog?${params.toString()}`,

@@ -208,7 +208,6 @@ export default function ProductDownloadCard({ data }) {
     }
   };
 
-  console.log(limitModalData);
 
   return (
     <>

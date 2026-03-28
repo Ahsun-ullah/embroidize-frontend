@@ -20,7 +20,6 @@ export default async function DownloadsPage({ searchParams }) {
 
   const { data, pagination } = statsResponse;
 
-  console.log(data);
 
   const columns = [
     { name: 'Product', uid: 'name' },

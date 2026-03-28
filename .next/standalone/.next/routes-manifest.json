@@ -714,10 +714,10 @@
       "regex": "^(?!/_next)/product/santa-hat-embroidery-design(?:/)?$"
     },
     {
-      "source": "/custom-embroidery-order",
-      "destination": "/custom-embroidery-digitizing-service",
+      "source": "/category/work-and-occupation",
+      "destination": "/category/professions-hobbies-embroidery-designs",
       "statusCode": 308,
-      "regex": "^(?!/_next)/custom-embroidery-order(?:/)?$"
+      "regex": "^(?!/_next)/category/work-and-occupation(?:/)?$"
     },
     {
       "source": "/product/free-heart-corner-embroidery-design",
@@ -997,10 +997,22 @@
       "namedRegex": "^/sitemap\\.xml(?:/)?$"
     },
     {
+      "page": "/subscriptions",
+      "regex": "^/subscriptions(?:/)?$",
+      "routeKeys": {},
+      "namedRegex": "^/subscriptions(?:/)?$"
+    },
+    {
       "page": "/terms-and-conditions",
       "regex": "^/terms\\-and\\-conditions(?:/)?$",
       "routeKeys": {},
       "namedRegex": "^/terms\\-and\\-conditions(?:/)?$"
+    },
+    {
+      "page": "/user/my-plan",
+      "regex": "^/user/my\\-plan(?:/)?$",
+      "routeKeys": {},
+      "namedRegex": "^/user/my\\-plan(?:/)?$"
     },
     {
       "page": "/user/user-details",
