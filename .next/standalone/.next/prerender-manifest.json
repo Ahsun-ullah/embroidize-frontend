@@ -1,6 +1,35 @@
 {
   "version": 4,
   "routes": {
+    "/favicon.ico": {
+      "initialHeaders": {
+        "cache-control": "public, max-age=0, must-revalidate",
+        "content-type": "image/x-icon",
+        "x-next-cache-tags": "_N_T_/layout,_N_T_/favicon.ico/layout,_N_T_/favicon.ico/route,_N_T_/favicon.ico"
+      },
+      "experimentalBypassFor": [
+        {
+          "type": "header",
+          "key": "Next-Action"
+        },
+        {
+          "type": "header",
+          "key": "content-type",
+          "value": "multipart/form-data;.*"
+        }
+      ],
+      "initialRevalidateSeconds": false,
+      "srcRoute": "/favicon.ico",
+      "dataRoute": null,
+      "allowHeader": [
+        "host",
+        "x-matched-path",
+        "x-prerender-revalidate",
+        "x-prerender-revalidate-if-generated",
+        "x-next-revalidated-tags",
+        "x-next-revalidate-tag-token"
+      ]
+    },
     "/robots.txt": {
       "initialHeaders": {
         "cache-control": "public, max-age=0, s-maxage=3600",
@@ -30,12 +59,7 @@
         "x-next-revalidate-tag-token"
       ]
     },
-    "/favicon.ico": {
-      "initialHeaders": {
-        "cache-control": "public, max-age=0, must-revalidate",
-        "content-type": "image/x-icon",
-        "x-next-cache-tags": "_N_T_/layout,_N_T_/favicon.ico/layout,_N_T_/favicon.ico/route,_N_T_/favicon.ico"
-      },
+    "/reset-password": {
       "experimentalBypassFor": [
         {
           "type": "header",
@@ -48,8 +72,32 @@
         }
       ],
       "initialRevalidateSeconds": false,
-      "srcRoute": "/favicon.ico",
-      "dataRoute": null,
+      "srcRoute": "/reset-password",
+      "dataRoute": "/reset-password.rsc",
+      "allowHeader": [
+        "host",
+        "x-matched-path",
+        "x-prerender-revalidate",
+        "x-prerender-revalidate-if-generated",
+        "x-next-revalidated-tags",
+        "x-next-revalidate-tag-token"
+      ]
+    },
+    "/subscriptions": {
+      "experimentalBypassFor": [
+        {
+          "type": "header",
+          "key": "Next-Action"
+        },
+        {
+          "type": "header",
+          "key": "content-type",
+          "value": "multipart/form-data;.*"
+        }
+      ],
+      "initialRevalidateSeconds": false,
+      "srcRoute": "/subscriptions",
+      "dataRoute": "/subscriptions.rsc",
       "allowHeader": [
         "host",
         "x-matched-path",
@@ -131,7 +179,7 @@
         "x-next-revalidate-tag-token"
       ]
     },
-    "/reset-password": {
+    "/custom-embroidery-digitizing-service": {
       "experimentalBypassFor": [
         {
           "type": "header",
@@ -144,32 +192,8 @@
         }
       ],
       "initialRevalidateSeconds": false,
-      "srcRoute": "/reset-password",
-      "dataRoute": "/reset-password.rsc",
-      "allowHeader": [
-        "host",
-        "x-matched-path",
-        "x-prerender-revalidate",
-        "x-prerender-revalidate-if-generated",
-        "x-next-revalidated-tags",
-        "x-next-revalidate-tag-token"
-      ]
-    },
-    "/auth/register": {
-      "experimentalBypassFor": [
-        {
-          "type": "header",
-          "key": "Next-Action"
-        },
-        {
-          "type": "header",
-          "key": "content-type",
-          "value": "multipart/form-data;.*"
-        }
-      ],
-      "initialRevalidateSeconds": false,
-      "srcRoute": "/auth/register",
-      "dataRoute": "/auth/register.rsc",
+      "srcRoute": "/custom-embroidery-digitizing-service",
+      "dataRoute": "/custom-embroidery-digitizing-service.rsc",
       "allowHeader": [
         "host",
         "x-matched-path",
@@ -203,7 +227,7 @@
         "x-next-revalidate-tag-token"
       ]
     },
-    "/custom-embroidery-digitizing-service": {
+    "/auth/login": {
       "experimentalBypassFor": [
         {
           "type": "header",
@@ -216,8 +240,8 @@
         }
       ],
       "initialRevalidateSeconds": false,
-      "srcRoute": "/custom-embroidery-digitizing-service",
-      "dataRoute": "/custom-embroidery-digitizing-service.rsc",
+      "srcRoute": "/auth/login",
+      "dataRoute": "/auth/login.rsc",
       "allowHeader": [
         "host",
         "x-matched-path",
@@ -227,7 +251,7 @@
         "x-next-revalidate-tag-token"
       ]
     },
-    "/subscriptions": {
+    "/auth/register": {
       "experimentalBypassFor": [
         {
           "type": "header",
@@ -240,8 +264,8 @@
         }
       ],
       "initialRevalidateSeconds": false,
-      "srcRoute": "/subscriptions",
-      "dataRoute": "/subscriptions.rsc",
+      "srcRoute": "/auth/register",
+      "dataRoute": "/auth/register.rsc",
       "allowHeader": [
         "host",
         "x-matched-path",
@@ -266,30 +290,6 @@
       "initialRevalidateSeconds": false,
       "srcRoute": "/auth/thank-you",
       "dataRoute": "/auth/thank-you.rsc",
-      "allowHeader": [
-        "host",
-        "x-matched-path",
-        "x-prerender-revalidate",
-        "x-prerender-revalidate-if-generated",
-        "x-next-revalidated-tags",
-        "x-next-revalidate-tag-token"
-      ]
-    },
-    "/auth/login": {
-      "experimentalBypassFor": [
-        {
-          "type": "header",
-          "key": "Next-Action"
-        },
-        {
-          "type": "header",
-          "key": "content-type",
-          "value": "multipart/form-data;.*"
-        }
-      ],
-      "initialRevalidateSeconds": false,
-      "srcRoute": "/auth/login",
-      "dataRoute": "/auth/login.rsc",
       "allowHeader": [
         "host",
         "x-matched-path",
@@ -399,8 +399,8 @@
   "dynamicRoutes": {},
   "notFoundRoutes": [],
   "preview": {
-    "previewModeId": "272cc3ef91000c48a348c5def8b01843",
-    "previewModeSigningKey": "4f5eb50e032f67009930b29b586a6e5f44c1f6e53e9e66504fdc49cce78d2b61",
-    "previewModeEncryptionKey": "20107752ac458226ab1053c0633d2117282aebb1fb41b3e30c9da39888b9d44c"
+    "previewModeId": "b3c9c67ead6798541388a25e76531403",
+    "previewModeSigningKey": "e7aa7bee9f295aed98d080be5b426c7380c7f000327a0171807a9d66be1e513b",
+    "previewModeEncryptionKey": "5e5fbb0d648c93901dc6851833a66bf2ae21a6fa71b8cb1467d42c041d85c72d"
   }
 }
