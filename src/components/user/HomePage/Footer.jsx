@@ -198,7 +198,7 @@ const Footer = () => {
                     Custom Digitizing
                   </Link>
                 </li>
-                <li>
+                {/* <li>
                   <Link
                     className='text-gray-600 hover:underline transition-colors duration-200'
                     href='/subscriptions'
@@ -206,7 +206,7 @@ const Footer = () => {
                   >
                     Subscriptions
                   </Link>
-                </li>
+                </li> */}
               </ul>
             </div>
           </div>
