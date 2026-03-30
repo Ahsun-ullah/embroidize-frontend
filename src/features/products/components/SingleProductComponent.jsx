@@ -180,7 +180,8 @@ export const SingleProductComponent = ({
 
               <div
                 dangerouslySetInnerHTML={{ __html: rawMarkup }}
-                className=' max-w-none break-words whitespace-pre-wrap text-2xl'
+                className='custom-blog-content break-words whitespace-pre-wrap'
+                itemProp='articleBody'
               />
             </div>
           </Suspense>

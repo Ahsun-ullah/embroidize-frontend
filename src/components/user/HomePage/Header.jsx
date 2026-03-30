@@ -149,13 +149,15 @@ export const Header = () => {
       <div
         id='category-menu'
         className={`bg-white overflow-hidden transition-all duration-300 ease-in-out ${
-          isMobileMenuOpen ? 'max-h-[600px] opacity-100' : 'max-h-0 opacity-0'
+          isMobileMenuOpen ? 'max-h-[80%] opacity-100' : 'max-h-0 opacity-0'
         }`}
       >
         <CategoryMenu isMobileMenuOpen={isMobileMenuOpen} />
       </div>
 
       <Divider className='bg-gray-300' />
+
+      
     </>
   );
 };

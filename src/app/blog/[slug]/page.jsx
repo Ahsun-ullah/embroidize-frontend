@@ -158,8 +158,7 @@ export default async function SingleBlogPage({ params }) {
               </header>
 
               <section
-                className='custom-blog-content '
-                style={{ fontSize: 18 }}
+                className='custom-blog-content'
                 dangerouslySetInnerHTML={{
                   __html: blog?.description,
                 }}

@@ -334,7 +334,7 @@ export default async function SingleBlogPage({ params }) {
             <div className='mx-4'>
               {/* Content Body */}
               <section
-                className='prose prose-2xl custom-blog-content max-w-none mt-8'
+                className='custom-blog-content'
                 dangerouslySetInnerHTML={{
                   __html: resource?.description,
                 }}
