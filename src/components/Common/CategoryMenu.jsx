@@ -12,6 +12,9 @@ export default function CategoryMenu({ isMobileMenuOpen }) {
 
   const categories = useMemo(() => categoryData?.data || [], [categoryData]);
 
+  console.log(categories.slice(0, 8));
+  console.log(isMobileMenuOpen);
+
   const renderCategoryLink = (category) => {
     const displayName = category.name
       .replace(/embroidery designs/gi, '')
@@ -49,7 +52,7 @@ export default function CategoryMenu({ isMobileMenuOpen }) {
     });
   };
 
-  if (!categories.length) return null;
+  // if (!categories.length) return null;
 
   return (
     <nav aria-label='Category menu'>
@@ -70,7 +73,7 @@ export default function CategoryMenu({ isMobileMenuOpen }) {
           </div>
         </div>
       ) : (
-        <div className='container hidden sm:flex flex-wrap items-center justify-center gap-x-10 py-4'>
+        <div className='container sm:flex flex-wrap items-center justify-center gap-x-10 py-4'>
           {categories.slice(0, 8).map((category) => {
             const displayName = category.name
               .replace(/embroidery designs/gi, '')

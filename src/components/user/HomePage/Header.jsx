@@ -25,6 +25,8 @@ export const Header = () => {
 
   const toggleMenu = () => setIsMobileMenuOpen((prev) => !prev);
 
+  console.log(isMobileMenuOpen);
+
   return (
     <>
       <HeroUINavbar
@@ -148,16 +150,17 @@ export const Header = () => {
 
       <div
         id='category-menu'
-        className={`bg-white overflow-hidden transition-all duration-300 ease-in-out ${
-          isMobileMenuOpen ? 'max-h-[80%] opacity-100' : 'max-h-0 opacity-0'
-        }`}
+        className={`
+    overflow-hidden transition-all duration-300 ease-in-out
+    max-h-0 opacity-0
+    md:max-h-full md:opacity-100
+    ${isMobileMenuOpen ? 'max-h-[80%] opacity-100' : ''}
+  `}
       >
         <CategoryMenu isMobileMenuOpen={isMobileMenuOpen} />
       </div>
 
       <Divider className='bg-gray-300' />
-
-      
     </>
   );
 };
