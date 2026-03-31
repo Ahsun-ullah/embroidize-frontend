@@ -52,7 +52,7 @@ export default async function AllBundles({ searchParams }) {
   const totalPages = pagination?.totalPages || 1;
 
   return (
-    <>
+    <div className='bg-[#fafafa]'>
       <Header />
 
       <div className='container mx-auto px-4 flex flex-col justify-between'>
@@ -87,6 +87,6 @@ export default async function AllBundles({ searchParams }) {
         </section>
       </div>
       <Footer />
-    </>
+    </div>
   );
 }

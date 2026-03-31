@@ -52,7 +52,7 @@ export default function SearchPage({ searchParams }) {
   );
 
   return (
-    <>
+    <div className='bg-[#fafafa]'>
       <Header />
       <div className='container py-8'>
         <h1 className='text-2xl font-bold mb-4'>
@@ -101,6 +101,6 @@ export default function SearchPage({ searchParams }) {
         </div>
       </div>
       <Footer />
-    </>
+    </div>
   );
 }

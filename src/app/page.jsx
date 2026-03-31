@@ -92,7 +92,7 @@ export default async function Home() {
     ]);
 
   return (
-    <>
+    <div className='bg-[#fafafa]'>
       <link
         rel='preconnect'
         href='https://cloud.digitalocean.com/spaces/embroidize-assets?i=9cf06e'
@@ -266,6 +266,6 @@ export default async function Home() {
       </section>
 
       <Footer />
-    </>
+    </div>
   );
 }

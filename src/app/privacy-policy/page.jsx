@@ -1,355 +1,116 @@
 import Footer from '@/components/user/HomePage/Footer';
 import Header from '@/components/user/HomePage/Header';
 
-export const metadata = {
-  title: 'Privacy Policy - Embroidize',
-  description:
-    'Read Embroidize’s Privacy Policy to understand how we collect, use, and protect your personal information when you download embroidery designs from our platform.',
-  alternates: {
-    canonical: 'https://embroidize.com/privacy-policy',
-  },
-  openGraph: {
-    title: 'Privacy Policy - Embroidize',
-    description:
-      'Read Embroidize’s Privacy Policy to understand how we collect, use, and protect your personal information when you download embroidery designs from our platform.',
-    url: 'https://embroidize.com',
-    siteName: 'Embroidize',
-    images: [
-      {
-        url: 'https://embroidize.com/og-banner.jpg',
-        width: 1200,
-        height: 630,
-      },
-    ],
-    type: 'website',
-  },
-  twitter: {
-    card: 'summary_large_image',
-    title: 'Privacy Policy - Embroidize',
-    description:
-      'Read Embroidize’s Privacy Policy to understand how we collect, use, and protect your personal information when you download embroidery designs from our platform.',
-    images: ['https://embroidize.com/og-banner.jpg'],
-  },
-  metadataBase: new URL('https://embroidize.com'),
-};
-
 export default function PrivacyPolicyPage() {
+  const sections = [
+    {
+      title: '1. Information We Collect',
+      content: `We may collect personal and non-personal information including:\n\n- Name and email address\n- Account credentials\n- Billing information (processed via third parties)\n- IP address and geolocation data\n- Device, browser, and usage data\n- Download activity and interaction logs`,
+    },
+    {
+      title: '2. How We Use Your Information',
+      content: `We use your information to:\n\n- Process transactions and subscriptions\n- Deliver digital products\n- Provide customer support\n- Improve platform performance and user experience\n- Detect fraud, abuse, or unauthorized activity\n- Communicate updates, offers, and service notices`,
+    },
+    {
+      title: '3. Legal Basis for Processing (GDPR)',
+      content: `We process your data based on:\n\n- Contractual necessity (to provide services)\n- Legal obligations\n- Legitimate interests (security, analytics, improvement)\n- Your consent (for marketing communications)`,
+    },
+    {
+      title: '4. Payment Processing',
+      content: `All payments are securely handled by third-party providers such as Stripe or PayPal.\n\nWe do not store your full payment card details on our servers.`,
+    },
+    {
+      title: '5. Cookies & Tracking Technologies',
+      content: `We use cookies and similar technologies to:\n\n- Maintain user sessions\n- Remember preferences\n- Analyze traffic and behavior\n- Improve functionality\n\nYou can control cookies through your browser settings.`,
+    },
+    {
+      title: '6. Analytics & Usage Tracking',
+      content: `We may collect analytics data such as page views, clicks, downloads, and session behavior to improve our platform.\n\nThis data may be aggregated and anonymized.`,
+    },
+    {
+      title: '7. Anti-Fraud & Abuse Detection',
+      content: `We use IP tracking, activity monitoring, and behavioral analysis to prevent:\n\n- Multiple account abuse\n- Download limit bypassing\n- Unauthorized access\n- Fraudulent transactions\n\nAccounts involved in suspicious activity may be restricted or terminated.`,
+    },
+    {
+      title: '8. Data Retention',
+      content: `We retain your data only as long as necessary to:\n\n- Provide services\n- Maintain legal and financial records\n- Resolve disputes\n- Enforce agreements`,
+    },
+    {
+      title: '9. Data Sharing',
+      content: `We do not sell your personal data.\n\nWe may share information with trusted third parties including:\n\n- Payment processors (Stripe, PayPal)\n- Analytics providers\n- Hosting and infrastructure services\n\nThese parties are required to protect your data.`,
+    },
+    {
+      title: '10. International Data Transfers',
+      content: `Your data may be processed in countries outside your location. We ensure appropriate safeguards are applied to protect your information.`,
+    },
+    {
+      title: '11. Your Rights',
+      content: `You have the right to:\n\n- Access your personal data\n- Correct inaccurate data\n- Request deletion\n- Withdraw consent\n- Object to certain processing\n\nTo exercise your rights, contact support@embroidize.com`,
+    },
+    {
+      title: '12. Marketing Communications',
+      content: `We may send promotional emails. You can unsubscribe at any time by contacting us or using the unsubscribe link.`,
+    },
+    {
+      title: '13. Children’s Privacy',
+      content: `Our services are not intended for individuals under 13 years of age. We do not knowingly collect data from children.`,
+    },
+    {
+      title: '14. Security Measures',
+      content: `We implement appropriate security measures including encryption, access controls, and monitoring systems to protect your data.`,
+    },
+    {
+      title: '15. Third-Party Links',
+      content: `Our website may contain links to third-party websites. We are not responsible for their privacy practices.`,
+    },
+    {
+      title: '16. Changes to Policy',
+      content: `We may update this Privacy Policy at any time. Continued use of the platform constitutes acceptance of the updated policy.`,
+    },
+
+    {
+      title: '17. Contact Information',
+      content: (
+        <>
+          <p>For privacy-related inquiries:</p>
+          <a
+            href='mailto:support@embroidize.com'
+            className='text-blue-600 underline font-medium'
+          >
+            support@embroidize.com
+          </a>
+        </>
+      ),
+    },
+  ];
+
   return (
     <>
       <Header />
 
-      <h1 className='text-4xl font-bold my-8 text-center'>
-        Privacy Policy – Embroidize
+      <h1 className='text-4xl font-bold text-center my-6'>
+        Privacy Policy – Embroidize LLC
       </h1>
-      
-      <main className='container px-6 mb-6 text-gray-800'>
-        <div>
-          <div className='space-y-8 text-base leading-relaxed'>
-            <p>
-              At Embroidize, we are committed to safeguarding your personal
-              information. This Privacy Policy outlines the ways in which we
-              collect, utilize, and secure your data when you browse our
-              website, engage with our services, or make a purchase. By
-              accessing or using our platform, you acknowledge and consent to
-              the practices described in this policy.
-            </p>
 
-            <Section title='What Information Do We Collect?'>
-              <p>
-                <strong>Personal information you disclose to us</strong>
-              </p>
-              <p>
-                Summary: We collect the personal details you choose to share
-                with us.
-              </p>
-              <p>
-                When you sign up for our services, show interest in our
-                offerings, take part in site activities, or reach out to us
-                directly, you may provide us with personal information. The type
-                of data we gather depends on how you interact with our website
-                and the features you use.
-              </p>
-              <p>
-                <strong>Personal Data You Share:</strong>
-              </p>
-              <ul className='list-disc pl-6 space-y-1'>
-                <li>Full name</li>
-                <li>Email address</li>
-                <li>Username</li>
-                <li>Password</li>
-                <li>Billing address</li>
-                <li>Purchase history</li>
-              </ul>
-              <p>
-                <strong>Sensitive Data:</strong> We do not collect or process
-                any sensitive personal information.
-              </p>
-              <p>
-                <strong>Non-Personal Information Collection:</strong>
-              </p>
-              <p>
-                We also collect certain types of information that do not
-                directly identify you as an individual. This non-personally
-                identifiable data is gathered automatically based on your
-                interactions with our website and may be analyzed both
-                individually and in aggregate.
-              </p>
-              <p>
-                For instance, we may track details such as the webpage you
-                visited before arriving at our site, the page you visit next,
-                your web browser type, and your Internet Protocol (IP) address.
-              </p>
-              <p>
-                A URL (Uniform Resource Locator) refers to the web address of a
-                page or resource online. An IP address is a unique number
-                assigned to your device whenever you access the internet. These
-                identifiers help websites communicate with your device and are
-                necessary for web browsing and online shopping.
-              </p>
-              <p>
-                This type of information helps us understand user behavior,
-                improve website performance, and enhance your overall experience
-                on our platform
-              </p>
-            </Section>
+      <main className='container px-6 mb-10 text-gray-800'>
+        <p className='text-sm text-gray-500 mb-6 text-center'>
+          Last Updated: {new Date().toLocaleDateString()}
+        </p>
 
-            <Section title='Where Do We Collect Information From You and How Do We Use It?'>
-              <p>
-                Our main purpose in gathering personal information is to deliver
-                a personalized and high-quality experience for visitors to
-                Embroidize. We use the details you provide to process orders,
-                communicate updates about purchases, share promotional offers,
-                improve site functionality, and manage our internal systems more
-                efficiently.
-              </p>
-            </Section>
+        <p className='mb-8 text-center'>
+          At Embroidize LLC, we are committed to protecting your personal data
+          and ensuring transparency in how we collect and use information.
+        </p>
 
-            <Section title='Shopping and User Activity Tracking'>
-              <p>
-                We collect certain types of technical and usage data during your
-                interactions with our website. This includes IP addresses for
-                system administration, demographic analysis, ad delivery, and
-                reporting of non-personal information to our partners. Details
-                we may gather include the referring URL, domain type (e.g., .com
-                or .org), IP address, access date and time, number of visits or
-                orders, browser and operating system details, server type,
-                geographic data (such as country, state, or area code), site
-                pages viewed, browser language, Java or cookie support,
-                plug-ins, and any search terms entered on our platform.
-              </p>
-            </Section>
-
-            <Section title='Ordering'>
-              <p>
-                When you place an order, we collect personally identifiable
-                information such as your name, email address, billing and
-                shipping addresses, phone number, selected products, payment
-                details, order number, IP address, referring URL, and a
-                password. This information is necessary to fulfill your order,
-                provide order updates, and send promotional content. You will
-                have the opportunity to review and update your information
-                before finalizing your purchase, and these updates will be
-                securely saved for future transactions.
-              </p>
-            </Section>
-
-            <Section title='Digital Downloads'>
-              <p>
-                For digital products and downloads, we collect personal details
-                including your name, email, billing/shipping information,
-                company name (if applicable), contact numbers, product
-                selections, payment details, order reference, IP address, and
-                login credentials. This data allows us to fulfill your order,
-                manage royalty or license obligations, maintain site operations,
-                and provide marketing communication. Downloadable content may
-                include usage limitations and restrictions tied to specific
-                devices or systems.
-              </p>
-            </Section>
-
-            <Section title='Surveys and Polls'>
-              <p>
-                To help us improve our services, we may invite customers to
-                complete voluntary surveys. These may be conducted internally or
-                by a third party. While individual responses remain
-                confidential, aggregate non-personal data may be shared with
-                relevant partners. Participation is optional.
-              </p>
-            </Section>
-
-            <Section title='Contests and Promotions'>
-              <p>
-                When you participate in giveaways, contests, or other
-                promotions, we may request personal information such as your
-                name, address, and email. This information is used to manage the
-                promotion, notify winners, and—where legally required—publicly
-                disclose winners. Participation implies consent to receive
-                promotional content related to the contest. You may also be
-                required to submit eligibility documentation to claim prizes.
-              </p>
-            </Section>
-
-            <Section title='Newsletters & Promotional Emails'>
-              <p>
-                We provide free newsletters and promotional emails to keep our
-                customers informed about deals, offers, and news. If you no
-                longer wish to receive such messages, you can unsubscribe by
-                contacting us at{' '}
-                <a
-                  href='mailto:support@embroidize.com'
-                  className='text-blue-600 underline'
-                >
-                  support@embroidize.com
-                </a>{' '}
-                Note that if you opt into receiving emails from third-party
-                partners, those communications will be governed by their own
-                privacy policies and opt-out mechanisms.
-              </p>
-            </Section>
-
-            <Section title='Customer Service and Communication Records'>
-              <p>
-                When you contact our customer service team—via phone, email, or
-                contact forms—we may retain a record of the communication. This
-                helps us track support issues and improve service quality. If
-                third parties contact us regarding your use of our site, we may
-                also retain that correspondence for reference.
-              </p>
-            </Section>
-
-            <Section title='Advertising'>
-              <p>
-                We may display advertisements on our website tailored to user
-                interests. This allows us to deliver relevant promotions based
-                on your browsing behavior. Advertisers do not have access to
-                your personal information. We may use aggregated,
-                non-identifiable data to help advertisers target appropriate
-                audiences. For example, we may include an advertisement in a
-                marketing email to customers who have shown interest in a
-                relevant product category.
-              </p>
-            </Section>
-
-            <Section title='Site Usage Tracking'>
-              <p>
-                We monitor how users navigate and interact with our site,
-                including the pages viewed, ads clicked, products added to the
-                cart, and completed purchases. This information is used to
-                troubleshoot technical issues, optimize performance, and better
-                understand customer preferences. Aggregated usage statistics may
-                be shared with business partners or third parties.
-              </p>
-            </Section>
-
-            <Section title='Cookies'>
-              <p>
-                We use cookies to improve your browsing experience and enable
-                site functionality. Cookies help store preferences, track user
-                sessions, and deliver relevant content. Third parties may also
-                use cookies in association with our site for analytics or
-                advertising purposes.
-              </p>
-            </Section>
-
-            <Section title='Sharing Your Information'>
-              <p>
-                We do not sell, trade, or rent your personal data to third
-                parties. However, we may share your information with trusted
-                partners in the following situations:
-              </p>
-              <ul className='list-disc pl-6 space-y-1'>
-                <li>
-                  <strong>Service Providers:</strong>We work with third-party
-                  vendors who assist us with essential services such as payment
-                  processing, order delivery, and email communications.
-                </li>
-                <li>
-                  <strong>Legal Compliance:</strong> We may disclose information
-                  if required by law or if necessary to protect our legal rights
-                  or the safety of our users and business.
-                </li>
-              </ul>
-            </Section>
-
-            <Section title='How We Safeguard Your Information'>
-              <ul className='list-disc pl-6 space-y-1'>
-                <li>SSL encryption for secure transactions</li>
-                <li>Routine security audits and platform updates</li>
-                <li>Restricted data access to authorized personnel only</li>
-              </ul>
-            </Section>
-
-            <Section title='Your Data Rights'>
-              <ul className='list-disc pl-6 space-y-1'>
-                <li>
-                  <strong>Access:</strong> Request a copy of your data
-                </li>
-                <li>
-                  <strong>Correction:</strong> Fix inaccurate information
-                </li>
-                <li>
-                  <strong>Deletion:</strong> Ask us to delete your data
-                </li>
-                <li>
-                  <strong>Opt-Out:</strong> Unsubscribe from promotional content
-                </li>
-              </ul>
-              <p>
-                To exercise your rights, email us at{' '}
-                <a
-                  href='mailto:support@embroidize.com'
-                  className='text-blue-600 underline'
-                >
-                  support@embroidize.com
-                </a>
-                .
-              </p>
-            </Section>
-
-            <Section title='Third-Party Links'>
-              <p>
-                Our website may feature links to external websites operated by
-                third parties. We are not responsible for the content, policies,
-                or privacy practices of these sites. We encourage you to review
-                their privacy statements before providing any personal data.
-              </p>
-            </Section>
-
-            <Section title='Policy Updates'>
-              <p>
-                We may revise this Privacy Policy periodically to reflect
-                changes in our practices or for legal and operational reasons.
-                Any updates will be posted on this page with a new "last
-                updated" date. We recommend checking this page occasionally to
-                stay informed on how we protect your data.
-              </p>
-            </Section>
-
-            <Section title='Contact Information'>
-              <p>
-                Email:{' '}
-                <a
-                  href='mailto:support@embroidize.com'
-                  className='text-blue-600 underline'
-                >
-                  support@embroidize.com
-                </a>
-              </p>
-              {/* <p>Phone: +0123456789</p> */}
-            </Section>
+        {sections.map((section, index) => (
+          <div key={index} className='mb-8 border-t pt-6'>
+            <h2 className='text-xl font-semibold mb-2'>{section.title}</h2>
+            <p className='whitespace-pre-line'>{section.content}</p>
           </div>
-        </div>
+        ))}
       </main>
+
       <Footer />
     </>
-  );
-}
-
-function Section({ title, children }) {
-  return (
-    <div className='border-t pt-6'>
-      <h2 className='text-xl font-semibold mb-3'>{title}</h2>
-      <div className='space-y-3'>{children}</div>
-    </div>
   );
 }

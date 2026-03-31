@@ -1,223 +1,158 @@
 import Image from 'next/image';
 import Link from 'next/link';
-const mainLogo = '/logo-black.png';
+import Script from 'next/script';
 
 const Footer = () => {
   return (
-    <footer className='py-6 bg-[#f9f9f9] text-gray-700 mt-12]'>
-      <div className='container flex flex-wrap text-left lg:text-left'>
-        {/* Logo Section */}
-        <div className='w-full lg:w-6/12 pb-6'>
-          <Link
-            href='/'
-            prefetch={false}
-            className='relative block w-[160px] h-[80px] sm:w-[120px] sm:h-[60px] md:w-[160px] md:h-[80px]'
-            aria-label='Navigate to homepage'
-          >
-            <Image
-              src={mainLogo || ''}
-              alt='Company Logo'
-              fill
-              sizes='(min-width: 640px) 100px, 120px'
-              priority
-              className='object-contain'
-            />
-          </Link>
-          <p className='text-lg mt-0 mb-4'>
-            Download free embroidery designs instantly – Browse unlimited
-            machine embroidery Design in multiple categories and styles. All
-            designs are tested and come in the most popular formats
-          </p>
-          <div className='flex items-center justify-start gap-x-2'>
-            {/* Social Media Links */}
-            <Link
-              href='https://www.linkedin.com/company/embroidize-official/'
-              target='_blank'
-              aria-label='linkedin-button'
-            >
-              <i className='ri-linkedin-fill rounded-full bg-black text-white p-2 text-base'></i>
-            </Link>
-            <Link
-              href='https://www.pinterest.com/embroidize/'
-              target='_blank'
-              aria-label='pinterest-button'
-            >
-              <i className='ri-pinterest-fill rounded-full bg-black text-white p-2 text-base'></i>
-            </Link>
-            <Link
-              href='https://www.facebook.com/embroidize'
-              target='_blank'
-              aria-label='facebook-button'
-            >
-              <i className='ri-facebook-circle-fill rounded-full bg-black text-white p-2 text-base'></i>
-            </Link>
-            <Link
-              href='https://x.com/embroidize'
-              target='_blank'
-              aria-label='x-button'
-            >
-              <i className='ri-twitter-x-fill rounded-full bg-black text-white p-2 text-base'></i>
-            </Link>
-            <Link
-              href='https://www.instagram.com/embroidize/'
-              target='_blank'
-              aria-label='instagram-button'
-            >
-              <i className='ri-instagram-fill rounded-full bg-black text-white p-2 text-base'></i>
-            </Link>
-            <Link
-              href='https://www.youtube.com/channel/UCVCNRSIGLqdBG6O9D1xHGpQ'
-              target='_blank'
-              aria-label='youtube-button'
-            >
-              <i className='ri-youtube-fill rounded-full bg-black text-white p-2 text-base'></i>
-            </Link>
-          </div>
-        </div>
+    <footer className='bg-[#fafafa] border-t text-gray-600'>
+      {/* SEO STRUCTURED DATA */}
+      <Script
+        id='organization-schema'
+        type='application/ld+json'
+        dangerouslySetInnerHTML={{
+          __html: JSON.stringify({
+            '@context': 'https://schema.org',
+            '@type': 'Organization',
+            name: 'Embroidize LLC',
+            url: 'https://embroidize.com',
+            logo: 'https://embroidize.com/og-banner.jpg',
+            contactPoint: {
+              '@type': 'ContactPoint',
+              email: 'support@embroidize.com',
+              contactType: 'customer support',
+            },
+          }),
+        }}
+      />
 
-        {/* Useful Links Section */}
-        <div className='w-full lg:w-6/12'>
-          <div className='flex flex-wrap items-top mb-6 font-semibold'>
-            <div className='w-full lg:w-4/12 ml-auto'>
-              <ul className='space-y-3'>
-                <li>
-                  <Link
-                    href='/products'
-                    prefetch={false}
-                    className='text-gray-600 hover:underline transition-colors duration-200'
-                  >
-                    Products
-                  </Link>
-                </li>
-                <li>
-                  <Link
-                    href='/bundles'
-                    prefetch={false}
-                    className='text-gray-600 hover:underline transition-colors duration-200'
-                  >
-                    Bundles
-                  </Link>
-                </li>
-                <li>
-                  <Link
-                    href='/blog'
-                    prefetch={false}
-                    className='text-gray-600 hover:underline transition-colors duration-200'
-                  >
-                    Blogs
-                  </Link>
-                </li>
-                <li>
-                  <Link
-                    href='/resources'
-                    prefetch={false}
-                    className='text-gray-600 hover:underline transition-colors duration-200'
-                  >
-                    Resources
-                  </Link>
-                </li>
-                <li>
-                  <Link
-                    href='/user/my-plan'
-                    prefetch={false}
-                    className='text-gray-600 hover:underline transition-colors duration-200'
-                  >
-                    My Plan
-                  </Link>
-                </li>
-                <li>
-                  <Link
-                    target='_blank'
-                    rel='noopener noreferrer'
-                    className='text-gray-600 hover:underline transition-colors duration-200 inline-flex items-center gap-1'
-                    href='https://www.etsy.com/shop/embroidize'
-                  >
-                    Etsy Shop
-                    <svg
-                      className='w-3 h-3'
-                      fill='none'
-                      stroke='currentColor'
-                      viewBox='0 0 24 24'
+      <div className='max-w-7xl mx-auto px-6 py-12'>
+        {/* GRID */}
+        <div className='grid gap-10 md:grid-cols-2 lg:grid-cols-4'>
+          {/* BRAND */}
+          <div className='space-y-4'>
+            <Link href='/' className='block w-[140px] h-[60px] relative'>
+              <Image
+                src='/logo-black.png'
+                alt='Embroidize Logo'
+                fill
+                className='object-contain'
+              />
+            </Link>
+
+            <p className='text-sm leading-relaxed text-gray-500'>
+              Premium embroidery designs for creators & small businesses.
+              Instant download. Commercial-friendly.
+            </p>
+          </div>
+
+          {/* LINKS */}
+          {[
+            {
+              title: 'Product',
+              links: [
+                { name: 'All Designs', href: '/products' },
+                { name: 'Bundles', href: '/bundles' },
+                { name: 'Resources', href: '/resources' },
+                { name: 'Blog', href: '/blog' },
+              ],
+            },
+            {
+              title: 'Company',
+              links: [
+                { name: 'About', href: '/about-us' },
+                { name: 'Contact', href: '/contact-us' },
+                {
+                  name: 'Custom Digitizing',
+                  href: '/custom-embroidery-digitizing-service',
+                },
+                {
+                  name: 'Etsy Shop',
+                  href: 'https://www.etsy.com/shop/embroidize',
+                  external: true,
+                },
+              ],
+            },
+            {
+              title: 'Legal',
+              links: [
+                { name: 'Terms', href: '/terms-and-conditions' },
+                { name: 'Privacy', href: '/privacy-policy' },
+              ],
+            },
+          ].map((section) => (
+            <div key={section.title}>
+              <h3 className='font-semibold text-gray-900 mb-4'>
+                {section.title}
+              </h3>
+              <ul className='space-y-2 text-sm'>
+                {section.links.map((link) => (
+                  <li key={link.name}>
+                    <Link
+                      href={link.href}
+                      target={link.external ? '_blank' : '_self'}
+                      className='hover:text-black transition'
                     >
-                      <path
-                        strokeLinecap='round'
-                        strokeLinejoin='round'
-                        strokeWidth={2}
-                        d='M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14'
-                      />
-                    </svg>
-                  </Link>
-                </li>
+                      {link.name}
+                    </Link>
+                  </li>
+                ))}
               </ul>
+            </div>
+          ))}
+        </div>
+
+        {/* BOTTOM BAR */}
+        <div className='mt-12 pt-6 border-t flex flex-col md:flex-row justify-between items-start md:items-center gap-6'>
+          {/* CONTACT */}
+          <div className='text-sm space-y-1'>
+            <p className='font-medium text-gray-900'>Embroidize LLC</p>
+
+            <a
+              href='mailto:support@embroidize.com'
+              className='block hover:text-blue-500 transition'
+            >
+              support@embroidize.com
+            </a>
+
+            <p className='text-gray-400 text-xs'>
+              Albuquerque, NM, United States
+            </p>
+          </div>
+
+          {/* SOCIAL + TRUST */}
+          <div className='flex flex-col items-start md:items-end gap-3'>
+            <div className='flex gap-3 text-lg'>
+              {[
+                [
+                  'linkedin',
+                  'https://www.linkedin.com/company/embroidize-official/',
+                ],
+                ['pinterest', 'https://www.pinterest.com/embroidize/'],
+                ['facebook', 'https://www.facebook.com/embroidize'],
+                ['twitter-x', 'https://x.com/embroidize'],
+                ['instagram', 'https://www.instagram.com/embroidize/'],
+                [
+                  'youtube',
+                  'https://www.youtube.com/channel/UCVCNRSIGLqdBG6O9D1xHGpQ',
+                ],
+              ].map(([icon, url]) => (
+                <Link key={icon} href={url} target='_blank'>
+                  <i
+                    className={`ri-${icon}-fill hover:text-black transition`}
+                  />
+                </Link>
+              ))}
             </div>
 
-            <div className='w-full lg:w-4/12 mt-3 lg:mt-0'>
-              <ul className='space-y-3'>
-                <li>
-                  <Link
-                    className='text-gray-600 hover:underline transition-colors duration-200'
-                    href='/terms-and-conditions'
-                    prefetch={false}
-                  >
-                    Terms &amp; Conditions
-                  </Link>
-                </li>
-                <li>
-                  <Link
-                    className='text-gray-600 hover:underline transition-colors duration-200'
-                    href='/privacy-policy'
-                    prefetch={false}
-                  >
-                    Privacy Policy
-                  </Link>
-                </li>
-                <li>
-                  <Link
-                    className='text-gray-600 hover:underline transition-colors duration-200'
-                    href='/about-us'
-                    prefetch={false}
-                  >
-                    About Us
-                  </Link>
-                </li>
-                <li>
-                  <Link
-                    className='text-gray-600 hover:underline transition-colors duration-200'
-                    href='/contact-us'
-                    prefetch={false}
-                  >
-                    Contact Us
-                  </Link>
-                </li>
-                <li>
-                  <Link
-                    className='text-gray-600 hover:underline transition-colors duration-200'
-                    href='/custom-embroidery-digitizing-service'
-                    prefetch={false}
-                  >
-                    Custom Digitizing
-                  </Link>
-                </li>
-                {/* <li>
-                  <Link
-                    className='text-gray-600 hover:underline transition-colors duration-200'
-                    href='/subscriptions'
-                    prefetch={false}
-                  >
-                    Subscriptions
-                  </Link>
-                </li> */}
-              </ul>
-            </div>
+            <p className='text-xs text-gray-400'>
+              Secure payments powered by <strong>Stripe</strong>
+            </p>
           </div>
         </div>
-      </div>
 
-      {/* Divider and Footer Info */}
-      <div className='flex flex-wrap items-center md:justify-between justify-between py-2 px-1 border-t border-gray-300'>
-        <div className='w-full md:w-4/12 px-4 mx-auto text-center'>
-          <strong>Embroidize</strong>
-          <p>&copy;{new Date().getFullYear()}. All rights reserved.</p>
+        {/* COPYRIGHT */}
+        <div className='text-center text-xs text-gray-400 mt-8'>
+          © {new Date().getFullYear()} Embroidize LLC. All rights reserved.
         </div>
       </div>
     </footer>

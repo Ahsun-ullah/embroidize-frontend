@@ -5,8 +5,8 @@ import { blurDataURL } from '@/utils/blur';
 import Image from 'next/image';
 import Link from 'next/link';
 import React from 'react';
-import SkuFlag from './SkuFlag';
 import AdminChoiceStar from './AdminChoiceStar';
+import SkuFlag from './SkuFlag';
 
 function DownloadIcon(props) {
   return (
@@ -53,7 +53,7 @@ const ProductCard = React.memo(function ProductCard({ item, index = 0 }) {
   const { data: userInfoData } = useUserInfoQuery();
 
   return (
-    <div className='bg-white rounded-3xl border overflow-hidden relative'>
+    <div className='bg-[#fafafa] rounded-3xl border overflow-hidden relative'>
       {/* SKU FLAG */}
       {item?.sku_code && userInfoData?.role === 'admin' && (
         <SkuFlag sku={item.sku_code} />
@@ -85,39 +85,42 @@ const ProductCard = React.memo(function ProductCard({ item, index = 0 }) {
             blurDataURL={blur}
           />
         </div>
-
-        <div className='flex flex-col p-4 gap-y-2'>
-          <div className='flex items-center justify-between gap-4'>
-            <p
-              className='text-sm sm:text-base md:text-lg font-semibold capitalize truncate'
-              title={productName}
-            >
-              {productName}
-            </p>
-            <span
-              className={`text-sm sm:text-base md:text-lg px-2 rounded-md shadow- ${isFree ? ' font-extrabold uppercase' : 'text-black font-semibold'}`}
-            >
-              {priceLabel}
-            </span>
-          </div>
-
-          <div className='flex items-center justify-between gap-4 text-xs sm:text-sm md:text-base'>
-            <div
-              className='text-black capitalize font-semibold truncate'
-              title={categoryName}
-            >
-              {categoryName.replace(/embroidery designs/gi, '').trim()}
-            </div>
-            <span className='font-semibold flex items-center gap-1'>
-              <DownloadIcon />
-              {new Intl.NumberFormat('en-US', {
-                notation: 'compact',
-                maximumFractionDigits: 1,
-              }).format(downloadCount)}
-            </span>
-          </div>
-        </div>
       </Link>
+
+      <div className='flex flex-col p-4 '>
+        <div className='flex items-center justify-between gap-2'>
+          <Link
+            href={productLink}
+            className='text-sm sm:text-sm md:text-base font-semibold capitalize truncate'
+            title={productName}
+          >
+            {productName}
+          </Link>
+          <span
+            className={` flex items-center gap-1 ${isFree ? ' font-semibold uppercase' :
+              'text-black font-medium'}`}
+          >
+            {priceLabel}
+          </span>
+        </div>
+
+        <div className='flex items-center justify-between gap-4'>
+          <Link
+            href={categoryLink}
+            className='text-black text-xs sm:text-xs md:text-sm font-normal capitalize  truncate'
+            title={categoryName}
+          >
+            {categoryName.replace(/embroidery designs/gi, '').trim()}
+          </Link>
+          <span className='font-semibold flex items-center gap-1'>
+            <DownloadIcon />
+            {new Intl.NumberFormat('en-US', {
+              notation: 'compact',
+              maximumFractionDigits: 1,
+            }).format(downloadCount)}
+          </span>
+        </div>
+      </div>
     </div>
   );
 });

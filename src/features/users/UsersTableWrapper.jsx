@@ -173,11 +173,13 @@ export default function UsersTableWrapper({
       setIsExporting(true);
 
       const params = new URLSearchParams();
+
       if (filters.search) params.set('search', filters.search);
       if (filters.minDownloads)
         params.set('minDownloads', filters.minDownloads);
       if (filters.startDate) params.set('startDate', filters.startDate);
       if (filters.endDate) params.set('endDate', filters.endDate);
+
       params.set('export', 'true');
 
       const apiUrl = process.env.NEXT_PUBLIC_BASE_API_URL_PROD;
@@ -192,36 +194,40 @@ export default function UsersTableWrapper({
           .find((row) => row.startsWith('token='))
           ?.split('=')[1];
 
-      const headers = new Headers();
+      const headers = {};
       if (token) {
-        headers.set('Authorization', `Bearer ${token}`);
+        headers['Authorization'] = `Bearer ${token}`;
       }
 
       const response = await fetch(`${apiUrl}/all-users?${params.toString()}`, {
         method: 'GET',
         headers,
-        cache: 'no-store',
       });
 
       if (!response.ok) {
-        throw new Error(`Export request failed with status ${response.status}`);
+        throw new Error(`Export failed: ${response.status}`);
       }
 
-      const result = await response.json();
-      const users = result?.data?.users ?? [];
+      // ✅ IMPORTANT: get blob instead of json
+      const blob = await response.blob();
 
-      if (!Array.isArray(users) || users.length === 0) {
-        alert('No data found for export.');
-        return;
-      }
-
-      const csv = convertUsersToCSV(users);
+      // ✅ dynamic filename
       const fileName =
         filters.startDate && filters.endDate
           ? `users-${filters.startDate}-to-${filters.endDate}.csv`
           : 'users-export.csv';
 
-      downloadCSV(csv, fileName);
+      // ✅ create download link
+      const url = window.URL.createObjectURL(blob);
+
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = fileName;
+      document.body.appendChild(a);
+      a.click();
+
+      a.remove();
+      window.URL.revokeObjectURL(url);
     } catch (error) {
       console.error('Export failed:', error);
       alert('Failed to export users.');
@@ -293,12 +299,13 @@ export default function UsersTableWrapper({
         </Button>
 
         <Button
-          className='min-w-fit'
+          className='min-w-fit '
           color='primary'
           onPress={handleExport}
           isLoading={isExporting}
+          isDisabled={isExporting}
         >
-          Export
+          {isExporting ? 'Exporting...' : 'Export'}
         </Button>
       </div>
     </div>

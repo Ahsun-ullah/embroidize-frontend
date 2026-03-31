@@ -67,7 +67,7 @@ export default async function SingleBundlePage({ params, searchParams }) {
     bundleData?.products?.slice(startIndex, endIndex) || [];
 
   return (
-    <>
+    <div className='bg-[#fafafa]'>
       <Header />
 
       <section className='container mx-auto text-black'>
@@ -118,6 +118,6 @@ export default async function SingleBundlePage({ params, searchParams }) {
       </section>
 
       <Footer />
-    </>
+    </div>
   );
 }

@@ -35,7 +35,7 @@ export default async function AllUsersListPage({ searchParams }) {
 
       <UsersTableWrapper
         initialData={users ?? []}
-        pagination={pagination} // Pass pagination from server
+        pagination={pagination} 
         columns={columns}
       />
     </div>

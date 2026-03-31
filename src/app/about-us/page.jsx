@@ -2,16 +2,16 @@ import Footer from '@/components/user/HomePage/Footer';
 import Header from '@/components/user/HomePage/Header';
 
 export const metadata = {
-  title: 'About Us - Embroidize',
+  title: 'About Embroidize – Premium Embroidery Design Platform',
   description:
-    'Learn about Embroidize, your go-to platform for high-quality, free embroidery machine designs. Explore our story, mission, and commitment to offering designs in multiple formats.',
+    'Discover Embroidize, a leading platform for high-quality embroidery machine designs. Free downloads, premium files, and creator-focused tools for embroidery enthusiasts and small businesses.',
   alternates: {
     canonical: 'https://embroidize.com/about-us',
   },
   openGraph: {
-    title: 'About Us - Embroidize',
+    title: 'About Embroidize – Premium Embroidery Design Platform',
     description:
-      'Learn about Embroidize, your go-to platform for high-quality, free embroidery machine designs. Explore our story, mission, and commitment to offering designs in multiple formats.',
+      'Explore Embroidize — your trusted source for high-quality embroidery designs with free downloads and commercial use options.',
     url: 'https://embroidize.com',
     siteName: 'Embroidize',
     images: [
@@ -23,13 +23,6 @@ export const metadata = {
     ],
     type: 'website',
   },
-  twitter: {
-    card: 'summary_large_image',
-    title: 'About Us - Embroidize',
-    description:
-      'Learn about Embroidize, your go-to platform for high-quality, free embroidery machine designs. Explore our story, mission, and commitment to offering designs in multiple formats.',
-    images: ['https://embroidize.com/og-banner.jpg'],
-  },
   metadataBase: new URL('https://embroidize.com'),
 };
 
@@ -37,111 +30,127 @@ export default function AboutUsPage() {
   return (
     <>
       <Header />
-      <main className='container mx-auto px-6 py-16 text-gray-800'>
-        {/* Intro */}
 
-        <h1 className='text-center text-4xl font-bold text-gray-900 '>
-          About Embroidize
-        </h1>
-        <p className='text-center text-lg text-gray-600 max-w-2xl mx-auto'>
-          Where creativity meets convenience — your go-to hub for premium
-          embroidery designs.
-        </p>
+      <main className="container mx-auto px-6 py-16 text-gray-800">
+        {/* HERO */}
+        <div className="text-center max-w-3xl mx-auto mb-16">
+          <h1 className="text-4xl font-bold text-gray-900 mb-4">
+            About Embroidize
+          </h1>
+          <p className="text-lg text-gray-600">
+            A modern platform built for embroidery creators — combining
+            creativity, accessibility, and professional-quality digital designs.
+          </p>
+        </div>
 
-        <div className='max-w-6xl mx-auto space-y-16'>
-          {/* Mission Section */}
-          <section className='grid md:grid-cols-2 gap-10 items-center p-8'>
-            <div className='space-y-4'>
-              <h2 className='text-2xl font-semibold text-gray-900'>
+        <div className="max-w-6xl mx-auto space-y-20">
+
+          {/* MISSION */}
+          <section className="grid md:grid-cols-2 gap-12 items-center">
+            <div className="space-y-4">
+              <h2 className="text-2xl font-semibold text-gray-900">
                 Our Mission
               </h2>
-              <p className='text-gray-700 leading-relaxed'>
-                At <strong>Embroidize</strong>, we believe embroidery should be
-                accessible, fun, and inspiring. Whether you're a hobbyist or a
-                professional crafter, our mission is to deliver beautifully
-                crafted digital embroidery designs that help you bring your
-                creative projects to life.
+              <p className="text-gray-700 leading-relaxed">
+                At <strong>Embroidize</strong>, our mission is to make embroidery
+                design accessible, reliable, and inspiring for creators
+                worldwide. Whether you're a beginner or a professional, we
+                provide high-quality digital embroidery files that bring your
+                ideas to life.
               </p>
-              <p className='text-gray-700 leading-relaxed'>
-                Our goal is to empower makers with the tools they need to
-                express themselves through thread and color. We believe that
-                creativity shouldn’t be limited by budget or access — that’s why
-                we offer affordable and free downloads so anyone, anywhere, can
-                start stitching their story.
-              </p>
-              <p className='text-gray-700 leading-relaxed'>
-                Embroidery is a timeless craft, but we’re bringing it into the
-                digital age. By offering downloadable designs compatible with
-                modern embroidery machines, we help preserve the beauty of
-                tradition while embracing the convenience of technology.
+              <p className="text-gray-700 leading-relaxed">
+                We focus on delivering designs that are not only visually
+                appealing but also optimized for real-world stitching across
+                different machines and formats.
               </p>
             </div>
-            <div>
-              <img
-                src='https://embroidize.com/og-banner.jpg'
-                alt='Embroidery Designs'
-                className='rounded-2xl shadow-2xl w-full'
-              />
-            </div>
+
+            <img
+              src="https://embroidize.com/og-banner.jpg"
+              alt="Embroidery designs"
+              className="rounded-2xl shadow-xl w-full"
+            />
           </section>
 
-          {/* Free Downloads Section */}
-          <section className='bg-gray-50 p-8 space-y-4 my-4'>
-            <h2 className='text-2xl font-semibold text-gray-900'>
-              Free Downloads with Fair Use
+          {/* WHAT WE OFFER */}
+          <section className="bg-gray-50 p-10 rounded-2xl space-y-6">
+            <h2 className="text-2xl font-semibold text-gray-900">
+              What We Offer
             </h2>
-            <p className='text-gray-700 leading-relaxed'>
-              We know how important it is to try before you commit — that’s why
-              we let users download a limited number of designs for free every
-              week. No hidden fees, no gimmicks. Just quality designs made for
-              creators like you.
-            </p>
-            <p className='text-gray-700'>
-              Our download limits help keep the platform sustainable while still
-              empowering the community with accessible resources.
-            </p>
-          </section>
 
-          {/* Why Choose Us Section */}
-          <section className='space-y-4 p-8'>
-            <h2 className='text-2xl font-semibold text-gray-900'>
-              Why Choose Embroidize?
-            </h2>
-            <ul className='list-disc pl-6 space-y-2 text-gray-700'>
-              <li> Curated and original embroidery designs</li>
-              <li> Free daily downloads — no strings attached</li>
-              <li> Easy-to-use formats for all major machines</li>
-              <li> A platform built by creators, for creators</li>
-              <li> Secure access and ethical use policies</li>
+            <ul className="grid md:grid-cols-2 gap-4 text-gray-700">
+              <li>✔ High-quality embroidery design files</li>
+              <li>✔ Multiple machine formats (PES, DST, JEF, EXP, etc.)</li>
+              <li>✔ Instant digital downloads</li>
+              <li>✔ Free daily downloads for registered users</li>
+              <li>✔ Premium and subscription-based access</li>
+              <li>✔ Commercial use for small businesses</li>
             </ul>
           </section>
 
-          {/* Community Section */}
-          <section className='bg-gradient-to-r from-blue-50 to-purple-50 p-8 rounded-2xl shadow-sm space-y-4'>
-            <h2 className='text-2xl font-semibold text-gray-900'>
+          {/* FREE SYSTEM */}
+          <section className="space-y-4">
+            <h2 className="text-2xl font-semibold text-gray-900">
+              Free Downloads with Fair Use
+            </h2>
+            <p className="text-gray-700 leading-relaxed">
+              We offer a limited number of free downloads to help users explore
+              our designs before committing. This system ensures fair access
+              while maintaining platform sustainability.
+            </p>
+          </section>
+
+          {/* WHY TRUST US */}
+          <section className="space-y-6">
+            <h2 className="text-2xl font-semibold text-gray-900">
+              Why Choose Embroidize?
+            </h2>
+
+            <ul className="grid md:grid-cols-2 gap-4 text-gray-700">
+              <li>✔ Professionally crafted embroidery designs</li>
+              <li>✔ Trusted by creators and small businesses</li>
+              <li>✔ Optimized files for smooth machine performance</li>
+              <li>✔ Secure platform with protected downloads</li>
+              <li>✔ Continuous updates and new designs</li>
+              <li>✔ Reliable customer support</li>
+            </ul>
+          </section>
+
+          {/* BUSINESS / BRAND TRUST */}
+          <section className="bg-gradient-to-r from-blue-50 to-purple-50 p-10 rounded-2xl space-y-4">
+            <h2 className="text-2xl font-semibold text-gray-900">
+              Built for Creators & Small Businesses
+            </h2>
+            <p className="text-gray-700 leading-relaxed">
+              Embroidize is designed to support both hobbyists and entrepreneurs.
+              Whether you're creating custom gifts or running a small embroidery
+              business, our designs are ready for real-world use.
+            </p>
+          </section>
+
+          {/* CTA */}
+          <section className="text-center space-y-4">
+            <h2 className="text-2xl font-semibold text-gray-900">
               Join Our Creative Community
             </h2>
-            <p className='text-gray-700 leading-relaxed'>
-              Whether you're decorating a tote bag, personalizing gifts, or
-              designing products for your small business, Embroidize is here to
-              support your creative journey. We're constantly updating our
-              collection with fresh designs and listening to what our users
-              need.
+            <p className="text-gray-700">
+              Start exploring designs, download your favorites, and bring your
+              ideas to life with Embroidize.
             </p>
-            <p className='text-gray-700'>
-              Got feedback or design requests? We’d love to hear from you! Reach
-              out at{' '}
+
+            <p className="text-gray-700">
+              Need help or have a request? Contact us at{' '}
               <a
-                href='mailto:support@embroidize.com'
-                className='text-blue-600 underline font-medium'
+                href="mailto:support@embroidize.com?subject=Support Request - Embroidize"
+                className="text-blue-600 underline font-medium hover:text-blue-800"
               >
                 support@embroidize.com
               </a>
-              .
             </p>
           </section>
         </div>
       </main>
+
       <Footer />
     </>
   );
