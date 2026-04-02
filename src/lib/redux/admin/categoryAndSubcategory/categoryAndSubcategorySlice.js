@@ -54,20 +54,12 @@ export const categoryAndSubcategorySlice = createApi({
         };
       },
     }),
-    // getPublicProductCategories: builder.query({
-    //   query: () => ({
-    //     url: '/public/product-category',
-    //     method: 'GET',
-    //   }),
-    // }),
     getPublicProductCategories: builder.query({
       query: () => ({
         url: '/public/product-category',
         method: 'GET',
       }),
-      // Cache the data for 24 hours (in seconds)
-      keepUnusedDataFor: 86400,
-      // Don't auto-refetch on mount or arg change
+      keepUnusedDataFor: 60 * 60 * 24 * 30,
       refetchOnMountOrArgChange: false,
       refetchOnReconnect: false,
     }),

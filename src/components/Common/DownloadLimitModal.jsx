@@ -2,7 +2,7 @@ import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { useEffect } from 'react';
 
- function DownloadLimitModal({ limitModalData, onClose, formatDuration }) {
+function DownloadLimitModal({ limitModalData, onClose, formatDuration }) {
   const router = useRouter();
 
   // FIX #3: Close on Escape key
@@ -25,12 +25,12 @@ import { useEffect } from 'react';
   return (
     // FIX #1: Backdrop click closes modal
     <div
-      className='fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50'
+      className='fixed inset-0  bg-black/50 backdrop-blur-sm flex items-center justify-center z-50'
       onClick={onClose}
     >
       {/* FIX #1: Stop propagation so clicks inside card don't close modal */}
       <div
-        className='relative bg-white rounded-2xl p-8 max-w-lg w-full mx-4 text-center shadow-xl animate-fadeIn'
+        className='relative bg-white rounded-2xl p-8 max-w-lg w-full mx-4 text-center shadow-xl animate-fadeIn '
         onClick={(e) => e.stopPropagation()}
       >
         {/* FIX #2: Close (×) button */}
@@ -79,25 +79,25 @@ import { useEffect } from 'react';
               Free plan limit reached ({limitModalData.count} downloads /{' '}
               {formatDuration(limitModalData.duration)}).
               <br />
-              <span className='text-sm text-gray-500'>
+              {/* <span className='text-sm text-gray-500'>
                 Unlock unlimited downloads with a premium plan.
-              </span>
+              </span> */}
             </>
           )}
         </p>
 
         {/* Value Proposition */}
-        <div className='bg-gray-50 rounded-lg p-4 mb-5 text-left text-sm text-gray-700'>
+        {/* <div className='bg-gray-50 rounded-lg p-4 mb-5 text-left text-sm text-gray-700'>
           <ul className='space-y-1'>
             <li>✅ Unlimited or higher download limits</li>
             <li>⚡ Faster access to all premium designs</li>
             <li>📁 All formats included (PES, DST, EXP, etc.)</li>
             <li>🚫 No waiting or restrictions</li>
           </ul>
-        </div>
+        </div> */}
 
         {/* FIX #6: All CTA buttons in one consistent group */}
-        <div className='flex gap-3 justify-center'>
+        {/* <div className='flex gap-3 justify-center'>
           <button
             className='bg-primary hover:bg-primary/90 text-white px-6 py-2 rounded-lg font-medium transition'
             onClick={() => {
@@ -114,7 +114,7 @@ import { useEffect } from 'react';
           >
             Maybe Later
           </button>
-        </div>
+        </div> */}
 
         {/* FIX #5 + #6: My Plan as full-width styled link, separated below CTAs */}
         <div className='mt-3'>

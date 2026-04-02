@@ -109,7 +109,7 @@ export default async function AllProductsPage({ searchParams }) {
   };
 
   return (
-    <div className='bg-[#fafafa]'>
+    <div className='bg-[#f4f4f4]'>
       <Header />
       {/* listens for new-product events and re-runs this SSR page */}
       <ProductUpdates />

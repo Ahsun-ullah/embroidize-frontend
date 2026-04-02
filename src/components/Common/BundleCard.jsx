@@ -17,20 +17,20 @@ const BundleCard = React.memo(function BundleCard({ item, index = 0 }) {
   const blur = item?.image?.blurDataURL || blurDataURL(600, 400);
 
   return (
-    <div className='bg-[#fafafa] rounded-3xl border overflow-hidden relative'>
+    <div>
       <Link
         href={productLink}
         className='block group'
         aria-label={`View details for ${productName}`}
       >
-        <div className='relative w-full aspect-[3/2]'>
+        <div className='relative w-full aspect-[3/2] overflow-hidden rounded-3xl bg-gray-200'>
           <Image
             src={imageUrl}
             alt={productName}
             fill
             quality={78}
-            sizes='(max-width:640px) 100vw, (max-width:1024px) 50vw, 33vw'
             className='object-cover object-center transition-transform duration-300 group-hover:scale-105'
+            sizes='(max-width:640px) 100vw, (max-width:1024px) 50vw, 33vw'
             priority={isLCP}
             fetchPriority={isLCP ? 'high' : 'auto'}
             placeholder='blur'
@@ -38,16 +38,16 @@ const BundleCard = React.memo(function BundleCard({ item, index = 0 }) {
           />
         </div>
 
-        <div className='flex flex-col p-4 gap-y-2'>
+        <div className='flex flex-col p-4'>
           <p
-            className='text-sm sm:text-base md:text-lg font-semibold capitalize truncate'
+            className='text-xs sm:text-xs md:text-sm font-medium capitalize truncate'
             title={productName}
           >
             {productName}
           </p>
 
           {item?.products?.length != null && (
-            <p className='text-gray-500 font-bold text-base'>
+            <p className='text-gray-500 font-medium text-base'>
               {item?.products?.length} Design
               {item?.products?.length !== 1 ? 's' : ''}
             </p>

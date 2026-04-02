@@ -2,18 +2,10 @@ import ScrollToTopBottom from '@/components/Common/ScrollToTopBottom';
 import { NProgressProvider } from '@/components/providers/NProgressProvider';
 import ClientProviders from '@/lib/providers/ClientProviders';
 import { GoogleTagManager } from '@next/third-parties/google';
-import { Plus_Jakarta_Sans } from 'next/font/google';
 import Script from 'next/script';
 import { Suspense } from 'react';
 import 'remixicon/fonts/remixicon.css';
 import './globals.css';
-
-export const plusJakarta = Plus_Jakarta_Sans({
-  subsets: ['latin'],
-  weight: ['300', '400', '500', '600', '700', '800'],
-  display: 'swap',
-  variable: '--font-sans',
-});
 
 export const metadata = {
   metadataBase: new URL('https://embroidize.com'),
@@ -87,7 +79,7 @@ export default function RootLayout({ children }) {
       </head>
 
       <body
-        className={`${plusJakarta.className} antialiased text-gray-900 bg-white`}
+        className={` antialiased text-gray-900 bg-white`}
         suppressHydrationWarning
       >
         {/* Google Tag Manager */}

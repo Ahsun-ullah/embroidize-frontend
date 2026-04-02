@@ -99,7 +99,7 @@ export default async function ProductDetails({ params }) {
   }
 
   return (
-    <>
+    <div className='bg-[#f4f4f4]'>
       <Header />
 
       <script
@@ -159,6 +159,6 @@ export default async function ProductDetails({ params }) {
         popularProducts={popularProducts}
       />
       <Footer />
-    </>
+    </div>
   );
 }

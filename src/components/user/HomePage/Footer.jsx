@@ -39,7 +39,7 @@ const Footer = () => {
               />
             </Link>
 
-            <p className='text-sm leading-relaxed text-gray-500'>
+            <p className='text-base  leading-relaxed text-gray-500'>
               Premium embroidery designs for creators & small businesses.
               Instant download. Commercial-friendly.
             </p>
@@ -75,8 +75,12 @@ const Footer = () => {
             {
               title: 'Legal',
               links: [
-                { name: 'Terms', href: '/terms-and-conditions' },
-                { name: 'Privacy', href: '/privacy-policy' },
+                { name: 'Terms & Conditions', href: '/terms-and-conditions' },
+                { name: 'Privacy Policy', href: '/privacy-policy' },
+                {
+                  name: 'Refund & Cancellation',
+                  href: '/refund-and-cancellation-policy',
+                },
               ],
             },
           ].map((section) => (
@@ -105,7 +109,7 @@ const Footer = () => {
         <div className='mt-12 pt-6 border-t flex flex-col md:flex-row justify-between items-start md:items-center gap-6'>
           {/* CONTACT */}
           <div className='text-sm space-y-1'>
-            <p className='font-medium text-gray-900'>Embroidize LLC</p>
+            <p className='font-medium text-gray-900'>Embroidize</p>
 
             <a
               href='mailto:support@embroidize.com'

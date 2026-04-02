@@ -92,7 +92,7 @@ export default async function Home() {
     ]);
 
   return (
-    <div className='bg-[#fafafa]'>
+    <div className='bg-[#f4f4f4]'>
       <link
         rel='preconnect'
         href='https://cloud.digitalocean.com/spaces/embroidize-assets?i=9cf06e'
@@ -165,7 +165,7 @@ export default async function Home() {
         aria-labelledby='popular-designs-heading'
         className=' text-black mb-8 py-6'
       >
-        <div className='bg-[#fafafa] flex flex-col items-center justify-center gap-2 py-6 mb-6'>
+        <div className='bg-[#ffffff] flex flex-col items-center justify-center gap-2 py-6 mb-6'>
           <h2
             id='popular-designs-heading'
             className='text-2xl sm:text-2xl md:text-3xl text-center font-bold leading-snug'
@@ -194,7 +194,7 @@ export default async function Home() {
         aria-labelledby='popular-designs-heading'
         className=' text-black my-8 py-6'
       >
-        <div className='bg-[#fafafa] flex flex-col items-center justify-center gap-2 py-6 mb-6'>
+        <div className='bg-[#ffffff] flex flex-col items-center justify-center gap-2 py-6 mb-6'>
           <h2
             id='popular-designs-heading'
             className='text-2xl sm:text-2xl md:text-3xl text-center font-bold leading-snug'
@@ -222,7 +222,7 @@ export default async function Home() {
         aria-labelledby='popular-bundles-heading'
         className='text-black my-8 py-6'
       >
-        <div className='bg-[#fafafa] flex flex-col items-center justify-center gap-2 py-6 mb-6'>
+        <div className='bg-[#ffffff] flex flex-col items-center justify-center gap-2 py-6 mb-6'>
           <h2
             id='popular-bundles-heading'
             className='text-2xl sm:text-2xl md:text-3xl text-center font-bold leading-snug'
@@ -246,7 +246,7 @@ export default async function Home() {
 
       {/* Recent Designs Section */}
       <section className=' text-black my-8 py-6'>
-        <div className=' bg-[#fafafa] flex flex-col items-center justify-center gap-2 py-6 mb-6'>
+        <div className=' bg-[#ffffff] flex flex-col items-center justify-center gap-2 py-6 mb-6'>
           <h2 className='text-2xl sm:text-2xl md:text-3xl text-center font-bold leading-snug'>
             Recent Approved Products
           </h2>

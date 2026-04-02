@@ -53,7 +53,7 @@ const ProductCard = React.memo(function ProductCard({ item, index = 0 }) {
   const { data: userInfoData } = useUserInfoQuery();
 
   return (
-    <div className='bg-[#fafafa] rounded-3xl border overflow-hidden relative'>
+    <div>
       {/* SKU FLAG */}
       {item?.sku_code && userInfoData?.role === 'admin' && (
         <SkuFlag sku={item.sku_code} />
@@ -71,7 +71,7 @@ const ProductCard = React.memo(function ProductCard({ item, index = 0 }) {
         className='block group'
         aria-label={`View details for ${productName}`}
       >
-        <div className='relative w-full aspect-[3/2]'>
+        <div className='relative w-full aspect-[3/2] overflow-hidden rounded-3xl bg-gray-200'>
           <Image
             src={imageUrl}
             alt={productName}
@@ -86,19 +86,19 @@ const ProductCard = React.memo(function ProductCard({ item, index = 0 }) {
           />
         </div>
       </Link>
-
       <div className='flex flex-col p-4 '>
         <div className='flex items-center justify-between gap-2'>
           <Link
             href={productLink}
-            className='text-sm sm:text-sm md:text-base font-semibold capitalize truncate'
+            className='text-xs sm:text-xs md:text-sm font-medium capitalize truncate'
             title={productName}
           >
             {productName}
           </Link>
           <span
-            className={` flex items-center gap-1 ${isFree ? ' font-semibold uppercase' :
-              'text-black font-medium'}`}
+            className={` flex items-center gap-1 ${
+              isFree ? ' text-base font-medium' : 'text-black font-medium'
+            }`}
           >
             {priceLabel}
           </span>
@@ -107,12 +107,12 @@ const ProductCard = React.memo(function ProductCard({ item, index = 0 }) {
         <div className='flex items-center justify-between gap-4'>
           <Link
             href={categoryLink}
-            className='text-black text-xs sm:text-xs md:text-sm font-normal capitalize  truncate'
+            className='text-black text-xs sm:text-xs md:text-sm font-medium capitalize  truncate'
             title={categoryName}
           >
             {categoryName.replace(/embroidery designs/gi, '').trim()}
           </Link>
-          <span className='font-semibold flex items-center gap-1'>
+          <span className='font-medium flex items-center gap-1'>
             <DownloadIcon />
             {new Intl.NumberFormat('en-US', {
               notation: 'compact',

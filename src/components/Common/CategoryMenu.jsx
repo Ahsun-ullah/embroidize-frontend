@@ -1,19 +1,48 @@
 'use client';
 
 import { useGetPublicProductCategoriesQuery } from '@/lib/redux/admin/categoryAndSubcategory/categoryAndSubcategorySlice';
+import {
+  getCachedCategories,
+  setCachedCategories,
+} from '@/lib/utils/categoryCache';
 import Link from 'next/link';
-import { useMemo } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 
 export default function CategoryMenu({ isMobileMenuOpen }) {
-  const { data: categoryData } = useGetPublicProductCategoriesQuery(undefined, {
-    refetchOnMountOrArgChange: false,
-    refetchOnReconnect: false,
+  const [cachedData, setCachedDataState] = useState(() => {
+    if (typeof window !== 'undefined') {
+      return getCachedCategories();
+    }
+    return null;
   });
 
-  const categories = useMemo(() => categoryData?.data || [], [categoryData]);
+  // ✅ Load from localStorage first
+  useEffect(() => {
+    const cached = getCachedCategories();
+    if (cached) {
+      setCachedDataState(cached);
+    }
+  }, []);
 
-  console.log(categories.slice(0, 8));
-  console.log(isMobileMenuOpen);
+  // ✅ Call API ONLY if no cache
+  const { data: categoryData } = useGetPublicProductCategoriesQuery(undefined, {
+    skip: !!cachedData, // 👈 KEY LINE
+  });
+
+  // ✅ Save API response to cache
+  useEffect(() => {
+    if (categoryData?.data) {
+      setCachedCategories(categoryData.data);
+      setCachedDataState(categoryData.data);
+    }
+  }, [categoryData]);
+
+  // ✅ Use cached OR API
+  const categories = useMemo(() => {
+    return cachedData || categoryData?.data || [];
+  }, [cachedData, categoryData]);
+
+  if (!categories.length) return null;
 
   const renderCategoryLink = (category) => {
     const displayName = category.name
@@ -52,7 +81,7 @@ export default function CategoryMenu({ isMobileMenuOpen }) {
     });
   };
 
-  // if (!categories.length) return null;
+  if (!categories.length) return null;
 
   return (
     <nav aria-label='Category menu'>

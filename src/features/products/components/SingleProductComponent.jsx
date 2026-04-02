@@ -22,7 +22,7 @@ export const SingleProductComponent = ({
   return (
     <main className='container mx-auto px-4'>
       {/* Breadcrumb */}
-      <div className='mb-6 font-medium'>
+      <div className='mb-6 font-normal text-xs'>
         <BreadCrumb
           items={[
             { label: 'Home', href: '/' },
@@ -40,7 +40,7 @@ export const SingleProductComponent = ({
                 ]
               : []),
             {
-              label: capitalize(singleProductData?.name),
+              label: '',
               href: '#',
             },
           ]}
@@ -62,7 +62,7 @@ export const SingleProductComponent = ({
         <div className='flex flex-col gap-6 w-full rounded-2xl h-fit'>
           <ProductDownloadCard data={singleProductData} />
 
-          <div className='flex flex-col gap-4 bg-[#f9f9f9] p-4 rounded-2xl'>
+          <div className='flex flex-col gap-4 bg-[#ffffff] p-4 rounded-2xl'>
             <div className='flex flex-col hover:bg-black/5 transition border-2 border-black rounded-3xl'>
               {singleProductData?.product_pdf?.url && (
                 <a
@@ -180,7 +180,7 @@ export const SingleProductComponent = ({
 
               <div
                 dangerouslySetInnerHTML={{ __html: rawMarkup }}
-                className='custom-blog-content break-words whitespace-pre-wrap'
+                className='custom-blog-content break-words whitespace-pre-wrap text-black'
                 itemProp='articleBody'
               />
             </div>

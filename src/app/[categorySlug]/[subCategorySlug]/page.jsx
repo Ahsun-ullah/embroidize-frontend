@@ -84,7 +84,7 @@ export default async function SubCategoryProducts({ params, searchParams }) {
   const rawMarkup = marked(subCategory?.description || '');
 
   return (
-    <div className='bg-[#fafafa]'>
+    <div className='bg-[#f4f4f4]'>
       <Header />
       <div className='container mx-auto px-4 py-6 flex flex-col gap-4'>
         <h1 className='capitalize text-3xl'>

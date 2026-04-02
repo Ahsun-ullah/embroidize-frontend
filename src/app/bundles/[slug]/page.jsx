@@ -67,7 +67,7 @@ export default async function SingleBundlePage({ params, searchParams }) {
     bundleData?.products?.slice(startIndex, endIndex) || [];
 
   return (
-    <div className='bg-[#fafafa]'>
+    <div className='bg-[#f4f4f4]'>
       <Header />
 
       <section className='container mx-auto text-black'>
