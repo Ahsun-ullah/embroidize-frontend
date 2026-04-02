@@ -943,6 +943,12 @@
       "namedRegex": "^/products(?:/)?$"
     },
     {
+      "page": "/refund-and-cancellation-policy",
+      "regex": "^/refund\\-and\\-cancellation\\-policy(?:/)?$",
+      "routeKeys": {},
+      "namedRegex": "^/refund\\-and\\-cancellation\\-policy(?:/)?$"
+    },
+    {
       "page": "/reset-password",
       "regex": "^/reset\\-password(?:/)?$",
       "routeKeys": {},
