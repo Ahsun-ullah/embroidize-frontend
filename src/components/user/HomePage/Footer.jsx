@@ -25,7 +25,7 @@ const Footer = () => {
         }}
       />
 
-      <div className='max-w-7xl mx-auto px-6 py-12'>
+      <div className='container max-w-7xl mx-auto px-6 py-12'>
         {/* GRID */}
         <div className='grid gap-10 md:grid-cols-2 lg:grid-cols-4'>
           {/* BRAND */}

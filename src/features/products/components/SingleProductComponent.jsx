@@ -1,7 +1,10 @@
 'use client';
 
 import LoadingSpinner from '@/components/Common/LoadingSpinner';
-import { capitalize } from '@/utils/functions/page';
+import {
+  capitalize,
+  preserveParagraphLineBreaks,
+} from '@/utils/functions/page';
 import { marked } from 'marked';
 import Link from 'next/link';
 import { Suspense, useState } from 'react';
@@ -18,7 +21,7 @@ export const SingleProductComponent = ({
   const [imageLoaded, setImageLoaded] = useState(false);
 
   const rawMarkup = marked(singleProductData?.description || '');
-
+  const formattedMarkup = preserveParagraphLineBreaks(rawMarkup);
   return (
     <main className='container mx-auto px-4'>
       {/* Breadcrumb */}
@@ -179,8 +182,8 @@ export const SingleProductComponent = ({
               </div>
 
               <div
-                dangerouslySetInnerHTML={{ __html: rawMarkup }}
-                className='custom-blog-content break-words whitespace-pre-wrap text-black'
+                dangerouslySetInnerHTML={{ __html: formattedMarkup }}
+                className='custom-blog-content break-words text-black leading-3relaxed'
                 itemProp='articleBody'
               />
             </div>

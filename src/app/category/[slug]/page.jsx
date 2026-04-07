@@ -7,7 +7,10 @@ import {
   getAllProductsByCategory,
   getSingleCategory,
 } from '@/lib/apis/public/category';
-import { capitalize } from '@/utils/functions/page';
+import {
+  capitalize,
+  preserveParagraphLineBreaks,
+} from '@/utils/functions/page';
 import { marked } from 'marked';
 import Link from 'next/link';
 import { redirect } from 'next/navigation';
@@ -80,6 +83,7 @@ export default async function CategoryProducts({ params, searchParams }) {
   }
 
   const rawMarkup = marked(singleCategoryData?.data?.description || '');
+  const formattedMarkup = preserveParagraphLineBreaks(rawMarkup);
 
   return (
     <div className='bg-[#f4f4f4]'>
@@ -140,9 +144,9 @@ export default async function CategoryProducts({ params, searchParams }) {
           )}
         </section>
         <div className='container'>
-          <pre
-            dangerouslySetInnerHTML={{ __html: rawMarkup }}
-            className='prose max-w-none break-words whitespace-pre-wrap font-sans text-lg'
+          <div
+            dangerouslySetInnerHTML={{ __html: formattedMarkup }}
+            className='custom-blog-content break-words text-black'
           />
         </div>
       </div>

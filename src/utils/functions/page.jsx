@@ -97,3 +97,19 @@ export const formatDate = (dateStr) => {
     day: 'numeric',
   });
 };
+
+export function preserveParagraphLineBreaks(rawMarkup) {
+  if (!rawMarkup || typeof rawMarkup !== 'string') {
+    return '';
+  }
+
+  return rawMarkup.replace(/<p>([\s\S]*?)<\/p>/g, (_match, content) => {
+    const cleaned = content.trim();
+
+    if (!cleaned.includes('\n')) {
+      return `<p>${cleaned}</p>`;
+    }
+
+    return `<p>${cleaned.replace(/\n+/g, '<br />')}</p>`;
+  });
+}

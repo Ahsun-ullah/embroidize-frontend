@@ -53,15 +53,13 @@ const ProductCard = React.memo(function ProductCard({ item, index = 0 }) {
   const { data: userInfoData } = useUserInfoQuery();
 
   return (
-    <div>
-      {/* SKU FLAG */}
+    <div className='relative'>
       {item?.sku_code && userInfoData?.role === 'admin' && (
         <SkuFlag sku={item.sku_code} />
       )}
 
-      {/* Admin Choice Star */}
       {item?.isAdminChoice && userInfoData?.role === 'admin' && (
-        <div className='absolute top-[0.1 px] left-2 z-10'>
+        <div className='absolute top-3 left-3 z-20'>
           <AdminChoiceStar status={item.isAdminChoice} />
         </div>
       )}

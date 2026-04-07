@@ -2,6 +2,7 @@ import ShareButtons from '@/components/Common/ShareButtons';
 import Footer from '@/components/user/HomePage/Footer';
 import Header from '@/components/user/HomePage/Header';
 import { getSingleBlog } from '@/lib/apis/public/blog';
+import { preserveParagraphLineBreaks } from '@/utils/functions/page';
 import Image from 'next/image';
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
@@ -70,6 +71,9 @@ export default async function SingleBlogPage({ params }) {
   const slugData = params.slug;
   const blogData = await getSingleBlog(slugData);
   const resource = blogData?.blogs;
+  const formattedDescription = preserveParagraphLineBreaks(
+    resource?.description,
+  );
 
   if (!resource) return notFound();
 
@@ -333,10 +337,10 @@ export default async function SingleBlogPage({ params }) {
           <div className='px-8 lg:px-12 pb-12'>
             <div className='mx-4'>
               {/* Content Body */}
-              <section
-                className='custom-blog-content'
+              <div
+                className='custom-blog-content break-words text-gray-900 leading-relaxed'
                 dangerouslySetInnerHTML={{
-                  __html: resource?.description,
+                  __html: formattedDescription,
                 }}
                 itemProp='articleBody'
               />

@@ -1,6 +1,7 @@
 import Footer from '@/components/user/HomePage/Footer';
 import Header from '@/components/user/HomePage/Header';
 import { getSingleBlog } from '@/lib/apis/public/blog';
+import { preserveParagraphLineBreaks } from '@/utils/functions/page';
 import { Divider } from '@heroui/divider';
 import Image from 'next/image';
 import Link from 'next/link';
@@ -58,6 +59,8 @@ export default async function SingleBlogPage({ params }) {
   const blogData = await getSingleBlog(slugData);
   const blog = blogData?.blogs;
   if (!blog) return notFound();
+
+  const formattedMarkup = preserveParagraphLineBreaks(blog?.description || '');
 
   // JSON-LD Structured Data
   const jsonLd = {
@@ -157,10 +160,10 @@ export default async function SingleBlogPage({ params }) {
                 )}
               </header>
 
-              <section
-                className='custom-blog-content'
+              <div
+                className='custom-blog-content break-words text-black'
                 dangerouslySetInnerHTML={{
-                  __html: blog?.description,
+                  __html: formattedMarkup,
                 }}
                 itemProp='articleBody'
               />
