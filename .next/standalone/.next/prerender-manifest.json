@@ -59,30 +59,6 @@
         "x-next-revalidate-tag-token"
       ]
     },
-    "/privacy-policy": {
-      "experimentalBypassFor": [
-        {
-          "type": "header",
-          "key": "Next-Action"
-        },
-        {
-          "type": "header",
-          "key": "content-type",
-          "value": "multipart/form-data;.*"
-        }
-      ],
-      "initialRevalidateSeconds": false,
-      "srcRoute": "/privacy-policy",
-      "dataRoute": "/privacy-policy.rsc",
-      "allowHeader": [
-        "host",
-        "x-matched-path",
-        "x-prerender-revalidate",
-        "x-prerender-revalidate-if-generated",
-        "x-next-revalidated-tags",
-        "x-next-revalidate-tag-token"
-      ]
-    },
     "/refund-and-cancellation-policy": {
       "experimentalBypassFor": [
         {
@@ -107,7 +83,7 @@
         "x-next-revalidate-tag-token"
       ]
     },
-    "/custom-embroidery-digitizing-service": {
+    "/privacy-policy": {
       "experimentalBypassFor": [
         {
           "type": "header",
@@ -120,8 +96,8 @@
         }
       ],
       "initialRevalidateSeconds": false,
-      "srcRoute": "/custom-embroidery-digitizing-service",
-      "dataRoute": "/custom-embroidery-digitizing-service.rsc",
+      "srcRoute": "/privacy-policy",
+      "dataRoute": "/privacy-policy.rsc",
       "allowHeader": [
         "host",
         "x-matched-path",
@@ -170,6 +146,30 @@
       "initialRevalidateSeconds": false,
       "srcRoute": "/subscriptions",
       "dataRoute": "/subscriptions.rsc",
+      "allowHeader": [
+        "host",
+        "x-matched-path",
+        "x-prerender-revalidate",
+        "x-prerender-revalidate-if-generated",
+        "x-next-revalidated-tags",
+        "x-next-revalidate-tag-token"
+      ]
+    },
+    "/custom-embroidery-digitizing-service": {
+      "experimentalBypassFor": [
+        {
+          "type": "header",
+          "key": "Next-Action"
+        },
+        {
+          "type": "header",
+          "key": "content-type",
+          "value": "multipart/form-data;.*"
+        }
+      ],
+      "initialRevalidateSeconds": false,
+      "srcRoute": "/custom-embroidery-digitizing-service",
+      "dataRoute": "/custom-embroidery-digitizing-service.rsc",
       "allowHeader": [
         "host",
         "x-matched-path",
@@ -251,30 +251,6 @@
         "x-next-revalidate-tag-token"
       ]
     },
-    "/auth/login": {
-      "experimentalBypassFor": [
-        {
-          "type": "header",
-          "key": "Next-Action"
-        },
-        {
-          "type": "header",
-          "key": "content-type",
-          "value": "multipart/form-data;.*"
-        }
-      ],
-      "initialRevalidateSeconds": false,
-      "srcRoute": "/auth/login",
-      "dataRoute": "/auth/login.rsc",
-      "allowHeader": [
-        "host",
-        "x-matched-path",
-        "x-prerender-revalidate",
-        "x-prerender-revalidate-if-generated",
-        "x-next-revalidated-tags",
-        "x-next-revalidate-tag-token"
-      ]
-    },
     "/auth/thank-you": {
       "experimentalBypassFor": [
         {
@@ -323,7 +299,7 @@
         "x-next-revalidate-tag-token"
       ]
     },
-    "/admin/contact-submissions": {
+    "/auth/login": {
       "experimentalBypassFor": [
         {
           "type": "header",
@@ -336,8 +312,8 @@
         }
       ],
       "initialRevalidateSeconds": false,
-      "srcRoute": "/admin/contact-submissions",
-      "dataRoute": "/admin/contact-submissions.rsc",
+      "srcRoute": "/auth/login",
+      "dataRoute": "/auth/login.rsc",
       "allowHeader": [
         "host",
         "x-matched-path",
@@ -395,6 +371,30 @@
         "x-next-revalidate-tag-token"
       ]
     },
+    "/admin/contact-submissions": {
+      "experimentalBypassFor": [
+        {
+          "type": "header",
+          "key": "Next-Action"
+        },
+        {
+          "type": "header",
+          "key": "content-type",
+          "value": "multipart/form-data;.*"
+        }
+      ],
+      "initialRevalidateSeconds": false,
+      "srcRoute": "/admin/contact-submissions",
+      "dataRoute": "/admin/contact-submissions.rsc",
+      "allowHeader": [
+        "host",
+        "x-matched-path",
+        "x-prerender-revalidate",
+        "x-prerender-revalidate-if-generated",
+        "x-next-revalidated-tags",
+        "x-next-revalidate-tag-token"
+      ]
+    },
     "/admin/categories": {
       "experimentalBypassFor": [
         {
@@ -423,8 +423,8 @@
   "dynamicRoutes": {},
   "notFoundRoutes": [],
   "preview": {
-    "previewModeId": "8c3f00c5670f36d4ccd3551929725608",
-    "previewModeSigningKey": "360c0e50d7359d9926f92ac697f5b236be040339fbf7d4a687814fe5b7a2f37f",
-    "previewModeEncryptionKey": "7c9f364609e880ff843217f68983c63d69f77991d6f1001859a2a01d49361f19"
+    "previewModeId": "7c5bbf542783838151c352611b6e19ca",
+    "previewModeSigningKey": "4e1435a6a509f80635a4ba5fd057a4855b5852f0bda2b8f656e3ed32bfba6d3e",
+    "previewModeEncryptionKey": "420fcef9ea33345b96d19f12200e526a4d86fda4e8e06e510512d6d824fe9068"
   }
 }
