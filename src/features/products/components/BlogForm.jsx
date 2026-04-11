@@ -2,7 +2,6 @@
 
 import { ErrorToast } from '@/components/Common/ErrorToast';
 import LoadingSpinner from '@/components/Common/LoadingSpinner';
-import QuillEditor from '@/components/Common/QuillEditor';
 import { SuccessToast } from '@/components/Common/SuccessToast';
 import {
   useAddBlogMutation,
@@ -13,12 +12,17 @@ import { blogSchema } from '@/lib/zodValidation/productValidation';
 import { slugify } from '@/utils/functions/page';
 import { Modal, ModalBody, ModalContent, ModalHeader } from '@heroui/react';
 import { zodResolver } from '@hookform/resolvers/zod';
+import dynamic from 'next/dynamic';
 import { useRouter } from 'next/navigation';
 import { useEffect, useState } from 'react';
 import { Controller, useForm } from 'react-hook-form';
 import Select from 'react-select';
 import { ImageFileUpload } from './ImageDragAndDropInput';
 import { CreatableTagsInput } from './TagsInput';
+const QuillEditor = dynamic(() => import('@/components/Common/QuillEditor'), {
+  ssr: false,
+  loading: () => <p>Loading editor...</p>,
+});
 
 export function BlogForm({ blog, isOpen, onOpenChange, setBlogId }) {
   const router = useRouter();
