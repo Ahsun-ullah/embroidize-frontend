@@ -1,4 +1,3 @@
-# See https://help.github.com/articles/ignoring-files/ for more about ignoring files.
 
 # dependencies
 /node_modules
@@ -13,13 +12,22 @@
 # testing
 /coverage
 
-# next.js - ignore everything except what we need for deployment
+# next.js
 /.next/*
 !/.next/standalone/
 !/.next/standalone/server.js
 !/.next/standalone/package.json
 !/.next/standalone/node_modules/
 !/.next/static/
+!/.next/server/
+!/.next/BUILD_ID
+!/.next/required-server-files.json
+!/.next/routes-manifest.json
+!/.next/prerender-manifest.json
+!/.next/react-loadable-manifest.json
+!/.next/app-build-manifest.json
+!/.next/build-manifest.json
+!/.next/app-path-routes-manifest.json
 /.next/standalone/.next
 /.next/cache/
 
