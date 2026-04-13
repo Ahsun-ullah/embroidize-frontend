@@ -56,7 +56,7 @@ export const authSlice = createApi({
     }),
     appleAuth: builder.mutation({
       query: (body) => ({
-        url: '/auth/apple',
+        url: '/public/auth/apple',
         method: 'POST',
         body,
       }),
@@ -65,7 +65,7 @@ export const authSlice = createApi({
     forgetPassword: builder.mutation({
       query: (body) => {
         return {
-          url: `/forgot-password`,
+          url: `/public/forgot-password`,
           method: 'POST',
           body,
         };
@@ -74,7 +74,7 @@ export const authSlice = createApi({
     resetPassword: builder.mutation({
       query: (body) => {
         return {
-          url: `/reset-password`,
+          url: `/public/reset-password`,
           method: 'POST',
           body,
         };

@@ -22,9 +22,8 @@ export default function MyPlanPage() {
   //          This turned the object into `true`, making every subscription?.xxx → undefined
   const subscription = userInfoData?.subscription ?? null;
 
-  // ─── FIX #2: plan lives on subscription.plan, not subscription.planId ────
-  // BUG WAS: const plan = subscription?.planId  (planId is an ID string, not the plan object)
-  const plan = subscription?.plan ?? null;
+  // After Mongoose populate, subscription.planId holds the full plan object
+  const plan = subscription?.planId ?? null;
 
   // ✅ USER TYPE
   // ─── FIX #3: These now work correctly because subscription is the real object ─

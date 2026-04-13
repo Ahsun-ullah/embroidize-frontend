@@ -12,7 +12,7 @@ export async function getSubCategories(
     queryParams.append('page', (currentPage + 1).toString());
     queryParams.append('limit', perPageData.toString());
 
-    const apiUrl = `${process.env.NEXT_PUBLIC_BASE_API_URL_PROD}/public/product-subCategory?${queryParams.toString()}`;
+    const apiUrl = `${process.env.NEXT_PUBLIC_BASE_API_URL_PROD}/public/product-subcategory?${queryParams.toString()}`;
 
     const response = await fetch(apiUrl, {
       headers,

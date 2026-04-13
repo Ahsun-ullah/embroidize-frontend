@@ -12,6 +12,6 @@ const errorMap = {
 
 export const handleApiError = (error, defaultMessage = 'An unexpected error occurred.') => {
   const errorMessage = error?.data?.message || error?.message || defaultMessage;
-  const userFriendlyMessage = errorMap[errorMessage] || defaultMessage;
+  const userFriendlyMessage = errorMap[errorMessage] || errorMessage || defaultMessage;
   ErrorToast('Error', userFriendlyMessage, 3000);
 };

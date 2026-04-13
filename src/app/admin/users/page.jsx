@@ -24,7 +24,7 @@ export default async function AllUsersListPage({ searchParams }) {
     { name: 'ID', uid: 'id' },
     { name: 'NAME', uid: 'name' },
     { name: 'EMAIL', uid: 'email' },
-    { name: 'DOWNLOAD', uid: 'downloadHistory' },
+    { name: 'DOWNLOAD', uid: 'downloadCount' },
     { name: 'Registration Date', uid: 'createdAt' },
     { name: 'ACTIONS', uid: 'actions' },
   ];
@@ -32,10 +32,9 @@ export default async function AllUsersListPage({ searchParams }) {
 
   return (
     <div className='flex flex-col gap-3'>
-
       <UsersTableWrapper
         initialData={users ?? []}
-        pagination={pagination} 
+        pagination={pagination}
         columns={columns}
       />
     </div>

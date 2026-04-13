@@ -100,11 +100,11 @@ export default function UsersTableWrapper({
         return <>{new Date(user.createdAt).toISOString().split('T')[0]}</>;
       case 'email':
         return <a href={`mailto:${user.email}`}>{user.email}</a>;
-      case 'downloadHistory':
+      case 'downloadCount':
         // The backend now returns 'downloadCount' field
         return (
           <div className='pl-4'>
-            {user.downloadCount ?? user.downloadHistory?.length}
+            {user.downloadCount}
           </div>
         );
       case 'id':

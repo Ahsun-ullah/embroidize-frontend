@@ -10,7 +10,7 @@ export async function getUsers(
 ) {
   'use server';
   try {
-    const cookieStore = cookies();
+    const cookieStore = await cookies();
     const token = cookieStore.get('token')?.value;
     const headers = new Headers();
 
