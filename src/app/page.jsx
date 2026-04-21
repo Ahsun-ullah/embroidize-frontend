@@ -170,8 +170,7 @@ export default async function Home() {
             id='popular-designs-heading'
             className='text-2xl sm:text-2xl md:text-3xl text-center font-bold leading-snug'
           >
-            Most Trending Designs Of{' '}
-            <span className='block sm:inline'>The Month</span>
+            Most Trending Designs Of The Month
           </h2>
 
           <p className='text-base sm:text-base md:text-lg font-medium text-gray-600'>
@@ -199,7 +198,7 @@ export default async function Home() {
             id='popular-designs-heading'
             className='text-2xl sm:text-2xl md:text-3xl text-center font-bold leading-snug'
           >
-            Embroidize Choice Embroidery Designs
+            Embroidize Choice Designs
           </h2>
 
           <p className='text-base sm:text-base md:text-lg font-medium text-gray-600'>

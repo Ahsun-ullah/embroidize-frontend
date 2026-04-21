@@ -208,7 +208,6 @@ export default function ProductDownloadCard({ data }) {
     }
   };
 
-
   return (
     <>
       <div className='relative flex flex-col p-8 overflow-hidden gap-4 border rounded-3xl bg-white'>
@@ -219,11 +218,47 @@ export default function ProductDownloadCard({ data }) {
         <h1 className='text-black font-bold text-2xl'>{data?.name}</h1>
         <p className='text-gray-600 my-2'>{data?.meta_description}</p>
 
+        {/* Rating + Downloads row */}
         <div className='flex items-center justify-between mb-2'>
-          <p className='text-black font-bold'>Select For Free Download</p>
-          <span className='font-semibold flex items-center gap-1'>
+          {/* Rating — clickable, scrolls to reviews */}
+          <button
+            onClick={() =>
+              document
+                .getElementById('review-section')
+                ?.scrollIntoView({ behavior: 'smooth', block: 'start' })
+            }
+            className='flex items-center gap-1.5 group'
+            title='Go to reviews'
+          >
+            {/* Stars */}
+            <div className='flex items-center gap-0.5'>
+              {[1, 2, 3, 4, 5].map((star) => (
+                <svg
+                  key={star}
+                  width={16}
+                  height={16}
+                  viewBox='0 0 24 24'
+                  fill={star <= Math.round(data?.averageRating ?? 0) ? '#F59E0B' : '#E5E7EB'}
+                >
+                  <path d='M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z' />
+                </svg>
+              ))}
+            </div>
+            <span className='text-sm font-bold text-gray-800'>
+              {data?.averageRating > 0
+                ? Number(data.averageRating).toFixed(1)
+                : '—'}
+            </span>
+            <span className='text-xs text-gray-400 group-hover:underline'>
+              ({data?.reviewCount ?? 0}{' '}
+              {(data?.reviewCount ?? 0) === 1 ? 'review' : 'reviews'})
+            </span>
+          </button>
+
+          {/* Downloads */}
+          <span className='font-semibold flex items-center gap-1 text-sm'>
             <i className='ri-download-2-line'></i>
-            {formatNumber(data?.downloadCount)}
+            {formatNumber(data?.downloadCount)} Downloads
           </span>
         </div>
 

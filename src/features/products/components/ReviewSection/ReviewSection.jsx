@@ -16,7 +16,8 @@ import ReviewList from './ReviewList';
 import ReviewModal from './ReviewModal';
 import ReviewSummary from './ReviewSummary';
 
-// Skeleton loader for the summary block
+const REVIEWS_PER_PAGE = 10;
+
 function SummarySkeleton() {
   return (
     <div className='bg-white border border-gray-100 rounded-2xl p-5 mb-6 animate-pulse'>
@@ -63,15 +64,13 @@ export default function ReviewSection({ productId, initialAvgRating = 0, initial
   const token = Cookies.get('token');
   const isLoggedIn = !!token;
   const { data: userInfoData } = useUserInfoQuery(undefined, { skip: !isLoggedIn });
-  const currentUserId = userInfoData?.data?._id ?? null;
+  const currentUserId = userInfoData?._id ?? null;
 
   // Review list state
   const [reviews, setReviews] = useState([]);
   const [pagination, setPagination] = useState(null);
   const [sort, setSort] = useState('recent');
-  const [page, setPage] = useState(1);
   const [isLoadingReviews, setIsLoadingReviews] = useState(true);
-  const [isLoadingMore, setIsLoadingMore] = useState(false);
 
   // Summary state
   const [summary, setSummary] = useState({
@@ -96,24 +95,23 @@ export default function ReviewSection({ productId, initialAvgRating = 0, initial
       const res = await getReviewSummary(productId);
       if (res?.success) setSummary(res.data);
     } catch {
-      // non-critical, summary falls back to product cached values
+      // non-critical
     } finally {
       setIsLoadingSummary(false);
     }
   }, [productId]);
 
-  // ── Fetch reviews (first page or reset) ───────────────────────────────────
-  const fetchReviews = useCallback(async (sortValue) => {
+  // ── Fetch a specific page of reviews ─────────────────────────────────────
+  const fetchReviews = useCallback(async (pageNum, sortValue) => {
     setIsLoadingReviews(true);
     try {
-      const res = await getProductReviews(productId, 1, 10, sortValue);
+      const res = await getProductReviews(productId, pageNum, REVIEWS_PER_PAGE, sortValue);
       if (res?.success) {
         setReviews(res.data.reviews);
         setPagination(res.data.pagination);
-        setPage(1);
       }
     } catch {
-      // silent — list just stays empty
+      // silent
     } finally {
       setIsLoadingReviews(false);
     }
@@ -132,32 +130,20 @@ export default function ReviewSection({ productId, initialAvgRating = 0, initial
 
   useEffect(() => {
     fetchSummary();
-    fetchReviews(sort);
+    fetchReviews(1, sort);
     fetchMyReview();
   }, [productId]); // eslint-disable-line react-hooks/exhaustive-deps
 
-  // ── Sort change ────────────────────────────────────────────────────────────
+  // ── Sort change — reset to page 1 ─────────────────────────────────────────
   const handleSortChange = (newSort) => {
     setSort(newSort);
-    fetchReviews(newSort);
+    fetchReviews(1, newSort);
   };
 
-  // ── Load more ─────────────────────────────────────────────────────────────
-  const handleLoadMore = async () => {
-    const nextPage = page + 1;
-    setIsLoadingMore(true);
-    try {
-      const res = await getProductReviews(productId, nextPage, 10, sort);
-      if (res?.success) {
-        setReviews((prev) => [...prev, ...res.data.reviews]);
-        setPagination(res.data.pagination);
-        setPage(nextPage);
-      }
-    } catch {
-      // silent
-    } finally {
-      setIsLoadingMore(false);
-    }
+  // ── Page change — fetch that page, scroll back to list top ────────────────
+  const handlePageChange = (newPage) => {
+    fetchReviews(newPage, sort);
+    reviewsRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
   };
 
   // ── Open modal ────────────────────────────────────────────────────────────
@@ -167,29 +153,23 @@ export default function ReviewSection({ productId, initialAvgRating = 0, initial
   };
 
   // ── Submit (create or update) ─────────────────────────────────────────────
-  const handleSubmit = async ({ rating, reviewText }) => {
+  const handleSubmit = async ({ rating, reviewText, images = [], removeImages = [] }) => {
     setIsSubmitting(true);
     try {
       if (editingReview) {
-        // Update
-        const res = await updateReview(editingReview._id, { rating, reviewText });
+        const res = await updateReview(editingReview._id, { rating, reviewText, images, removeImages });
         const updated = res.data.review;
-        setReviews((prev) =>
-          prev.map((r) => (r._id === updated._id ? updated : r))
-        );
+        setReviews((prev) => prev.map((r) => (r._id === updated._id ? updated : r)));
         setMyReview(updated);
         setSummary((prev) => ({ ...prev, ...res.data.stats }));
         SuccessToast('Updated', 'Your review has been updated.', 3000);
       } else {
-        // Create
-        const res = await createReview(productId, { rating, reviewText });
+        const res = await createReview(productId, { rating, reviewText, images });
         const created = res.data.review;
-        setReviews((prev) => [created, ...prev]);
+        // Prepend to current list and refresh summary; re-fetch page 1 so totals are right
         setMyReview(created);
-        setPagination((prev) =>
-          prev ? { ...prev, total: prev.total + 1 } : prev
-        );
         setSummary((prev) => ({ ...prev, ...res.data.stats }));
+        await fetchReviews(1, sort);
         SuccessToast('Thank you!', 'Your review has been submitted.', 3000);
       }
       setModalOpen(false);
@@ -205,12 +185,11 @@ export default function ReviewSection({ productId, initialAvgRating = 0, initial
     setIsDeleting(true);
     try {
       const res = await deleteReview(reviewId);
-      setReviews((prev) => prev.filter((r) => r._id !== reviewId));
       setMyReview(null);
-      setPagination((prev) =>
-        prev ? { ...prev, total: Math.max(0, prev.total - 1) } : prev
-      );
       setSummary((prev) => ({ ...prev, ...res.data.stats }));
+      // Re-fetch current page so pagination stays correct
+      const currentPage = pagination?.page ?? 1;
+      await fetchReviews(currentPage, sort);
       SuccessToast('Deleted', 'Your review has been removed.', 3000);
     } catch (err) {
       ErrorToast('Error', err.message || 'Failed to delete review.', 4000);
@@ -242,7 +221,7 @@ export default function ReviewSection({ productId, initialAvgRating = 0, initial
 
       {/* Review list */}
       <div ref={reviewsRef}>
-        {isLoadingReviews ? (
+        {isLoadingReviews && reviews.length === 0 ? (
           <div className='flex flex-col gap-3'>
             {[1, 2, 3].map((i) => (
               <ReviewCardSkeleton key={i} />
@@ -255,8 +234,8 @@ export default function ReviewSection({ productId, initialAvgRating = 0, initial
             currentUserId={currentUserId}
             onEdit={handleOpenModal}
             onDelete={handleDelete}
-            onLoadMore={handleLoadMore}
-            isLoadingMore={isLoadingMore}
+            onPageChange={handlePageChange}
+            isLoadingReviews={isLoadingReviews}
             isDeleting={isDeleting}
           />
         )}

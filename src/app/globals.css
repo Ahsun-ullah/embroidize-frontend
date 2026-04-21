@@ -368,7 +368,7 @@ span {
 .custom-blog-content ul li {
   position: relative;
   padding-left: 0.6rem;
-  color: var(--text-soft);
+  color: black;
   font-size: 15.5px;
   font-weight: 400 !important;
 }
@@ -382,7 +382,7 @@ span {
   width: 8px;
   height: 8px;
   border-radius: 50%;
-  background: linear-gradient(135deg, var(--cd--primary), var(--cd--secondary));
+  background: black;
 }
 
 /* =========================

@@ -1,5 +1,6 @@
 'use client';
 
+import { Pagination, Spinner } from '@heroui/react';
 import ReviewCard from './ReviewCard';
 
 export default function ReviewList({
@@ -8,19 +9,22 @@ export default function ReviewList({
   currentUserId,
   onEdit,
   onDelete,
-  onLoadMore,
-  isLoadingMore,
+  onPageChange,
+  isLoadingReviews,
   isDeleting,
 }) {
-  if (reviews.length === 0) {
+  if (!isLoadingReviews && reviews.length === 0) {
     return (
       <div className='text-center py-12'>
-        <p className='text-gray-400 text-sm'>No reviews yet. Be the first to review this design!</p>
+        <p className='text-gray-400 text-sm'>
+          No reviews yet. Be the first to review this design!
+        </p>
       </div>
     );
   }
 
-  const hasMore = pagination && pagination.page < pagination.pages;
+  const totalPages = pagination?.pages ?? 1;
+  const currentPage = pagination?.page ?? 1;
 
   return (
     <div className='flex flex-col gap-3'>
@@ -35,21 +39,25 @@ export default function ReviewList({
         />
       ))}
 
-      {/* Load More */}
-      {hasMore && (
-        <div className='flex justify-center mt-2'>
-          <button
-            onClick={onLoadMore}
-            disabled={isLoadingMore}
-            className='px-6 py-2 rounded-full border border-gray-300 text-sm font-medium text-gray-600 hover:bg-gray-50 transition disabled:opacity-50'
-          >
-            {isLoadingMore ? 'Loading...' : 'Load More Reviews'}
-          </button>
+      {/* Pagination */}
+      {totalPages > 1 && (
+        <div className='flex flex-col items-center gap-2 mt-4'>
+          <Pagination
+            showControls
+            showShadow
+            color='primary'
+            page={currentPage}
+            total={totalPages}
+            onChange={onPageChange}
+            isDisabled={isLoadingReviews}
+          />
+          {isLoadingReviews && (
+            <div className='flex items-center gap-2 text-sm text-gray-500'>
+              <Spinner size='sm' color='primary' />
+              <span>Loading reviews...</span>
+            </div>
+          )}
         </div>
-      )}
-
-      {!hasMore && reviews.length > 0 && (
-        <p className='text-center text-xs text-gray-400 mt-2'>All reviews loaded</p>
       )}
     </div>
   );

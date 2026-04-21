@@ -20,6 +20,7 @@ export const SingleProductComponent = ({
   popularProducts,
 }) => {
   const [imageLoaded, setImageLoaded] = useState(false);
+  const [descExpanded, setDescExpanded] = useState(false);
 
   const rawMarkup = marked(singleProductData?.description || '');
   const formattedMarkup = preserveParagraphLineBreaks(rawMarkup);
@@ -182,11 +183,54 @@ export const SingleProductComponent = ({
                 </h2>
               </div>
 
-              <div
-                dangerouslySetInnerHTML={{ __html: formattedMarkup }}
-                className='custom-blog-content break-words text-black leading-3relaxed'
-                itemProp='articleBody'
-              />
+              <div className='relative'>
+                <div
+                  dangerouslySetInnerHTML={{ __html: formattedMarkup }}
+                  className='custom-blog-content break-words text-black leading-relaxed overflow-hidden transition-all duration-500'
+                  itemProp='articleBody'
+                  style={{ maxHeight: descExpanded ? '2000px' : '45rem' }}
+                />
+
+                {/* Fade gradient when collapsed */}
+                {!descExpanded && (
+                  <div className='absolute bottom-0 left-0 right-0 h-16 bg-gradient-to-t from-white to-transparent pointer-events-none rounded-2xl' />
+                )}
+              </div>
+
+              <button
+                onClick={() => setDescExpanded((v) => !v)}
+                className='mt-3 flex items-center gap-1.5 text-sm font-semibold text-black hover:text-gray-600 transition w-full justify-center'
+              >
+                {descExpanded ? (
+                  <>
+                    Show less
+                    <svg
+                      width={16}
+                      height={16}
+                      viewBox='0 0 24 24'
+                      fill='none'
+                      stroke='currentColor'
+                      strokeWidth={2.5}
+                    >
+                      <path d='m18 15-6-6-6 6' />
+                    </svg>
+                  </>
+                ) : (
+                  <>
+                    Show more
+                    <svg
+                      width={16}
+                      height={16}
+                      viewBox='0 0 24 24'
+                      fill='none'
+                      stroke='currentColor'
+                      strokeWidth={2.5}
+                    >
+                      <path d='m6 9 6 6 6-6' />
+                    </svg>
+                  </>
+                )}
+              </button>
             </div>
           </Suspense>
 
@@ -212,6 +256,15 @@ export const SingleProductComponent = ({
               </div>
             )}
           </Suspense>
+
+          {/* Reviews */}
+          <div id='review-section' className='my-12'>
+            <ReviewSection
+              productId={singleProductData?._id}
+              initialAvgRating={singleProductData?.averageRating ?? 0}
+              initialReviewCount={singleProductData?.reviewCount ?? 0}
+            />
+          </div>
         </div>
 
         {/* Right: Recommendations */}
@@ -223,15 +276,6 @@ export const SingleProductComponent = ({
             />
           </Suspense>
         )}
-      </div>
-
-      {/* Reviews */}
-      <div className='my-12'>
-        <ReviewSection
-          productId={singleProductData?._id}
-          initialAvgRating={singleProductData?.averageRating ?? 0}
-          initialReviewCount={singleProductData?.reviewCount ?? 0}
-        />
       </div>
 
       {/* Future Section */}
