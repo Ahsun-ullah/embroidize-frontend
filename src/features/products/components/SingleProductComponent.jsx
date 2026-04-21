@@ -11,6 +11,7 @@ import { Suspense, useState } from 'react';
 import { BreadCrumb } from './BreadCrumb';
 import ProductDownloadCard from './ProductDownloadCard';
 import ClientOnlyRecommendations from './ProductMostPopularAndRelaventDesign';
+import ReviewSection from './ReviewSection/ReviewSection';
 import { SingleProductImageCard } from './SingleProductImageCard';
 
 export const SingleProductComponent = ({
@@ -222,6 +223,15 @@ export const SingleProductComponent = ({
             />
           </Suspense>
         )}
+      </div>
+
+      {/* Reviews */}
+      <div className='my-12'>
+        <ReviewSection
+          productId={singleProductData?._id}
+          initialAvgRating={singleProductData?.averageRating ?? 0}
+          initialReviewCount={singleProductData?.reviewCount ?? 0}
+        />
       </div>
 
       {/* Future Section */}

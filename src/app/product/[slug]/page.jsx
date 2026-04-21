@@ -90,11 +90,11 @@ export default async function ProductDetails({ params }) {
     },
   };
 
-  if (product?.rating?.average && product?.reviews?.length > 0) {
+  if (product?.averageRating > 0 && product?.reviewCount > 0) {
     productSchema.aggregateRating = {
       '@type': 'AggregateRating',
-      ratingValue: Number(product.rating.average),
-      reviewCount: Number(product.reviews.length),
+      ratingValue: Number(product.averageRating),
+      reviewCount: Number(product.reviewCount),
     };
   }
 
