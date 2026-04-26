@@ -1,4 +1,5 @@
 import ScrollToTopBottom from '@/components/Common/ScrollToTopBottom';
+import ChatIdentify from '@/components/Common/TawkIdentify';
 import { NProgressProvider } from '@/components/providers/NProgressProvider';
 import ClientProviders from '@/lib/providers/ClientProviders';
 import { GoogleTagManager } from '@next/third-parties/google';
@@ -41,13 +42,14 @@ export default function RootLayout({ children }) {
           strategy='afterInteractive'
         />
 
-        {/* Tawk.to Scripts in head */}
+        {/* Tawk.to — tracking only, widget hidden from Tawk.to dashboard */}
         <Script
           id='tawk-script'
           strategy='afterInteractive'
           dangerouslySetInnerHTML={{
             __html: `
-            var Tawk_API=Tawk_API||{}, Tawk_LoadStart=new Date();
+            var Tawk_API = Tawk_API || {};
+            var Tawk_LoadStart = new Date();
             (function(){
               var s1=document.createElement("script"),s0=document.getElementsByTagName("script")[0];
               s1.async=true;
@@ -60,22 +62,6 @@ export default function RootLayout({ children }) {
           }}
         />
 
-        <Script
-          id='tawk-iframe-fix'
-          strategy='afterInteractive'
-          dangerouslySetInnerHTML={{
-            __html: `
-            function fixTawkIframes() {
-              document.querySelectorAll('iframe[title="chat widget"]').forEach((iframe) => {
-                iframe.style.setProperty('right', '0px', 'important');
-                iframe.style.setProperty('position', 'fixed', 'important');
-              });
-            }
-            fixTawkIframes();
-            setInterval(fixTawkIframes, 1000);
-          `,
-          }}
-        />
       </head>
 
       <body
@@ -106,7 +92,27 @@ export default function RootLayout({ children }) {
           }}
         />
 
+        {/* Crisp — live chat widget */}
+        <Script
+          id='crisp-script'
+          strategy='afterInteractive'
+          dangerouslySetInnerHTML={{
+            __html: `
+            window.$crisp = [];
+            window.CRISP_WEBSITE_ID = "9d1d964b-6b12-4029-8f3f-28266472b3ad";
+            (function(){
+              var d = document;
+              var s = d.createElement("script");
+              s.src = "https://client.crisp.chat/l.js";
+              s.async = 1;
+              d.getElementsByTagName("head")[0].appendChild(s);
+            })();
+          `,
+          }}
+        />
+
         <ClientProviders>
+          <ChatIdentify />
           <Suspense>
             <NProgressProvider>
               <main

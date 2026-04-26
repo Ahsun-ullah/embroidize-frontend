@@ -78,6 +78,42 @@ export async function getAllCustomOrdersForDashboard(
   }
 }
 
+export async function getCustomOrderById(id) {
+  try {
+    const cookieStore = await cookies();
+    const token = cookieStore.get('token')?.value;
+
+    const headers = new Headers();
+    if (token) {
+      headers.set('Authorization', `Bearer ${token}`);
+    }
+
+    const apiUrl = process.env.NEXT_PUBLIC_BASE_API_URL_PROD;
+    const url = `${apiUrl}/admin/orders/custom/${id}`;
+
+    const response = await fetch(url, {
+      headers,
+      cache: 'no-store',
+      next: { revalidate: 0 },
+    });
+
+    if (!response.ok) {
+      throw new Error(`API request failed with status ${response.status}`);
+    }
+
+    const responseData = await response.json();
+
+    if (!responseData.success) {
+      throw new Error(responseData.message || 'API returned unsuccessful response');
+    }
+
+    return { order: responseData?.data || null };
+  } catch (error) {
+    console.error('Error fetching custom order:', error);
+    return { order: null };
+  }
+}
+
 export async function getCustomOrderStats() {
   try {
     const cookieStore = await cookies();

@@ -140,6 +140,20 @@ export default function AdminSidebar({ isCollapsed, setIsCollapsed }) {
         />
 
         <NavItem
+          href='/admin/subscribers'
+          icon='ri-vip-crown-2-fill'
+          label='Subscribers'
+          tooltip='Subscribers'
+        />
+
+        <NavItem
+          href='/admin/plans'
+          icon='ri-price-tag-3-fill'
+          label='Subscription Plans'
+          tooltip='Plans'
+        />
+
+        <NavItem
           href='/admin/categories'
           icon='ri-layout-grid-2-fill'
           label='Category & Sub-Category'

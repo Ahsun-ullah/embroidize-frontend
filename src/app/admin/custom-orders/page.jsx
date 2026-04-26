@@ -19,6 +19,7 @@ export default async function CustomOrdersPage({ searchParams }) {
   ]);
 
   const columns = [
+    { name: 'FILE', uid: 'preview' },
     { name: 'ORDER NUMBER', uid: 'orderNumber' },
     { name: 'CUSTOMER', uid: 'name' },
     { name: 'SIZE', uid: 'size' },
