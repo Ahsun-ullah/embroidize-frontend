@@ -100,6 +100,7 @@ export default function RootLayout({ children }) {
             __html: `
             window.$crisp = [];
             window.CRISP_WEBSITE_ID = "9d1d964b-6b12-4029-8f3f-28266472b3ad";
+            window.$crisp.push(["config", "position:reverse", false]);
             (function(){
               var d = document;
               var s = d.createElement("script");
