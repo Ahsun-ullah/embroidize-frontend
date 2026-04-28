@@ -2,6 +2,7 @@
 
 import DownloadLimitModal from '@/components/Common/DownloadLimitModal';
 import { ErrorToast } from '@/components/Common/ErrorToast';
+import FavoriteButton from '@/components/Common/FavoriteButton';
 import LoadingSpinner from '@/components/Common/LoadingSpinner';
 import SkuFlag from '@/components/Common/SkuFlag';
 import { useUserInfoQuery } from '@/lib/redux/common/user/userInfoSlice';
@@ -215,7 +216,10 @@ export default function ProductDownloadCard({ data }) {
           <SkuFlag sku={data.sku_code} />
         )}
 
-        <h1 className='text-black font-bold text-2xl'>{data?.name}</h1>
+        <div className='flex items-start justify-between gap-3'>
+          <h1 className='text-black font-bold text-2xl'>{data?.name}</h1>
+          <FavoriteButton productId={data?._id} className='flex-shrink-0 mt-1' />
+        </div>
         <p className='text-gray-600 my-2'>{data?.meta_description}</p>
 
         {/* Rating + Downloads row */}

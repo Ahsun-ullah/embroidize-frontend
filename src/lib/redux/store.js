@@ -4,6 +4,7 @@ import { blogsSlice } from './admin/blogs/blogsSlice';
 import { categoryAndSubcategorySlice } from './admin/categoryAndSubcategory/categoryAndSubcategorySlice';
 import { protectedProductSlice } from './admin/protectedProducts/protectedProductSlice';
 import { userSlice } from './admin/users/userSlice';
+import { favoritesSlice } from './common/favorites/favoritesSlice';
 import { productCommonSlice } from './common/product/productCommonSlice';
 import { userInfoSlice } from './common/user/userInfoSlice';
 import { authSlice } from './public/auth/authSlice';
@@ -21,6 +22,7 @@ export const makeStore = () => {
       [protectedProductSlice.reducerPath]: protectedProductSlice.reducer,
       [productCommonSlice.reducerPath]: productCommonSlice.reducer,
       [blogsSlice.reducerPath]: blogsSlice.reducer,
+      [favoritesSlice.reducerPath]: favoritesSlice.reducer,
     },
     middleware: (getDefaultMiddleware) =>
       getDefaultMiddleware()
@@ -31,7 +33,8 @@ export const makeStore = () => {
         .concat(protectedProductSlice.middleware)
         .concat(productCommonSlice.middleware)
         .concat(blogsSlice.middleware)
-        .concat(authSlice.middleware),
+        .concat(authSlice.middleware)
+        .concat(favoritesSlice.middleware),
     devTools: process.env.NODE_ENV !== 'production',
   });
 };

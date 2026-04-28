@@ -67,12 +67,18 @@ span {
   font-family: Poppins !important;
 }
 
-.widget-visible iframe[title='chat widget'] {
-  right: 0px !important;
-  position: fixed !important;
-  /* bottom: 20px !important; */
-  width: 350px !important;
-  height: 520px !important;
+/* Tawk.to — keep loaded for analytics, hide all visible elements */
+#tawk-bubble-container,
+.tawk-min-container,
+.tawk-button-circle,
+[id^='tawk-bubble'],
+[src*='tawk.to'] {
+  display: none !important;
+  visibility: hidden !important;
+  pointer-events: none !important;
+  width: 0 !important;
+  height: 0 !important;
+  opacity: 0 !important;
 }
 
 .end-3 {

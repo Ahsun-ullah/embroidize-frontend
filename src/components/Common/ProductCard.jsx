@@ -6,6 +6,7 @@ import Image from 'next/image';
 import Link from 'next/link';
 import React from 'react';
 import AdminChoiceStar from './AdminChoiceStar';
+import FavoriteButton from './FavoriteButton';
 import SkuFlag from './SkuFlag';
 
 function DownloadIcon(props) {
@@ -64,26 +65,31 @@ const ProductCard = React.memo(function ProductCard({ item, index = 0 }) {
         </div>
       )}
 
-      <Link
-        href={productLink}
-        className='block group'
-        aria-label={`View details for ${productName}`}
-      >
-        <div className='relative w-full aspect-[3/2] overflow-hidden rounded-3xl bg-gray-200'>
-          <Image
-            src={imageUrl}
-            alt={productName}
-            fill
-            quality={78}
-            sizes='(max-width:640px) 100vw, (max-width:1024px) 50vw, 33vw'
-            className='object-cover object-center transition-transform duration-300 group-hover:scale-105'
-            priority={isLCP}
-            fetchPriority={isLCP ? 'high' : 'auto'}
-            placeholder='blur'
-            blurDataURL={blur}
-          />
+      <div className='relative'>
+        <Link
+          href={productLink}
+          className='block group'
+          aria-label={`View details for ${productName}`}
+        >
+          <div className='relative w-full aspect-[3/2] overflow-hidden rounded-3xl bg-gray-200'>
+            <Image
+              src={imageUrl}
+              alt={productName}
+              fill
+              quality={78}
+              sizes='(max-width:640px) 100vw, (max-width:1024px) 50vw, 33vw'
+              className='object-cover object-center transition-transform duration-300 group-hover:scale-105'
+              priority={isLCP}
+              fetchPriority={isLCP ? 'high' : 'auto'}
+              placeholder='blur'
+              blurDataURL={blur}
+            />
+          </div>
+        </Link>
+        <div className='absolute top-2 right-2 z-20'>
+          <FavoriteButton productId={item._id} />
         </div>
-      </Link>
+      </div>
       <div className='flex flex-col p-4 '>
         <div className='flex items-center justify-between gap-2'>
           <Link

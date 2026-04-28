@@ -64,6 +64,7 @@ export default function BundleDetailsWrapper({ bundle }) {
       // 1. Append Text Data
       data.append('name', formData.name);
       data.append('slug', formData.slug);
+      data.append('description', formData.description || '');
       data.append('meta_title', formData.meta_title || '');
       data.append('meta_description', formData.meta_description || '');
 

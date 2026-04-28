@@ -13,12 +13,13 @@ export default function ChatIdentify() {
     const token = Cookies.get('token');
     if (!token || !userInfo?.email) return;
 
-    // ── Tawk.to (tracking only — widget is hidden) ──────────────────────────
+    // ── Tawk.to (analytics only — widget is hidden) ──────────────────────────
     if (!tawkIdentified.current) {
       const waitForTawk = (attempts = 0) => {
         if (attempts > 20) return;
         const api = window.Tawk_API;
         if (api && typeof api.setAttributes === 'function') {
+          api.hideWidget();
           api.setAttributes(
             { name: userInfo.name || '', email: userInfo.email },
             (error) => { if (!error) tawkIdentified.current = true; }
@@ -30,7 +31,7 @@ export default function ChatIdentify() {
       waitForTawk();
     }
 
-    // ── Crisp (chat widget — identify for async email replies) ───────────────
+    // ── Crisp (chat widget) ───────────────────────────────────────────────────
     if (!crispIdentified.current) {
       const waitForCrisp = (attempts = 0) => {
         if (attempts > 20) return;

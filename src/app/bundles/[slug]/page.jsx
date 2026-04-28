@@ -4,7 +4,8 @@ import Footer from '@/components/user/HomePage/Footer';
 import Header from '@/components/user/HomePage/Header';
 import { BreadCrumb } from '@/features/products/components/BreadCrumb';
 import { getSingleBundle } from '@/lib/apis/protected/bundles';
-import { capitalize } from '@/utils/functions/page';
+import { capitalize, preserveParagraphLineBreaks } from '@/utils/functions/page';
+import { marked } from 'marked';
 import { notFound } from 'next/navigation';
 
 export async function generateMetadata({ params }) {
@@ -82,7 +83,7 @@ export default async function SingleBundlePage({ params, searchParams }) {
           ]}
         />
 
-        <h1 className='text-center capitalize text-3xl font-bold my-16  text-gray-900'>
+        <h1 className='text-center capitalize text-3xl font-bold mt-16 mb-16 text-gray-900'>
           {bundleData?.name}
         </h1>
 
@@ -115,6 +116,16 @@ export default async function SingleBundlePage({ params, searchParams }) {
         <div className='mt-12'>
           <Pagination totalPages={totalPages} perPageData={perPageData} />
         </div>
+
+        {/* Description — shown after all products */}
+        {bundleData?.description && (
+          <div
+            className='custom-blog-content  mt-16 mb-12 px-4'
+            dangerouslySetInnerHTML={{
+              __html: preserveParagraphLineBreaks(marked(bundleData.description)),
+            }}
+          />
+        )}
       </section>
 
       <Footer />

@@ -116,7 +116,7 @@ export default function UserProfileDropdown() {
                   className='flex text-base gap-1 font-medium'
                 >
                   <i className='ri-account-circle-fill' aria-hidden='true'></i>
-                  Account
+                  My Profile
                 </Link>
               </DropdownItem>
               <DropdownItem>
@@ -125,7 +125,7 @@ export default function UserProfileDropdown() {
                   prefetch={false}
                   className='flex text-base gap-1 font-medium'
                 >
-                  <i className='ri-account-circle-fill' aria-hidden='true'></i>
+                  <i className='ri-vip-crown-fill' aria-hidden='true'></i>
                   My Plan
                 </Link>
               </DropdownItem>
@@ -137,6 +137,16 @@ export default function UserProfileDropdown() {
                 >
                   <i className='ri-download-fill' aria-hidden='true'></i>
                   Downloads
+                </Link>
+              </DropdownItem>
+              <DropdownItem>
+                <Link
+                  href='/user/user-details?tabName=favourites'
+                  prefetch={false}
+                  className='flex text-base gap-1 font-medium'
+                >
+                  <i className='ri-heart-fill' aria-hidden='true'></i>
+                  My Favourites
                 </Link>
               </DropdownItem>
               <DropdownItem>

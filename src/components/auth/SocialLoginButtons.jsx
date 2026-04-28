@@ -1,6 +1,7 @@
 'use client';
 
 import { ErrorToast } from '@/components/Common/ErrorToast';
+import { useFingerprint } from '@/lib/hooks/useFingerprint';
 import {
   useAppleAuthMutation,
   useGoogleAuthMutation,
@@ -17,6 +18,7 @@ export default function SocialLoginButtons({ showThankYou = true }) {
   const googleButtonRef = useRef(null);
   const appleButtonRef = useRef(null);
 
+  const fingerprint = useFingerprint();
   const [googleAuth] = useGoogleAuthMutation();
   const [appleAuth] = useAppleAuthMutation();
 
@@ -59,6 +61,7 @@ export default function SocialLoginButtons({ showThankYou = true }) {
             try {
               const result = await googleAuth({
                 idToken: response.credential,
+                fingerprint,
               }).unwrap();
 
 
@@ -149,6 +152,7 @@ export default function SocialLoginButtons({ showThankYou = true }) {
           try {
             const result = await appleAuth({
               idToken: event.detail.authorization.id_token,
+              fingerprint,
             }).unwrap();
 
             Cookies.set('token', result.data.token);

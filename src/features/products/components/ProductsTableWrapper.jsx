@@ -1,5 +1,6 @@
 'use client';
 
+import MDEditor from '@uiw/react-md-editor';
 import Link from 'next/link';
 import { useRouter, useSearchParams } from 'next/navigation';
 import {
@@ -71,6 +72,7 @@ export default function ProductsTableWrapper({
   const [bundleImage, setBundleImage] = useState(null);
   const [bundleImagePreview, setBundleImagePreview] = useState('');
   const [bundleSlug, setBundleSlug] = useState('');
+  const [bundleDescription, setBundleDescription] = useState('');
   const [bundleMetaTitle, setBundleMetaTitle] = useState('');
   const [bundleMetaDescription, setBundleMetaDescription] = useState('');
 
@@ -226,6 +228,9 @@ export default function ProductsTableWrapper({
     setBundleImage(null);
     setBundleImagePreview('');
     setBundleSlug('');
+    setBundleDescription('');
+    setBundleMetaTitle('');
+    setBundleMetaDescription('');
   };
 
   const handleSubmitBundle = async () => {
@@ -244,6 +249,7 @@ export default function ProductsTableWrapper({
       formData.append('name', bundleName.trim());
       formData.append('productIds', JSON.stringify(selectedIds));
       formData.append('slug', bundleSlug);
+      formData.append('description', bundleDescription || '');
       formData.append('meta_title', bundleMetaTitle || '');
       formData.append('meta_description', bundleMetaDescription || '');
       if (bundleImage) formData.append('image', bundleImage);
@@ -520,7 +526,7 @@ export default function ProductsTableWrapper({
         onClose={handleCloseBundleModal}
         size='3xl'
         backdrop='blur'
-        scrollBehavior='inside'
+        scrollBehavior='outside'
       >
         <ModalContent>
           <ModalHeader>Create Bundle Design</ModalHeader>
@@ -542,6 +548,19 @@ export default function ProductsTableWrapper({
               isRequired
               variant='bordered'
             />
+            <div className='flex flex-col gap-1'>
+              <label className='text-sm font-medium text-gray-700'>
+                Description
+              </label>
+              <div data-color-mode='light'>
+                <MDEditor
+                  value={bundleDescription}
+                  onChange={(val) => setBundleDescription(val || '')}
+                  height={220}
+                  preview='edit'
+                />
+              </div>
+            </div>
             <Input
               label='Meta Title'
               value={bundleMetaTitle}

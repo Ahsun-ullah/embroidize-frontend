@@ -8,6 +8,7 @@ import SocialLoginButtons from '@/components/auth/SocialLoginButtons';
 import EmailOtp from '@/components/Common/EmailOtp';
 import LoadingSpinner from '@/components/Common/LoadingSpinner';
 import { SuccessToast } from '@/components/Common/SuccessToast';
+import { useFingerprint } from '@/lib/hooks/useFingerprint';
 import { useGenerateOtpMutation } from '@/lib/redux/public/auth/authSlice';
 import { handleApiError } from '@/lib/utils/handleError';
 import { Input } from '@heroui/react';
@@ -25,6 +26,7 @@ const RegisterContent = () => {
   const searchParams = useSearchParams();
   const pathName = searchParams?.get('pathName') || '/';
 
+  const fingerprint = useFingerprint();
   const [generateOtp, { isLoading: otpGenerateIsLoading }] =
     useGenerateOtpMutation();
 
@@ -40,6 +42,7 @@ const RegisterContent = () => {
       name: formData.get('name')?.toString().trim() || '',
       email: formData.get('email')?.toString().trim().toLowerCase() || '',
       password: formData.get('password')?.toString() || '',
+      fingerprint,
     };
 
     // Validate data before proceeding

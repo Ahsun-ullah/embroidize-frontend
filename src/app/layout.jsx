@@ -42,13 +42,14 @@ export default function RootLayout({ children }) {
           strategy='afterInteractive'
         />
 
-        {/* Tawk.to — tracking only, widget hidden from Tawk.to dashboard */}
+        {/* Tawk.to — analytics only, widget hidden via CSS + API */}
         <Script
           id='tawk-script'
           strategy='afterInteractive'
           dangerouslySetInnerHTML={{
             __html: `
             var Tawk_API = Tawk_API || {};
+            Tawk_API.onLoad = function() { Tawk_API.hideWidget(); };
             var Tawk_LoadStart = new Date();
             (function(){
               var s1=document.createElement("script"),s0=document.getElementsByTagName("script")[0];
@@ -61,6 +62,7 @@ export default function RootLayout({ children }) {
           `,
           }}
         />
+
 
       </head>
 
@@ -100,7 +102,7 @@ export default function RootLayout({ children }) {
             __html: `
             window.$crisp = [];
             window.CRISP_WEBSITE_ID = "9d1d964b-6b12-4029-8f3f-28266472b3ad";
-            window.$crisp.push(["config", "position:reverse", false]);
+            window.$crisp.push(["config", "position:reverse", [false]]);
             (function(){
               var d = document;
               var s = d.createElement("script");

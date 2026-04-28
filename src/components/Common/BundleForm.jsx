@@ -1,6 +1,7 @@
 'use client';
 
 import { slugify } from '@/utils/functions/page';
+import MDEditor from '@uiw/react-md-editor';
 import {
   Button,
   Input,
@@ -24,6 +25,7 @@ const BundleModal = ({
   const [formData, setFormData] = useState({
     name: '',
     slug: '',
+    description: '',
     meta_title: '',
     meta_description: '',
     image: null,
@@ -36,6 +38,7 @@ const BundleModal = ({
       setFormData({
         name: initialData.name || '',
         slug: initialData.slug || '',
+        description: initialData.description || '',
         meta_title: initialData.meta_title || '',
         meta_description: initialData.meta_description || '',
         image: null, // Image remains null unless a new one is picked
@@ -46,6 +49,7 @@ const BundleModal = ({
       setFormData({
         name: '',
         slug: '',
+        description: '',
         meta_title: '',
         meta_description: '',
         image: null,
@@ -83,7 +87,7 @@ const BundleModal = ({
       onClose={onClose}
       size='3xl'
       backdrop='blur'
-      scrollBehavior='inside'
+      scrollBehavior='outside'
     >
       <ModalContent>
         <ModalHeader className='flex flex-col gap-1'>
@@ -121,6 +125,22 @@ const BundleModal = ({
               variant='bordered'
               description='URL-friendly version (lowercase, hyphens only)'
             />
+
+            <div className='flex flex-col gap-1'>
+              <label className='text-sm font-medium text-gray-700'>
+                Description
+              </label>
+              <div data-color-mode='light'>
+                <MDEditor
+                  value={formData.description}
+                  onChange={(val) =>
+                    setFormData({ ...formData, description: val || '' })
+                  }
+                  height={220}
+                  preview='edit'
+                />
+              </div>
+            </div>
 
             <Input
               label='Meta Title'

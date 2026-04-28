@@ -2,6 +2,8 @@
 
 import { ErrorToast } from '@/components/Common/ErrorToast';
 import LoadingSpinner from '@/components/Common/LoadingSpinner';
+import ProductCard from '@/components/Common/ProductCard';
+import { useGetUserFavoritesQuery } from '@/lib/redux/common/favorites/favoritesSlice';
 import {
   useUserDownloadHistoryQuery,
   useUserInfoQuery,
@@ -9,6 +11,7 @@ import {
 import { Tab, Tabs } from '@heroui/react';
 import Cookies from 'js-cookie';
 import Link from 'next/link';
+import { useRouter } from 'next/navigation';
 import { useEffect, useMemo, useState } from 'react';
 import ChangePasswordForm from './UserChangePasswordForm';
 import UserProfile from './UserProfile';
@@ -16,7 +19,9 @@ import UserProfile from './UserProfile';
 const ITEMS_PER_PAGE = 5;
 
 export default function UserDetailsComponent({ defaultTab = 'account' }) {
+  const router = useRouter();
   const [activeTab, setActiveTab] = useState(defaultTab);
+  const [isPlanNavigating, setIsPlanNavigating] = useState(false);
   const [loadingId, setLoadingId] = useState(null);
 
   const [search, setSearch] = useState('');
@@ -28,6 +33,9 @@ export default function UserDetailsComponent({ defaultTab = 'account' }) {
 
   const { data: downloadHistory, isLoading: isDownloadLoading } =
     useUserDownloadHistoryQuery(userId, { skip: !userId });
+
+  const { data: favoritesData, isLoading: isFavoritesLoading } =
+    useGetUserFavoritesQuery(undefined, { skip: activeTab !== 'favourites' });
 
   useEffect(() => {
     if (defaultTab) setActiveTab(defaultTab);
@@ -413,7 +421,14 @@ export default function UserDetailsComponent({ defaultTab = 'account' }) {
           <Tabs
             aria-label='User Tabs'
             selectedKey={activeTab}
-            onSelectionChange={setActiveTab}
+            onSelectionChange={(key) => {
+              if (key === 'my-plan') {
+                setIsPlanNavigating(true);
+                router.push('/user/my-plan');
+                return;
+              }
+              setActiveTab(key);
+            }}
             color='secondary'
             variant='bordered'
             size='sm'
@@ -473,6 +488,48 @@ export default function UserDetailsComponent({ defaultTab = 'account' }) {
                 </div>
               }
             />
+
+            {/* Favourites */}
+            <Tab
+              key='favourites'
+              title={
+                <div
+                  className={`flex items-center gap-1 sm:gap-2 px-1 sm:px-2 ${
+                    activeTab === 'favourites' ? 'text-white' : 'text-black'
+                  }`}
+                >
+                  <i className='ri-heart-fill text-base sm:text-lg md:text-xl' />
+                  <span className='text-[11px] sm:text-sm md:text-base whitespace-nowrap'>
+                    <span className='hidden sm:inline'>My Favourites</span>
+                    <span className='sm:hidden'>Favs</span>
+                  </span>
+                </div>
+              }
+            />
+
+            {/* My Plan — navigates away on click */}
+            <Tab
+              key='my-plan'
+              title={
+                <div className='flex items-center gap-1 sm:gap-2 px-1 sm:px-2 text-black'>
+                  {isPlanNavigating ? (
+                    <span className='w-4 h-4 border-2 border-gray-400 border-t-transparent rounded-full animate-spin' />
+                  ) : (
+                    <i className='ri-vip-crown-fill text-base sm:text-lg md:text-xl' />
+                  )}
+                  <span className='text-[11px] sm:text-sm md:text-base whitespace-nowrap'>
+                    {isPlanNavigating ? (
+                      <span className='hidden sm:inline'>Loading...</span>
+                    ) : (
+                      <>
+                        <span className='hidden sm:inline'>My Plan</span>
+                        <span className='sm:hidden'>Plan</span>
+                      </>
+                    )}
+                  </span>
+                </div>
+              }
+            />
           </Tabs>
         </div>
       </div>
@@ -482,6 +539,27 @@ export default function UserDetailsComponent({ defaultTab = 'account' }) {
         {activeTab === 'account' && <UserProfile />}
         {activeTab === 'downloads' && renderDownloadTab}
         {activeTab === 'password' && <ChangePasswordForm />}
+        {activeTab === 'favourites' && (
+          <div>
+            {isFavoritesLoading ? (
+              <LoadingSpinner />
+            ) : favoritesData?.data?.products?.length > 0 ? (
+              <div className='grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4'>
+                {favoritesData.data.products.map((product, index) => (
+                  <ProductCard key={product._id} item={product} index={index} />
+                ))}
+              </div>
+            ) : (
+              <div className='flex flex-col items-center justify-center py-20 text-center'>
+                <div className='text-5xl mb-4'>🤍</div>
+                <p className='text-gray-700 font-semibold text-lg'>No favourites yet</p>
+                <p className='text-gray-400 text-sm mt-1'>
+                  Tap the heart on any design to save it here.
+                </p>
+              </div>
+            )}
+          </div>
+        )}
       </div>
     </div>
   );
