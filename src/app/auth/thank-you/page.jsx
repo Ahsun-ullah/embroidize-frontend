@@ -10,7 +10,6 @@ function ThankYouContent() {
   const [countdown, setCountdown] = useState(5);
 
   const redirectPath = searchParams.get('redirect') || '/';
-  const userEmail = searchParams.get('email');
   const isNewUser = searchParams.get('new_user') === 'true';
 
   // Track analytics on mount
@@ -20,7 +19,6 @@ function ThankYouContent() {
       // Track registration conversion
       window.gtag('event', 'sign_up', {
         method: 'Email',
-        user_email: userEmail,
       });
 
       // Track as conversion event
@@ -33,12 +31,9 @@ function ThankYouContent() {
 
     // Facebook Pixel tracking (if you use it)
     if (typeof window !== 'undefined' && window.fbq && isNewUser) {
-      window.fbq('track', 'CompleteRegistration', {
-        content_name: 'User Registration',
-        status: 'completed',
-      });
+      window.fbq('track', 'CompleteRegistration');
     }
-  }, [userEmail, isNewUser]);
+  }, [isNewUser]);
 
   // Separate countdown timer effect
   useEffect(() => {

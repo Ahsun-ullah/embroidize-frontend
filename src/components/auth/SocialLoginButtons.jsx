@@ -64,13 +64,11 @@ export default function SocialLoginButtons({ showThankYou = true }) {
                 fingerprint,
               }).unwrap();
 
-
               // ✅ TRACK SIGNUP (ONLY FOR NEW USERS)
               if (typeof window !== 'undefined' && result?.data?.isNew) {
                 window.dataLayer = window.dataLayer || [];
                 window.dataLayer.push({
                   event: 'signup_success',
-                  email: result.data.email,
                   method: 'google',
                 });
               }
@@ -82,8 +80,6 @@ export default function SocialLoginButtons({ showThankYou = true }) {
                 router.push(
                   `/auth/thank-you?redirect=${encodeURIComponent(
                     pathName,
-                  )}&email=${encodeURIComponent(
-                    result.data.email,
                   )}&new_user=${result.data.isNew}`,
                 );
               } else {
@@ -155,14 +151,21 @@ export default function SocialLoginButtons({ showThankYou = true }) {
               fingerprint,
             }).unwrap();
 
+            // ✅ TRACK SIGNUP (ONLY FOR NEW USERS)
+            if (typeof window !== 'undefined' && result?.data?.isNew) {
+              window.dataLayer = window.dataLayer || [];
+              window.dataLayer.push({
+                event: 'signup_success',
+                method: 'apple',
+              });
+            }
+
             Cookies.set('token', result.data.token);
 
             if (showThankYou) {
               router.push(
                 `/auth/thank-you?redirect=${encodeURIComponent(
                   pathName,
-                )}&email=${encodeURIComponent(
-                  result.data.email,
                 )}&new_user=${result.data.isNew}`,
               );
             } else {

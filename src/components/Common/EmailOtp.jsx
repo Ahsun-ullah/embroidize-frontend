@@ -85,11 +85,9 @@ const EmailOtp = ({ step, setStep, userDetailsData, pathName }) => {
         window.dataLayer = window.dataLayer || [];
         window.dataLayer.push({
           event: 'signup_success',
-          email: userDetailsData.email,
           method: 'email',
         });
       }
-
       const loginPayload = {
         email: userDetailsData.email,
         password: userDetailsData.password,
