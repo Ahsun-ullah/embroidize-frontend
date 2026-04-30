@@ -105,7 +105,7 @@ const EmailOtp = ({ step, setStep, userDetailsData, pathName }) => {
 
       // Redirect to thank you page with destination and user info
       router.push(
-        `/auth/thank-you?redirect=${encodeURIComponent(finalDestination)}&email=${encodeURIComponent(userDetailsData.email)}&new_user=true`,
+        `/auth/thank-you?redirect=${encodeURIComponent(finalDestination)}&new_user=true`,
       );
     } catch (error) {
       handleApiError(error, 'Something went wrong. Please try again.');
