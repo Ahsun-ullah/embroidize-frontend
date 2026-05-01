@@ -286,6 +286,11 @@ export default function AdminSidebar({ isCollapsed, setIsCollapsed }) {
               label: 'Bypass Emails',
               icon: 'ri-mail-lock-line',
             },
+            {
+              href: '/admin/settings/scripts',
+              label: 'Admin Scripts',
+              icon: 'ri-terminal-box-line',
+            },
           ]}
         />
       </ul>
