@@ -1,12 +1,14 @@
 import AdminChoiceDesign from '@/components/user/HomePage/AdminChoiceSection';
 import Footer from '@/components/user/HomePage/Footer';
 import Header from '@/components/user/HomePage/Header';
+import MostLikedDesigns from '@/components/user/HomePage/MostLikedDesigns';
 import PopularDesign from '@/components/user/HomePage/PopularDesign';
 import RecentBundleSection from '@/components/user/HomePage/RecentBundleSection';
 import RecentProductsSection from '@/components/user/HomePage/RecentProductsSection';
 import { getAllBundlesForDashboard } from '@/lib/apis/protected/bundles';
 import {
   getAdminChoiceProducts,
+  getMostLikedProducts,
   getPopularProducts,
   getProducts,
 } from '@/lib/apis/public/products';
@@ -76,20 +78,33 @@ function GridSkeleton({ rows = 2, cols = 6 }) {
 }
 
 export default async function Home() {
-  const [popularPromise, adminChoicePromise, recentPromise, bundlePromise] = [
+  const [
+    popularPromise,
+    adminChoicePromise,
+    recentPromise,
+    bundlePromise,
+    mostLikedPromise,
+  ] = [
     getPopularProducts('', 1, 8, { cache: 'no-store' }),
     getAdminChoiceProducts('', 1, 8, { cache: 'no-store' }),
     getProducts('', 1, 8, { cache: 'no-store' }),
     getAllBundlesForDashboard('', 1, 8, { cache: 'no-store' }),
+    getMostLikedProducts('', 1, 8, { cache: 'no-store' }),
   ];
 
-  const [popularProducts, adminChoiceProducts, recentProducts, bundles] =
-    await Promise.all([
-      popularPromise,
-      adminChoicePromise,
-      recentPromise,
-      bundlePromise,
-    ]);
+  const [
+    popularProducts,
+    adminChoiceProducts,
+    recentProducts,
+    bundles,
+    mostLikedProducts,
+  ] = await Promise.all([
+    popularPromise,
+    adminChoicePromise,
+    recentPromise,
+    bundlePromise,
+    mostLikedPromise,
+  ]);
 
   return (
     <div className='bg-[#f4f4f4]'>
@@ -170,7 +185,7 @@ export default async function Home() {
             id='popular-designs-heading'
             className='text-2xl sm:text-2xl md:text-3xl text-center font-bold leading-snug'
           >
-            Most Trending Designs Of The Month
+            Most Downloaded Designs Of The Month
           </h2>
 
           <p className='text-base sm:text-base md:text-lg font-medium text-gray-600'>
@@ -187,6 +202,31 @@ export default async function Home() {
           )}
         </Suspense>
       </section>
+
+      {/* Most Liked Designs Section */}
+      {mostLikedProducts?.products?.length ? (
+        <section
+          aria-labelledby='most-liked-designs-heading'
+          className=' text-black my-8 py-6'
+        >
+          <div className='bg-[#ffffff] flex flex-col items-center justify-center gap-2 py-6 mb-6'>
+            <h2
+              id='most-liked-designs-heading'
+              className='text-2xl sm:text-2xl md:text-3xl text-center font-bold leading-snug'
+            >
+              Most Liked Designs
+            </h2>
+
+            <p className='text-base sm:text-base md:text-lg font-medium text-gray-600'>
+              Designs the community loves the most.
+            </p>
+          </div>
+
+          <Suspense fallback={<GridSkeleton />}>
+            <MostLikedDesigns mostLikedProducts={mostLikedProducts} />
+          </Suspense>
+        </section>
+      ) : null}
 
       {/* Admin Choice Embroidery Designs Section */}
       <section

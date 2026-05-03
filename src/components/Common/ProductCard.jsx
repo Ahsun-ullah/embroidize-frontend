@@ -7,6 +7,7 @@ import Link from 'next/link';
 import React from 'react';
 import AdminChoiceStar from './AdminChoiceStar';
 import FavoriteButton from './FavoriteButton';
+import LikeButton from './LikeButton';
 import SkuFlag from './SkuFlag';
 
 function DownloadIcon(props) {
@@ -88,6 +89,13 @@ const ProductCard = React.memo(function ProductCard({ item, index = 0 }) {
         </Link>
         <div className='absolute top-2 right-2 z-20'>
           <FavoriteButton productId={item._id} />
+        </div>
+        <div className='absolute top-2 left-2 z-20'>
+          <LikeButton
+            productId={item._id}
+            initialCount={item?.likeCount || 0}
+            variant='card'
+          />
         </div>
       </div>
       <div className='flex flex-col p-4 '>

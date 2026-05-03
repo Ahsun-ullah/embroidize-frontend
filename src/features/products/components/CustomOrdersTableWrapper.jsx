@@ -28,7 +28,7 @@ import {
   Textarea,
   useDisclosure,
 } from '@heroui/react';
-import { Download, Eye, Mail, Search, Trash2 } from 'lucide-react';
+import { Download, Eye, Globe, Mail, MapPin, Search, Trash2 } from 'lucide-react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { startTransition, useState } from 'react';
 
@@ -56,6 +56,14 @@ function DetailRow({ label, value }) {
       <span className='text-sm text-gray-900 dark:text-gray-100'>{value}</span>
     </div>
   );
+}
+
+// Builds a "City, Region, Country" string from an ipInfo payload, dropping empty parts.
+function formatLocation(ipInfo) {
+  if (!ipInfo) return '';
+  return [ipInfo.city, ipInfo.region, ipInfo.country]
+    .filter((v) => typeof v === 'string' && v.trim())
+    .join(', ');
 }
 
 function getToken() {
@@ -373,6 +381,30 @@ export default function CustomOrdersTableWrapper({
             <div className='text-xs text-gray-500'>{order.email}</div>
           </div>
         );
+
+      case 'origin': {
+        const country = order?.ipInfo?.country;
+        const city = order?.ipInfo?.city;
+        if (!country && !city && !order?.ip) {
+          return <span className='text-gray-400 text-xs'>—</span>;
+        }
+        return (
+          <div className='flex flex-col gap-0.5 min-w-[120px]'>
+            {country && (
+              <span className='inline-flex items-center gap-1 text-xs font-semibold text-gray-800'>
+                <Globe size={12} className='text-gray-400' />
+                {country}
+              </span>
+            )}
+            {city && <span className='text-xs text-gray-500'>{city}</span>}
+            {!country && !city && order?.ip && (
+              <span className='font-mono text-[11px] text-gray-500'>
+                {order.ip}
+              </span>
+            )}
+          </div>
+        );
+      }
 
       case 'size':
         return (
@@ -728,6 +760,68 @@ export default function CustomOrdersTableWrapper({
                     />
                   </div>
                 </div>
+
+                {/* Origin / Location — only renders if any IP data was captured */}
+                {(viewOrder?.ip || viewOrder?.ipInfo) && (
+                  <>
+                    <Divider />
+                    <div>
+                      <p className='text-xs font-semibold text-gray-400 uppercase tracking-wide mb-3 flex items-center gap-1.5'>
+                        <MapPin size={13} className='text-gray-400' />
+                        Origin
+                      </p>
+
+                      {/* Hero block: country + city, prominent */}
+                      {(viewOrder?.ipInfo?.country ||
+                        viewOrder?.ipInfo?.city) && (
+                        <div className='flex items-center gap-3 p-3 rounded-xl bg-gray-50 dark:bg-gray-900 border border-gray-200 dark:border-gray-800 mb-4'>
+                          <div className='w-10 h-10 rounded-lg bg-black text-white flex items-center justify-center shrink-0'>
+                            <Globe size={18} />
+                          </div>
+                          <div className='min-w-0'>
+                            <p className='text-sm font-bold text-gray-900 dark:text-gray-100 truncate'>
+                              {formatLocation(viewOrder.ipInfo) || '—'}
+                            </p>
+                            {viewOrder?.ipInfo?.timezone && (
+                              <p className='text-xs text-gray-500'>
+                                {viewOrder.ipInfo.timezone}
+                              </p>
+                            )}
+                          </div>
+                        </div>
+                      )}
+
+                      <div className='grid grid-cols-1 sm:grid-cols-2 gap-4'>
+                        {viewOrder?.ip && (
+                          <DetailRow
+                            label='IP Address'
+                            value={
+                              <span className='font-mono text-sm'>
+                                {viewOrder.ip}
+                              </span>
+                            }
+                          />
+                        )}
+                        <DetailRow
+                          label='Postal'
+                          value={viewOrder?.ipInfo?.postal}
+                        />
+                        <DetailRow
+                          label='Region'
+                          value={viewOrder?.ipInfo?.region}
+                        />
+                        <DetailRow
+                          label='Org / ISP'
+                          value={viewOrder?.ipInfo?.org}
+                        />
+                        <DetailRow
+                          label='Coordinates'
+                          value={viewOrder?.ipInfo?.loc}
+                        />
+                      </div>
+                    </div>
+                  </>
+                )}
 
                 <Divider />
 

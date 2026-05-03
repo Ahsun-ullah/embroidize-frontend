@@ -235,7 +235,7 @@ export const SingleProductComponent = ({
           </Suspense>
 
           {/* Related Keywords */}
-          <Suspense fallback={<LoadingSpinner />}>
+          {/* <Suspense fallback={<LoadingSpinner />}>
             {Array.isArray(singleProductData?.meta_keywords) && (
               <div className='my-10'>
                 <h2 className='text-black text-lg font-semibold mb-4'>
@@ -255,7 +255,7 @@ export const SingleProductComponent = ({
                 </div>
               </div>
             )}
-          </Suspense>
+          </Suspense> */}
 
           {/* Reviews */}
           <div id='review-section' className='my-12'>
@@ -273,6 +273,7 @@ export const SingleProductComponent = ({
             <ClientOnlyRecommendations
               allProductData={allProductData}
               popularProducts={popularProducts}
+              singleProductData={singleProductData}
             />
           </Suspense>
         )}

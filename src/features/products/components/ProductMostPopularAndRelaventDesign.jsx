@@ -5,6 +5,7 @@ import ProductCard from '@/components/Common/ProductCard';
 export default function ClientOnlyRecommendations({
   allProductData,
   popularProducts,
+  singleProductData,
 }) {
   return (
     <div className='w-full lg:w-1/2'>
@@ -12,7 +13,7 @@ export default function ClientOnlyRecommendations({
       <div className='mb-10'>
         <div className='flex items-center justify-between mb-6'>
           <h2 className='text-black text-lg font-bold'>Relevant Designs</h2>
-          <a href='/products' className='text-sm text-black underline'>
+          <a href={`/category/${singleProductData?.category?.slug}`} className='text-sm text-black underline'>
             See All Designs
           </a>
         </div>

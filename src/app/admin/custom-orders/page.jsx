@@ -22,6 +22,7 @@ export default async function CustomOrdersPage({ searchParams }) {
     { name: 'FILE', uid: 'preview' },
     { name: 'ORDER NUMBER', uid: 'orderNumber' },
     { name: 'CUSTOMER', uid: 'name' },
+    { name: 'ORIGIN', uid: 'origin' },
     { name: 'SIZE', uid: 'size' },
     { name: 'FORMAT', uid: 'fileFormat' },
     { name: 'TURNAROUND', uid: 'turnaround' },

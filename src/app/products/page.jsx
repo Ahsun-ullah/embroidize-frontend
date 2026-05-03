@@ -4,6 +4,7 @@ import Footer from '@/components/user/HomePage/Footer';
 import Header from '@/components/user/HomePage/Header';
 import {
   getAdminChoiceProducts,
+  getMostLikedProducts,
   getPopularProducts,
   getProducts,
 } from '@/lib/apis/public/products';
@@ -13,8 +14,10 @@ import ProductUpdates from './ProductUpdates';
 export const revalidate = 0;
 
 export async function generateMetadata({ searchParams }) {
-  const isPopular = searchParams?.filter === 'popular';
-  const isAdminChoice = searchParams?.filter === 'embroidize-choice';
+  const filter = searchParams?.filter;
+  const isPopular = filter === 'popular';
+  const isAdminChoice = filter === 'embroidize-choice';
+  const isMostLiked = filter === 'most-liked';
 
   const baseTitle = 'Machine Embroidery Designs';
   const baseDescription =
@@ -28,40 +31,42 @@ export async function generateMetadata({ searchParams }) {
   const adminChoiceDescription =
     'Discover our curated selection of premium embroidery designs, handpicked by our team for quality and uniqueness.';
 
+  const mostLikedTitle = 'Most Liked Embroidery Designs - Community Picks';
+  const mostLikedDescription =
+    'Browse the embroidery designs our community loves the most. Liked by thousands and ready for instant download.';
+
+  const pickTitle = isPopular
+    ? popularTitle
+    : isAdminChoice
+      ? adminChoiceTitle
+      : isMostLiked
+        ? mostLikedTitle
+        : baseTitle;
+
+  const pickDescription = isPopular
+    ? popularDescription
+    : isAdminChoice
+      ? adminChoiceDescription
+      : isMostLiked
+        ? mostLikedDescription
+        : baseDescription;
+
+  const canonicalPath = isPopular
+    ? '/products?filter=popular'
+    : isAdminChoice
+      ? '/products?filter=embroidize-choice'
+      : isMostLiked
+        ? '/products?filter=most-liked'
+        : '/products';
+
   return {
-    title: isPopular
-      ? popularTitle
-      : isAdminChoice
-        ? adminChoiceTitle
-        : baseTitle,
-    description: isPopular
-      ? popularDescription
-      : isAdminChoice
-        ? adminChoiceDescription
-        : baseDescription,
-    alternates: {
-      canonical: isPopular
-        ? 'https://embroidize.com/products?filter=popular'
-        : isAdminChoice
-          ? 'https://embroidize.com/products?filter=embroidize-choice'
-          : 'https://embroidize.com/products',
-    },
+    title: pickTitle,
+    description: pickDescription,
+    alternates: { canonical: `https://embroidize.com${canonicalPath}` },
     openGraph: {
-      title: isPopular
-        ? popularTitle
-        : isAdminChoice
-          ? adminChoiceTitle
-          : baseTitle,
-      description: isPopular
-        ? popularDescription
-        : isAdminChoice
-          ? adminChoiceDescription
-          : baseDescription,
-      url: isPopular
-        ? 'https://embroidize.com/products?filter=popular'
-        : isAdminChoice
-          ? 'https://embroidize.com/products?filter=embroidize-choice'
-          : 'https://embroidize.com/products',
+      title: pickTitle,
+      description: pickDescription,
+      url: `https://embroidize.com${canonicalPath}`,
       siteName: 'Embroidize',
       images: [
         {
@@ -75,16 +80,8 @@ export async function generateMetadata({ searchParams }) {
     },
     twitter: {
       card: 'summary_large_image',
-      title: isPopular
-        ? popularTitle
-        : isAdminChoice
-          ? adminChoiceTitle
-          : baseTitle,
-      description: isPopular
-        ? popularDescription
-        : isAdminChoice
-          ? adminChoiceDescription
-          : baseDescription,
+      title: pickTitle,
+      description: pickDescription,
       images: ['https://embroidize.com/og-banner.jpg'],
     },
   };
@@ -93,14 +90,18 @@ export async function generateMetadata({ searchParams }) {
 export default async function AllProductsPage({ searchParams }) {
   const currentPage = parseInt(searchParams?.page) || 1;
   const perPageData = parseInt(searchParams?.limit) || 20;
-  const isPopular = searchParams?.filter === 'popular';
-  const isAdminChoice = searchParams?.filter === 'embroidize-choice';
+  const filter = searchParams?.filter;
+  const isPopular = filter === 'popular';
+  const isAdminChoice = filter === 'embroidize-choice';
+  const isMostLiked = filter === 'most-liked';
 
   const productData = isPopular
     ? await getPopularProducts('', currentPage, perPageData)
     : isAdminChoice
       ? await getAdminChoiceProducts('', currentPage, perPageData)
-      : await getProducts('', currentPage, perPageData);
+      : isMostLiked
+        ? await getMostLikedProducts('', currentPage, perPageData)
+        : await getProducts('', currentPage, perPageData);
 
   const { products, totalCount, totalPages } = {
     ...productData,
@@ -125,7 +126,7 @@ export default async function AllProductsPage({ searchParams }) {
                 href='/products'
                 prefetch={false}
                 className={`px-4 py-2 text-sm whitespace-nowrap rounded transition-colors ${
-                  !isPopular && !isAdminChoice
+                  !isPopular && !isAdminChoice && !isMostLiked
                     ? 'bg-black text-white'
                     : 'border border-gray-200 hover:bg-gray-50'
                 }`}
@@ -142,6 +143,17 @@ export default async function AllProductsPage({ searchParams }) {
                 }`}
               >
                 Popular
+              </Link>
+              <Link
+                href='/products?filter=most-liked'
+                prefetch={false}
+                className={`px-4 py-2 text-sm whitespace-nowrap rounded transition-colors ${
+                  isMostLiked
+                    ? 'bg-black text-white'
+                    : 'border border-gray-200 hover:bg-gray-50'
+                }`}
+              >
+                Most Liked
               </Link>
               <Link
                 href='/products?filter=embroidize-choice'
