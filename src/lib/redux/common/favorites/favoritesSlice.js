@@ -28,7 +28,9 @@ export const favoritesSlice = createApi({
         url: `/favorites/${productId}`,
         method: 'POST',
       }),
-      // Optimistic update — heart flips instantly, reverts on API error
+      // Optimistic update — heart flips instantly, reverts on API error.
+      // The mutation response includes { isFavourited, favoriteCount } so callers
+      // (FavoriteButton) can reconcile their local count to the server count.
       async onQueryStarted(productId, { dispatch, queryFulfilled }) {
         const patch = dispatch(
           favoritesSlice.util.updateQueryData('getFavoriteIds', undefined, (draft) => {

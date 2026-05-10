@@ -134,12 +134,12 @@ export default function ProfileForm() {
   }
 
   return (
-    <div className='w-full max-w-md mx-auto p-6 bg-white rounded-lg shadow-md'>
-      <h1 className='text-2xl font-bold mb-6'>Profile Details</h1>
+    <div className='w-full max-w-md mx-auto p-4 sm:p-6 bg-white rounded-lg shadow-md'>
+      <h1 className='text-xl sm:text-2xl font-bold mb-6'>Profile Details</h1>
 
       <form onSubmit={handleSubmit(onSubmit)}>
         {/* Profile Picture */}
-        <div className='flex flex-col sm:flex-row items-center mb-8'>
+        <div className='flex flex-col sm:flex-row items-center sm:items-start mb-8'>
           <div className='relative mb-4 sm:mb-0'>
             <div className='w-24 h-24 rounded-full overflow-hidden bg-gray-100'>
               <Image
@@ -159,8 +159,8 @@ export default function ProfileForm() {
             </div>
           </div>
 
-          <div className='ml-0 sm:ml-4'>
-            <div className='relative w-40 h-10 bg-gray-100 text-center text-sm font-medium rounded-lg overflow-hidden cursor-pointer hover:bg-gray-200 transition'>
+          <div className='w-full sm:w-auto sm:ml-4 flex flex-col items-center sm:items-start'>
+            <div className='relative w-full sm:w-40 h-10 bg-gray-100 text-center text-sm font-medium rounded-lg overflow-hidden cursor-pointer hover:bg-gray-200 transition'>
               <span className='absolute inset-0 flex items-center justify-center z-10'>
                 Change Photo
               </span>

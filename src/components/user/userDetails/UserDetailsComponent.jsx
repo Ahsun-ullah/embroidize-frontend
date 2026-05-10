@@ -164,7 +164,7 @@ export default function UserDetailsComponent({ defaultTab = 'account' }) {
         </div>
 
         {/* Stats bar */}
-        <div className='flex items-center justify-between mb-4'>
+        <div className='flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 mb-4'>
           <p className='text-xs text-gray-400'>
             Showing{' '}
             <span className='font-semibold text-gray-700'>
@@ -185,7 +185,7 @@ export default function UserDetailsComponent({ defaultTab = 'account' }) {
                 setSearch('');
                 setFilterType('all');
               }}
-              className='text-xs text-violet-600 hover:text-violet-700 font-medium underline underline-offset-2'
+              className='self-start sm:self-auto text-xs text-violet-600 hover:text-violet-700 font-medium underline underline-offset-2'
             >
               Clear filters
             </button>
@@ -340,13 +340,14 @@ export default function UserDetailsComponent({ defaultTab = 'account' }) {
               })}
             </div>
 
-            {/* Pagination */}
+            {/* Pagination — overflow-x-auto so the row scrolls on narrow phones
+                instead of clipping page buttons. */}
             {totalPages > 1 && (
-              <div className='flex items-center justify-center gap-2 mt-6'>
+              <div className='flex items-center justify-center gap-2 mt-6 overflow-x-auto -mx-3 px-3 sm:mx-0 sm:px-0'>
                 <button
                   onClick={() => setCurrentPage((p) => Math.max(1, p - 1))}
                   disabled={currentPage === 1}
-                  className='w-9 h-9 flex items-center justify-center rounded-xl border border-gray-200 bg-white text-gray-500 hover:border-violet-400 hover:text-violet-600 disabled:opacity-40 disabled:cursor-not-allowed transition-all duration-150'
+                  className='flex-shrink-0 w-9 h-9 flex items-center justify-center rounded-xl border border-gray-200 bg-white text-gray-500 hover:border-violet-400 hover:text-violet-600 disabled:opacity-40 disabled:cursor-not-allowed transition-all duration-150'
                 >
                   <i className='ri-arrow-left-s-line text-lg' />
                 </button>
@@ -365,7 +366,10 @@ export default function UserDetailsComponent({ defaultTab = 'account' }) {
 
                     if (showEllipsisBefore || showEllipsisAfter) {
                       return (
-                        <span key={page} className='text-gray-300 text-sm px-1'>
+                        <span
+                          key={page}
+                          className='flex-shrink-0 text-gray-300 text-sm px-1'
+                        >
                           •••
                         </span>
                       );
@@ -376,7 +380,7 @@ export default function UserDetailsComponent({ defaultTab = 'account' }) {
                       <button
                         key={page}
                         onClick={() => setCurrentPage(page)}
-                        className={`w-9 h-9 flex items-center justify-center rounded-xl text-sm font-semibold transition-all duration-150 ${
+                        className={`flex-shrink-0 w-9 h-9 flex items-center justify-center rounded-xl text-sm font-semibold transition-all duration-150 ${
                           isActive
                             ? 'bg-violet-600 text-white border border-violet-600 shadow-sm shadow-violet-200'
                             : 'border border-gray-200 bg-white text-gray-600 hover:border-violet-400 hover:text-violet-600'
@@ -393,7 +397,7 @@ export default function UserDetailsComponent({ defaultTab = 'account' }) {
                     setCurrentPage((p) => Math.min(totalPages, p + 1))
                   }
                   disabled={currentPage === totalPages}
-                  className='w-9 h-9 flex items-center justify-center rounded-xl border border-gray-200 bg-white text-gray-500 hover:border-violet-400 hover:text-violet-600 disabled:opacity-40 disabled:cursor-not-allowed transition-all duration-150'
+                  className='flex-shrink-0 w-9 h-9 flex items-center justify-center rounded-xl border border-gray-200 bg-white text-gray-500 hover:border-violet-400 hover:text-violet-600 disabled:opacity-40 disabled:cursor-not-allowed transition-all duration-150'
                 >
                   <i className='ri-arrow-right-s-line text-lg' />
                 </button>
@@ -415,123 +419,124 @@ export default function UserDetailsComponent({ defaultTab = 'account' }) {
   ]);
 
   return (
-    <div className=' py-6 sm:py-8 md:py-10'>
-      <div className='flex items-center justify-center'>
-        <div className='w-full max-w-full overflow-x-auto flex items-center justify-center'>
-          <Tabs
-            aria-label='User Tabs'
-            selectedKey={activeTab}
-            onSelectionChange={(key) => {
-              if (key === 'my-plan') {
-                setIsPlanNavigating(true);
-                router.push('/user/my-plan');
-                return;
-              }
-              setActiveTab(key);
-            }}
-            color='secondary'
-            variant='bordered'
-            size='sm'
-            placement='top'
-            className='flex-nowrap min-w-max'
-          >
-            {/* Account */}
-            <Tab
-              key='account'
-              title={
-                <div
-                  className={`flex items-center gap-1 sm:gap-2 px-1 sm:px-2 ${
-                    activeTab === 'account' ? 'text-white' : 'text-black'
-                  }`}
-                >
-                  <i className='ri-account-circle-fill text-base sm:text-lg md:text-xl' />
-                  <span className='text-[11px] sm:text-sm md:text-base whitespace-nowrap'>
-                    <span className='sm:inline hidden'>Account</span>
-                    <span className='sm:hidden'>Acc</span>
-                  </span>
-                </div>
-              }
-            />
+    <div className='py-6 sm:py-8 md:py-10'>
+      {/* overflow-x-auto allows horizontal scroll when tabs exceed viewport on narrow phones.
+          justify-center inside an overflow container traps the start of the content out of
+          reach on touch devices, so we left-align and let users scroll naturally. */}
+      <div className='w-full overflow-x-auto -mx-3 px-3 sm:mx-0 sm:px-0'>
+        <Tabs
+          aria-label='User Tabs'
+          selectedKey={activeTab}
+          onSelectionChange={(key) => {
+            if (key === 'my-plan') {
+              setIsPlanNavigating(true);
+              router.push('/user/my-plan');
+              return;
+            }
+            setActiveTab(key);
+          }}
+          color='secondary'
+          variant='bordered'
+          size='sm'
+          placement='top'
+          className='flex-nowrap min-w-max'
+        >
+          {/* Account */}
+          <Tab
+            key='account'
+            title={
+              <div
+                className={`flex items-center gap-1 sm:gap-2 px-1 sm:px-2 ${
+                  activeTab === 'account' ? 'text-white' : 'text-black'
+                }`}
+              >
+                <i className='ri-account-circle-fill text-base sm:text-lg md:text-xl' />
+                <span className='text-[11px] sm:text-sm md:text-base whitespace-nowrap'>
+                  <span className='sm:inline hidden'>Account</span>
+                  <span className='sm:hidden'>Acc</span>
+                </span>
+              </div>
+            }
+          />
 
-            {/* Password */}
-            <Tab
-              key='password'
-              title={
-                <div
-                  className={`flex items-center gap-1 sm:gap-2 px-1 sm:px-2 ${
-                    activeTab === 'password' ? 'text-white' : 'text-black'
-                  }`}
-                >
-                  <i className='ri-lock-password-fill text-base sm:text-lg md:text-xl' />
-                  <span className='text-[11px] sm:text-sm md:text-base whitespace-nowrap'>
-                    <span className='hidden sm:inline'>Change Password</span>
-                    <span className='sm:hidden'>Pass</span>
-                  </span>
-                </div>
-              }
-            />
-
-            {/* Downloads */}
-            <Tab
-              key='downloads'
-              title={
-                <div
-                  className={`flex items-center gap-1 sm:gap-2 px-1 sm:px-2 ${
-                    activeTab === 'downloads' ? 'text-white' : 'text-black'
-                  }`}
-                >
-                  <i className='ri-download-fill text-base sm:text-lg md:text-xl' />
-                  <span className='text-[11px] sm:text-sm md:text-base whitespace-nowrap'>
-                    <span className='hidden sm:inline'>Downloads</span>
-                    <span className='sm:hidden'>Down</span>
-                  </span>
-                </div>
-              }
-            />
-
-            {/* Favourites */}
-            <Tab
-              key='favourites'
-              title={
-                <div
-                  className={`flex items-center gap-1 sm:gap-2 px-1 sm:px-2 ${
-                    activeTab === 'favourites' ? 'text-white' : 'text-black'
-                  }`}
-                >
-                  <i className='ri-heart-fill text-base sm:text-lg md:text-xl' />
-                  <span className='text-[11px] sm:text-sm md:text-base whitespace-nowrap'>
-                    <span className='hidden sm:inline'>My Favourites</span>
-                    <span className='sm:hidden'>Favs</span>
-                  </span>
-                </div>
-              }
-            />
-
-            {/* My Plan — navigates away on click */}
-            <Tab
-              key='my-plan'
-              title={
-                <div className='flex items-center gap-1 sm:gap-2 px-1 sm:px-2 text-black'>
+          {/* My Plan — navigates away on click */}
+          <Tab
+            key='my-plan'
+            title={
+              <div className='flex items-center gap-1 sm:gap-2 px-1 sm:px-2 text-black'>
+                {isPlanNavigating ? (
+                  <span className='w-4 h-4 border-2 border-gray-400 border-t-transparent rounded-full animate-spin' />
+                ) : (
+                  <i className='ri-vip-crown-fill text-base sm:text-lg md:text-xl' />
+                )}
+                <span className='text-[11px] sm:text-sm md:text-base whitespace-nowrap'>
                   {isPlanNavigating ? (
-                    <span className='w-4 h-4 border-2 border-gray-400 border-t-transparent rounded-full animate-spin' />
+                    <span className='hidden sm:inline'>Loading...</span>
                   ) : (
-                    <i className='ri-vip-crown-fill text-base sm:text-lg md:text-xl' />
+                    <>
+                      <span className='hidden sm:inline'>My Plan</span>
+                      <span className='sm:hidden'>Plan</span>
+                    </>
                   )}
-                  <span className='text-[11px] sm:text-sm md:text-base whitespace-nowrap'>
-                    {isPlanNavigating ? (
-                      <span className='hidden sm:inline'>Loading...</span>
-                    ) : (
-                      <>
-                        <span className='hidden sm:inline'>My Plan</span>
-                        <span className='sm:hidden'>Plan</span>
-                      </>
-                    )}
-                  </span>
-                </div>
-              }
-            />
-          </Tabs>
-        </div>
+                </span>
+              </div>
+            }
+          />
+
+          {/* Downloads */}
+          <Tab
+            key='downloads'
+            title={
+              <div
+                className={`flex items-center gap-1 sm:gap-2 px-1 sm:px-2 ${
+                  activeTab === 'downloads' ? 'text-white' : 'text-black'
+                }`}
+              >
+                <i className='ri-download-fill text-base sm:text-lg md:text-xl' />
+                <span className='text-[11px] sm:text-sm md:text-base whitespace-nowrap'>
+                  <span className='hidden sm:inline'>Downloads</span>
+                  <span className='sm:hidden'>Down</span>
+                </span>
+              </div>
+            }
+          />
+
+          {/* Favourites */}
+          <Tab
+            key='favourites'
+            title={
+              <div
+                className={`flex items-center gap-1 sm:gap-2 px-1 sm:px-2 ${
+                  activeTab === 'favourites' ? 'text-white' : 'text-black'
+                }`}
+              >
+                <i className='ri-heart-fill text-base sm:text-lg md:text-xl' />
+                <span className='text-[11px] sm:text-sm md:text-base whitespace-nowrap'>
+                  <span className='hidden sm:inline'>My Favourites</span>
+                  <span className='sm:hidden'>Favs</span>
+                </span>
+              </div>
+            }
+          />
+
+          {/* Password */}
+          <Tab
+            key='password'
+            title={
+              <div
+                className={`flex items-center gap-1 sm:gap-2 px-1 sm:px-2 ${
+                  activeTab === 'password' ? 'text-white' : 'text-black'
+                }`}
+              >
+                <i className='ri-lock-password-fill text-base sm:text-lg md:text-xl' />
+                <span className='text-[11px] sm:text-sm md:text-base whitespace-nowrap'>
+                  <span className='hidden sm:inline'>Change Password</span>
+                  <span className='sm:hidden'>Pass</span>
+                </span>
+              </div>
+            }
+          />
+        </Tabs>
       </div>
 
       {/* Content */}
@@ -552,7 +557,9 @@ export default function UserDetailsComponent({ defaultTab = 'account' }) {
             ) : (
               <div className='flex flex-col items-center justify-center py-20 text-center'>
                 <div className='text-5xl mb-4'>🤍</div>
-                <p className='text-gray-700 font-semibold text-lg'>No favourites yet</p>
+                <p className='text-gray-700 font-semibold text-lg'>
+                  No favourites yet
+                </p>
                 <p className='text-gray-400 text-sm mt-1'>
                   Tap the heart on any design to save it here.
                 </p>

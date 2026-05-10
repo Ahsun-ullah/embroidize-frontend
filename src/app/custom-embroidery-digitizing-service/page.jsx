@@ -52,14 +52,14 @@ export default function CustomEmbroideryOrderPage() {
       {/* HERO SECTION */}
       <section className='bg-gradient-to-b from-slate-50 to-white'>
         <div className='container mx-auto px-4 py-8 sm:px-6 lg:px-8 lg:py-10'>
-          <div className='grid items-center gap-4 lg:grid-cols-[1.2fr_0.8fr] lg:gap-4'>
+          <div className='grid items-center gap-6 lg:grid-cols-[1.2fr_0.8fr] lg:gap-4'>
             {/* LEFT: Hero Text */}
-            <div>
+            <div className='text-center lg:text-left'>
               <p className='text-sm font-bold uppercase tracking-wider text-slate-600 sm:text-base'>
                 Professional
               </p>
 
-              <h1 className='mt-3 text-3xl font-extrabold leading-tight text-slate-900 sm:text-3xl lg:text-4xl'>
+              <h1 className='mt-3 text-2xl font-extrabold leading-tight text-slate-900 sm:text-3xl lg:text-4xl'>
                 Custom Embroidery Digitizing Service
               </h1>
 
@@ -68,7 +68,7 @@ export default function CustomEmbroideryOrderPage() {
                 1–24 hour delivery for all embroidery machines
               </p>
 
-              <p className='mt-4 max-w-2xl text-base leading-relaxed text-slate-700 sm:text-lg'>
+              <p className='mt-4 max-w-2xl text-base leading-relaxed text-slate-700 sm:text-lg mx-auto lg:mx-0'>
                 Upload your logo, artwork, or sketch and receive professional
                 embroidery digitizing converted into machine‑ready embroidery
                 files. Delivered with fast turnaround, free revisions, and
@@ -79,7 +79,7 @@ export default function CustomEmbroideryOrderPage() {
               <div className='mt-8 space-y-3'>
                 <Link
                   href='#order-form'
-                  className='inline-flex w-full items-center justify-center rounded-full bg-black px-10 py-4 text-base font-bold text-white shadow-xl transition hover:bg-slate-800 active:scale-95 sm:w-auto sm:text-lg'
+                  className='inline-flex w-full items-center justify-center rounded-full bg-black px-6 py-4 text-sm font-bold text-white shadow-xl transition hover:bg-slate-800 active:scale-95 sm:w-auto sm:px-10 sm:text-lg'
                 >
                   Start Custom Embroidery Order
                 </Link>
@@ -89,13 +89,14 @@ export default function CustomEmbroideryOrderPage() {
               </div>
             </div>
 
-            {/* RIGHT: Hero Image */}
+            {/* RIGHT: Hero Image — fluid on mobile, capped at fixed widths from sm+ */}
             <div className='relative flex justify-center lg:justify-end'>
-              <div className='relative h-[300px] w-[400px] sm:h-[350px] sm:w-[480px] lg:h-[400px] lg:w-[520px]'>
+              <div className='relative aspect-[4/3] w-full max-w-[400px] sm:max-w-[480px] lg:max-w-[520px]'>
                 <Image
                   src='https://embroidize-assets.nyc3.cdn.digitaloceanspaces.com/custom-order-page-banner-image.png'
                   alt='Custom embroidery digitizing before and after comparison'
                   fill
+                  sizes='(min-width: 1024px) 520px, (min-width: 640px) 480px, 100vw'
                   className='object-contain drop-shadow-2xl'
                   priority
                 />

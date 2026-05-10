@@ -1,11 +1,11 @@
 import { configureStore } from '@reduxjs/toolkit';
 import { setupListeners } from '@reduxjs/toolkit/query';
+import { adminChoiceSlice } from './admin/adminChoice/adminChoiceSlice';
 import { blogsSlice } from './admin/blogs/blogsSlice';
 import { categoryAndSubcategorySlice } from './admin/categoryAndSubcategory/categoryAndSubcategorySlice';
 import { protectedProductSlice } from './admin/protectedProducts/protectedProductSlice';
 import { userSlice } from './admin/users/userSlice';
 import { favoritesSlice } from './common/favorites/favoritesSlice';
-import { likesSlice } from './common/likes/likesSlice';
 import { productCommonSlice } from './common/product/productCommonSlice';
 import { userInfoSlice } from './common/user/userInfoSlice';
 import { authSlice } from './public/auth/authSlice';
@@ -24,7 +24,7 @@ export const makeStore = () => {
       [productCommonSlice.reducerPath]: productCommonSlice.reducer,
       [blogsSlice.reducerPath]: blogsSlice.reducer,
       [favoritesSlice.reducerPath]: favoritesSlice.reducer,
-      [likesSlice.reducerPath]: likesSlice.reducer,
+      [adminChoiceSlice.reducerPath]: adminChoiceSlice.reducer,
     },
     middleware: (getDefaultMiddleware) =>
       getDefaultMiddleware()
@@ -37,7 +37,7 @@ export const makeStore = () => {
         .concat(blogsSlice.middleware)
         .concat(authSlice.middleware)
         .concat(favoritesSlice.middleware)
-        .concat(likesSlice.middleware),
+        .concat(adminChoiceSlice.middleware),
     devTools: process.env.NODE_ENV !== 'production',
   });
 };

@@ -4,7 +4,7 @@ import Footer from '@/components/user/HomePage/Footer';
 import Header from '@/components/user/HomePage/Header';
 import {
   getAdminChoiceProducts,
-  getMostLikedProducts,
+  getMostFavoritedProducts,
   getPopularProducts,
   getProducts,
 } from '@/lib/apis/public/products';
@@ -17,7 +17,7 @@ export async function generateMetadata({ searchParams }) {
   const filter = searchParams?.filter;
   const isPopular = filter === 'popular';
   const isAdminChoice = filter === 'embroidize-choice';
-  const isMostLiked = filter === 'most-liked';
+  const isMostFavourited = filter === 'most-favourited';
 
   const baseTitle = 'Machine Embroidery Designs';
   const baseDescription =
@@ -31,32 +31,32 @@ export async function generateMetadata({ searchParams }) {
   const adminChoiceDescription =
     'Discover our curated selection of premium embroidery designs, handpicked by our team for quality and uniqueness.';
 
-  const mostLikedTitle = 'Most Liked Embroidery Designs - Community Picks';
-  const mostLikedDescription =
-    'Browse the embroidery designs our community loves the most. Liked by thousands and ready for instant download.';
+  const mostFavouritedTitle = 'Most Favourited Embroidery Designs - Community Picks';
+  const mostFavouritedDescription =
+    'Browse the embroidery designs our community favourites the most. Saved by thousands and ready for instant download.';
 
   const pickTitle = isPopular
     ? popularTitle
     : isAdminChoice
       ? adminChoiceTitle
-      : isMostLiked
-        ? mostLikedTitle
+      : isMostFavourited
+        ? mostFavouritedTitle
         : baseTitle;
 
   const pickDescription = isPopular
     ? popularDescription
     : isAdminChoice
       ? adminChoiceDescription
-      : isMostLiked
-        ? mostLikedDescription
+      : isMostFavourited
+        ? mostFavouritedDescription
         : baseDescription;
 
   const canonicalPath = isPopular
     ? '/products?filter=popular'
     : isAdminChoice
       ? '/products?filter=embroidize-choice'
-      : isMostLiked
-        ? '/products?filter=most-liked'
+      : isMostFavourited
+        ? '/products?filter=most-favourited'
         : '/products';
 
   return {
@@ -93,14 +93,14 @@ export default async function AllProductsPage({ searchParams }) {
   const filter = searchParams?.filter;
   const isPopular = filter === 'popular';
   const isAdminChoice = filter === 'embroidize-choice';
-  const isMostLiked = filter === 'most-liked';
+  const isMostFavourited = filter === 'most-favourited';
 
   const productData = isPopular
     ? await getPopularProducts('', currentPage, perPageData)
     : isAdminChoice
       ? await getAdminChoiceProducts('', currentPage, perPageData)
-      : isMostLiked
-        ? await getMostLikedProducts('', currentPage, perPageData)
+      : isMostFavourited
+        ? await getMostFavoritedProducts('', currentPage, perPageData)
         : await getProducts('', currentPage, perPageData);
 
   const { products, totalCount, totalPages } = {
@@ -126,7 +126,7 @@ export default async function AllProductsPage({ searchParams }) {
                 href='/products'
                 prefetch={false}
                 className={`px-4 py-2 text-sm whitespace-nowrap rounded transition-colors ${
-                  !isPopular && !isAdminChoice && !isMostLiked
+                  !isPopular && !isAdminChoice && !isMostFavourited
                     ? 'bg-black text-white'
                     : 'border border-gray-200 hover:bg-gray-50'
                 }`}
@@ -145,15 +145,15 @@ export default async function AllProductsPage({ searchParams }) {
                 Popular
               </Link>
               <Link
-                href='/products?filter=most-liked'
+                href='/products?filter=most-favourited'
                 prefetch={false}
                 className={`px-4 py-2 text-sm whitespace-nowrap rounded transition-colors ${
-                  isMostLiked
+                  isMostFavourited
                     ? 'bg-black text-white'
                     : 'border border-gray-200 hover:bg-gray-50'
                 }`}
               >
-                Most Liked
+                Most Favourited
               </Link>
               <Link
                 href='/products?filter=embroidize-choice'

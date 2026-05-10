@@ -1,14 +1,14 @@
 import AdminChoiceDesign from '@/components/user/HomePage/AdminChoiceSection';
 import Footer from '@/components/user/HomePage/Footer';
 import Header from '@/components/user/HomePage/Header';
-import MostLikedDesigns from '@/components/user/HomePage/MostLikedDesigns';
+import MostFavoritedDesigns from '@/components/user/HomePage/MostFavoritedDesigns';
 import PopularDesign from '@/components/user/HomePage/PopularDesign';
 import RecentBundleSection from '@/components/user/HomePage/RecentBundleSection';
 import RecentProductsSection from '@/components/user/HomePage/RecentProductsSection';
 import { getAllBundlesForDashboard } from '@/lib/apis/protected/bundles';
 import {
   getAdminChoiceProducts,
-  getMostLikedProducts,
+  getMostFavoritedProducts,
   getPopularProducts,
   getProducts,
 } from '@/lib/apis/public/products';
@@ -83,13 +83,13 @@ export default async function Home() {
     adminChoicePromise,
     recentPromise,
     bundlePromise,
-    mostLikedPromise,
+    mostFavoritedPromise,
   ] = [
     getPopularProducts('', 1, 8, { cache: 'no-store' }),
     getAdminChoiceProducts('', 1, 8, { cache: 'no-store' }),
     getProducts('', 1, 8, { cache: 'no-store' }),
     getAllBundlesForDashboard('', 1, 8, { cache: 'no-store' }),
-    getMostLikedProducts('', 1, 8, { cache: 'no-store' }),
+    getMostFavoritedProducts('', 1, 8, { cache: 'no-store' }),
   ];
 
   const [
@@ -97,13 +97,13 @@ export default async function Home() {
     adminChoiceProducts,
     recentProducts,
     bundles,
-    mostLikedProducts,
+    mostFavoritedProducts,
   ] = await Promise.all([
     popularPromise,
     adminChoicePromise,
     recentPromise,
     bundlePromise,
-    mostLikedPromise,
+    mostFavoritedPromise,
   ]);
 
   return (
@@ -185,7 +185,8 @@ export default async function Home() {
             id='popular-designs-heading'
             className='text-2xl sm:text-2xl md:text-3xl text-center font-bold leading-snug'
           >
-            Most Downloaded Designs Of The Month
+            Most Downloaded Designs
+            <br /> Of The Month
           </h2>
 
           <p className='text-base sm:text-base md:text-lg font-medium text-gray-600'>
@@ -203,18 +204,18 @@ export default async function Home() {
         </Suspense>
       </section>
 
-      {/* Most Liked Designs Section */}
-      {mostLikedProducts?.products?.length ? (
+      {/* Most Favourited Designs Section */}
+      {mostFavoritedProducts?.products?.length ? (
         <section
-          aria-labelledby='most-liked-designs-heading'
+          aria-labelledby='most-favourited-designs-heading'
           className=' text-black my-8 py-6'
         >
           <div className='bg-[#ffffff] flex flex-col items-center justify-center gap-2 py-6 mb-6'>
             <h2
-              id='most-liked-designs-heading'
+              id='most-favourited-designs-heading'
               className='text-2xl sm:text-2xl md:text-3xl text-center font-bold leading-snug'
             >
-              Most Liked Designs
+              Most Favourited Designs
             </h2>
 
             <p className='text-base sm:text-base md:text-lg font-medium text-gray-600'>
@@ -223,7 +224,7 @@ export default async function Home() {
           </div>
 
           <Suspense fallback={<GridSkeleton />}>
-            <MostLikedDesigns mostLikedProducts={mostLikedProducts} />
+            <MostFavoritedDesigns mostFavoritedProducts={mostFavoritedProducts} />
           </Suspense>
         </section>
       ) : null}

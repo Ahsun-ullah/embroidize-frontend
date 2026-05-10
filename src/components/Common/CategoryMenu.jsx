@@ -9,12 +9,9 @@ import Link from 'next/link';
 import { useEffect, useMemo, useState } from 'react';
 
 export default function CategoryMenu({ isMobileMenuOpen }) {
-  const [cachedData, setCachedDataState] = useState(() => {
-    if (typeof window !== 'undefined') {
-      return getCachedCategories();
-    }
-    return null;
-  });
+  // Initialize to null on both server and client to avoid hydration mismatch.
+  // The useEffect below loads from localStorage after hydration completes.
+  const [cachedData, setCachedDataState] = useState(null);
 
   // ✅ Load from localStorage first
   useEffect(() => {

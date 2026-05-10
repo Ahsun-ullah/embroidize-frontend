@@ -93,13 +93,13 @@ export async function getPopularProducts(
     totalPages: meta.totalPages ?? 1,
   };
 }
-export async function getMostLikedProducts(
+export async function getMostFavoritedProducts(
   searchQuery,
   currentPage = 1,
   perPageData = 12,
 ) {
   try {
-    const url = buildURL('/public/most-liked/products', {
+    const url = buildURL('/public/most-favorited/products', {
       search: searchQuery || undefined,
       page: currentPage,
       limit: perPageData,
@@ -118,7 +118,7 @@ export async function getMostLikedProducts(
       totalPages: meta.totalPages ?? 1,
     };
   } catch (error) {
-    console.error('Error fetching most liked products:', error);
+    console.error('Error fetching most favourited products:', error);
     return {
       products: [],
       totalCount: 0,

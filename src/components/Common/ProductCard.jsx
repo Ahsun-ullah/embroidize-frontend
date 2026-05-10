@@ -5,9 +5,8 @@ import { blurDataURL } from '@/utils/blur';
 import Image from 'next/image';
 import Link from 'next/link';
 import React from 'react';
-import AdminChoiceStar from './AdminChoiceStar';
+import AdminChoiceToggle from './AdminChoiceToggle';
 import FavoriteButton from './FavoriteButton';
-import LikeButton from './LikeButton';
 import SkuFlag from './SkuFlag';
 
 function DownloadIcon(props) {
@@ -60,9 +59,14 @@ const ProductCard = React.memo(function ProductCard({ item, index = 0 }) {
         <SkuFlag sku={item.sku_code} />
       )}
 
-      {item?.isAdminChoice && userInfoData?.role === 'admin' && (
+      {/* Admin-only click-to-toggle. Always renders for admins (active or not)
+          so they can flip Embroidize Choice from any card on the site. */}
+      {userInfoData?.role === 'admin' && (
         <div className='absolute top-3 left-3 z-20'>
-          <AdminChoiceStar status={item.isAdminChoice} />
+          <AdminChoiceToggle
+            productId={item._id}
+            initialStatus={!!item?.isAdminChoice}
+          />
         </div>
       )}
 
@@ -88,12 +92,9 @@ const ProductCard = React.memo(function ProductCard({ item, index = 0 }) {
           </div>
         </Link>
         <div className='absolute top-2 right-2 z-20'>
-          <FavoriteButton productId={item._id} />
-        </div>
-        <div className='absolute top-2 left-2 z-20'>
-          <LikeButton
+          <FavoriteButton
             productId={item._id}
-            initialCount={item?.likeCount || 0}
+            initialCount={item?.favoriteCount || 0}
             variant='card'
           />
         </div>

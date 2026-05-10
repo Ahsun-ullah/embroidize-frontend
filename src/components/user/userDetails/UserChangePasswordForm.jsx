@@ -51,8 +51,8 @@ export default function ChangePasswordForm() {
   };
 
   return (
-    <div className='w-full max-w-md mx-auto p-6 bg-white rounded-lg shadow-md'>
-      <h1 className='text-2xl font-bold mb-6'>Change Password</h1>
+    <div className='w-full max-w-md mx-auto p-4 sm:p-6 bg-white rounded-lg shadow-md'>
+      <h1 className='text-xl sm:text-2xl font-bold mb-6'>Change Password</h1>
 
       <form onSubmit={handleSubmit(onSubmit)}>
         {/* Current Password */}

@@ -3,8 +3,8 @@ import ProductCard from '@/components/Common/ProductCard';
 import Link from 'next/link';
 import { Suspense } from 'react';
 
-const MostLikedDesigns = ({ mostLikedProducts }) => {
-  const { products: allProducts } = mostLikedProducts;
+const MostFavoritedDesigns = ({ mostFavoritedProducts }) => {
+  const { products: allProducts } = mostFavoritedProducts;
 
   return (
     <section className='text-black my-8 py-6'>
@@ -20,11 +20,11 @@ const MostLikedDesigns = ({ mostLikedProducts }) => {
 
         <div className='text-center mt-12'>
           <Link
-            href='/products?filter=most-liked'
+            href='/products?filter=most-favourited'
             prefetch={false}
             className='inline-flex items-center justify-center rounded-full bg-black px-8 py-4 text-base font-bold text-white hover:bg-gray-800 transition-all'
           >
-            View All Most Liked →
+            View All Most Favourited →
           </Link>
         </div>
       </div>
@@ -32,4 +32,4 @@ const MostLikedDesigns = ({ mostLikedProducts }) => {
   );
 };
 
-export default MostLikedDesigns;
+export default MostFavoritedDesigns;
