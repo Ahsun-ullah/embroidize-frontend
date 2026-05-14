@@ -133,7 +133,7 @@ export default async function AllProductsPage({ searchParams }) {
               >
                 All
               </Link>
-              <Link
+              {/* <Link
                 href='/products?filter=popular'
                 prefetch={false}
                 className={`px-4 py-2 text-sm whitespace-nowrap rounded transition-colors ${
@@ -143,7 +143,7 @@ export default async function AllProductsPage({ searchParams }) {
                 }`}
               >
                 Popular
-              </Link>
+              </Link> */}
               <Link
                 href='/products?filter=most-favourited'
                 prefetch={false}

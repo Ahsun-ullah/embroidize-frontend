@@ -176,7 +176,7 @@ export default async function Home() {
         </div>
       </section>
 
-      <section
+      {/* <section
         aria-labelledby='popular-designs-heading'
         className=' text-black mb-8 py-6'
       >
@@ -195,14 +195,13 @@ export default async function Home() {
         </div>
 
         <Suspense fallback={<GridSkeleton />}>
-          {/* Make sure PopularDesign is a **server component** (no 'use client') */}
           {popularProducts?.products?.length ? (
             <PopularDesign popularProducts={popularProducts} />
           ) : (
             <GridSkeleton />
           )}
         </Suspense>
-      </section>
+      </section> */}
 
       {/* Most Favourited Designs Section */}
       {mostFavoritedProducts?.products?.length ? (

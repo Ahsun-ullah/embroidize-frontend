@@ -55,6 +55,9 @@ export async function getAllProductsForDashboard(
     limit: perPageData || 8,
     category: categoryId || undefined,
     sub_category: subCategoryId || undefined,
+    // TEMP: admin dashboard sees all products; public listing hides SKU-ending-in-F.
+    // Remove when the backend tempSkuHide helper is removed.
+    includeHidden: 1,
   });
 
   const result = await getJSON(url);
