@@ -319,12 +319,14 @@ export default function ProductsTableWrapper({
       switch (columnKey) {
         case 'name':
           return (
-            <User
-              avatarProps={{ radius: 'lg', src: product?.image?.url }}
-              name={cellValue}
-            >
-              {product.name}
-            </User>
+            <Link target='_blank' className='hover:underline' href={`/product/${product.slug}`}>
+              <User
+                avatarProps={{ radius: 'lg', src: product?.image?.url }}
+                name={cellValue}
+              >
+                {product.name}
+              </User>
+            </Link>
           );
         case 'isAdminChoice':
           return (
