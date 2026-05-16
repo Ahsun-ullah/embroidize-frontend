@@ -5,8 +5,10 @@ import { useState } from 'react';
 
 export default function PurchaseButton({
   plan,
-  isPopular = false,
-  isActivePlan = false, // ✅ Added
+  isPopular,
+  isActivePlan,
+  ctaTitle,
+  ctaSubtitle,
 }) {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState(null);
@@ -62,50 +64,46 @@ export default function PurchaseButton({
   };
 
   // ✅ Active plan state — disabled button with checkmark
-  if (isActivePlan) {
+  if (isActivePlan === true) {
     return (
       <button
         disabled
-        className={`w-full py-2.5 rounded-xl text-sm font-semibold cursor-not-allowed flex items-center justify-center gap-2 ${
-          isPopular
-            ? 'bg-white/20 text-white border border-white/40'
-            : 'bg-gray-100 text-gray-500 border border-gray-200'
-        }`}
+        className='w-full py-3.5 px-4 rounded-xl bg-green-500 text-white cursor-not-allowed flex flex-col items-center justify-center gap-0.5'
       >
-        <span className={isPopular ? 'text-white' : 'text-green-500'}>✓</span>
-        Active Plan
+        <span className='font-semibold text-sm flex items-center gap-2'>
+          <span className='text-white'>✓</span>
+          Active Plan
+        </span>
+        <span className='text-xs text-green-100'>You are subscribed</span>
       </button>
     );
   }
 
-  // ✅ Normal subscribe button
+  // ✅ Normal subscribe button — two-line, full black, matches design
   return (
     <div>
       <button
         onClick={handlePurchase}
         disabled={isLoading}
-        className={`w-full py-2.5 rounded-xl text-sm font-semibold transition-all duration-200 disabled:cursor-not-allowed ${
-          isPopular
-            ? 'bg-white text-black hover:bg-gray-100 disabled:bg-gray-600 disabled:text-gray-400'
-            : 'bg-black text-white hover:bg-gray-900 disabled:bg-gray-300 disabled:text-gray-500'
-        }`}
+        className='w-full py-5 px-4 rounded-xl bg-black text-white hover:bg-gray-900 active:scale-[0.99] transition-all duration-200 disabled:bg-gray-400 disabled:cursor-not-allowed flex flex-col items-center justify-center gap-0.5'
       >
         {isLoading ? (
-          <span className='flex items-center justify-center gap-2'>
-            <span
-              className={`w-4 h-4 border-2 border-t-transparent rounded-full animate-spin ${
-                isPopular ? 'border-black' : 'border-white'
-              }`}
-            />
-            Processing...
+          <span className='flex items-center justify-center gap-2 py-1'>
+            <span className='w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin' />
+            <span className='text-sm font-medium'>Processing...</span>
           </span>
         ) : (
-          `Subscribe to ${plan.name}`
+          <>
+            <span className='font-semibold text-base leading-tight'>
+              {ctaTitle || `Subscribe to ${plan.name}`}
+            </span>
+
+          </>
         )}
       </button>
 
       {error && (
-        <p className='text-red-400 text-xs mt-2 text-center'>{error}</p>
+        <p className='text-red-500 text-xs mt-2 text-center'>{error}</p>
       )}
     </div>
   );

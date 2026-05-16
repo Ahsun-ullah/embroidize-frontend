@@ -22,14 +22,17 @@ export default function MyPlanPage() {
   //          This turned the object into `true`, making every subscription?.xxx → undefined
   const subscription = userInfoData?.subscription ?? null;
 
+
   // After Mongoose populate, subscription.planId holds the full plan object
   const plan = subscription?.planId ?? null;
+
+
 
   // ✅ USER TYPE
   // ─── FIX #3: These now work correctly because subscription is the real object ─
   // BUG WAS: subscription was `true` (boolean), so subscription.status was always undefined,
   //          isPaidUser was always false, isFreeUser was always true
-  const isPaidUser = !!subscription && subscription.status === 'active';
+  const isPaidUser = !!subscription;
   const isFreeUser = !isPaidUser;
   const isOneTime = isPaidUser && !subscription?.stripeSubscriptionId;
   const isCancelled = subscription?.cancelAtPeriodEnd === true;
@@ -159,6 +162,7 @@ export default function MyPlanPage() {
               >
                 {remaining > 0 ? `${remaining} left` : 'Limit reached'}
               </span>
+
             </div>
 
             {/* Progress */}
