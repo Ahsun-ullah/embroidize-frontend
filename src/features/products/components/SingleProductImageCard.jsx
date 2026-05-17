@@ -11,6 +11,7 @@ function ImageLightbox({ src, alt, onClose }) {
   const [position, setPosition] = useState({ x: 0, y: 0 });
   const [isDragging, setIsDragging] = useState(false);
   const dragStart = useRef(null);
+  const didPan = useRef(false);
   const containerRef = useRef(null);
 
   const MIN_SCALE = 1;
@@ -77,10 +78,12 @@ function ImageLightbox({ src, alt, onClose }) {
     if (scale <= 1) return;
     e.preventDefault();
     setIsDragging(true);
+    didPan.current = false;
     dragStart.current = { x: e.clientX - position.x, y: e.clientY - position.y };
   };
   const onMouseMove = (e) => {
     if (!isDragging || !dragStart.current) return;
+    didPan.current = true;
     setPosition({ x: e.clientX - dragStart.current.x, y: e.clientY - dragStart.current.y });
   };
   const onMouseUp = () => {
@@ -92,25 +95,35 @@ function ImageLightbox({ src, alt, onClose }) {
   const onTouchStart = (e) => {
     if (scale <= 1 || e.touches.length !== 1) return;
     const t = e.touches[0];
+    didPan.current = false;
     dragStart.current = { x: t.clientX - position.x, y: t.clientY - position.y };
   };
   const onTouchMove = (e) => {
     if (!dragStart.current || e.touches.length !== 1) return;
+    didPan.current = true;
     const t = e.touches[0];
     setPosition({ x: t.clientX - dragStart.current.x, y: t.clientY - dragStart.current.y });
   };
   const onTouchEnd = () => { dragStart.current = null; };
 
+  // Close when click lands on the backdrop (not on the image itself) and wasn't a pan
+  const onBackdropClick = (e) => {
+    if (didPan.current) {
+      didPan.current = false;
+      return;
+    }
+    if (e.target === e.currentTarget) onClose();
+  };
+
   return (
     <div
       className='fixed inset-0 z-50 flex items-center justify-center bg-black/90'
-      onClick={onClose}
     >
-      {/* Image area — stop propagation so clicking image doesn't close */}
+      {/* Image area — clicking on the backdrop (not the image) closes the lightbox */}
       <div
         ref={containerRef}
         className='relative w-full h-full flex items-center justify-center overflow-hidden'
-        onClick={(e) => e.stopPropagation()}
+        onClick={onBackdropClick}
         onMouseDown={onMouseDown}
         onMouseMove={onMouseMove}
         onMouseUp={onMouseUp}

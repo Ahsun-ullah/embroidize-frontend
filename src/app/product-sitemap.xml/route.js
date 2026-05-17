@@ -12,7 +12,7 @@ export async function GET(req) {
       ? 0
       : parseInt(idParam, 10);
 
-    const limit = 2000;
+    const limit = 1000;
     const skip = pageNum * limit;
 
     // IMPORTANT: pass skip & limit to backend
