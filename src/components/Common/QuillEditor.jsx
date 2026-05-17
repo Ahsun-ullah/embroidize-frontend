@@ -292,7 +292,10 @@ export default function QuillEditor({
         f.type.startsWith('image/'),
       );
       if (!hasImage) return;
+      // Capture-phase + stopImmediatePropagation so Quill's own drop handler
+      // doesn't ALSO insert the file (was causing duplicate inserts).
       e.preventDefault();
+      e.stopImmediatePropagation();
       // Move caret to drop point if browser supports it
       let range = null;
       if (document.caretRangeFromPoint) {
@@ -309,8 +312,8 @@ export default function QuillEditor({
       }
       handleFiles(files);
     };
-    quill.root.addEventListener('dragover', onDragOver);
-    quill.root.addEventListener('drop', onDrop);
+    quill.root.addEventListener('dragover', onDragOver, true);
+    quill.root.addEventListener('drop', onDrop, true);
 
     // ---- Paste: screenshot, embedded base64, or rich HTML with remote images ----
     const onPaste = async (e) => {
@@ -323,7 +326,10 @@ export default function QuillEditor({
         (it) => it.kind === 'file' && it.type.startsWith('image/'),
       );
       if (fileItems.length > 0) {
+        // Capture-phase + stopImmediatePropagation so Quill's own paste
+        // handler doesn't ALSO insert the image (was causing duplicates).
         e.preventDefault();
+        e.stopImmediatePropagation();
         const files = fileItems.map((it) => it.getAsFile()).filter(Boolean);
         await handleFiles(files);
         return;
@@ -333,6 +339,7 @@ export default function QuillEditor({
       const html = cd.getData('text/html');
       if (html && /<img\b/i.test(html)) {
         e.preventDefault();
+        e.stopImmediatePropagation();
         const warnings = [];
         setStatus({ kind: 'uploading', text: 'Importing pasted images…' });
         try {
@@ -370,7 +377,7 @@ export default function QuillEditor({
       }
       // Otherwise let Quill handle (plain text or HTML without images)
     };
-    quill.root.addEventListener('paste', onPaste);
+    quill.root.addEventListener('paste', onPaste, true);
 
     // Initial content
     if (value) {
@@ -386,9 +393,9 @@ export default function QuillEditor({
     // Cleanup
     return () => {
       quill.root.removeEventListener('dblclick', onDblClick);
-      quill.root.removeEventListener('dragover', onDragOver);
-      quill.root.removeEventListener('drop', onDrop);
-      quill.root.removeEventListener('paste', onPaste);
+      quill.root.removeEventListener('dragover', onDragOver, true);
+      quill.root.removeEventListener('drop', onDrop, true);
+      quill.root.removeEventListener('paste', onPaste, true);
       quill.off('text-change', onTextChange);
       quillRef.current = null;
       if (containerRef.current) containerRef.current.innerHTML = '';
