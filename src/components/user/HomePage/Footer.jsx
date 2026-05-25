@@ -59,19 +59,44 @@ const Footer = () => {
               />
             </Link>
             <p className='text-[15px] leading-relaxed text-gray-700 max-w-sm'>
-              Premium embroidery designs for creators &amp; small businesses.
-              Instant download. Commercial-friendly.
+              Discover high-quality machine embroidery designs for hobbyists,
+              embroidery businesses, and creators. Instantly download
+              commercial-use embroidery files in PES, DST, EXP, JEF, VP3, XXX,
+              and more formats. Explore our{' '}
+              <a
+                href='https://embroidize.com/free-machine-embroidery-designs'
+                className='text-gray-900 underline hover:text-gray-700'
+              >
+                Free Machine Embroidery Designs
+              </a>{' '}
+              collection for free embroidery patterns and instant digital
+              downloads.
             </p>
-
             {/* SOCIAL */}
             <div className='flex items-center gap-2 pt-2'>
               {[
-                ['linkedin', 'https://www.linkedin.com/company/embroidize-official/', 'LinkedIn'],
-                ['pinterest', 'https://www.pinterest.com/embroidize/', 'Pinterest'],
+                [
+                  'linkedin',
+                  'https://www.linkedin.com/company/embroidize-official/',
+                  'LinkedIn',
+                ],
+                [
+                  'pinterest',
+                  'https://www.pinterest.com/embroidize/',
+                  'Pinterest',
+                ],
                 ['facebook', 'https://www.facebook.com/embroidize', 'Facebook'],
                 ['twitter-x', 'https://x.com/embroidize', 'X (Twitter)'],
-                ['instagram', 'https://www.instagram.com/embroidize/', 'Instagram'],
-                ['youtube', 'https://www.youtube.com/channel/UCVCNRSIGLqdBG6O9D1xHGpQ', 'YouTube'],
+                [
+                  'instagram',
+                  'https://www.instagram.com/embroidize/',
+                  'Instagram',
+                ],
+                [
+                  'youtube',
+                  'https://www.youtube.com/channel/UCVCNRSIGLqdBG6O9D1xHGpQ',
+                  'YouTube',
+                ],
               ].map(([icon, url, label]) => (
                 <Link
                   key={icon}

@@ -130,14 +130,6 @@ export default function AboutUsPage() {
 
           {/* CTA */}
           <section className='text-center space-y-4'>
-            <h2 className='text-2xl font-semibold text-gray-900'>
-              Join Our Creative Community
-            </h2>
-            <p className='text-gray-700'>
-              Start exploring designs, download your favorites, and bring your
-              ideas to life with Embroidize.
-            </p>
-
             <div className='bg-gradient-to-r from-blue-50 to-indigo-50 p-8 rounded-lg'>
               <p className='text-gray-700 mb-2'>
                 📧 <span className='font-medium'>Email:</span>{' '}
@@ -149,11 +141,14 @@ export default function AboutUsPage() {
                 </a>
               </p>
               <p className='text-gray-700'>
-                📍 <span className='font-medium'>Address:</span><br />
+                📍 <span className='font-medium'>Address:</span>
+                <br />
                 <span className='text-gray-600'>
-                  Mountain Road Professional Center<br />
+                  Mountain Road Professional Center
+                  <br />
                   1209 Mountain Road Place NE, Suite R<br />
-                  Albuquerque, New Mexico 87110<br />
+                  Albuquerque, New Mexico 87110
+                  <br />
                   United States
                 </span>
               </p>
