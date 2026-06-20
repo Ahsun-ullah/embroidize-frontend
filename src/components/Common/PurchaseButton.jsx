@@ -9,10 +9,19 @@ export default function PurchaseButton({
   isActivePlan,
   ctaTitle,
   ctaSubtitle,
+  provider = 'stripe',
 }) {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState(null);
   const pathName = usePathname();
+
+  const priceId =
+    provider === 'paddle' ? plan.paddlePriceId : plan.stripePriceId;
+  const endpoint =
+    provider === 'paddle'
+      ? '/paddle/create-checkout-session'
+      : '/subscriptions/create-checkout-session';
+  const isProviderUnavailable = !priceId;
 
   const handlePurchase = async () => {
     const token = Cookies.get('token');
@@ -22,19 +31,24 @@ export default function PurchaseButton({
       return;
     }
 
+    if (isProviderUnavailable) {
+      setError(`This plan is not available via ${provider}. Choose another payment method.`);
+      return;
+    }
+
     try {
       setIsLoading(true);
       setError(null);
 
       const response = await fetch(
-        `${process.env.NEXT_PUBLIC_BASE_API_URL_PROD}/subscriptions/create-checkout-session`,
+        `${process.env.NEXT_PUBLIC_BASE_API_URL_PROD}${endpoint}`,
         {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
             Authorization: `Bearer ${token}`,
           },
-          body: JSON.stringify({ priceId: plan.stripePriceId }),
+          body: JSON.stringify({ priceId }),
         },
       );
 
@@ -63,7 +77,7 @@ export default function PurchaseButton({
     }
   };
 
-  // ✅ Active plan state — disabled button with checkmark
+  // Active plan state — disabled button with checkmark
   if (isActivePlan === true) {
     return (
       <button
@@ -79,12 +93,12 @@ export default function PurchaseButton({
     );
   }
 
-  // ✅ Normal subscribe button — two-line, full black, matches design
+  // Normal subscribe button
   return (
     <div>
       <button
         onClick={handlePurchase}
-        disabled={isLoading}
+        disabled={isLoading || isProviderUnavailable}
         className='w-full py-5 px-4 rounded-xl bg-black text-white hover:bg-gray-900 active:scale-[0.99] transition-all duration-200 disabled:bg-gray-400 disabled:cursor-not-allowed flex flex-col items-center justify-center gap-0.5'
       >
         {isLoading ? (
@@ -95,9 +109,10 @@ export default function PurchaseButton({
         ) : (
           <>
             <span className='font-semibold text-base leading-tight'>
-              {ctaTitle || `Subscribe to ${plan.name}`}
+              {isProviderUnavailable
+                ? `Not available via ${provider}`
+                : ctaTitle || `Subscribe to ${plan.name}`}
             </span>
-
           </>
         )}
       </button>

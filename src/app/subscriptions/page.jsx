@@ -208,6 +208,7 @@ export default function SubscriptionsPage() {
   const [plans, setPlans] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [provider, setProvider] = useState('stripe');
   const pathName = usePathname();
   const router = useRouter();
   const { data: userInfoData } = useUserInfoQuery();
@@ -328,6 +329,39 @@ export default function SubscriptionsPage() {
           <p className='mt-3 text-gray-600 text-sm md:text-base'>
             Get instant access to premium embroidery designs in every format.
             Commercial use included, cancel anytime.
+          </p>
+        </div>
+
+        {/* Payment method toggle */}
+        <div className='max-w-md mx-auto mb-10'>
+          <div className='bg-white rounded-2xl shadow-sm p-1.5 flex items-center'>
+            <button
+              type='button'
+              onClick={() => setProvider('stripe')}
+              className={`flex-1 py-2.5 px-4 rounded-xl text-sm font-semibold transition-all ${
+                provider === 'stripe'
+                  ? 'bg-black text-white shadow-sm'
+                  : 'bg-transparent text-gray-600 hover:text-black'
+              }`}
+            >
+              Pay with Stripe
+            </button>
+            <button
+              type='button'
+              onClick={() => setProvider('paddle')}
+              className={`flex-1 py-2.5 px-4 rounded-xl text-sm font-semibold transition-all ${
+                provider === 'paddle'
+                  ? 'bg-black text-white shadow-sm'
+                  : 'bg-transparent text-gray-600 hover:text-black'
+              }`}
+            >
+              Pay with Paddle
+            </button>
+          </div>
+          <p className='text-center text-xs text-gray-500 mt-2'>
+            {provider === 'paddle'
+              ? 'Paddle handles tax + invoicing for you.'
+              : 'Standard card checkout via Stripe.'}
           </p>
         </div>
 
@@ -489,6 +523,7 @@ export default function SubscriptionsPage() {
                         isActivePlan={isActivePlan}
                         ctaTitle={d.ctaTitle}
                         ctaSubtitle={d.ctaSub}
+                        provider={provider}
                       />
 
                       {/* Footer trust row */}

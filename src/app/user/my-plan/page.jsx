@@ -1,5 +1,5 @@
 'use client';
-import { useCountdown } from '@/lib/hooks/countdown';
+import { useDownloadReset } from '@/lib/hooks/useDownloadReset';
 import { useUserInfoQuery } from '@/lib/redux/common/user/userInfoSlice';
 import {
   formatCountdown,
@@ -9,24 +9,24 @@ import {
 import { Divider } from '@heroui/divider';
 import Cookies from 'js-cookie';
 import { useRouter } from 'next/navigation';
-import { useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 
-export default function MyPlanPage() {
+export default function MyPlanPage({ onClose }) {
   const { data: userInfoData, isLoading: userLoading } = useUserInfoQuery();
   const [isRedirecting, setIsRedirecting] = useState(false);
   const [error, setError] = useState(null);
   const router = useRouter();
+  const dialogRef = useRef(null);
+  const [isUpgrading, setIsUpgrading] = useState(false);
+  const { currentPlanName } = useDownloadReset({ tickMs: 60_000 });
 
   // ─── FIX #1: Keep the subscription as an object, not a boolean ───────────
   // BUG WAS: userInfoData?.subscription ? true : false
   //          This turned the object into `true`, making every subscription?.xxx → undefined
   const subscription = userInfoData?.subscription ?? null;
 
-
   // After Mongoose populate, subscription.planId holds the full plan object
   const plan = subscription?.planId ?? null;
-
-
 
   // ✅ USER TYPE
   // ─── FIX #3: These now work correctly because subscription is the real object ─
@@ -37,12 +37,14 @@ export default function MyPlanPage() {
   const isOneTime = isPaidUser && !subscription?.stripeSubscriptionId;
   const isCancelled = subscription?.cancelAtPeriodEnd === true;
 
-  // FREE DATA
-  const usedDownloads = userInfoData?.usedDownloads ?? 0;
-  const limit = userInfoData?.downloadLimit ?? 0;
-  const remaining = userInfoData?.remainingDownloads ?? 0;
-  const timeUntilReset = userInfoData?.timeUntilReset ?? 0;
-  const timeLeft = useCountdown(timeUntilReset);
+  // FREE DATA — sourced from the shared hook so the reset countdown here and the
+  // Download Limit modal are computed in exactly one place (no duplicated logic).
+  const {
+    usedDownloads,
+    limit,
+    remaining,
+    msLeft: timeLeft,
+  } = useDownloadReset();
 
   // PAID DATA
   const usagePercent =
@@ -72,6 +74,31 @@ export default function MyPlanPage() {
         ? 'bg-amber-400'
         : 'bg-violet-500';
 
+  // ── Accessibility: close on Escape, lock body scroll, focus the dialog ──
+  useEffect(() => {
+    const onKeyDown = (e) => e.key === 'Escape' && onClose?.();
+    document.addEventListener('keydown', onKeyDown);
+    document.body.style.overflow = 'hidden';
+
+    const prevFocus = document.activeElement;
+    dialogRef.current?.focus();
+
+    // Trigger the progress-bar fill transition on the next frame.
+    const raf = requestAnimationFrame(() => setBarReady(true));
+
+    return () => {
+      document.removeEventListener('keydown', onKeyDown);
+      document.body.style.overflow = '';
+      cancelAnimationFrame(raf);
+      if (prevFocus instanceof HTMLElement) prevFocus.focus();
+    };
+  }, [onClose]);
+
+  const goToUpgrade = () => {
+    setIsUpgrading(true);
+    router.push('/subscriptions');
+  };
+
   const handleManagePlan = async () => {
     setIsRedirecting(true);
     setError(null);
@@ -84,8 +111,13 @@ export default function MyPlanPage() {
         return;
       }
 
+      const manageEndpoint =
+        subscription?.provider === 'paddle'
+          ? '/paddle/manage'
+          : '/subscriptions/manage';
+
       const response = await fetch(
-        `${process.env.NEXT_PUBLIC_BASE_API_URL_PROD}/subscriptions/manage`,
+        `${process.env.NEXT_PUBLIC_BASE_API_URL_PROD}${manageEndpoint}`,
         {
           method: 'POST',
           headers: {
@@ -162,7 +194,6 @@ export default function MyPlanPage() {
               >
                 {remaining > 0 ? `${remaining} left` : 'Limit reached'}
               </span>
-
             </div>
 
             {/* Progress */}
@@ -224,27 +255,102 @@ export default function MyPlanPage() {
               )}
             </div>
 
-            {/* CTA
-            {remaining === 0 && (
+            {/* CTA */}
+            {/* {remaining === 0 && (
               <div className='text-center space-y-3'>
-                <p className='text-sm text-red-500 font-medium'>
+                <p className='text-lg text-red-500 font-medium'>
                   Skip the wait and download instantly 🚀
                 </p>
-
-                <button
-                  onClick={() => router.push('/subscriptions')}
-                  className='bg-violet-600 text-white px-6 py-2 rounded-lg text-sm font-semibold hover:bg-violet-700 transition shadow'
-                >
-                  Upgrade Now
-                </button>
               </div>
             )} */}
 
-            {/* Browse */}
-            <div className='flex justify-center'>
+            {/* ── Upgrade tiers ── */}
+            {/* <div>
+              <div className='grid grid-cols-3 gap-2.5'>
+                {UPGRADE_TIERS.map((tier) => {
+                  const isCurrent =
+                    currentPlanName?.toLowerCase() === tier.name.toLowerCase();
+                  return (
+                    <button
+                      key={tier.name}
+                      onClick={() => {
+                        onClose?.();
+                        router.push('/subscriptions');
+                      }}
+                      aria-label={`Upgrade to ${tier.name}, ${tier.dailyLimit} downloads per day`}
+                      className={`group relative flex items-center gap-2.5 rounded-2xl border p-3 text-left transition-all duration-200 hover:-translate-y-0.5 hover:shadow-md focus:outline-none focus-visible:ring-2 focus-visible:ring-green-500 ${
+                        isCurrent
+                          ? 'border-green-600 bg-green-600 text-white'
+                          : 'border-green-100 bg-green-50 hover:border-green-400 dark:border-green-500/20 dark:bg-green-500/10 dark:hover:border-green-400'
+                      }`}
+                    >
+                      <span
+                        className={`flex h-9 w-9 shrink-0 items-center justify-center rounded-lg ${
+                          isCurrent
+                            ? 'bg-white/20 text-white'
+                            : 'bg-green-100 text-green-600 dark:bg-green-500/20 dark:text-green-400'
+                        }`}
+                      >
+                        <Download className='h-5 w-5' aria-hidden />
+                      </span>
+                      <span className='flex flex-col leading-tight'>
+                        <span
+                          className={`text-base font-extrabold tabular-nums ${
+                            isCurrent
+                              ? 'text-white'
+                              : 'text-green-700 dark:text-green-400'
+                          }`}
+                        >
+                          {tier.dailyLimit}
+                          <span className='ml-0.5 text-[11px] font-medium'>
+                            / day
+                          </span>
+                        </span>
+                        <span
+                          className={`text-xs font-semibold ${
+                            isCurrent
+                              ? 'text-white/90'
+                              : 'text-green-800 dark:text-green-300'
+                          }`}
+                        >
+                          {tier.name}
+                          {isCurrent && (
+                            <span className='ml-1 text-[9px] font-semibold uppercase opacity-80'>
+                              · Current
+                            </span>
+                          )}
+                        </span>
+                      </span>
+                    </button>
+                  );
+                })}
+              </div>
+            </div> */}
+
+            {/* ── CTAs ── */}
+            <div className='mt-6 space-y-2'>
+              {/* <Button
+                onPress={goToUpgrade}
+                isLoading={isUpgrading}
+                aria-label='Upgrade now'
+                className='h-12 w-full rounded-xl bg-green-600 text-base font-semibold text-white hover:bg-green-700'
+                startContent={
+                  !isUpgrading ? (
+                    <Crown
+                      className='h-4 w-4'
+                      fill='currentColor'
+                      aria-hidden
+                    />
+                  ) : null
+                }
+              >
+                Upgrade Now
+              </Button> */}
+
+              {/*  Browse Designs */}
               <button
                 onClick={() => router.push('/products')}
-                className='border border-slate-200 text-slate-600 px-5 py-2 rounded-lg text-sm hover:bg-slate-50 transition'
+                className='w-full rounded-xl py-2.5 text-sm  h-12 font-semibold text-gray-600 bg-gray-50 transition hover:bg-blue-50 dark:text-blue-400 dark:hover:bg-blue-500/10'
               >
                 Browse Designs
               </button>
@@ -253,9 +359,6 @@ export default function MyPlanPage() {
         </div>
       )}
 
-      {/* ─── FIX #4: Entire paid section gated behind isPaidUser ──────────────
-           BUG WAS: Hero, stats, usage bars, billing card all rendered unconditionally.
-           Free users saw broken/empty UI since subscription and plan were null.        */}
       {isPaidUser && (
         <>
           {/* ── HERO ── */}

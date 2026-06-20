@@ -98,6 +98,45 @@ export const formatDate = (dateStr) => {
   });
 };
 
+// Compact reset countdown for UI that only needs hour/minute granularity
+// (e.g. "13h 42m", "42m", or "Available now"). Takes the same ms input as
+// formatCountdown so the two stay consistent against one source of truth.
+export const formatResetCountdown = (ms) => {
+  if (!ms || ms <= 0) return 'Available now';
+  const totalMinutes = Math.floor(ms / 60000);
+  const h = Math.floor(totalMinutes / 60);
+  const m = totalMinutes % 60;
+  return h > 0 ? `${h}h ${m}m` : `${m}m`;
+};
+
+// Human-friendly absolute reset time: "Today at 12:00 AM", "Tomorrow at 3:30 PM",
+// or "Mar 5 at 9:00 AM". Renders in the browser's own locale + timezone, so the
+// time shown always matches the user's wall clock regardless of where it was
+// computed on the server.
+export const formatResetTime = (date) => {
+  if (!date) return '';
+  const d = date instanceof Date ? date : new Date(date);
+  if (isNaN(d.getTime())) return '';
+
+  const time = d.toLocaleTimeString('en-US', {
+    hour: 'numeric',
+    minute: '2-digit',
+  });
+
+  const startOfDay = (x) => new Date(x.getFullYear(), x.getMonth(), x.getDate());
+  const dayDiff = Math.round(
+    (startOfDay(d) - startOfDay(new Date())) / 86400000,
+  );
+
+  if (dayDiff === 0) return `Today at ${time}`;
+  if (dayDiff === 1) return `Tomorrow at ${time}`;
+  const dateLabel = d.toLocaleDateString('en-US', {
+    month: 'short',
+    day: 'numeric',
+  });
+  return `${dateLabel} at ${time}`;
+};
+
 export function preserveParagraphLineBreaks(rawMarkup) {
   if (!rawMarkup || typeof rawMarkup !== 'string') {
     return '';

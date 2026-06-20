@@ -362,6 +362,7 @@ export default function SubscribersTableWrapper({ subscribers, stats, revenue })
   const columns = [
     { uid: 'user', name: 'USER' },
     { uid: 'plan', name: 'PLAN' },
+    { uid: 'provider', name: 'PROVIDER' },
     { uid: 'status', name: 'STATUS' },
     { uid: 'downloads', name: 'DOWNLOADS (PERIOD)' },
     { uid: 'daily', name: 'DAILY' },
@@ -402,6 +403,15 @@ export default function SubscribersTableWrapper({ subscribers, stats, revenue })
             </p>
           </div>
         ) : <span className='text-gray-400 text-xs'>—</span>;
+
+      case 'provider': {
+        const p = sub?.provider || 'stripe';
+        return (
+          <Chip size='sm' variant='flat' className='capitalize' color={p === 'paddle' ? 'secondary' : 'default'}>
+            {p}
+          </Chip>
+        );
+      }
 
       case 'status':
         return (

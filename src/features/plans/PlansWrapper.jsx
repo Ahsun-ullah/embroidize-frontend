@@ -48,6 +48,7 @@ const EMPTY_FORM = {
   type: 'recurring',
   billingInterval: 'month',
   stripePriceId: '',
+  paddlePriceId: '',
   price: '',
   downloadLimit: '',
   dailyLimit: '',
@@ -83,6 +84,7 @@ export default function PlansWrapper({ plans: initialPlans }) {
       type: plan.type || 'recurring',
       billingInterval: plan.billingInterval || 'month',
       stripePriceId: plan.stripePriceId || '',
+      paddlePriceId: plan.paddlePriceId || '',
       price: String(plan.price ?? ''),
       downloadLimit: plan.downloadLimit != null ? String(plan.downloadLimit) : '',
       dailyLimit: plan.dailyLimit != null ? String(plan.dailyLimit) : '',
@@ -92,8 +94,12 @@ export default function PlansWrapper({ plans: initialPlans }) {
   };
 
   const savePlan = async () => {
-    if (!form.name || !form.stripePriceId || form.price === '') {
-      ErrorToast('Validation', 'Name, Stripe Price ID, and price are required.', 3000);
+    if (!form.name || form.price === '') {
+      ErrorToast('Validation', 'Name and price are required.', 3000);
+      return;
+    }
+    if (!form.stripePriceId && !form.paddlePriceId) {
+      ErrorToast('Validation', 'At least one of Stripe Price ID or Paddle Price ID is required.', 3000);
       return;
     }
 
@@ -103,7 +109,8 @@ export default function PlansWrapper({ plans: initialPlans }) {
         name: form.name,
         type: form.type,
         billingInterval: form.type === 'recurring' ? form.billingInterval : null,
-        stripePriceId: form.stripePriceId,
+        stripePriceId: form.stripePriceId || undefined,
+        paddlePriceId: form.paddlePriceId || undefined,
         price: parseFloat(form.price),
         downloadLimit: form.downloadLimit !== '' ? parseInt(form.downloadLimit, 10) : null,
         dailyLimit: form.dailyLimit !== '' ? parseInt(form.dailyLimit, 10) : null,
@@ -181,6 +188,7 @@ export default function PlansWrapper({ plans: initialPlans }) {
     { uid: 'price', name: 'PRICE' },
     { uid: 'limits', name: 'LIMITS' },
     { uid: 'stripe', name: 'STRIPE PRICE ID' },
+    { uid: 'paddle', name: 'PADDLE PRICE ID' },
     { uid: 'status', name: 'STATUS' },
     { uid: 'actions', name: 'ACTIONS' },
   ];
@@ -211,7 +219,13 @@ export default function PlansWrapper({ plans: initialPlans }) {
       case 'stripe':
         return (
           <span className='text-xs font-mono text-gray-500 break-all max-w-[160px] block'>
-            {plan.stripePriceId}
+            {plan.stripePriceId || <span className='italic text-gray-300'>—</span>}
+          </span>
+        );
+      case 'paddle':
+        return (
+          <span className='text-xs font-mono text-gray-500 break-all max-w-[160px] block'>
+            {plan.paddlePriceId || <span className='italic text-gray-300'>—</span>}
           </span>
         );
       case 'status':
@@ -262,8 +276,8 @@ export default function PlansWrapper({ plans: initialPlans }) {
 
       <div className='bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-700 rounded-lg p-3'>
         <p className='text-xs text-amber-700 dark:text-amber-300'>
-          <strong>Important:</strong> Create your price in the Stripe Dashboard first, then add it here using the Stripe Price ID.
-          Changing the price shown here does <em>not</em> change the Stripe price — it only updates what&apos;s displayed to users.
+          <strong>Important:</strong> Create your price in Stripe and/or Paddle first, then paste the Price ID(s) here.
+          A plan must have at least one provider Price ID. Changing the display price does <em>not</em> change the provider price.
         </p>
       </div>
 
@@ -329,10 +343,20 @@ export default function PlansWrapper({ plans: initialPlans }) {
                     placeholder='price_...'
                     value={form.stripePriceId}
                     onChange={(e) => setField('stripePriceId', e.target.value)}
-                    isRequired
-                    isDisabled={!!editingPlan}
-                    description={editingPlan ? 'Stripe Price ID cannot be changed after creation' : 'Find this in your Stripe Dashboard → Products'}
+                    description='Find this in your Stripe Dashboard → Products'
                   />
+
+                  <Input
+                    label='Paddle Price ID'
+                    placeholder='pri_...'
+                    value={form.paddlePriceId}
+                    onChange={(e) => setField('paddlePriceId', e.target.value)}
+                    description='Find this in your Paddle Dashboard → Catalog → Products'
+                  />
+
+                  <p className='text-xs text-gray-500 -mt-1'>
+                    At least one of Stripe or Paddle Price ID is required. Fill both if the plan is offered on both providers.
+                  </p>
 
                   <Input
                     type='number'
