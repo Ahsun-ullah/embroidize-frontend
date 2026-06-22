@@ -19,6 +19,11 @@ const UserProfileDropdown = dynamic(
   { ssr: false },
 );
 
+const HeaderQuickLinks = dynamic(
+  () => import('@/components/Common/HeaderQuickLinks'),
+  { ssr: false },
+);
+
 export const Header = () => {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [isSearchFocused, setIsSearchFocused] = useState(false);
@@ -135,6 +140,9 @@ export const Header = () => {
                   Subscriptions
                 </span>
               </Link> */}
+
+              {/* Desktop-only quick links (hidden on mobile) */}
+              <HeaderQuickLinks />
 
               <div className='shrink-0'>
                 <UserProfileDropdown />

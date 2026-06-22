@@ -1,6 +1,31 @@
 import Footer from '@/components/user/HomePage/Footer';
 import Header from '@/components/user/HomePage/Header';
 
+export const metadata = {
+  title: 'Refund & Cancellation Policy | Embroidize – Digital Product Terms',
+  description:
+    'Understand our refund and cancellation policies for digital embroidery design files and subscription services.',
+  alternates: {
+    canonical: 'https://embroidize.com/refund-and-cancellation-policy',
+  },
+  openGraph: {
+    title: 'Refund & Cancellation Policy | Embroidize – Digital Product Terms',
+    description:
+      'Understand our refund and cancellation policies for digital embroidery design files and subscription services.',
+    url: 'https://embroidize.com/refund-and-cancellation-policy',
+    siteName: 'Embroidize',
+    images: [
+      {
+        url: 'https://embroidize.com/og-banner.jpg',
+        width: 1200,
+        height: 630,
+      },
+    ],
+    type: 'website',
+  },
+  metadataBase: new URL('https://embroidize.com'),
+};
+
 export default function RefundPolicyPage() {
   const sections = [
     {

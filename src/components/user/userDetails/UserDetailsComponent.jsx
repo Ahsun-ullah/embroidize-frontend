@@ -8,6 +8,7 @@ import {
   useUserDownloadHistoryQuery,
   useUserInfoQuery,
 } from '@/lib/redux/common/user/userInfoSlice';
+import { filenameFromContentDisposition } from '@/utils/functions/page';
 import { Tab, Tabs } from '@heroui/react';
 import Cookies from 'js-cookie';
 import Link from 'next/link';
@@ -60,10 +61,16 @@ export default function UserDetailsComponent({ defaultTab = 'account' }) {
       if (!res.ok) throw new Error(`Download failed with status ${res.status}`);
 
       const blob = await res.blob();
+      // Honour the SEO-friendly filename the server sets; fall back to the
+      // legacy name if the header isn't present/readable.
+      const filename = filenameFromContentDisposition(
+        res.headers.get('content-disposition'),
+        `From_Embroidize_${extension}.zip`,
+      );
       const url = window.URL.createObjectURL(blob);
       const link = document.createElement('a');
       link.href = url;
-      link.download = `From_Embroidize_${extension}.zip`;
+      link.download = filename;
       document.body.appendChild(link);
       link.click();
       window.URL.revokeObjectURL(url);

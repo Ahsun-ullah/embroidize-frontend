@@ -473,7 +473,7 @@ export default async function LandingPage() {
 
           <div className='mt-8'>
             <Link
-              href='/categories'
+              href='/products'
               prefetch={false}
               className='inline-block px-6 py-3 rounded-full bg-black text-white font-bold hover:bg-gray-800 transition-colors'
             >

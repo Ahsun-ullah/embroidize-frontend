@@ -53,6 +53,28 @@ export const queryString = (str) =>
     .toLowerCase()
     .replace(/\s+/g, '+');
 
+// Extracts the filename the server set in a Content-Disposition header,
+// supporting both `filename="..."` and the RFC 5987 `filename*=UTF-8''...` form.
+// Returns `fallback` when the header is missing or unreadable (e.g. an older
+// API response, or the header isn't CORS-exposed), so a download is never left
+// unnamed. The server is the single source of truth for the name.
+export const filenameFromContentDisposition = (header, fallback = 'download.zip') => {
+  if (!header) return fallback;
+
+  // RFC 5987 extended form takes precedence (handles non-ASCII names).
+  const extended = header.match(/filename\*=(?:UTF-8'')?([^;]+)/i);
+  if (extended?.[1]) {
+    try {
+      return decodeURIComponent(extended[1].replace(/["']/g, '').trim());
+    } catch {
+      /* fall through to the plain form */
+    }
+  }
+
+  const plain = header.match(/filename="?([^";]+)"?/i);
+  return plain?.[1]?.trim() || fallback;
+};
+
 export function formatNumber(num) {
   if (num >= 1_000_000)
     return (num / 1_000_000).toFixed(1).replace(/\.0$/, '') + 'M';

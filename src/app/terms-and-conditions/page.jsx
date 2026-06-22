@@ -1,6 +1,31 @@
 import Footer from '@/components/user/HomePage/Footer';
 import Header from '@/components/user/HomePage/Header';
 
+export const metadata = {
+  title: 'Terms & Conditions | Embroidize – Digital Product Usage',
+  description:
+    'Please read these terms and conditions carefully before using our digital embroidery design services.',
+  alternates: {
+    canonical: 'https://embroidize.com/terms-and-conditions',
+  },
+  openGraph: {
+    title: 'Terms & Conditions | Embroidize – Digital Product Usage',
+    description:
+      'Please read these terms and conditions carefully before using our digital embroidery design services.',
+    url: 'https://embroidize.com/terms-and-conditions',
+    siteName: 'Embroidize',
+    images: [
+      {
+        url: 'https://embroidize.com/og-banner.jpg',
+        width: 1200,
+        height: 630,
+      },
+    ],
+    type: 'website',
+  },
+  metadataBase: new URL('https://embroidize.com'),
+};
+
 export default function TermsPage() {
   const sections = [
     {

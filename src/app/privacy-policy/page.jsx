@@ -1,6 +1,31 @@
 import Footer from '@/components/user/HomePage/Footer';
 import Header from '@/components/user/HomePage/Header';
 
+export const metadata = {
+  title: 'Privacy Policy | Embroidize – Protecting Your Data',
+  description:
+    'Learn how we collect, use, and protect your personal information.',
+  alternates: {
+    canonical: 'https://embroidize.com/privacy-policy',
+  },
+  openGraph: {
+    title: 'Privacy Policy | Embroidize – Protecting Your Data',
+    description:
+      'Learn how we collect, use, and protect your personal information.',
+    url: 'https://embroidize.com/privacy-policy',
+    siteName: 'Embroidize',
+    images: [
+      {
+        url: 'https://embroidize.com/og-banner.jpg',
+        width: 1200,
+        height: 630,
+      },
+    ],
+    type: 'website',
+  },
+  metadataBase: new URL('https://embroidize.com'),
+};
+
 export default function PrivacyPolicyPage() {
   const sections = [
     {

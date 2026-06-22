@@ -6,7 +6,10 @@ import FavoriteButton from '@/components/Common/FavoriteButton';
 import LoadingSpinner from '@/components/Common/LoadingSpinner';
 import SkuFlag from '@/components/Common/SkuFlag';
 import { useUserInfoQuery } from '@/lib/redux/common/user/userInfoSlice';
-import { formatNumber } from '@/utils/functions/page';
+import {
+  filenameFromContentDisposition,
+  formatNumber,
+} from '@/utils/functions/page';
 import {
   Button,
   Modal,
@@ -192,7 +195,12 @@ export default function ProductDownloadCard({ data }) {
       }
 
       const blob = await res.blob();
-      const filename = `Embroidize_${fileData.extension}.zip`;
+      // Honour the SEO-friendly filename the server sets; fall back to the
+      // legacy name if the header isn't present/readable.
+      const filename = filenameFromContentDisposition(
+        res.headers.get('content-disposition'),
+        `Embroidize_${fileData.extension}.zip`,
+      );
 
       safeDownload(blob, filename);
     } catch (err) {
