@@ -45,6 +45,7 @@ export default function UserProfileDropdown() {
 
   const handleLogout = () => {
     Cookies.remove('token');
+    Cookies.remove('finance_elev');
     dispatch(userInfoSlice.util.resetApiState());
     router.push('/'); // Redirect to homepage after logout
   };

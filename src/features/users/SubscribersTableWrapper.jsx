@@ -65,10 +65,20 @@ function apiBase() {
   return process.env.NEXT_PUBLIC_BASE_API_URL_PROD || process.env.NEXT_PUBLIC_BASE_API_URL;
 }
 
+function getFinanceToken() {
+  const row = document.cookie
+    .split('; ')
+    .find((r) => r.startsWith('finance_elev='));
+  return row ? row.split('=').slice(1).join('=') : undefined;
+}
+
 function authHeaders() {
   const token = getToken();
+  const finance = getFinanceToken();
   const h = { 'Content-Type': 'application/json' };
   if (token) h['Authorization'] = `Bearer ${token}`;
+  // Required by the gated subscriber endpoints (cancel/refund/quota/etc.).
+  if (finance) h['x-finance-elevation'] = finance;
   return h;
 }
 

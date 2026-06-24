@@ -1,6 +1,9 @@
+import { FinanceGate } from '@/features/admin/FinanceGate';
+import { FinanceUnlockedBar } from '@/features/admin/FinanceUnlockedBar';
 import CustomOrdersTableWrapper from '@/features/products/components/CustomOrdersTableWrapper';
 import { CustomOrderStatsClient } from '@/features/products/components/CustomOrderStatsClient';
 import { PaypalSummaryClient } from '@/features/products/components/PaypalSummaryClient';
+import { checkFinanceUnlocked } from '@/lib/apis/protected/financeAuth';
 import {
   getAllCustomOrdersForDashboard,
   getCustomOrderStats,
@@ -8,6 +11,10 @@ import {
 } from '@/lib/apis/protected/customOrders';
 
 export default async function CustomOrdersPage({ searchParams }) {
+  if (!(await checkFinanceUnlocked())) {
+    return <FinanceGate title='Custom Orders' />;
+  }
+
   const params = await searchParams;
 
   const page = Number(params?.page) || 1;
@@ -37,6 +44,7 @@ export default async function CustomOrdersPage({ searchParams }) {
 
   return (
     <div className='space-y-10'>
+      <FinanceUnlockedBar />
       <CustomOrderStatsClient stats={stats} />
       <PaypalSummaryClient summary={summary} />
       <CustomOrdersTableWrapper

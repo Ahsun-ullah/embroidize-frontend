@@ -1,7 +1,7 @@
 export const dynamic = 'force-dynamic';
 
 import DashboardCharts from '@/features/dashboard/components/DashboardCharts';
-import { getCustomOrderStats } from '@/lib/apis/protected/customOrders';
+import { getCustomOrderCount } from '@/lib/apis/protected/customOrders';
 import { getDashboardStatsAPI } from '@/lib/apis/protected/users';
 import { getProducts } from '@/lib/apis/public/products';
 import Link from 'next/link';
@@ -9,7 +9,7 @@ import Link from 'next/link';
 export default async function AdminDashboard() {
   // 1. Fetch Aggregated Stats from Backend (Fast)
   const stats = await getDashboardStatsAPI();
-  const { stats: customOrderStats } = await getCustomOrderStats();
+  const { total: customOrderTotal } = await getCustomOrderCount();
 
   // 2. Fetch Product Count (keep existing logic or create similar aggregated endpoint)
   const productsResponse = await getProducts('', 1, 1);
@@ -58,7 +58,7 @@ export default async function AdminDashboard() {
           className='bg-white rounded shadow p-4 flex flex-col items-center'
         >
           <span className='text-2xl font-bold'>
-            {customOrderStats?.total || 0}
+            {customOrderTotal || 0}
           </span>
           <span className='text-gray-500 mt-2'>Custom Orders</span>
         </Link>

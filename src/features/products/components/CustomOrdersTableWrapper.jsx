@@ -81,6 +81,14 @@ function getToken() {
   return tokenCookie ? tokenCookie.split('=').slice(1).join('=') : undefined;
 }
 
+// Financial elevation token — required by the gated custom-order endpoints.
+function getFinanceToken() {
+  const c = document.cookie
+    .split('; ')
+    .find((r) => r.startsWith('finance_elev='));
+  return c ? c.split('=').slice(1).join('=') : undefined;
+}
+
 export default function CustomOrdersTableWrapper({
   initialData,
   pagination,
@@ -210,6 +218,8 @@ export default function CustomOrdersTableWrapper({
         process.env.NEXT_PUBLIC_BASE_API_URL;
       const headers = { 'Content-Type': 'application/json' };
       if (token) headers['Authorization'] = `Bearer ${token}`;
+      const financeToken = getFinanceToken();
+      if (financeToken) headers['x-finance-elevation'] = financeToken;
       const res = await fetch(
         `${apiUrl}/admin/orders/custom/${contactOrder._id}/contact`,
         {
@@ -249,6 +259,8 @@ export default function CustomOrdersTableWrapper({
         process.env.NEXT_PUBLIC_BASE_API_URL;
       const headers = { 'Content-Type': 'application/json' };
       if (token) headers['Authorization'] = `Bearer ${token}`;
+      const financeToken = getFinanceToken();
+      if (financeToken) headers['x-finance-elevation'] = financeToken;
       const res = await fetch(
         `${apiUrl}/admin/orders/custom/${selectedOrder._id}`,
         {
@@ -292,6 +304,8 @@ export default function CustomOrdersTableWrapper({
         process.env.NEXT_PUBLIC_BASE_API_URL;
       const headers = { 'Content-Type': 'application/json' };
       if (token) headers['Authorization'] = `Bearer ${token}`;
+      const financeToken = getFinanceToken();
+      if (financeToken) headers['x-finance-elevation'] = financeToken;
       const res = await fetch(
         `${apiUrl}/admin/orders/custom/${selectedOrderId}`,
         { method: 'DELETE', headers },

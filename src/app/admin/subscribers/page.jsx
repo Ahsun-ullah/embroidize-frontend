@@ -1,7 +1,14 @@
+import { FinanceGate } from '@/features/admin/FinanceGate';
+import { FinanceUnlockedBar } from '@/features/admin/FinanceUnlockedBar';
 import SubscribersTableWrapper from '@/features/users/SubscribersTableWrapper';
+import { checkFinanceUnlocked } from '@/lib/apis/protected/financeAuth';
 import { getRevenueStats, getSubscribedUsers } from '@/lib/apis/protected/subscriptions';
 
 export default async function SubscribersPage() {
+  if (!(await checkFinanceUnlocked())) {
+    return <FinanceGate title='Subscribers' />;
+  }
+
   const [subscribers, revenue] = await Promise.all([
     getSubscribedUsers(),
     getRevenueStats(),
@@ -18,6 +25,7 @@ export default async function SubscribersPage() {
 
   return (
     <div className='space-y-6'>
+      <FinanceUnlockedBar />
       <SubscribersTableWrapper subscribers={subscribers} stats={stats} revenue={revenue} />
     </div>
   );

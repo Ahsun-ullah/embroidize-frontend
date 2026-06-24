@@ -55,6 +55,71 @@ export default function AdminSidebar({ isCollapsed, setIsCollapsed }) {
     );
   };
 
+  // Second-level collapsible group (a group nested inside a NavGroup), e.g.
+  // Settings → Financial → Subscribers / Custom Orders. Only renders when the
+  // sidebar is expanded (the parent group collapses to its first item otherwise).
+  const NavSubGroup = ({ icon, label, items }) => {
+    const isAnyChildActive = items.some(
+      (it) => pathname === it.href || pathname.startsWith(`${it.href}/`)
+    );
+    const [open, setOpen] = useState(isAnyChildActive);
+
+    useEffect(() => {
+      if (isAnyChildActive) setOpen(true);
+    }, [isAnyChildActive]);
+
+    return (
+      <li>
+        <button
+          type='button'
+          onClick={() => setOpen((v) => !v)}
+          className={`
+            w-full flex items-center gap-2
+            rounded-md px-3 py-2
+            text-sm
+            ${isAnyChildActive ? 'text-white' : 'text-slate-300'}
+            hover:bg-slate-800 hover:text-white
+            transition-colors duration-150
+          `}
+          aria-expanded={open}
+        >
+          {icon && <i className={`${icon} text-sm`}></i>}
+          <span className='flex-1 text-left'>{label}</span>
+          <i
+            className={`text-sm transition-transform ${open ? 'ri-arrow-down-s-line' : 'ri-arrow-right-s-line'}`}
+          ></i>
+        </button>
+
+        {open && (
+          <ul className='mt-1 ml-3 pl-3 border-l border-slate-700 space-y-1'>
+            {items.map((it) => {
+              const childActive = pathname === it.href;
+              return (
+                <li key={it.href}>
+                  <Link href={it.href}>
+                    <div
+                      className={`
+                        flex items-center gap-2
+                        rounded-md px-3 py-2
+                        text-sm
+                        ${childActive ? 'bg-slate-800 text-white font-medium' : 'text-slate-300'}
+                        hover:bg-slate-800 hover:text-white
+                        transition-colors duration-150
+                      `}
+                    >
+                      {it.icon && <i className={`${it.icon} text-sm`}></i>}
+                      <span>{it.label}</span>
+                    </div>
+                  </Link>
+                </li>
+              );
+            })}
+          </ul>
+        )}
+      </li>
+    );
+  };
+
   // Nested group: parent label expands to show child links.
   // When sidebar is collapsed, clicking the icon navigates to the first child
   // (full nested behavior shows when sidebar is expanded).
@@ -104,6 +169,17 @@ export default function AdminSidebar({ isCollapsed, setIsCollapsed }) {
         {open && (
           <ul className='mt-1 ml-3 pl-3 border-l border-slate-700 space-y-1'>
             {items.map((it) => {
+              // A child can itself be a group (e.g. Settings → Financial).
+              if (it.items) {
+                return (
+                  <NavSubGroup
+                    key={it.label}
+                    icon={it.icon}
+                    label={it.label}
+                    items={it.items}
+                  />
+                );
+              }
               const childActive = pathname === it.href;
               return (
                 <li key={it.href}>
@@ -232,11 +308,6 @@ export default function AdminSidebar({ isCollapsed, setIsCollapsed }) {
               label: 'All Users',
               icon: 'ri-user-fill',
             },
-            {
-              href: '/admin/subscribers',
-              label: 'Subscribers',
-              icon: 'ri-vip-crown-2-fill',
-            },
           ]}
         />
 
@@ -249,11 +320,6 @@ export default function AdminSidebar({ isCollapsed, setIsCollapsed }) {
               href: '/admin/downloads',
               label: 'Downloads',
               icon: 'ri-download-cloud-fill',
-            },
-            {
-              href: '/admin/custom-orders',
-              label: 'Custom Orders',
-              icon: 'ri-file-list-3-fill',
             },
           ]}
         />
@@ -290,6 +356,22 @@ export default function AdminSidebar({ isCollapsed, setIsCollapsed }) {
               href: '/admin/settings/scripts',
               label: 'Admin Scripts',
               icon: 'ri-terminal-box-line',
+            },
+            {
+              label: 'Financial',
+              icon: 'ri-lock-2-fill',
+              items: [
+                {
+                  href: '/admin/subscribers',
+                  label: 'Subscribers',
+                  icon: 'ri-vip-crown-2-fill',
+                },
+                {
+                  href: '/admin/custom-orders',
+                  label: 'Custom Orders',
+                  icon: 'ri-file-list-3-fill',
+                },
+              ],
             },
           ]}
         />

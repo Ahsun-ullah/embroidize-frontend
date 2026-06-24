@@ -84,6 +84,7 @@ const ProfileDropdown = () => {
             href='/auth/login'
             onClick={() => {
               Cookies.remove('token');
+              Cookies.remove('finance_elev');
               dispatch(userInfoSlice.util.resetApiState());
             }}
           >

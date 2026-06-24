@@ -11,10 +11,14 @@ export async function getAllCustomOrdersForDashboard(
   try {
     const cookieStore = await cookies();
     const token = cookieStore.get('token')?.value;
+    const finance = cookieStore.get('finance_elev')?.value;
 
     const headers = new Headers();
     if (token) {
       headers.set('Authorization', `Bearer ${token}`);
+    }
+    if (finance) {
+      headers.set('x-finance-elevation', finance);
     }
 
     const apiUrl = process.env.NEXT_PUBLIC_BASE_API_URL_PROD;
@@ -82,10 +86,14 @@ export async function getCustomOrderById(id) {
   try {
     const cookieStore = await cookies();
     const token = cookieStore.get('token')?.value;
+    const finance = cookieStore.get('finance_elev')?.value;
 
     const headers = new Headers();
     if (token) {
       headers.set('Authorization', `Bearer ${token}`);
+    }
+    if (finance) {
+      headers.set('x-finance-elevation', finance);
     }
 
     const apiUrl = process.env.NEXT_PUBLIC_BASE_API_URL_PROD;
@@ -114,7 +122,9 @@ export async function getCustomOrderById(id) {
   }
 }
 
-export async function getPaypalSummary() {
+// Ungated total count for the main admin dashboard tile. Hits the count-only
+// endpoint, so it works without Financial elevation.
+export async function getCustomOrderCount() {
   try {
     const cookieStore = await cookies();
     const token = cookieStore.get('token')?.value;
@@ -122,6 +132,39 @@ export async function getPaypalSummary() {
     const headers = new Headers();
     if (token) {
       headers.set('Authorization', `Bearer ${token}`);
+    }
+
+    const apiUrl = process.env.NEXT_PUBLIC_BASE_API_URL_PROD;
+    const response = await fetch(`${apiUrl}/admin/orders/custom/count`, {
+      headers,
+      cache: 'no-store',
+      next: { revalidate: 0 },
+    });
+
+    if (!response.ok) {
+      throw new Error(`API request failed with status ${response.status}`);
+    }
+
+    const responseData = await response.json();
+    return { total: responseData?.data?.total || 0 };
+  } catch (error) {
+    console.error('Error fetching custom order count:', error);
+    return { total: 0 };
+  }
+}
+
+export async function getPaypalSummary() {
+  try {
+    const cookieStore = await cookies();
+    const token = cookieStore.get('token')?.value;
+    const finance = cookieStore.get('finance_elev')?.value;
+
+    const headers = new Headers();
+    if (token) {
+      headers.set('Authorization', `Bearer ${token}`);
+    }
+    if (finance) {
+      headers.set('x-finance-elevation', finance);
     }
 
     const apiUrl = process.env.NEXT_PUBLIC_BASE_API_URL_PROD;
@@ -162,10 +205,14 @@ export async function getCustomOrderStats() {
   try {
     const cookieStore = await cookies();
     const token = cookieStore.get('token')?.value;
+    const finance = cookieStore.get('finance_elev')?.value;
 
     const headers = new Headers();
     if (token) {
       headers.set('Authorization', `Bearer ${token}`);
+    }
+    if (finance) {
+      headers.set('x-finance-elevation', finance);
     }
 
     const apiUrl = process.env.NEXT_PUBLIC_BASE_API_URL_PROD;
