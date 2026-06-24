@@ -28,7 +28,15 @@ import {
   Textarea,
   useDisclosure,
 } from '@heroui/react';
-import { Download, Eye, Globe, Mail, MapPin, Search, Trash2 } from 'lucide-react';
+import {
+  Download,
+  Eye,
+  Globe,
+  Mail,
+  MapPin,
+  Search,
+  Trash2,
+} from 'lucide-react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { startTransition, useState } from 'react';
 
@@ -409,23 +417,37 @@ export default function CustomOrdersTableWrapper({
       case 'size':
         return (
           <div className='text-sm'>
-            {order?.sizeWidth && order?.sizeHeight
-              ? `${order.sizeWidth} × ${order.sizeHeight} ${order.sizeUnit || ''}`
-              : '—'}
+            {order?.sizeWidth || order?.sizeHeight
+              ? `${order.sizeWidth} × ${order.sizeHeight} ${order.sizeUnit || ''}`.trim()
+              : order?.finishedSize
+                ? `${order.finishedSize} ${order.sizeUnit || ''}`.trim()
+                : '—'}
           </div>
         );
 
-      case 'fileFormat':
-        return order.fileFormat ? (
+      case 'fileFormat': {
+        const fmt = order.machineFormat || order.fileFormat;
+        return fmt ? (
           <span className='uppercase text-xs font-semibold bg-gray-100 dark:bg-gray-800 px-2 py-1 rounded'>
-            {order.fileFormat}
+            {fmt}
           </span>
         ) : (
           <span className='text-gray-400 text-xs'>—</span>
         );
+      }
 
       case 'turnaround':
-        return <div className='text-sm'>{order.turnaround || '—'}</div>;
+        return (
+          <div className='text-sm'>
+            {order.rushOrder ? 'Rush (+$5)' : order.turnaround || '—'}
+          </div>
+        );
+      case 'preferredBudget':
+        return (
+          <div className='text-sm text-center'>
+            {`$${order.preferredBudget || 0}`}
+          </div>
+        );
 
       case 'status':
         return (
@@ -498,7 +520,6 @@ export default function CustomOrdersTableWrapper({
 
   // Derived values for the view modal
   const isImageRef = viewOrder?.designReference?.mimetype?.startsWith('image/');
-  console.log(viewOrder);
   const sizeText =
     viewOrder?.sizeWidth && viewOrder?.sizeHeight
       ? `${viewOrder.sizeWidth} × ${viewOrder.sizeHeight} ${viewOrder.sizeUnit || ''}`
@@ -832,27 +853,57 @@ export default function CustomOrdersTableWrapper({
                   </p>
                   <div className='grid grid-cols-1 sm:grid-cols-2 gap-4'>
                     <DetailRow
-                      label='File Format'
-                      value={viewOrder?.fileFormat || 'Not specified'}
+                      label='Machine Format'
+                      value={
+                        viewOrder?.machineFormat ||
+                        viewOrder?.fileFormat ||
+                        'Not specified'
+                      }
                     />
                     <DetailRow
-                      label='Turnaround'
-                      value={viewOrder?.turnaround || 'Not specified'}
+                      label='Design Type'
+                      value={
+                        viewOrder?.designType ||
+                        viewOrder?.complexity ||
+                        'Not specified'
+                      }
                     />
                     <DetailRow
-                      label='Complexity'
-                      value={viewOrder?.complexity || 'Not specified'}
+                      label='Fabric / Garment'
+                      value={viewOrder?.fabricType || 'Not specified'}
                     />
                     <DetailRow
-                      label='Size'
-                      value={sizeText || 'Not specified'}
+                      label='Finished Size'
+                      value={
+                        viewOrder?.finishedSize || sizeText || 'Not specified'
+                      }
                     />
+                    <DetailRow
+                      label='Preferred Budget'
+                      value={
+                        viewOrder?.preferredBudget != null
+                          ? `$${viewOrder.preferredBudget}`
+                          : 'Not specified'
+                      }
+                    />
+                    <DetailRow
+                      label='Rush Order'
+                      value={viewOrder?.rushOrder ? 'Yes (+$5)' : 'No'}
+                    />
+                    {viewOrder?.turnaround && (
+                      <DetailRow
+                        label='Turnaround'
+                        value={viewOrder.turnaround}
+                      />
+                    )}
                   </div>
-                  {viewOrder?.details && (
+                  {(viewOrder?.specialInstructions || viewOrder?.details) && (
                     <div className='mt-4'>
                       <DetailRow
-                        label='Additional Details'
-                        value={viewOrder.details}
+                        label='Special Instructions'
+                        value={
+                          viewOrder.specialInstructions || viewOrder.details
+                        }
                       />
                     </div>
                   )}
@@ -1029,7 +1080,8 @@ export default function CustomOrdersTableWrapper({
                   />
                   <Textarea
                     label='Admin Notes (Optional)'
-                    placeholder='Add internal notes...'
+                    placeholder='e.g. "saklain paypal" — the name before "paypal" feeds the PayPal breakdown'
+                    description='Tip: write the PayPal account name before the word "paypal" (or "paypal: Name") so it totals correctly in the PayPal breakdown.'
                     value={adminNotes}
                     onChange={(e) => setAdminNotes(e.target.value)}
                     minRows={3}

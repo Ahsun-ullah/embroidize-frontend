@@ -114,6 +114,50 @@ export async function getCustomOrderById(id) {
   }
 }
 
+export async function getPaypalSummary() {
+  try {
+    const cookieStore = await cookies();
+    const token = cookieStore.get('token')?.value;
+
+    const headers = new Headers();
+    if (token) {
+      headers.set('Authorization', `Bearer ${token}`);
+    }
+
+    const apiUrl = process.env.NEXT_PUBLIC_BASE_API_URL_PROD;
+    const url = `${apiUrl}/admin/orders/custom/paypal-summary`;
+
+    const response = await fetch(url, {
+      headers,
+      cache: 'no-store',
+      next: { revalidate: 0 },
+    });
+
+    if (!response.ok) {
+      throw new Error(`API request failed with status ${response.status}`);
+    }
+
+    const responseData = await response.json();
+
+    if (!responseData.success) {
+      throw new Error(
+        responseData.message || 'API returned unsuccessful response',
+      );
+    }
+
+    return {
+      summary: responseData?.data || {
+        accounts: [],
+        grandTotal: 0,
+        orderCount: 0,
+      },
+    };
+  } catch (error) {
+    console.error('Error fetching PayPal summary:', error);
+    return { summary: { accounts: [], grandTotal: 0, orderCount: 0 } };
+  }
+}
+
 export async function getCustomOrderStats() {
   try {
     const cookieStore = await cookies();
@@ -145,14 +189,20 @@ export async function getCustomOrderStats() {
       );
     }
 
+    const fallback = {
+      total: 0,
+      pending: 0,
+      inProgress: 0,
+      completed: 0,
+      cancelled: 0,
+      last30Days: 0,
+      emailNotSent: 0,
+      withFiles: 0,
+      revenue: { total: 0, completed: 0, avg: 0, pricedCount: 0 },
+    };
+
     return {
-      stats: responseData?.data || {
-        total: 0,
-        pending: 0,
-        inProgress: 0,
-        completed: 0,
-        cancelled: 0,
-      },
+      stats: { ...fallback, ...(responseData?.data || {}) },
     };
   } catch (error) {
     console.error('Error fetching custom order stats:', error);
@@ -163,6 +213,10 @@ export async function getCustomOrderStats() {
         inProgress: 0,
         completed: 0,
         cancelled: 0,
+        last30Days: 0,
+        emailNotSent: 0,
+        withFiles: 0,
+        revenue: { total: 0, completed: 0, avg: 0, pricedCount: 0 },
       },
     };
   }

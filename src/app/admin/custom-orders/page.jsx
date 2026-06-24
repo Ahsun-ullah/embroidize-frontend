@@ -1,8 +1,10 @@
 import CustomOrdersTableWrapper from '@/features/products/components/CustomOrdersTableWrapper';
 import { CustomOrderStatsClient } from '@/features/products/components/CustomOrderStatsClient';
+import { PaypalSummaryClient } from '@/features/products/components/PaypalSummaryClient';
 import {
   getAllCustomOrdersForDashboard,
   getCustomOrderStats,
+  getPaypalSummary,
 } from '@/lib/apis/protected/customOrders';
 
 export default async function CustomOrdersPage({ searchParams }) {
@@ -13,9 +15,10 @@ export default async function CustomOrdersPage({ searchParams }) {
   const status = params?.status || 'all';
   const perPage = 20;
 
-  const [{ orders, pagination }, { stats }] = await Promise.all([
+  const [{ orders, pagination }, { stats }, { summary }] = await Promise.all([
     getAllCustomOrdersForDashboard(search, page, perPage, status),
     getCustomOrderStats(),
+    getPaypalSummary(),
   ]);
 
   const columns = [
@@ -26,7 +29,7 @@ export default async function CustomOrdersPage({ searchParams }) {
     { name: 'SIZE', uid: 'size' },
     { name: 'FORMAT', uid: 'fileFormat' },
     { name: 'TURNAROUND', uid: 'turnaround' },
-    { name: 'COMPLEXITY', uid: 'complexity' },
+    { name: 'PREFERRED BUDGET', uid: 'preferredBudget' },
     { name: 'STATUS', uid: 'status' },
     { name: 'CREATED AT', uid: 'createdAt' },
     { name: 'ACTIONS', uid: 'actions' },
@@ -35,6 +38,7 @@ export default async function CustomOrdersPage({ searchParams }) {
   return (
     <div className='space-y-10'>
       <CustomOrderStatsClient stats={stats} />
+      <PaypalSummaryClient summary={summary} />
       <CustomOrdersTableWrapper
         initialData={orders}
         pagination={pagination}
