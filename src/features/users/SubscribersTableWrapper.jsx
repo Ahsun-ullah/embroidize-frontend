@@ -417,7 +417,7 @@ export default function SubscribersTableWrapper({ subscribers, stats, revenue })
       case 'provider': {
         const p = sub?.provider || 'stripe';
         return (
-          <Chip size='sm' variant='flat' className='capitalize' color={p === 'paddle' ? 'secondary' : 'default'}>
+          <Chip size='sm' variant='flat' className='capitalize' color='default'>
             {p}
           </Chip>
         );

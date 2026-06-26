@@ -9,19 +9,14 @@ export default function PurchaseButton({
   isActivePlan,
   ctaTitle,
   ctaSubtitle,
-  provider = 'stripe',
 }) {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState(null);
   const pathName = usePathname();
 
-  const priceId =
-    provider === 'paddle' ? plan.paddlePriceId : plan.stripePriceId;
-  const endpoint =
-    provider === 'paddle'
-      ? '/paddle/create-checkout-session'
-      : '/subscriptions/create-checkout-session';
-  const isProviderUnavailable = !priceId;
+  const priceId = plan.stripePriceId;
+  const endpoint = '/subscriptions/create-checkout-session';
+  const isUnavailable = !priceId;
 
   const handlePurchase = async () => {
     const token = Cookies.get('token');
@@ -31,8 +26,8 @@ export default function PurchaseButton({
       return;
     }
 
-    if (isProviderUnavailable) {
-      setError(`This plan is not available via ${provider}. Choose another payment method.`);
+    if (isUnavailable) {
+      setError('This plan is not available right now. Please try again later.');
       return;
     }
 
@@ -98,7 +93,7 @@ export default function PurchaseButton({
     <div>
       <button
         onClick={handlePurchase}
-        disabled={isLoading || isProviderUnavailable}
+        disabled={isLoading || isUnavailable}
         className='w-full py-5 px-4 rounded-xl bg-black text-white hover:bg-gray-900 active:scale-[0.99] transition-all duration-200 disabled:bg-gray-400 disabled:cursor-not-allowed flex flex-col items-center justify-center gap-0.5'
       >
         {isLoading ? (
@@ -109,8 +104,8 @@ export default function PurchaseButton({
         ) : (
           <>
             <span className='font-semibold text-base leading-tight'>
-              {isProviderUnavailable
-                ? `Not available via ${provider}`
+              {isUnavailable
+                ? 'Not available'
                 : ctaTitle || `Subscribe to ${plan.name}`}
             </span>
           </>

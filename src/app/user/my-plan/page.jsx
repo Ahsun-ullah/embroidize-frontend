@@ -111,13 +111,8 @@ export default function MyPlanPage({ onClose }) {
         return;
       }
 
-      const manageEndpoint =
-        subscription?.provider === 'paddle'
-          ? '/paddle/manage'
-          : '/subscriptions/manage';
-
       const response = await fetch(
-        `${process.env.NEXT_PUBLIC_BASE_API_URL_PROD}${manageEndpoint}`,
+        `${process.env.NEXT_PUBLIC_BASE_API_URL_PROD}/subscriptions/manage`,
         {
           method: 'POST',
           headers: {
