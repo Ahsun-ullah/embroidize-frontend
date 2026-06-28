@@ -15,7 +15,7 @@ const cleanName = (name = '') =>
 
 // Categories may carry their thumbnail under any of these keys — use the first.
 const getImage = (c) =>
-  c?.image.url ||
+  c?.image?.url ||
   c?.thumbnail ||
   c?.icon ||
   c?.imageUrl ||
@@ -138,9 +138,6 @@ export default function BrowseCategories({
           const img = getImage(category);
           const count = getCount(category);
 
-          console.log(category?.image?.url);
-          console.log(img);
-
           return (
             <Link
               key={category._id ?? category.slug}
@@ -151,12 +148,12 @@ export default function BrowseCategories({
             >
               <div className='relative mb-3 aspect-square w-full overflow-hidden rounded-xl bg-neutral-50'>
                 {img ? (
+                  // eslint-disable-next-line @next/next/no-img-element
                   <img
                     src={img}
                     alt={name}
-                    fill={true}
-                    sizes='(min-width: 1280px) 140px, (min-width: 1024px) 16vw, (min-width: 640px) 30vw, 45vw'
-                    className='object-contain p-2 transition-transform duration-300 group-hover:scale-105'
+                    loading='lazy'
+                    className='absolute inset-0 h-full w-full object-contain p-2 transition-transform duration-300 group-hover:scale-105'
                   />
                 ) : (
                   <span className='flex h-full w-full items-center justify-center text-2xl text-neutral-300'>

@@ -15,11 +15,15 @@ import { marked } from 'marked';
 import Link from 'next/link';
 import { redirect } from 'next/navigation';
 
-export async function generateMetadata({ params }) {
+export async function generateMetadata({ params, searchParams }) {
   try {
     const response = await getSingleCategory(params?.slug);
     const category = response?.data;
-    const canonicalUrl = `https://embroidize.com/category/${category.slug}`;
+    const baseUrl = `https://embroidize.com/category/${category.slug}`;
+    // Paginated pages self-canonicalize (page 2 → page 2) so products that only
+    // appear on deeper pages still get indexed. Page 1 uses the clean URL.
+    const page = parseInt(searchParams?.page) || 1;
+    const canonicalUrl = page > 1 ? `${baseUrl}?page=${page}` : baseUrl;
 
     return {
       title: category?.meta_title || category?.name,
@@ -136,7 +140,6 @@ export default async function CategoryProducts({ params, searchParams }) {
           {allProducts.length > 0 && (
             <div className='flex items-center justify-center mt-6'>
               <Pagination
-                currentPage={currentPage?.page}
                 perPageData={perPageData}
                 totalPages={totalPages}
               />

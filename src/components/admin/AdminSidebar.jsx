@@ -335,6 +335,11 @@ export default function AdminSidebar({ isCollapsed, setIsCollapsed }) {
               icon: 'ri-news-line',
             },
             {
+              href: '/admin/reviews',
+              label: 'Reviews',
+              icon: 'ri-star-line',
+            },
+            {
               href: '/admin/contact-submissions',
               label: 'Contact Submissions',
               icon: 'ri-mail-line',
@@ -356,6 +361,11 @@ export default function AdminSidebar({ isCollapsed, setIsCollapsed }) {
               href: '/admin/settings/scripts',
               label: 'Admin Scripts',
               icon: 'ri-terminal-box-line',
+            },
+            {
+              href: '/admin/settings/redirects',
+              label: 'Redirects',
+              icon: 'ri-arrow-left-right-line',
             },
             {
               label: 'Financial',

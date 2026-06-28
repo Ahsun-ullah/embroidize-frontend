@@ -20,16 +20,6 @@ export default async function DownloadsPage({ searchParams }) {
 
   const { data, pagination } = statsResponse;
 
-
-  const columns = [
-    { name: 'Product', uid: 'name' },
-    { name: 'Category', uid: 'category' },
-    { name: 'Subcategory', uid: 'sub_category' },
-    { name: 'Downloads', uid: 'downloadCount' },
-    { name: 'File Types', uid: 'fileTypes' },
-    { name: 'Actions', uid: 'actions' },
-  ];
-
   return (
     <div className='downloads-page p-6'>
       <div className='flex justify-between items-center me-6'>
@@ -40,7 +30,6 @@ export default async function DownloadsPage({ searchParams }) {
       </div>
       <MostDownloadedProductsTableWrapper
         initialData={data || []}
-        columns={columns}
         pageSize={perPage}
         pagination={pagination}
       />

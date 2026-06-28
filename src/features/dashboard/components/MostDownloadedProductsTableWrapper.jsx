@@ -1,21 +1,12 @@
 'use client';
-import UserTable from '@/components/Common/Table';
-import { VerticalDotsIcon } from '@/components/icons';
-import {
-  Button,
-  Dropdown,
-  DropdownItem,
-  DropdownMenu,
-  DropdownTrigger,
-  Input,
-  User,
-} from '@heroui/react';
+import { Button, Chip, Input, Pagination } from '@heroui/react';
+import { Download, ExternalLink, Heart, ImageOff } from 'lucide-react';
+import Link from 'next/link';
 import { useRouter, useSearchParams } from 'next/navigation';
-import { useCallback, useState } from 'react';
+import { useState } from 'react';
 
 export default function MostDownloadedProductsTableWrapper({
   initialData,
-  columns,
   pageSize,
   pagination,
 }) {
@@ -34,6 +25,10 @@ export default function MostDownloadedProductsTableWrapper({
     searchParams.get('startDate') ? 'custom' : 'all',
   );
 
+  const hasFilter = !!(
+    searchParams.get('startDate') || searchParams.get('endDate')
+  );
+
   // --- Filter Logic (URL Based) ---
   const updateURL = (newParams) => {
     const params = new URLSearchParams(searchParams.toString());
@@ -45,6 +40,7 @@ export default function MostDownloadedProductsTableWrapper({
     });
 
     // Reset to page 1 on filter change
+    params.delete('page');
     router.push(`?${params.toString()}`);
   };
 
@@ -98,60 +94,13 @@ export default function MostDownloadedProductsTableWrapper({
     router.push(`?${params.toString()}`);
   };
 
-  const renderCell = useCallback((item, columnKey) => {
-    if (!item?.product) return <span>-</span>;
-    const cellValue = item.product[columnKey];
-
-    switch (columnKey) {
-      case 'name':
-        return (
-          <User
-            avatarProps={{ radius: 'lg', src: item.product.image?.url }}
-            name={cellValue}
-          >
-            {item.product.name}
-          </User>
-        );
-      case 'category':
-        return <>{item.product.category?.name || '-'}</>;
-      case 'sub_category':
-        return <>{item.product.sub_category?.name || '-'}</>;
-      case 'downloadCount':
-        const hasFilter = !!(
-          searchParams.get('startDate') || searchParams.get('endDate')
-        );
-
-        const displayCount = hasFilter
-          ? (item.downloadCount ?? 0)
-          : (item.product?.downloadCount ?? 0);
-
-        return <span className='font-medium'>{displayCount}</span>;
-
-      case 'fileTypes':
-        return <p className='uppercase'>{item.fileTypes?.join(', ') || '-'}</p>;
-      case 'actions':
-        return (
-          <div className='relative flex justify-center items-center gap-2'>
-            <Dropdown>
-              <DropdownTrigger>
-                <Button isIconOnly size='sm' variant='light'>
-                  <VerticalDotsIcon className='text-default-300' />
-                </Button>
-              </DropdownTrigger>
-              <DropdownMenu>
-                <DropdownItem key='view'>View Details</DropdownItem>
-              </DropdownMenu>
-            </Dropdown>
-          </div>
-        );
-      default:
-        return cellValue;
-    }
-  }, [searchParams]);
+  const data = Array.isArray(initialData) ? initialData : [];
+  const pages = pagination?.totalPages || 1;
+  const currentPage = pagination?.page || 1;
 
   // --- Filter Bar UI ---
   const topContent = (
-    <div className='flex flex-col gap-4 mb-4'>
+    <div className='flex flex-col gap-4 mb-6'>
       <div className='flex flex-wrap gap-3 items-end justify-between'>
         {/* Preset Buttons */}
         <div className='flex flex-wrap gap-1 bg-gray-100 dark:bg-neutral-800 rounded-lg p-1'>
@@ -197,9 +146,7 @@ export default function MostDownloadedProductsTableWrapper({
             aria-label='Start Date'
             className='w-36'
             value={dateInputs.startDate}
-            onChange={(e) =>
-              handleManualDateChange('startDate', e.target.value)
-            }
+            onChange={(e) => handleManualDateChange('startDate', e.target.value)}
           />
           <span className='text-gray-400'>-</span>
           <Input
@@ -226,14 +173,146 @@ export default function MostDownloadedProductsTableWrapper({
   );
 
   return (
-    <UserTable
-      data={initialData}
-      columns={columns}
-      pageSize={pageSize}
-      renderCell={renderCell}
-      onPageChange={onPageChange}
-      pagination={pagination}
-      topContent={topContent}
-    />
+    <div>
+      {topContent}
+
+      {data.length === 0 ? (
+        <div className='py-16 text-center text-gray-400'>No data found</div>
+      ) : (
+        <div className='grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4'>
+          {data.map((item) => {
+            const product = item.product || {};
+            const slug = product.slug;
+            const imageUrl = product.image?.url;
+            const downloadCount = hasFilter
+              ? (item.downloadCount ?? 0)
+              : (product.downloadCount ?? 0);
+            const favoriteCount = product.favoriteCount ?? 0;
+
+            return (
+              <div
+                key={item._id}
+                className='group bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden flex flex-col hover:shadow-md transition-shadow'
+              >
+                {/* ── Focused image (larger) ── */}
+                <Link
+                  href={slug ? `/product/${slug}` : '#'}
+                  target={slug ? '_blank' : undefined}
+                  rel='noopener noreferrer'
+                  className='relative block aspect-[16/10] bg-gray-50 overflow-hidden'
+                  title={slug ? 'Open product page' : undefined}
+                >
+                  {imageUrl ? (
+                    // eslint-disable-next-line @next/next/no-img-element
+                    <img
+                      src={imageUrl}
+                      alt={product.name || 'design'}
+                      className='w-full h-full object-cover transition-transform duration-300 group-hover:scale-105'
+                    />
+                  ) : (
+                    <div className='w-full h-full flex items-center justify-center text-gray-300'>
+                      <ImageOff size={48} />
+                    </div>
+                  )}
+                </Link>
+
+                {/* ── Data ── */}
+                <div className='p-3 flex flex-col gap-2 flex-1'>
+                  <Link
+                    href={slug ? `/product/${slug}` : '#'}
+                    target={slug ? '_blank' : undefined}
+                    rel='noopener noreferrer'
+                    className='font-semibold text-sm leading-snug line-clamp-2 hover:underline'
+                  >
+                    {product.name || '—'}
+                  </Link>
+
+                  <div className='text-xs text-gray-700 space-y-0.5'>
+                    <p className='flex gap-1'>
+                      <span className='text-gray-400 shrink-0'>Category:</span>
+                      <span className='font-medium line-clamp-1'>
+                        {product.category?.name || '—'}
+                      </span>
+                    </p>
+                    <p className='flex gap-1'>
+                      <span className='text-gray-400 shrink-0'>Subcategory:</span>
+                      <span className='font-medium line-clamp-1'>
+                        {product.sub_category?.name || '—'}
+                      </span>
+                    </p>
+                  </div>
+
+                  {/* Stats row: downloads + favourites (compact) */}
+                  <div className='grid grid-cols-2 gap-1.5'>
+                    <div
+                      className='flex items-center justify-center gap-1 rounded-md bg-gradient-to-br from-gray-900 to-gray-700 text-white py-1'
+                      title={`${downloadCount} downloads`}
+                    >
+                      <Download size={12} />
+                      <span className='text-xs font-bold leading-none'>
+                        {downloadCount}
+                      </span>
+                    </div>
+                    <div
+                      className='flex items-center justify-center gap-1 rounded-md border border-gray-300 py-1'
+                      title={`${favoriteCount} favourites`}
+                    >
+                      <Heart size={12} className='fill-gray-900 text-gray-900' />
+                      <span className='text-xs font-bold leading-none'>
+                        {favoriteCount}
+                      </span>
+                    </div>
+                  </div>
+
+                  {item.fileTypes?.length > 0 && (
+                    <div className='flex flex-wrap gap-1'>
+                      {item.fileTypes.map((ft) => (
+                        <Chip
+                          key={ft}
+                          size='sm'
+                          variant='flat'
+                          className='uppercase text-[10px] h-5'
+                        >
+                          {ft}
+                        </Chip>
+                      ))}
+                    </div>
+                  )}
+
+                  <div className='mt-auto pt-1'>
+                    <Button
+                      as={Link}
+                      href={slug ? `/product/${slug}` : '#'}
+                      target={slug ? '_blank' : undefined}
+                      isDisabled={!slug}
+                      size='sm'
+                      variant='flat'
+                      fullWidth
+                      endContent={<ExternalLink size={14} />}
+                    >
+                      View Product
+                    </Button>
+                  </div>
+                </div>
+              </div>
+            );
+          })}
+        </div>
+      )}
+
+      {pages > 1 && (
+        <div className='flex justify-center mt-8'>
+          <Pagination
+            isCompact
+            showControls
+            showShadow
+            color='primary'
+            page={currentPage}
+            total={pages}
+            onChange={onPageChange}
+          />
+        </div>
+      )}
+    </div>
   );
 }

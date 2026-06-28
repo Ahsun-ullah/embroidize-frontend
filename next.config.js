@@ -1,13 +1,4 @@
-// eslint-disable-next-line @typescript-eslint/no-require-imports
-const redirectsMap = require('./redirects.map.json');
 
-const redirectsFromMap = Object.entries(redirectsMap).map(
-  ([source, destination]) => ({
-    source,
-    destination,
-    permanent: true,
-  }),
-);
 
 /** @type {import('next').NextConfig} */
 const nextConfig = {
@@ -65,7 +56,6 @@ const nextConfig = {
         destination: 'https://embroidize.com/:path*',
         permanent: true,
       },
-      ...redirectsFromMap,
     ];
   },
 };

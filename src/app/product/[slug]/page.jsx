@@ -8,7 +8,7 @@ import {
   getSingleProduct,
 } from '@/lib/apis/public/products';
 import { getAllProductsBySubCategory } from '@/lib/apis/public/subcategory';
-import { notFound } from 'next/navigation';
+import { notFound, permanentRedirect } from 'next/navigation';
 
 // Metadata
 export async function generateMetadata({ params }) {
@@ -16,7 +16,10 @@ export async function generateMetadata({ params }) {
   const product = response?.data;
   if (!product) return {};
 
-  const canonicalUrl = `https://embroidize.com/product/${params.slug}`;
+  // Canonical always points to the slug URL, even when reached via the old ID URL.
+  const canonicalUrl = `https://embroidize.com/product/${
+    product.slug || params.slug
+  }`;
 
   return {
     title: product.meta_title,
@@ -48,6 +51,13 @@ export default async function ProductDetails({ params }) {
   const response = await getSingleProduct(slug);
   const product = response?.data;
   if (!product) return notFound();
+
+  // Old ID-based URLs (e.g. /product/6818e763bc00bb75faf4ae24) and any other
+  // non-canonical identifier resolve to the product, then permanently redirect
+  // (308) to the canonical slug URL so each product is only shown at its slug.
+  if (product.slug && product.slug !== slug) {
+    permanentRedirect(`/product/${product.slug}`);
+  }
 
   const hasSubCategory = !!product?.sub_category?.slug;
 
