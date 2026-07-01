@@ -268,6 +268,9 @@ export default function PlansWrapper({ plans: initialPlans }) {
         <p className='text-xs text-amber-700 dark:text-amber-300'>
           <strong>Important:</strong> Create your price in Stripe first, then paste the Price ID here.
           A plan must have a Stripe Price ID. Changing the display price does <em>not</em> change the Stripe price.
+          <br />
+          <strong>Going live?</strong> Edit each plan and replace its test{' '}
+          <code className='font-mono'>price_…</code> with the matching <strong>live</strong> Price ID.
         </p>
       </div>
 
