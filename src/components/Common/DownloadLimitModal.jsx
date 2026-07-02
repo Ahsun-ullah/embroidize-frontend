@@ -38,14 +38,18 @@ function DownloadLimitModal({ limitModalData = {}, onClose, formatDuration }) {
   const pct = total > 0 ? Math.min(Math.round((used / total) * 100), 100) : 0;
 
   const isPeriod = limitModalData?.type === 'period';
+  const isFree = limitModalData?.type === 'free';
 
-  const title = isPeriod
-    ? 'Download Limit Reached'
-    : 'Daily Download Limit Reached';
+  const title =
+    isPeriod || isFree
+      ? 'Download Limit Reached'
+      : 'Daily Download Limit Reached';
 
   const subtitle = isPeriod
     ? `You've used all ${total} downloads for this billing period.`
-    : `You've used all ${total} free download${total === 1 ? '' : 's'} available today. Your limit will reset automatically.`;
+    : isFree
+      ? `You've used all ${total} free download${total === 1 ? '' : 's'} for this 24-hour window. They all reset together when the timer below ends.`
+      : `You've used all ${total} free download${total === 1 ? '' : 's'} available today. Your limit will reset automatically.`;
 
   // ── Accessibility: close on Escape, lock body scroll, focus the dialog ──
   useEffect(() => {
@@ -300,7 +304,7 @@ function DownloadLimitModal({ limitModalData = {}, onClose, formatDuration }) {
               <span>
                 Free Plan:{' '}
                 <span className='font-semibold text-neutral-700 dark:text-neutral-200'>
-                  {limit} download{limit === 1 ? '' : 's'} per day
+                  {limit} download{limit === 1 ? '' : 's'} every 24 hours
                 </span>
               </span>
             ) : limitModalData?.duration && formatDuration ? (

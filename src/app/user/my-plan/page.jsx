@@ -9,14 +9,13 @@ import {
 import { Divider } from '@heroui/divider';
 import Cookies from 'js-cookie';
 import { useRouter } from 'next/navigation';
-import { useEffect, useRef, useState } from 'react';
+import { useState } from 'react';
 
 export default function MyPlanPage({ onClose }) {
   const { data: userInfoData, isLoading: userLoading } = useUserInfoQuery();
   const [isRedirecting, setIsRedirecting] = useState(false);
   const [error, setError] = useState(null);
   const router = useRouter();
-  const dialogRef = useRef(null);
   const [isUpgrading, setIsUpgrading] = useState(false);
   const { currentPlanName } = useDownloadReset({ tickMs: 60_000 });
 
@@ -43,6 +42,7 @@ export default function MyPlanPage({ onClose }) {
     usedDownloads,
     limit,
     remaining,
+    isLimitReached,
     msLeft: timeLeft,
   } = useDownloadReset();
 
@@ -74,25 +74,6 @@ export default function MyPlanPage({ onClose }) {
         ? 'bg-amber-400'
         : 'bg-violet-500';
 
-  // ── Accessibility: close on Escape, lock body scroll, focus the dialog ──
-  useEffect(() => {
-    const onKeyDown = (e) => e.key === 'Escape' && onClose?.();
-    document.addEventListener('keydown', onKeyDown);
-    document.body.style.overflow = 'hidden';
-
-    const prevFocus = document.activeElement;
-    dialogRef.current?.focus();
-
-    // Trigger the progress-bar fill transition on the next frame.
-    const raf = requestAnimationFrame(() => setBarReady(true));
-
-    return () => {
-      document.removeEventListener('keydown', onKeyDown);
-      document.body.style.overflow = '';
-      cancelAnimationFrame(raf);
-      if (prevFocus instanceof HTMLElement) prevFocus.focus();
-    };
-  }, [onClose]);
 
   const goToUpgrade = () => {
     setIsUpgrading(true);
@@ -210,12 +191,12 @@ export default function MyPlanPage({ onClose }) {
             {/* 🔥 VISUAL COUNTDOWN BLOCK */}
             <div
               className={`rounded-2xl p-5 text-center border ${
-                timeLeft > 0
+                isLimitReached
                   ? 'bg-gradient-to-br from-red-50 to-white border-red-200'
                   : 'bg-gradient-to-br from-green-50 to-white border-green-200'
               }`}
             >
-              {timeLeft > 0 ? (
+              {isLimitReached ? (
                 <>
                   <div className='text-red-500 text-sm font-semibold mb-1'>
                     Download Locked

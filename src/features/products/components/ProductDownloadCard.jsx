@@ -38,7 +38,7 @@ export default function ProductDownloadCard({ data }) {
     duration: null,
   });
 
-  const { data: userInfoData } = useUserInfoQuery();
+  const { data: userInfoData, refetch: refetchUserInfo } = useUserInfoQuery();
 
   // ---- Detect Facebook/Instagram in-app browser ----
   useEffect(() => {
@@ -203,6 +203,13 @@ export default function ProductDownloadCard({ data }) {
       );
 
       safeDownload(blob, filename);
+
+      // The server records this download's quota on response 'finish' (after the
+      // stream completes), so refresh the free-usage widget shortly after — this
+      // keeps "downloads left" accurate instead of showing a stale count.
+      setTimeout(() => {
+        refetchUserInfo();
+      }, 1200);
     } catch (err) {
       console.error('Download error:', err);
       ErrorToast(
