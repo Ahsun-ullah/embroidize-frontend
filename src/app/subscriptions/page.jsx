@@ -196,14 +196,24 @@ const getPlanDisplay = (plan) => {
   };
 };
 
-/* ---------- Static fallback values per card position ---------- */
-const getStaticDefaults = (index) => {
-  if (index === 0) return { savePercent: 75, originalPrice: 799.99 };
-  if (index === 1) return { savePercent: 50, originalPrice: 99.99 };
+const getStaticDefaults = (plan) => {
+  let savePercent = 0;
 
-  return { savePercent: 30, originalPrice: 14.27 };
+  if (plan?.billingInterval === null) savePercent = plan?.savePercent ?? '';
+  else if (plan?.billingInterval === 'year')
+    savePercent = plan?.savePercent ?? '';
+  else if (plan?.billingInterval === 'month')
+    savePercent = plan?.savePercent ?? '';
+
+  const originalPrice = (Number(plan.price) / (1 - savePercent / 100)).toFixed(
+    2,
+  );
+
+  return {
+    savePercent,
+    originalPrice: Number(originalPrice),
+  };
 };
-
 export default function SubscriptionsPage() {
   const [plans, setPlans] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -260,7 +270,8 @@ export default function SubscriptionsPage() {
   const [dailyResetTime, setDailyResetTime] = useState('Loading...');
 
   useEffect(() => {
-    const DEADLINE = new Date('2026-05-31T23:59:59Z');
+    const DEADLINE = new Date();
+    DEADLINE.setHours(23, 59, 59, 999);
 
     const updateCountdown = () => {
       const now = new Date();
@@ -321,7 +332,7 @@ export default function SubscriptionsPage() {
 
       <div className='min-h-screen bg-[#F5F5F7] py-12 pb-20 px-4 relative overflow-hidden'>
         {/* Page heading — add above the pricing grid */}
-        <div className='text-center mb-20 max-w-2xl mx-auto'>
+        <div className='text-center mb-8 max-w-2xl mx-auto'>
           <h1 className='text-3xl md:text-4xl font-extrabold text-black tracking-tight'>
             Choose Your Plan
           </h1>
@@ -331,7 +342,7 @@ export default function SubscriptionsPage() {
           </p>
         </div>
 
-        <div className='max-w-7xl mx-auto relative z-10'>
+        <div className='max-w-7xl mx-auto relative z-10 items-center'>
           {plans.length === 0 ? (
             <div className='text-center py-24 border border-gray-200 rounded-xl bg-white'>
               <p className='text-gray-400 text-lg'>No plans available yet.</p>
@@ -342,14 +353,16 @@ export default function SubscriptionsPage() {
           ) : (
             <>
               {/* ---------- PRICING CARDS ---------- */}
-              <div className='grid grid-cols-1 md:grid-cols-3 gap-6 mb-8'>
-                {plans.map((plan, index) => {
+              <div className='mx-auto flex flex-wrap justify-center gap-6 mb-8'>
+                {plans.map((plan) => {
                   const isActivePlan = activePlanId === plan._id;
                   const isPopular = (plan.billingInterval || '')
                     .toLowerCase()
                     .startsWith('year');
                   const d = getPlanDisplay(plan);
-                  const staticVals = getStaticDefaults(index);
+                  const staticVals = getStaticDefaults(plan);
+
+
                   const savings = plan.savePercent ?? staticVals.savePercent;
                   const originalPrice =
                     plan.originalPrice ?? staticVals.originalPrice;
@@ -357,7 +370,7 @@ export default function SubscriptionsPage() {
                   return (
                     <div
                       key={plan._id}
-                      className={`relative bg-white rounded-3xl shadow-lg p-7 pt-8 flex flex-col transition-all duration-300 hover:-translate-y-1 hover:shadow-2xl ${
+                      className={`w-full max-w-sm md:w-[360px] relative bg-white rounded-3xl shadow-lg p-7 pt-8 flex flex-col transition-all duration-300 hover:-translate-y-1 hover:shadow-2xl ${
                         isPopular ? 'md:scale-[1.02] ring-1 ring-black/5' : ''
                       } ${isActivePlan ? 'ring-2 ring-green-500' : ''}`}
                     >
@@ -425,11 +438,11 @@ export default function SubscriptionsPage() {
                                 {d.priceSuffix}
                               </span>
                             )}
-                            {/* {plan.originalPrice && ( */}
-                            <span className='text-sm text-gray-400 line-through'>
-                              ${originalPrice}
-                            </span>
-                            {/* )} */}
+                            {plan.savePercent != null && (
+                              <span className='text-sm text-gray-400 line-through'>
+                                ${originalPrice}
+                              </span>
+                            )}
                             <span className='inline-block mt-2 bg-gray-100 text-gray-700 text-xs font-medium px-3 py-1 rounded-full'>
                               {d.pill}
                             </span>
@@ -546,6 +559,8 @@ export default function SubscriptionsPage() {
             </>
           )}
         </div>
+
+
       </div>
 
       <Divider className='bg-gray-200' />

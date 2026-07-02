@@ -20,10 +20,19 @@ export default async function CustomOrdersPage({ searchParams }) {
   const page = Number(params?.page) || 1;
   const search = params?.search || '';
   const status = params?.status || 'all';
+  const paymentTag = params?.paymentTag || 'all';
   const perPage = 20;
 
   const [{ orders, pagination }, { stats }, { summary }] = await Promise.all([
-    getAllCustomOrdersForDashboard(search, page, perPage, status),
+    getAllCustomOrdersForDashboard(
+      search,
+      page,
+      perPage,
+      status,
+      'createdAt',
+      'desc',
+      paymentTag,
+    ),
     getCustomOrderStats(),
     getPaypalSummary(),
   ]);

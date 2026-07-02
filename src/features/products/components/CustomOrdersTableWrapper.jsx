@@ -102,6 +102,9 @@ export default function CustomOrdersTableWrapper({
   const [statusFilter, setStatusFilter] = useState(
     searchParams.get('status') || 'all',
   );
+  const [paymentTagFilter, setPaymentTagFilter] = useState(
+    searchParams.get('paymentTag') || 'all',
+  );
 
   // View details modal
   const {
@@ -130,6 +133,7 @@ export default function CustomOrdersTableWrapper({
   const [newStatus, setNewStatus] = useState('');
   const [adminNotes, setAdminNotes] = useState('');
   const [estimatedPrice, setEstimatedPrice] = useState('');
+  const [paymentChannel, setPaymentChannel] = useState('');
   const [isUpdating, setIsUpdating] = useState(false);
 
   // Contact customer modal
@@ -169,6 +173,15 @@ export default function CustomOrdersTableWrapper({
     router.push(`?${params.toString()}`);
   };
 
+  const handlePaymentTagFilter = (tag) => {
+    setPaymentTagFilter(tag);
+    const params = new URLSearchParams(searchParams.toString());
+    if (tag !== 'all') params.set('paymentTag', tag);
+    else params.delete('paymentTag');
+    params.set('page', '1');
+    router.push(`?${params.toString()}`);
+  };
+
   const handlePageChange = (page) => {
     const params = new URLSearchParams(searchParams.toString());
     params.set('page', page.toString());
@@ -185,6 +198,7 @@ export default function CustomOrdersTableWrapper({
     setNewStatus(order.status);
     setAdminNotes(order.adminNotes || '');
     setEstimatedPrice(order.estimatedPrice || '');
+    setPaymentChannel(order.paymentChannel || '');
     onStatusOpen();
   };
 
@@ -272,6 +286,7 @@ export default function CustomOrdersTableWrapper({
             estimatedPrice: estimatedPrice
               ? parseFloat(estimatedPrice)
               : undefined,
+            paymentChannel: paymentChannel.trim(),
           }),
         },
       );
@@ -463,17 +478,33 @@ export default function CustomOrdersTableWrapper({
           </div>
         );
 
-      case 'status':
+      case 'status': {
+        // Priced order with no payment channel yet → flag it so it can be tagged.
+        const untagged =
+          Number(order.estimatedPrice) > 0 &&
+          !(order.paymentChannel || '').trim();
         return (
-          <Chip
-            color={STATUS_CHIP_COLOR[order.status] || 'default'}
-            size='sm'
-            variant='flat'
-            className='capitalize'
-          >
-            {order.status}
-          </Chip>
+          <div className='flex flex-col items-start gap-1'>
+            <Chip
+              color={STATUS_CHIP_COLOR[order.status] || 'default'}
+              size='sm'
+              variant='flat'
+              className='capitalize'
+            >
+              {order.status}
+            </Chip>
+            {untagged && (
+              <Chip
+                size='sm'
+                variant='flat'
+                className='bg-gray-200 text-gray-700 text-[10px]'
+              >
+                Untagged
+              </Chip>
+            )}
+          </div>
         );
+      }
 
       case 'createdAt':
         return (
@@ -579,6 +610,27 @@ export default function CustomOrdersTableWrapper({
             <DropdownItem key='in-progress'>In Progress</DropdownItem>
             <DropdownItem key='completed'>Completed</DropdownItem>
             <DropdownItem key='cancelled'>Cancelled</DropdownItem>
+          </DropdownMenu>
+        </Dropdown>
+        <Dropdown>
+          <DropdownTrigger>
+            <Button variant='flat' className='capitalize min-w-[170px]'>
+              Payment:{' '}
+              {paymentTagFilter === 'untagged'
+                ? 'Untagged (paid)'
+                : paymentTagFilter === 'tagged'
+                  ? 'Tagged'
+                  : 'all'}
+            </Button>
+          </DropdownTrigger>
+          <DropdownMenu
+            aria-label='Payment tag filter'
+            selectedKeys={[paymentTagFilter]}
+            onAction={(k) => handlePaymentTagFilter(k)}
+          >
+            <DropdownItem key='all'>All</DropdownItem>
+            <DropdownItem key='untagged'>Untagged (paid)</DropdownItem>
+            <DropdownItem key='tagged'>Tagged</DropdownItem>
           </DropdownMenu>
         </Dropdown>
       </div>
@@ -925,6 +977,7 @@ export default function CustomOrdersTableWrapper({
 
                 {/* Admin section */}
                 {(viewOrder?.estimatedPrice != null ||
+                  viewOrder?.paymentChannel ||
                   viewOrder?.adminNotes) && (
                   <>
                     <Divider />
@@ -937,6 +990,12 @@ export default function CustomOrdersTableWrapper({
                           <DetailRow
                             label='Estimated Price'
                             value={`$${viewOrder.estimatedPrice}`}
+                          />
+                        )}
+                        {viewOrder?.paymentChannel && (
+                          <DetailRow
+                            label='Payment Channel'
+                            value={viewOrder.paymentChannel}
                           />
                         )}
                         {viewOrder?.adminNotes && (
@@ -1092,10 +1151,16 @@ export default function CustomOrdersTableWrapper({
                     onChange={(e) => setEstimatedPrice(e.target.value)}
                     startContent={<span className='text-sm'>$</span>}
                   />
+                  <Input
+                    label='Payment Channel (Optional)'
+                    placeholder='e.g. embroidize stripe, saklain paypal, etsy'
+                    description='Type how you received the money. The income breakdown groups amounts by this exact text — reuse the same wording to keep a total together.'
+                    value={paymentChannel}
+                    onChange={(e) => setPaymentChannel(e.target.value)}
+                  />
                   <Textarea
                     label='Admin Notes (Optional)'
-                    placeholder='e.g. "saklain paypal" — the name before "paypal" feeds the PayPal breakdown'
-                    description='Tip: write the PayPal account name before the word "paypal" (or "paypal: Name") so it totals correctly in the PayPal breakdown.'
+                    placeholder='Any internal notes about this order'
                     value={adminNotes}
                     onChange={(e) => setAdminNotes(e.target.value)}
                     minRows={3}

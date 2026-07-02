@@ -7,6 +7,7 @@ export async function getAllCustomOrdersForDashboard(
   status = 'all',
   sortBy = 'createdAt',
   order = 'desc',
+  paymentTag = 'all',
 ) {
   try {
     const cookieStore = await cookies();
@@ -37,6 +38,10 @@ export async function getAllCustomOrdersForDashboard(
 
     if (status && status !== 'all') {
       url.searchParams.set('status', status);
+    }
+
+    if (paymentTag && paymentTag !== 'all') {
+      url.searchParams.set('paymentTag', paymentTag);
     }
 
     const response = await fetch(url.toString(), {
