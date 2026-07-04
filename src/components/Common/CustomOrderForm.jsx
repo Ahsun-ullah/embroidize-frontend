@@ -201,8 +201,8 @@ export default function CustomOrderForm() {
         : '';
       SuccessToast(
         'Thank you!',
-        `We've received your design and will deliver your digitized file within 1–24 hours. Check your inbox — including your spam folder.${orderLine}`,
-        5000,
+        `We've received your design and will deliver your digitized file within 1–24 hours. Check your inbox — including your spam folder — for a confirmation with your order tracking link.${orderLine}`,
+        6000,
       );
 
       resetForm();

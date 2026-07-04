@@ -12,6 +12,7 @@ import SearchBox from '@/components/Common/SearchBox';
 const mainLogo = '/logo-black.png';
 const mobileLogo = '/favicon.png';
 
+import { CrownIcon } from 'lucide-react';
 import dynamic from 'next/dynamic';
 
 const UserProfileDropdown = dynamic(
@@ -130,14 +131,16 @@ export const Header = () => {
                 href='/subscriptions'
                 prefetch={false}
                 aria-label='Subscriptions'
-                className='flex items-center justify-center rounded px-2 py-2 font-bold text-gray-800 transition-colors hover:text-blue-600 focus:outline-none focus-visible:ring focus-visible:ring-gray-400'
+                className='flex items-center justify-center rounded px-2 py-2 font-bold text-gray-800 transition-colors hover:text-yellow-500 focus:outline-none focus-visible:ring focus-visible:ring-gray-400'
               >
-                <i
-                  className='ri-vip-crown-line text-[20px] sm:text-[22px]'
-                  aria-hidden='true'
+                <CrownIcon
+                  fill='currentColor'
+                  strokeWidth={1.8}
+                  className='h-6 w-6 text-yellow-500'
                 />
+
                 <span className='hidden sm:inline ml-2 text-sm md:text-base'>
-                  Subscriptions
+                  Pricing
                 </span>
               </Link> */}
 

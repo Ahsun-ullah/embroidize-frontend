@@ -7,9 +7,11 @@ import {
   formatWindow,
 } from '@/utils/functions/page';
 import { Divider } from '@heroui/divider';
+import { Button } from '@heroui/react';
 import Cookies from 'js-cookie';
+import { Crown, Download } from 'lucide-react';
 import { useRouter } from 'next/navigation';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 
 export default function MyPlanPage({ onClose }) {
   const { data: userInfoData, isLoading: userLoading } = useUserInfoQuery();
@@ -74,11 +76,31 @@ export default function MyPlanPage({ onClose }) {
         ? 'bg-amber-400'
         : 'bg-violet-500';
 
-
   const goToUpgrade = () => {
     setIsUpgrading(true);
     router.push('/subscriptions');
   };
+
+  const [tiers, setTiers] = useState([]);
+  useEffect(() => {
+    let active = true;
+    (async () => {
+      try {
+        const res = await fetch(
+          `${process.env.NEXT_PUBLIC_BASE_API_URL_PROD}/public/subscriptions`,
+        );
+        if (!res.ok) return;
+        const data = await res.json();
+        const plans = data?.data?.plans ?? [];
+        if (active) setTiers(plans);
+      } catch {
+        // Non-critical — the modal still works without the upgrade grid.
+      }
+    })();
+    return () => {
+      active = false;
+    };
+  }, []);
 
   const handleManagePlan = async () => {
     setIsRedirecting(true);
@@ -243,7 +265,7 @@ export default function MyPlanPage({ onClose }) {
             {/* ── Upgrade tiers ── */}
             {/* <div>
               <div className='grid grid-cols-3 gap-2.5'>
-                {UPGRADE_TIERS.map((tier) => {
+                {tiers.length > 0 && tiers.map((tier) => {
                   const isCurrent =
                     currentPlanName?.toLowerCase() === tier.name.toLowerCase();
                   return (
@@ -331,6 +353,7 @@ export default function MyPlanPage({ onClose }) {
                 Browse Designs
               </button>
             </div>
+
           </div>
         </div>
       )}
@@ -740,7 +763,7 @@ export default function MyPlanPage({ onClose }) {
                       <button
                         onClick={handleManagePlan}
                         disabled={isRedirecting}
-                        className='w-full py-3 rounded-xl text-sm font-bold bg-violet-600 text-white hover:bg-violet-700 transition-all duration-200 disabled:bg-slate-100 disabled:text-slate-400 disabled:cursor-not-allowed shadow-sm shadow-violet-200'
+                        className='w-full py-3 rounded-xl text-sm font-bold bg-violet-600 text-white hover:bg-black transition-all duration-200 disabled:bg-slate-100 disabled:text-slate-400 disabled:cursor-not-allowed shadow-sm shadow-violet-200'
                       >
                         {isRedirecting ? (
                           <span className='flex items-center justify-center gap-2'>
