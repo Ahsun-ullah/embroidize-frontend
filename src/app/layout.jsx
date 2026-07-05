@@ -116,6 +116,13 @@ export default function RootLayout({ children }) {
 
         <ClientProviders>
           <ChatIdentify />
+          {/* This Suspense is a SAFETY NET for pages that call
+              useSearchParams() without their own boundary (e.g. auth pages).
+              It must stay OUTSIDE nothing-critical: NProgressProvider isolates
+              its own useSearchParams internally, so static pages (about,
+              contact, custom-order landing, …) fully server-render. If a page
+              ever view-sources as an empty shell again, look for a new
+              unwrapped useSearchParams() in its component tree. */}
           <Suspense>
             <NProgressProvider>
               <main

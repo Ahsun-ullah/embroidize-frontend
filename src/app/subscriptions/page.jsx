@@ -6,6 +6,7 @@ import Footer from '@/components/user/HomePage/Footer';
 import Header from '@/components/user/HomePage/Header';
 import { useUserInfoQuery } from '@/lib/redux/common/user/userInfoSlice';
 import { Divider } from '@heroui/divider';
+import { GiftIcon } from 'lucide-react';
 import { usePathname, useRouter } from 'next/navigation';
 import { useEffect, useState } from 'react';
 
@@ -221,7 +222,24 @@ export default function SubscriptionsPage() {
   const pathName = usePathname();
   const router = useRouter();
   const { data: userInfoData } = useUserInfoQuery();
-  const activePlanId = userInfoData?.subscription?.planId?._id ?? null;
+  // A subscription only counts as "active" while its status grants access.
+  // /userinfo keeps returning the subscription doc after a Stripe-portal
+  // cancellation (status 'canceled', pointer never nulled), so checking mere
+  // existence would show the dead plan as "Active" forever and block
+  // re-subscribing. Statuses mirror the backend's accessStatuses list.
+  const ACCESS_STATUSES = ['active', 'trialing', 'past_due'];
+  const sub = userInfoData?.subscription;
+  const activePlanId =
+    sub && ACCESS_STATUSES.includes(sub.status)
+      ? (sub.planId?._id ?? null)
+      : null;
+  // Free-plan card state:
+  //  - guest (not registered)          → nothing is "active"; CTA → /auth/register
+  //  - registered, no live subscription (none, canceled, or expired)
+  //                                    → Free plan shows as the active plan
+  //  - registered with live subscription → the paid plan shows active instead
+  const isLoggedIn = Boolean(userInfoData?.email || userInfoData?._id);
+  const isFreeActive = isLoggedIn && !activePlanId;
 
   // Define the order you want plans to appear in
   const PLAN_ORDER = ['one-time', 'year', 'month'];
@@ -352,8 +370,149 @@ export default function SubscriptionsPage() {
             </div>
           ) : (
             <>
-              {/* ---------- PRICING CARDS ---------- */}
-              <div className='mx-auto flex flex-wrap justify-center gap-6 mb-8'>
+              {/* ONE container for all cards → centered, equal height, consistent */}
+              <div className='w-full flex flex-wrap justify-center items-stretch gap-6 mb-8'>
+                {/* ---------- STATIC FREE PLAN CARD ---------- */}
+                <div
+                  className={`w-full max-w-sm md:w-[360px] relative bg-white rounded-3xl shadow-lg p-7 pt-8 flex flex-col transition-all duration-300 hover:-translate-y-1 hover:shadow-2xl ${
+                    isFreeActive ? 'ring-2 ring-green-500' : ''
+                  }`}
+                >
+                  {/* Badge: "Active Plan" for registered free users, otherwise a neutral starter badge */}
+                  {isFreeActive ? (
+                    <div className='absolute -top-4 left-1/2 -translate-x-1/2 z-20'>
+                      <span className='bg-green-500 text-white text-xs font-bold px-4 py-1.5 rounded-full shadow-md whitespace-nowrap'>
+                        ✓ Active Plan
+                      </span>
+                    </div>
+                  ) : (
+                    <div className='absolute -top-4 left-1/2 -translate-x-1/2 z-20 flex items-center gap-1.5 bg-black text-white text-xs font-semibold px-4 py-1.5 rounded-full shadow-md whitespace-nowrap'>
+                      <StarFilled />
+                      Best For Starter
+                    </div>
+                  )}
+
+                  {/* Header: icon + title */}
+                  <div className='flex items-start gap-4 mb-5'>
+                    <div className='w-16 h-16 rounded-2xl bg-gray-100 flex items-center justify-center text-black flex-shrink-0'>
+                      <GiftIcon
+                        width='34'
+                        height='34'
+                        viewBox='0 0 24 24'
+                        fill='none'
+                        stroke='currentColor'
+                        strokeWidth='1.6'
+                        strokeLinecap='round'
+                        strokeLinejoin='round'
+                      />
+                    </div>
+                    <div className='pt-1'>
+                      <h2 className='text-xl font-bold text-black '>
+                        Free Forever
+                      </h2>
+                      <p className='text-sm text-gray-600 mt-1'>
+                        For Life Time
+                      </p>
+                    </div>
+                  </div>
+
+                  {/* Price row */}
+                  <div className='flex items-start justify-between mb-5'>
+                    <div>
+                      <div className='flex items-baseline gap-2 flex-wrap'>
+                        <span className='text-4xl font-extrabold text-black tracking-tight'>
+                          $0
+                        </span>
+                        <span className='text-sm text-gray-500'>
+                          / Forever Free
+                        </span>
+                        <span className='inline-block mt-2 bg-gray-100 text-gray-700 text-xs font-medium px-3 py-1 rounded-full'>
+                          No Billing
+                        </span>
+                      </div>
+                    </div>
+                    <div className='bg-gray-100 rounded-xl px-4 py-2 text-center min-w-[80px]'>
+                      <div className='text-2xl font-bold text-black leading-none'>
+                        5
+                      </div>
+                      <div className='text-[10px] text-gray-600 mt-1 leading-tight'>
+                        Downloads
+                        <br />
+                        per day
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Tagline box */}
+                  <div className='bg-gray-100 rounded-xl px-4 py-4 mb-5 text-center gap-3'>
+                    Perfect for trying out Embroidize!
+                  </div>
+
+                  {/* Features list */}
+                  <ul className='space-y-2.5 mb-6 flex-1'>
+                    {[
+                      '5 Downloads per day',
+                      'Access For Life Time new designs',
+                      'All Design Formats',
+                      'Personal Use Only',
+                      'On Demand support',
+                      'No Credit Card Required',
+                    ].map((f) => (
+                      <li
+                        key={f}
+                        className='flex items-start gap-2.5 text-sm text-gray-700'
+                      >
+                        <span className='text-black flex-shrink-0 mt-0.5'>
+                          <CheckCircle />
+                        </span>
+                        <span>{f}</span>
+                      </li>
+                    ))}
+                  </ul>
+
+                  {/* CTA — mirrors PurchaseButton's states */}
+                  {isFreeActive ? (
+                    <button
+                      disabled
+                      className='w-full py-3.5 px-4 rounded-xl bg-green-500 text-white cursor-not-allowed flex flex-col items-center justify-center gap-0.5'
+                    >
+                      <span className='font-semibold text-sm flex items-center gap-2'>
+                        <span className='text-white'>✓</span>
+                        Active Plan
+                      </span>
+                      <span className='text-xs text-green-100'>
+                        You are on the free plan
+                      </span>
+                    </button>
+                  ) : isLoggedIn ? (
+                    <button
+                      disabled
+                      className='w-full py-3.5 px-4 rounded-xl bg-gray-200 text-gray-500 cursor-not-allowed flex items-center justify-center'
+                    >
+                      <span className='font-semibold text-sm'>
+                        Included in your plan
+                      </span>
+                    </button>
+                  ) : (
+                    <button
+                      onClick={() => router.push('/auth/register')}
+                      className='w-full py-5 px-4 rounded-xl bg-black text-white hover:bg-gray-900 active:scale-[0.99] transition-all duration-200 flex items-center justify-center'
+                    >
+                      <span className='font-semibold text-base leading-tight'>
+                        Start Free Now
+                      </span>
+                    </button>
+                  )}
+
+                  {/* Footer trust row */}
+                  <div className='flex items-center justify-center gap-6 mt-5 pt-4 border-t border-gray-100'>
+                    <div className='flex items-center gap-1.5 text-xs text-gray-600'>
+                      <ShieldIcon /> No Payment Required
+                    </div>
+                  </div>
+                </div>
+
+                {/* ---------- DYNAMIC PRICING CARDS ---------- */}
                 {plans.map((plan) => {
                   const isActivePlan = activePlanId === plan._id;
                   const isPopular = (plan.billingInterval || '')
@@ -361,8 +520,6 @@ export default function SubscriptionsPage() {
                     .startsWith('year');
                   const d = getPlanDisplay(plan);
                   const staticVals = getStaticDefaults(plan);
-
-
                   const savings = plan.savePercent ?? staticVals.savePercent;
                   const originalPrice =
                     plan.originalPrice ?? staticVals.originalPrice;
@@ -392,7 +549,7 @@ export default function SubscriptionsPage() {
                         </div>
                       )}
 
-                      {/* SAVE ribbon (top-right diagonal) */}
+                      {/* SAVE ribbon */}
                       {savings && (
                         <div
                           className='absolute top-0 right-0 bg-black text-white w-24 h-24 rounded-tr-3xl flex flex-col items-center justify-center text-center'
@@ -495,7 +652,7 @@ export default function SubscriptionsPage() {
                         ))}
                       </ul>
 
-                      {/* CTA button — passes through to your existing PurchaseButton */}
+                      {/* CTA button */}
                       <PurchaseButton
                         plan={plan}
                         isPopular={isPopular}
@@ -514,53 +671,50 @@ export default function SubscriptionsPage() {
                   );
                 })}
               </div>
-
-              {/* ---------- TRUST BAR ---------- */}
-              <div className='bg-white rounded-2xl shadow-md p-6 md:p-8'>
-                <div className='grid grid-cols-2 md:grid-cols-4 gap-6'>
-                  {[
-                    {
-                      icon: <ShieldIcon size={34} />,
-                      title: '100% Secure Payment',
-                      body: 'Your payment information is always protected.',
-                    },
-                    {
-                      icon: <RefreshIcon />,
-                      title: 'Cancel Anytime',
-                      body: 'No hidden fees. Cancel whenever you want.',
-                    },
-                    {
-                      icon: <HeadsetIcon />,
-                      title: '24/7 Support',
-                      body: 'We’re here to help you anytime you need.',
-                    },
-                    {
-                      icon: <PeopleIcon />,
-                      title: 'Trusted Worldwide',
-                      body: 'Loved by thousands of embroidery enthusiasts.',
-                    },
-                  ].map((item, i) => (
-                    <div key={i} className='flex items-start gap-3'>
-                      <div className='text-black flex-shrink-0 mt-1'>
-                        {item.icon}
-                      </div>
-                      <div>
-                        <p className='text-sm font-semibold text-black'>
-                          {item.title}
-                        </p>
-                        <p className='text-xs text-gray-500 mt-0.5 leading-snug'>
-                          {item.body}
-                        </p>
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              </div>
             </>
           )}
+          {/* ---------- TRUST BAR ---------- */}
+          <div className='bg-white rounded-2xl shadow-md p-6 md:p-8'>
+            <div className='grid grid-cols-2 md:grid-cols-4 gap-6'>
+              {[
+                {
+                  icon: <ShieldIcon size={34} />,
+                  title: '100% Secure Payment',
+                  body: 'Your payment information is always protected.',
+                },
+                {
+                  icon: <RefreshIcon />,
+                  title: 'Cancel Anytime',
+                  body: 'No hidden fees. Cancel whenever you want.',
+                },
+                {
+                  icon: <HeadsetIcon />,
+                  title: '24/7 Support',
+                  body: 'We’re here to help you anytime you need.',
+                },
+                {
+                  icon: <PeopleIcon />,
+                  title: 'Trusted Worldwide',
+                  body: 'Loved by thousands of embroidery enthusiasts.',
+                },
+              ].map((item, i) => (
+                <div key={i} className='flex items-start gap-3'>
+                  <div className='text-black flex-shrink-0 mt-1'>
+                    {item.icon}
+                  </div>
+                  <div>
+                    <p className='text-sm font-semibold text-black'>
+                      {item.title}
+                    </p>
+                    <p className='text-xs text-gray-500 mt-0.5 leading-snug'>
+                      {item.body}
+                    </p>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
         </div>
-
-
       </div>
 
       <Divider className='bg-gray-200' />

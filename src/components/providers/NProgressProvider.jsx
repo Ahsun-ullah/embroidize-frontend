@@ -1,7 +1,7 @@
 'use client';
 import { usePathname, useSearchParams } from 'next/navigation';
 import NProgress from 'nprogress';
-import { useEffect, useState } from 'react';
+import { Suspense, useEffect, useState } from 'react';
 
 NProgress.configure({
   showSpinner: false,
@@ -11,7 +11,14 @@ NProgress.configure({
   easing: 'ease',
 });
 
-export const NProgressProvider = ({ children }) => {
+// All navigation-progress logic lives HERE, in a component that renders only
+// the corner spinner — never the page content. It calls useSearchParams(),
+// which suspends during static prerendering, so it MUST be isolated behind
+// its own <Suspense> with the children OUTSIDE that boundary. When children
+// sat inside the boundary (the previous shape), every statically rendered
+// page bailed out to an EMPTY client-side shell (view-source showed no
+// content — an SEO disaster). Do not move children back inside.
+const NProgressEvents = () => {
   const pathname = usePathname();
   const searchParams = useSearchParams();
   const [loading, setLoading] = useState(false);
@@ -62,16 +69,21 @@ export const NProgressProvider = ({ children }) => {
     });
   }, []);
 
+  if (!loading) return null;
   return (
-    <>
-      {loading && (
-        <div className='np-corner-spinner' aria-hidden='true'>
-          <span className='np-ring' />
-          {/* eslint-disable-next-line @next/next/no-img-element */}
-          <img className='np-logo' src='/favicon.png' alt='' />
-        </div>
-      )}
-      {children}
-    </>
+    <div className='np-corner-spinner' aria-hidden='true'>
+      <span className='np-ring' />
+      {/* eslint-disable-next-line @next/next/no-img-element */}
+      <img className='np-logo' src='/favicon.png' alt='' />
+    </div>
   );
 };
+
+export const NProgressProvider = ({ children }) => (
+  <>
+    <Suspense fallback={null}>
+      <NProgressEvents />
+    </Suspense>
+    {children}
+  </>
+);

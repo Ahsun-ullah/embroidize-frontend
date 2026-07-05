@@ -541,6 +541,16 @@ export default function SubscribersTableWrapper({ subscribers, stats, revenue })
             <h2 className='text-sm font-bold text-gray-700 dark:text-gray-300 uppercase tracking-wide'>Revenue Overview</h2>
           </div>
           <div className='grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-6 gap-4 mb-5'>
+            {/* All-time gross from Stripe (invoices + one-time plan purchases,
+                custom orders excluded). null = Stripe unreachable → hide. */}
+            {revenue.totalCollected != null && (
+              <StatCard
+                label='Total Collected'
+                value={`$${Number(revenue.totalCollected).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`}
+                color='text-emerald-600'
+                sub='All-time, from Stripe'
+              />
+            )}
             <StatCard label='MRR' value={`$${revenue.mrr}`} color='text-indigo-600' />
             <StatCard label='ARR' value={`$${revenue.arr}`} color='text-indigo-500' />
             <StatCard label='Active Subs' value={revenue.totalActive} color='text-green-600' />

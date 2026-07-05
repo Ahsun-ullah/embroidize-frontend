@@ -4,7 +4,7 @@ import { Navbar as HeroUINavbar, NavbarContent } from '@heroui/navbar';
 import { Divider } from '@heroui/react';
 import Image from 'next/image';
 import Link from 'next/link';
-import { useState } from 'react';
+import { Suspense, useState } from 'react';
 
 import CategoryMenu from '@/components/Common/CategoryMenu';
 import SearchBox from '@/components/Common/SearchBox';
@@ -18,6 +18,27 @@ import dynamic from 'next/dynamic';
 const UserProfileDropdown = dynamic(
   () => import('@/components/Common/UserProfileDropdown'),
   { ssr: false },
+);
+
+// Static placeholder rendered during prerender while SearchBox suspends.
+// SearchBox calls useSearchParams(), which — without a Suspense boundary —
+// forces the ENTIRE page to bail out of static rendering
+// (BAILOUT_TO_CLIENT_SIDE_RENDERING → empty HTML, invisible to crawlers).
+// The boundary confines that to the search box; everything else stays SSR'd.
+// Markup mirrors SearchBox's Input so there is no layout shift on hydration.
+const SearchBoxFallback = () => (
+  <div className='w-full min-w-0'>
+    <div className='relative w-full'>
+      <div
+        aria-hidden='true'
+        className='flex h-10 w-full items-center rounded-full border-2 border-gray-300 pe-14 ps-3 sm:h-11 sm:pe-16 md:h-12'
+      >
+        <span className='text-sm text-gray-500 sm:text-base'>
+          Search designs...
+        </span>
+      </div>
+    </div>
+  </div>
 );
 
 const HeaderQuickLinks = dynamic(
@@ -101,7 +122,9 @@ export const Header = () => {
                 isSearchFocused ? 'max-w-full ' : 'max-w-[720px]  '
               }`}
             >
-              <SearchBox onFocusChange={setIsSearchFocused} />
+              <Suspense fallback={<SearchBoxFallback />}>
+                <SearchBox onFocusChange={setIsSearchFocused} />
+              </Suspense>
             </div>
           </div>
 
