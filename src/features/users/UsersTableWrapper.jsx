@@ -107,6 +107,29 @@ export default function UsersTableWrapper({
             {user.downloadCount}
           </div>
         );
+      case 'provider': {
+        // How the account was created: 'local' = direct email+password;
+        // anything else is a social provider (google now, more later —
+        // unknown providers render capitalized automatically).
+        const provider = user.provider || 'local';
+        const isSocial = provider !== 'local';
+        const label = isSocial
+          ? provider.charAt(0).toUpperCase() + provider.slice(1)
+          : 'Email';
+        return (
+          <span
+            className={`inline-flex items-center gap-1.5 rounded-full px-2.5 py-1 text-xs font-semibold ${
+              isSocial ? 'bg-black text-white' : 'bg-gray-100 text-gray-700'
+            }`}
+          >
+            <i
+              className={isSocial ? `ri-${provider}-fill` : 'ri-mail-line'}
+              aria-hidden='true'
+            />
+            {label}
+          </span>
+        );
+      }
       case 'id':
         return <span>{user._id}</span>;
       case 'actions':

@@ -25,6 +25,7 @@ export default async function AllUsersListPage({ searchParams }) {
     { name: 'NAME', uid: 'name' },
     { name: 'EMAIL', uid: 'email' },
     { name: 'DOWNLOAD', uid: 'downloadCount' },
+    { name: 'SIGNUP VIA', uid: 'provider' },
     { name: 'Registration Date', uid: 'createdAt' },
     { name: 'ACTIONS', uid: 'actions' },
   ];
