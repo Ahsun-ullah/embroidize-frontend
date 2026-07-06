@@ -27,6 +27,8 @@ export default async function AllProductsListPage({ searchParams }) {
     { name: 'CATEGORY', uid: 'category' },
     { name: 'SUB CATEGORY', uid: 'sub_category' },
     { name: 'PRICE', uid: 'price' },
+    { name: 'TIER', uid: 'isFree' },
+    { name: 'STATUS', uid: 'isActive' },
     { name: 'SKU', uid: 'sku_code' },
     { name: 'ACTIONS', uid: 'actions' },
   ];

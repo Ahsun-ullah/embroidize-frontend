@@ -13,10 +13,10 @@ import {
 import Select from 'react-select';
 
 // UI Components
-import UserTable from '@/components/Common/Table';
 import { PlusIcon, VerticalDotsIcon } from '@/components/icons';
 import {
   Button,
+  Checkbox,
   Dropdown,
   DropdownItem,
   DropdownMenu,
@@ -27,12 +27,15 @@ import {
   ModalContent,
   ModalFooter,
   ModalHeader,
+  Pagination,
   Textarea,
-  User,
 } from '@heroui/react';
+import { ImageOff } from 'lucide-react';
 
 // Redux & Utils
+import AdminChoiceToggle from '@/components/Common/AdminChoiceToggle';
 import { ErrorToast } from '@/components/Common/ErrorToast';
+import ProductFlagToggle from '@/components/Common/ProductFlagToggle';
 import { SuccessToast } from '@/components/Common/SuccessToast';
 import {
   useGetPublicProductCategoriesQuery,
@@ -119,10 +122,26 @@ export default function ProductsTableWrapper({
   const activeSubCategoryOption =
     subCategoryOptions.find((s) => s.value === selectedSubCategoryId) || null;
 
+  // Selection is a plain Set of product ids, driven by the per-card checkboxes.
   const selectedIds = useMemo(() => {
     if (selectedKeys === 'all') return initialData.map((item) => item._id);
     return Array.from(selectedKeys);
   }, [selectedKeys, initialData]);
+
+  const toggleSelect = useCallback((id) => {
+    setSelectedKeys((prev) => {
+      const next = new Set(prev === 'all' ? [] : prev);
+      if (next.has(id)) next.delete(id);
+      else next.add(id);
+      return next;
+    });
+  }, []);
+
+  const selectAllOnPage = useCallback(() => {
+    setSelectedKeys(new Set(initialData.map((p) => p._id)));
+  }, [initialData]);
+
+  const clearSelection = useCallback(() => setSelectedKeys(new Set()), []);
 
   // --- URL Update Logic ---
   const updateURL = useCallback(
@@ -313,52 +332,152 @@ export default function ProductsTableWrapper({
     }
   };
 
-  const renderCell = useCallback(
-    (product, columnKey) => {
-      const cellValue = product[columnKey];
-      switch (columnKey) {
-        case 'name':
-          return (
-            <Link target='_blank' className='hover:underline' href={`/product/${product.slug}`}>
-              <User
-                avatarProps={{ radius: 'lg', src: product?.image?.url }}
-                name={cellValue}
-              >
-                {product.name}
-              </User>
-            </Link>
-          );
-        case 'isAdminChoice':
-          return (
-            <div className='flex justify-center'>
-              {product.isAdminChoice ? (
-                <i className='ri-shield-star-fill text-2xl text-primary'></i>
+  const renderProductCard = useCallback(
+    (product, isSelected) => {
+      const slug = product.slug;
+      const imageUrl = product?.image?.url;
+      const editHref = `/admin/add-products?productId=${product._id}`;
+
+      return (
+        <div
+          key={product._id}
+          className={`group relative flex flex-col overflow-hidden rounded-xl border bg-white shadow-sm transition-shadow hover:shadow-md ${
+            isSelected ? 'border-black ring-1 ring-black' : 'border-gray-100'
+          }`}
+        >
+          {/* ── Image + overlays ── */}
+          <div className='relative aspect-[16/10] overflow-hidden bg-gray-50'>
+            {/* Selection checkbox */}
+            <div className='absolute left-2 top-2 z-10 rounded-md bg-white/95 p-0.5 shadow-sm backdrop-blur-sm'>
+              <Checkbox
+                size='sm'
+                isSelected={isSelected}
+                onValueChange={() => toggleSelect(product._id)}
+                aria-label={`Select ${product.name}`}
+              />
+            </div>
+
+            {/* Admin Choice star toggle (renders only for admins) */}
+            <div className='absolute right-2 top-2 z-10'>
+              <AdminChoiceToggle
+                productId={product._id}
+                initialStatus={product.isAdminChoice}
+              />
+            </div>
+
+            <Link
+              href={slug ? `/product/${slug}` : '#'}
+              target={slug ? '_blank' : undefined}
+              rel='noopener noreferrer'
+              className='block h-full w-full'
+              title={slug ? 'Open product page' : undefined}
+            >
+              {imageUrl ? (
+                // eslint-disable-next-line @next/next/no-img-element
+                <img
+                  src={imageUrl}
+                  alt={product.name || 'design'}
+                  className='h-full w-full object-cover transition-transform duration-300 group-hover:scale-105'
+                />
               ) : (
-                <span className='text-gray-300'>-</span>
+                <div className='flex h-full w-full items-center justify-center text-gray-300'>
+                  <ImageOff size={48} />
+                </div>
+              )}
+            </Link>
+          </div>
+
+          {/* ── Body ── */}
+          <div className='flex flex-1 flex-col gap-2 p-3'>
+            <div className='flex items-start justify-between gap-2'>
+              <Link
+                href={slug ? `/product/${slug}` : '#'}
+                target={slug ? '_blank' : undefined}
+                rel='noopener noreferrer'
+                className='line-clamp-2 text-sm font-semibold leading-snug hover:underline'
+              >
+                {product.name || '—'}
+              </Link>
+              {product.serial_no != null && (
+                <span className='shrink-0 font-mono text-[11px] text-gray-400'>
+                  #{product.serial_no}
+                </span>
               )}
             </div>
-          );
-        case 'category':
-          return <span>{capitalize(product?.category?.name || '-')}</span>;
-        case 'sub_category':
-          return <span>{capitalize(product?.sub_category?.name || '-')}</span>;
-        case 'actions':
-          return (
-            <div className='flex justify-center items-center'>
+
+            <div className='text-xs text-gray-500'>
+              {capitalize(product?.category?.name || '—')}
+              {product?.sub_category?.name
+                ? ` · ${capitalize(product.sub_category.name)}`
+                : ''}
+            </div>
+
+            <div className='flex items-center justify-between text-xs'>
+              <span className='font-semibold text-gray-900'>
+                {product.price ? `$${product.price}` : 'Free'}
+              </span>
+              <span className='text-gray-400'>
+                SKU: {product.sku_code || '—'}
+              </span>
+            </div>
+
+            {/* Tier + Status toggles */}
+            <div className='flex flex-wrap items-center gap-2'>
+              <ProductFlagToggle
+                productId={product._id}
+                field='isFree'
+                initialValue={product.isFree === true}
+                onConfig={{
+                  label: 'Free',
+                  className:
+                    'border border-gray-300 bg-white text-gray-700 hover:bg-gray-100',
+                }}
+                offConfig={{
+                  label: 'Premium',
+                  className: 'bg-gray-900 text-white hover:bg-gray-700',
+                }}
+                messages={{ on: 'Marked as Free', off: 'Marked as Premium' }}
+              />
+              <ProductFlagToggle
+                productId={product._id}
+                field='isActive'
+                initialValue={product.isActive !== false}
+                onConfig={{
+                  label: 'Active',
+                  className:
+                    'bg-emerald-100 text-emerald-700 hover:bg-emerald-200',
+                }}
+                offConfig={{
+                  label: 'Inactive',
+                  className: 'bg-red-100 text-red-700 hover:bg-red-200',
+                }}
+                messages={{
+                  on: 'Product activated',
+                  off: 'Product deactivated',
+                }}
+              />
+            </div>
+
+            {/* Actions */}
+            <div className='mt-auto flex items-center gap-2 pt-1'>
+              <Button
+                size='sm'
+                variant='flat'
+                className='flex-1'
+                onPress={() => router.push(editHref)}
+              >
+                Edit
+              </Button>
               <Dropdown>
                 <DropdownTrigger>
                   <Button isIconOnly size='sm' variant='light'>
                     <VerticalDotsIcon className='text-default-300' />
                   </Button>
                 </DropdownTrigger>
-                <DropdownMenu>
+                <DropdownMenu aria-label='Product actions'>
                   <DropdownItem
                     key='edit'
-                    onPress={() =>
-                      router.push(
-                        `/admin/add-products?productId=${product._id}`,
-                      )
-                    }
+                    onPress={() => router.push(editHref)}
                   >
                     Edit
                   </DropdownItem>
@@ -373,12 +492,11 @@ export default function ProductsTableWrapper({
                 </DropdownMenu>
               </Dropdown>
             </div>
-          );
-        default:
-          return cellValue;
-      }
+          </div>
+        </div>
+      );
     },
-    [deleteProduct, router],
+    [deleteProduct, router, toggleSelect],
   );
 
   const topContent = useMemo(
@@ -494,6 +612,15 @@ export default function ProductsTableWrapper({
     ],
   );
 
+  // Derived selection helpers for the card grid.
+  const selectedSet =
+    selectedKeys === 'all'
+      ? new Set(initialData.map((p) => p._id))
+      : selectedKeys;
+  const allOnPageSelected =
+    initialData.length > 0 &&
+    initialData.every((p) => selectedSet.has(p._id));
+
   return (
     <>
       <div className='flex justify-between items-center mb-4'>
@@ -511,17 +638,59 @@ export default function ProductsTableWrapper({
         </Link>
       </div>
 
-      <UserTable
-        data={initialData}
-        columns={columns}
-        pageSize={pagination?.limit || 10}
-        renderCell={renderCell}
-        onPageChange={onPageChange}
-        pagination={pagination}
-        topContent={topContent}
-        selectedKeys={selectedKeys}
-        onSelectionChange={setSelectedKeys}
-      />
+      {/* Filters + bulk-action bar */}
+      {topContent}
+
+      {/* Select-all / clear row */}
+      {initialData.length > 0 && (
+        <div className='mb-3 flex items-center gap-4 text-sm'>
+          <Checkbox
+            size='sm'
+            isSelected={allOnPageSelected}
+            isIndeterminate={selectedIds.length > 0 && !allOnPageSelected}
+            onValueChange={(checked) =>
+              checked ? selectAllOnPage() : clearSelection()
+            }
+          >
+            Select all on this page
+          </Checkbox>
+          {selectedIds.length > 0 && (
+            <button
+              type='button'
+              onClick={clearSelection}
+              className='font-medium text-red-500 hover:text-red-700'
+            >
+              Clear selection ({selectedIds.length})
+            </button>
+          )}
+        </div>
+      )}
+
+      {/* Product cards */}
+      {initialData.length === 0 ? (
+        <div className='py-16 text-center text-gray-400'>No products found</div>
+      ) : (
+        <div className='grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5'>
+          {initialData.map((product) =>
+            renderProductCard(product, selectedSet.has(product._id)),
+          )}
+        </div>
+      )}
+
+      {/* Pagination */}
+      {pagination?.totalPages > 1 && (
+        <div className='mt-8 flex justify-center'>
+          <Pagination
+            isCompact
+            showControls
+            showShadow
+            color='primary'
+            page={pagination?.page || 1}
+            total={pagination.totalPages}
+            onChange={onPageChange}
+          />
+        </div>
+      )}
 
       <Modal
         isOpen={isBundleModalOpen}

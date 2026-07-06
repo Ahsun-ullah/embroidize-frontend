@@ -14,6 +14,9 @@ export const productSchema = z.object({
   image: z.any().optional(),
   file: z.any().optional(),
   product_pdf: z.any().optional(),
+  // Pricing tier (false = premium/subscription-only) + publish state.
+  isFree: z.boolean().default(false),
+  isActive: z.boolean().default(true),
 });
 export const blogSchema = z.object({
   title: z.string().min(1, 'Blog Title is required'),

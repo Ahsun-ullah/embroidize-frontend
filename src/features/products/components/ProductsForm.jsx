@@ -64,6 +64,9 @@ export function ProductsForm({ product }) {
       image: null,
       file: null,
       product_pdf: null,
+      // New products default to premium + active.
+      isFree: false,
+      isActive: true,
     },
   });
 
@@ -83,6 +86,9 @@ export function ProductsForm({ product }) {
         image: product.image ?? null,
         file: product.file ?? null,
         product_pdf: product.product_pdf ?? null,
+        // Missing flags fall back to premium + active (matches the backend).
+        isFree: product.isFree ?? false,
+        isActive: product.isActive ?? true,
       });
       setDescription(product.description ?? '');
       setSlug(product.slug ?? '');
@@ -360,6 +366,88 @@ export function ProductsForm({ product }) {
           {errors.price && (
             <p className='text-red-500 font-light'>{errors.price.message}</p>
           )}
+        </div>
+
+        {/* Pricing Tier (free / premium) */}
+        <div>
+          <label className='text-lg font-medium tracking-tight leading-5'>
+            Pricing Tier <span className='text-red-600'>*</span>
+          </label>
+          <Controller
+            name='isFree'
+            control={control}
+            render={({ field }) => (
+              <div className='mt-1 inline-flex w-full overflow-hidden rounded-[4px] border-[1.8px]'>
+                <button
+                  type='button'
+                  onClick={() => field.onChange(false)}
+                  className={`flex-1 px-4 py-2 text-sm font-semibold transition-colors ${
+                    !field.value
+                      ? 'bg-gray-900 text-white'
+                      : 'bg-white text-gray-600 hover:bg-gray-100'
+                  }`}
+                >
+                  Premium
+                </button>
+                <button
+                  type='button'
+                  onClick={() => field.onChange(true)}
+                  className={`flex-1 px-4 py-2 text-sm font-semibold transition-colors ${
+                    field.value
+                      ? 'bg-gray-900 text-white'
+                      : 'bg-white text-gray-600 hover:bg-gray-100'
+                  }`}
+                >
+                  Free
+                </button>
+              </div>
+            )}
+          />
+          <p className='mt-1 text-xs text-gray-400'>
+            Premium designs need an active subscription. Free designs count
+            toward the free daily quota.
+          </p>
+        </div>
+
+        {/* Publish Status (active / inactive) */}
+        <div>
+          <label className='text-lg font-medium tracking-tight leading-5'>
+            Status <span className='text-red-600'>*</span>
+          </label>
+          <Controller
+            name='isActive'
+            control={control}
+            render={({ field }) => (
+              <div className='mt-1 inline-flex w-full overflow-hidden rounded-[4px] border-[1.8px]'>
+                <button
+                  type='button'
+                  onClick={() => field.onChange(true)}
+                  className={`flex-1 px-4 py-2 text-sm font-semibold transition-colors ${
+                    field.value
+                      ? 'bg-emerald-600 text-white'
+                      : 'bg-white text-gray-600 hover:bg-gray-100'
+                  }`}
+                >
+                  Active
+                </button>
+                <button
+                  type='button'
+                  onClick={() => field.onChange(false)}
+                  className={`flex-1 px-4 py-2 text-sm font-semibold transition-colors ${
+                    !field.value
+                      ? 'bg-red-600 text-white'
+                      : 'bg-white text-gray-600 hover:bg-gray-100'
+                  }`}
+                >
+                  Inactive
+                </button>
+              </div>
+            )}
+          />
+          <p className='mt-1 text-xs text-gray-400'>
+            Inactive products are hidden from the store and can&apos;t be
+            downloaded.
+          </p>
         </div>
 
         {/* Description */}
