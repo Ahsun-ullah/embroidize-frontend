@@ -29,6 +29,7 @@ import {
   useDisclosure,
 } from '@heroui/react';
 import {
+  Copy,
   CreditCard,
   Download,
   Eye,
@@ -37,6 +38,7 @@ import {
   Mail,
   MapPin,
   Search,
+  Send,
   Trash2,
   Upload,
 } from 'lucide-react';
@@ -78,21 +80,6 @@ const STATUS_BADGE = {
   completed: 'bg-green-100 text-green-800',
   cancelled: 'bg-red-100 text-red-800',
   expired: 'bg-gray-200 text-gray-600',
-};
-
-// Manual status moves the backend transition map allows from each status.
-// `cancelled` is always allowed. quote/deliver transitions happen via their
-// own dedicated actions, not this dropdown.
-const MANUAL_NEXT_STATUSES = {
-  pending_review: ['pending_review', 'cancelled'],
-  awaiting_payment: ['awaiting_payment', 'expired', 'cancelled'],
-  paid: ['paid', 'in_progress', 'cancelled'],
-  in_progress: ['in_progress', 'cancelled'],
-  delivered: ['delivered', 'in_revision', 'completed', 'cancelled'],
-  in_revision: ['in_revision', 'in_progress', 'cancelled'],
-  completed: ['completed', 'in_revision', 'cancelled'],
-  cancelled: ['cancelled'],
-  expired: ['expired', 'cancelled'],
 };
 
 function DetailRow({ label, value }) {
@@ -216,6 +203,18 @@ export default function CustomOrdersTableWrapper({
   const [deliverFile, setDeliverFile] = useState(null);
   const [isDelivering, setIsDelivering] = useState(false);
   const [downloadingDelivery, setDownloadingDelivery] = useState(false);
+
+  // Manual payment request (direct Stripe checkout link) modal
+  const {
+    isOpen: isPayReqOpen,
+    onOpen: onPayReqOpen,
+    onOpenChange: onPayReqChange,
+  } = useDisclosure();
+  const [payReqOrder, setPayReqOrder] = useState(null);
+  const [payReqAmount, setPayReqAmount] = useState('');
+  const [payReqNote, setPayReqNote] = useState('');
+  const [payReqUrl, setPayReqUrl] = useState('');
+  const [isPayRequesting, setIsPayRequesting] = useState(false);
 
   const handleSearch = (value) => {
     const params = new URLSearchParams(searchParams.toString());
@@ -373,6 +372,50 @@ export default function CustomOrdersTableWrapper({
       ErrorToast('Error', err.message || 'Failed to set price', 4000);
     } finally {
       setIsQuoting(false);
+    }
+  };
+
+  const handlePayRequest = (order) => {
+    setPayReqOrder(order);
+    setPayReqAmount('');
+    setPayReqNote('');
+    setPayReqUrl('');
+    onPayReqOpen();
+  };
+
+  const submitPayRequest = async () => {
+    const amount = parseFloat(payReqAmount);
+    if (!payReqOrder || isNaN(amount) || amount <= 0) {
+      ErrorToast('Error', 'Enter a valid positive amount', 3000);
+      return;
+    }
+    setIsPayRequesting(true);
+    try {
+      const res = await fetch(
+        `${apiBase()}/admin/orders/custom/${payReqOrder._id}/payment-request`,
+        {
+          method: 'POST',
+          headers: adminHeaders(),
+          body: JSON.stringify({ amount, note: payReqNote.trim() || undefined }),
+        },
+      );
+      const result = await res.json();
+      if (!res.ok) throw new Error(result.message || 'Failed to create payment link');
+      setPayReqUrl(result?.data?.url || '');
+      SuccessToast('Success', result?.message || 'Payment link created.', 5000);
+    } catch (err) {
+      ErrorToast('Error', err.message || 'Failed to create payment link', 4000);
+    } finally {
+      setIsPayRequesting(false);
+    }
+  };
+
+  const copyPayLink = async () => {
+    try {
+      await navigator.clipboard.writeText(payReqUrl);
+      SuccessToast('Copied', 'Payment link copied to clipboard', 2500);
+    } catch {
+      ErrorToast('Error', 'Copy failed — select and copy the link manually', 3000);
     }
   };
 
@@ -748,9 +791,16 @@ export default function CustomOrdersTableWrapper({
                 startContent={<CreditCard size={16} />}
                 onClick={() => handleQuote(order)}
               >
-                {order.status === 'awaiting_payment' || order.status === 'expired'
+                {['awaiting_payment', 'expired', 'cancelled'].includes(order.status)
                   ? 'Re-quote / Update Price'
                   : 'Set Price & Request Payment'}
+              </DropdownItem>
+              <DropdownItem
+                key='payment-request'
+                startContent={<Send size={16} />}
+                onClick={() => handlePayRequest(order)}
+              >
+                Request Payment (Stripe Link)
               </DropdownItem>
               <DropdownItem
                 key='deliver'
@@ -1471,14 +1521,11 @@ export default function CustomOrdersTableWrapper({
                   <Select
                     label='Status'
                     placeholder='Select status'
-                    description='Only transitions the order lifecycle allows are listed. Use "Set Price" for quoting and "Upload ZIP" for delivery.'
+                    description='Admin override — any status can be set. This never emails the customer; use "Set Price" for quoting and "Upload ZIP" for delivery (those notify them).'
                     selectedKeys={[newStatus]}
                     onChange={(e) => setNewStatus(e.target.value)}
                   >
-                    {(
-                      MANUAL_NEXT_STATUSES[selectedOrder?.status] ||
-                      Object.keys(STATUS_LABELS)
-                    ).map((s) => (
+                    {Object.keys(STATUS_LABELS).map((s) => (
                       <SelectItem key={s} value={s}>
                         {STATUS_LABELS[s] || s}
                       </SelectItem>
@@ -1579,6 +1626,98 @@ export default function CustomOrdersTableWrapper({
                 >
                   Set Price &amp; Notify
                 </Button>
+              </ModalFooter>
+            </>
+          )}
+        </ModalContent>
+      </Modal>
+
+      {/* ─── Manual Payment Request (direct Stripe link) Modal ─── */}
+      <Modal isOpen={isPayReqOpen} onOpenChange={onPayReqChange} backdrop='blur'>
+        <ModalContent>
+          {(onClose) => (
+            <>
+              <ModalHeader>
+                <div className='flex items-center gap-2'>
+                  <Send size={20} />
+                  Request Payment (Stripe Link)
+                </div>
+              </ModalHeader>
+              <ModalBody>
+                <div className='space-y-4'>
+                  <div className='bg-gray-50 dark:bg-gray-900 p-3 rounded-lg'>
+                    <p className='font-semibold'>{payReqOrder?.name}</p>
+                    <p className='text-sm text-gray-600'>{payReqOrder?.email}</p>
+                    <p className='text-xs font-mono text-gray-500 mt-1'>
+                      Order: {payReqOrder?.orderNumber}
+                    </p>
+                  </div>
+
+                  {!payReqUrl ? (
+                    <>
+                      <Input
+                        type='number'
+                        label='Amount (USD)'
+                        placeholder='e.g. 10'
+                        value={payReqAmount}
+                        onChange={(e) => setPayReqAmount(e.target.value)}
+                        startContent={<span className='text-sm'>$</span>}
+                        autoFocus
+                      />
+                      <Textarea
+                        label='Note (optional)'
+                        placeholder='e.g. Extra revision fee — 3rd revision on this order'
+                        value={payReqNote}
+                        onChange={(e) => setPayReqNote(e.target.value)}
+                        maxRows={3}
+                      />
+                      <p className='text-xs text-gray-500'>
+                        Creates a direct Stripe checkout link — the customer just
+                        clicks and pays, no order page needed. The link is emailed
+                        to them automatically and shown here to copy. The order
+                        status doesn&apos;t change until Stripe confirms payment.
+                      </p>
+                    </>
+                  ) : (
+                    <>
+                      <div className='bg-gray-50 dark:bg-gray-900 p-3 rounded-lg'>
+                        <p className='text-xs font-semibold text-gray-500 uppercase tracking-wide mb-1'>
+                          Payment link (valid 24 hours)
+                        </p>
+                        <p className='text-xs font-mono break-all select-all'>
+                          {payReqUrl}
+                        </p>
+                      </div>
+                      <p className='text-xs text-gray-500'>
+                        The link was emailed to {payReqOrder?.email}. You can also
+                        copy it and send it yourself. If it expires unpaid, just
+                        create a new one from this same action.
+                      </p>
+                    </>
+                  )}
+                </div>
+              </ModalBody>
+              <ModalFooter>
+                <Button variant='light' onPress={onClose}>
+                  {payReqUrl ? 'Done' : 'Cancel'}
+                </Button>
+                {!payReqUrl ? (
+                  <Button
+                    color='primary'
+                    isLoading={isPayRequesting}
+                    onPress={submitPayRequest}
+                  >
+                    Create &amp; Email Link
+                  </Button>
+                ) : (
+                  <Button
+                    color='primary'
+                    startContent={<Copy size={16} />}
+                    onPress={copyPayLink}
+                  >
+                    Copy Link
+                  </Button>
+                )}
               </ModalFooter>
             </>
           )}
