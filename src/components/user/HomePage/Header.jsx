@@ -150,7 +150,7 @@ export const Header = () => {
               justify='end'
               className='flex flex-[0_0_auto] items-center gap-1 sm:gap-2 md:gap-3'
             >
-              {/* <Link
+              <Link
                 href='/subscriptions'
                 prefetch={false}
                 aria-label='Subscriptions'
@@ -165,7 +165,7 @@ export const Header = () => {
                 <span className='hidden sm:inline ml-2 text-sm md:text-base'>
                   Pricing
                 </span>
-              </Link> */}
+              </Link>
 
               {/* Desktop-only quick links (hidden on mobile) */}
               <HeaderQuickLinks />

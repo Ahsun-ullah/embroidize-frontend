@@ -126,7 +126,7 @@ const Footer = () => {
               {
                 title: 'Company',
                 links: [
-                  { name: 'About', href: '/about-us' },
+                  { name: 'Pricing', href: '/subscriptions' },
                   { name: 'Contact', href: '/contact-us' },
                   {
                     name: 'Custom Digitizing',
@@ -142,6 +142,7 @@ const Footer = () => {
               {
                 title: 'Legal',
                 links: [
+                  { name: 'About', href: '/about-us' },
                   { name: 'Terms & Conditions', href: '/terms-and-conditions' },
                   { name: 'Privacy Policy', href: '/privacy-policy' },
                   {
