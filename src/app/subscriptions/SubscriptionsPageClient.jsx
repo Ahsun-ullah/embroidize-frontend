@@ -10,7 +10,6 @@ import { GiftIcon } from 'lucide-react';
 import { usePathname, useRouter } from 'next/navigation';
 import { useEffect, useState } from 'react';
 
-
 /* One-Time Payment — diamond/gem (premium one-time investment) */
 const OneTimeIcon = () => (
   <svg
