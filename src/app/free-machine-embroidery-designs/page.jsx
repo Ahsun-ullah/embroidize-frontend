@@ -1,7 +1,8 @@
 import CategoryPills from '@/components/Common/Categorypills';
-import LandingHeader from '@/components/Common/LandingHeader';
 import LoadingSpinner from '@/components/Common/LoadingSpinner';
 import ProductCard from '@/components/Common/ProductCard';
+import Footer from '@/components/user/HomePage/Footer';
+import Header from '@/components/user/HomePage/Header';
 import { getPopularProducts } from '@/lib/apis/public/products';
 import Image from 'next/image';
 import Link from 'next/link';
@@ -15,9 +16,9 @@ export const fetchCache = 'force-no-store';
 export const revalidate = 0;
 
 export const metadata = {
-  title: 'Free Machine Embroidery Designs | 15,000+ Instant Downloads',
+  title: 'Free Machine Embroidery Designs | 18,000+ Instant Downloads',
   description:
-    'Browse 15,000+ free machine embroidery designs in PES, DST, JEF, VP3, HUS and more. Professionally digitized, commercial use approved. Create a free account for instant access.',
+    'Browse 18,000+ free machine embroidery designs in PES, DST, JEF, VP3, HUS and more. Professionally digitized, commercial use approved. Create a free account for instant access.',
   keywords: [
     'free embroidery designs download',
     'machine embroidery patterns',
@@ -30,9 +31,9 @@ export const metadata = {
     canonical: 'https://embroidize.com/free-machine-embroidery-designs',
   },
   openGraph: {
-    title: 'Free Machine Embroidery Designs | 15,000+ Instant Downloads',
+    title: 'Free Machine Embroidery Designs | 18,000+ Instant Downloads',
     description:
-      'Browse 15,000+ free machine embroidery designs in PES, DST, JEF, VP3, HUS and more. Professionally digitized, commercial use approved.',
+      'Browse 18,000+ free machine embroidery designs in PES, DST, JEF, VP3, HUS and more. Professionally digitized, commercial use approved.',
     url: 'https://embroidize.com/free-machine-embroidery-designs',
     siteName: 'Embroidize',
     images: [
@@ -156,14 +157,15 @@ export default async function LandingPage() {
       />
 
       {/* Navbar + Categories menu (client component — owns the toggle state) */}
-      <LandingHeader />
+      {/* <LandingHeader /> */}
+      <Header />
 
       {/* Hero Section with Strong CTA */}
       <section className='relative w-full overflow-hidden bg-gradient-to-br from-gray-50 via-blue-50 to-gray-100'>
         <div className='mx-auto max-w-5xl px-4 sm:px-6 lg:px-8 pb-20 pt-4 sm:pb-24 lg:pb-32'>
           <div className='text-center'>
             {/* Trust Badge */}
-            <div className='inline-block mb-6 px-6 py-3 bg-green-100 text-green-700 rounded-full text-base font-bold shadow-md'>
+            <div className='inline-block mb-6 px-6 py-3 bg-green-400 text-black rounded-full text-base font-bold shadow-md'>
               ✓ 100% Free • No Credit Card Required • Instant Access
             </div>
 
@@ -172,7 +174,7 @@ export default async function LandingPage() {
               style={{ fontFamily: 'Inter, sans-serif', fontWeight: 700 }}
               className='text-5xl sm:text-6xl lg:text-7xl font-extrabold tracking-tight leading-tight mb-6'
             >
-              Download 15,000+ Free
+              Download 18,000+ Free
               <br />
               <span className='bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent'>
                 Machine Embroidery Designs
@@ -205,7 +207,7 @@ export default async function LandingPage() {
               <div className='flex flex-row flex-nowrap justify-center gap-6 sm:gap-12 max-w-2xl mx-auto'>
                 <div className='text-center'>
                   <div className='text-3xl sm:text-5xl font-extrabold text-gray-900'>
-                    15,000+
+                    18,000+
                   </div>
                   <div className='mt-2 text-sm sm:text-base text-gray-600 font-medium'>
                     Free Designs
@@ -213,7 +215,7 @@ export default async function LandingPage() {
                 </div>
                 <div className='text-center'>
                   <div className='text-3xl sm:text-5xl font-extrabold text-gray-900'>
-                    8,000+
+                    12,000+
                   </div>
                   <div className='mt-2 text-sm sm:text-base text-gray-600 font-medium'>
                     Happy Users
@@ -650,68 +652,7 @@ export default async function LandingPage() {
         </div>
       </section>
 
-      <footer className='bg-[#f9f9f9] text-gray-700'>
-        <div className='container flex flex-wrap text-left lg:text-left'>
-          {/* Logo Section */}
-          <div className='w-full lg:w-6/12'>
-            <Link
-              href='/'
-              prefetch={false}
-              className='relative block w-[160px] h-[80px] sm:w-[120px] sm:h-[60px] md:w-[160px] md:h-[80px]'
-              aria-label='Navigate to homepage'
-            >
-              <Image
-                src={mainLogo || ''}
-                alt='Company Logo'
-                fill
-                sizes='(min-width: 640px) 100px, 120px'
-                priority
-                className='object-contain'
-              />
-            </Link>
-          </div>
-
-          {/* Useful Links Section */}
-          <div className='flex gap-8 flex-wrap items-center justify-start lg:justify-end w-full lg:w-6/12'>
-            <Link
-              className='text-gray-600 hover:underline transition-colors duration-200'
-              href='/terms-and-conditions'
-              prefetch={false}
-            >
-              Terms &amp; Conditions
-            </Link>
-            <Link
-              className='text-gray-600 hover:underline transition-colors duration-200'
-              href='/privacy-policy'
-              prefetch={false}
-            >
-              Privacy Policy
-            </Link>
-            <Link
-              className='text-gray-600 hover:underline transition-colors duration-200'
-              href='/about-us'
-              prefetch={false}
-            >
-              About Us
-            </Link>
-            <Link
-              className='text-gray-600 hover:underline transition-colors duration-200'
-              href='/contact-us'
-              prefetch={false}
-            >
-              Contact Us
-            </Link>
-          </div>
-        </div>
-
-        {/* Divider and Footer Info */}
-        <div className='flex flex-wrap items-center md:justify-between justify-between py-2 px-1 border-t border-gray-300'>
-          <div className='w-full md:w-4/12 px-4 mx-auto text-center'>
-            <strong>Embroidize</strong>
-            <p>&copy;{new Date().getFullYear()}. All rights reserved.</p>
-          </div>
-        </div>
-      </footer>
+      <Footer />
     </>
   );
 }

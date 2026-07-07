@@ -1,8 +1,8 @@
 export const dynamic = 'force-dynamic';
 
 import DashboardCharts from '@/features/dashboard/components/DashboardCharts';
-import { getCustomOrderCount } from '@/lib/apis/protected/customOrders';
 import { getNewReviewCount } from '@/lib/apis/protected/adminReviews';
+import { getCustomOrderCount } from '@/lib/apis/protected/customOrders';
 import { getDashboardStatsAPI } from '@/lib/apis/protected/users';
 import { getProducts } from '@/lib/apis/public/products';
 import Link from 'next/link';
@@ -37,14 +37,21 @@ export default async function AdminDashboard() {
       </p>
 
       <div className='grid grid-cols-1 md:grid-cols-2 lg:grid-cols-6 gap-4 mb-8'>
-        <div className='bg-white rounded shadow p-4 flex flex-col items-center'>
-          <span className='text-2xl font-bold'>{totalProducts}</span>
+        <Link
+          href='/admin/all-products'
+          className='bg-white rounded shadow p-4 flex flex-col items-center'
+        >
+          <span className='text-2xl font-bold'>{totalProducts || 0}</span>
           <span className='text-gray-500 mt-2'>Total Products</span>
-        </div>
-        <div className='bg-white rounded shadow p-4 flex flex-col items-center'>
-          <span className='text-2xl font-bold'>{totalUsers}</span>
+        </Link>
+
+        <Link
+          href='/admin/users'
+          className='bg-white rounded shadow p-4 flex flex-col items-center'
+        >
+          <span className='text-2xl font-bold'>{totalUsers || 0}</span>
           <span className='text-gray-500 mt-2'>Total Users</span>
-        </div>
+        </Link>
         <div className='bg-white rounded shadow p-4 flex flex-col items-center'>
           <span className='text-2xl font-bold'>{totalDownloads}</span>
           <span className='text-gray-500 mt-2'>Total Downloads</span>
@@ -59,9 +66,7 @@ export default async function AdminDashboard() {
           href='/admin/custom-orders'
           className='bg-white rounded shadow p-4 flex flex-col items-center'
         >
-          <span className='text-2xl font-bold'>
-            {customOrderTotal || 0}
-          </span>
+          <span className='text-2xl font-bold'>{customOrderTotal || 0}</span>
           <span className='text-gray-500 mt-2'>Custom Orders</span>
         </Link>
 

@@ -4,6 +4,7 @@ import DownloadLimitModal from '@/components/Common/DownloadLimitModal';
 import { ErrorToast } from '@/components/Common/ErrorToast';
 import FavoriteButton from '@/components/Common/FavoriteButton';
 import LoadingSpinner from '@/components/Common/LoadingSpinner';
+import PremiumDesignBanner from '@/components/Common/PremiumDesignBanner';
 import SkuFlag from '@/components/Common/SkuFlag';
 import { useUserInfoQuery } from '@/lib/redux/common/user/userInfoSlice';
 import {
@@ -38,9 +39,26 @@ export default function ProductDownloadCard({ data }) {
     duration: null,
   });
 
+  const [subscriptionRequired, setSubscriptionRequired] = useState(false);
+
   const { data: userInfoData, refetch: refetchUserInfo } = useUserInfoQuery();
 
-  // ---- Detect Facebook/Instagram in-app browser ----
+
+  const ACCESS_STATUSES = ['active', 'trialing', 'past_due'];
+  const sub = userInfoData?.subscription;
+  const isSubscribed = !!(sub && ACCESS_STATUSES.includes(sub.status));
+  const isAdmin = userInfoData?.role === 'admin';
+  const isPremium = data?.isFree !== true;
+  const needsUpgrade = isPremium && !isSubscribed;
+  const showUpgrade = needsUpgrade || subscriptionRequired;
+
+
+  const handleGetAllAccess = () => {
+    const productPath = data?.slug ? `/product/${data.slug}` : pathName;
+    router.push(`/subscriptions?redirect=${encodeURIComponent(productPath)}`);
+  };
+
+
   useEffect(() => {
     const ua = navigator.userAgent || navigator.vendor || window.opera;
     const isFBApp =
@@ -48,7 +66,7 @@ export default function ProductDownloadCard({ data }) {
     setIsFacebookBrowser(isFBApp);
   }, []);
 
-  // ---- Detect ALL mobile / tablet / iPad / iOS ----
+
   useEffect(() => {
     const ua = navigator.userAgent;
 
@@ -69,7 +87,7 @@ export default function ProductDownloadCard({ data }) {
     return `${num} ${units[unit]}${num === '1' ? '' : 's'}`;
   };
 
-  // ---- Copy link to clipboard ----
+
   const copyLinkToClipboard = () => {
     navigator.clipboard.writeText(window.location.href);
     setLinkCopied(true);
@@ -78,25 +96,24 @@ export default function ProductDownloadCard({ data }) {
     }, 2000);
   };
 
-  // ---- Try to open in external browser (best effort) ----
+
   const tryOpenInExternalBrowser = () => {
     const currentUrl = window.location.href;
     const ua = navigator.userAgent;
 
-    // Method 1: Try Android Chrome intent (only works on real Android devices)
+
     if (/Android/.test(ua)) {
-      // Try Chrome intent
+
       window.location.href = `googlechrome://navigate?url=${encodeURIComponent(currentUrl)}`;
 
-      // Fallback to generic intent after small delay
+
       setTimeout(() => {
         window.location.href = `intent://${currentUrl.replace(/^https?:\/\//, '')}#Intent;scheme=https;action=android.intent.action.VIEW;end`;
       }, 500);
     }
 
-    // Method 2: For iOS - no programmatic way, show instructions
+
     if (/iPhone|iPad|iPod/.test(ua)) {
-      // iOS has no way to force open - user must do it manually
       return false;
     }
 
@@ -131,11 +148,11 @@ export default function ProductDownloadCard({ data }) {
   };
 
   const handleSingleZipFileDownload = async (fileData) => {
-    // Check if using Facebook in-app browser
+
     if (isFacebookBrowser) {
-      setShowFormatSheet(false); // Close format modal first
+      setShowFormatSheet(false);
       setTimeout(() => {
-        setShowFacebookWarning(true); // Then show Facebook warning
+        setShowFacebookWarning(true);
       }, 300);
       return;
     }
@@ -172,6 +189,17 @@ export default function ProductDownloadCard({ data }) {
           errorMessage = errorJson?.error?.message || errorMessage;
           errorTitle = errorJson?.message || errorTitle;
 
+
+          if (
+            errorJson?.status === 403 &&
+            errorJson?.error?.limitType === 'subscription'
+          ) {
+            setSubscriptionRequired(true);
+            setShowFormatSheet(false);
+            setIsLoading(false);
+            return;
+          }
+
           if (errorJson?.status === 403 && errorTitle === 'Limit Reached') {
             const limitData = {
               type: errorJson?.error?.limitType,
@@ -195,8 +223,7 @@ export default function ProductDownloadCard({ data }) {
       }
 
       const blob = await res.blob();
-      // Honour the SEO-friendly filename the server sets; fall back to the
-      // legacy name if the header isn't present/readable.
+
       const filename = filenameFromContentDisposition(
         res.headers.get('content-disposition'),
         `Embroidize_${fileData.extension}.zip`,
@@ -204,9 +231,6 @@ export default function ProductDownloadCard({ data }) {
 
       safeDownload(blob, filename);
 
-      // The server records this download's quota on response 'finish' (after the
-      // stream completes), so refresh the free-usage widget shortly after — this
-      // keeps "downloads left" accurate instead of showing a stale count.
       setTimeout(() => {
         refetchUserInfo();
       }, 1200);
@@ -263,7 +287,11 @@ export default function ProductDownloadCard({ data }) {
                   width={16}
                   height={16}
                   viewBox='0 0 24 24'
-                  fill={star <= Math.round(data?.averageRating ?? 0) ? '#F59E0B' : '#E5E7EB'}
+                  fill={
+                    star <= Math.round(data?.averageRating ?? 0)
+                      ? '#F59E0B'
+                      : '#E5E7EB'
+                  }
                 >
                   <path d='M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z' />
                 </svg>
@@ -298,7 +326,9 @@ export default function ProductDownloadCard({ data }) {
           </div>
         )}
 
-        {isLoading ? (
+        {showUpgrade ? (
+          <PremiumDesignBanner onGetAccess={handleGetAllAccess} />
+        ) : isLoading ? (
           <LoadingSpinner />
         ) : (
           <Button
@@ -307,8 +337,22 @@ export default function ProductDownloadCard({ data }) {
             className='border w-full bg-black text-white font-semibold text-xl h-14'
             onPress={() => setShowFormatSheet(true)}
           >
+            <Download color='#ffffff' strokeWidth={3} />{' '}
+            {isSubscribed ? 'Download' : 'Free Download'}
+          </Button>
+        )}
+
+        {isAdmin ? (
+          <Button
+            variant='flat'
+            size='lg'
+            className='border w-full bg-black text-white font-semibold text-xl h-14'
+            onPress={() => setShowFormatSheet(true)}
+          >
             <Download color='#ffffff' strokeWidth={3} /> Free Download
           </Button>
+        ) : (
+          ''
         )}
       </div>
 

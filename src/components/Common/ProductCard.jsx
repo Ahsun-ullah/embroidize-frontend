@@ -140,40 +140,43 @@ const ProductCard = React.memo(function ProductCard({ item, index = 0 }) {
       </div> */}
       </div>
       {/* ── Title + category (left) with tier badge (right) ── */}
-      <div className='flex flex-col p-4 '>
-        <div className='flex items-center justify-between gap-2'>
+      <div className='flex items-center justify-between gap-4 p-4'>
+        {/* Left */}
+        <div className='min-w-0 flex-1 gap-0.5 flex flex-col'>
           <Link
             href={productLink}
-            className='text-xs sm:text-xs md:text-sm font-medium capitalize truncate'
+            className='block truncate text-sm font-semibold text-neutral-900 hover:text-black'
             title={productName}
           >
-            {productName.replace(/Embroidery Design, |Machine Embroidery Design/gi, '').trim()}
+            {productName
+              .replace(/Embroidery Design, |Machine Embroidery Design/gi, '')
+              .trim()}
           </Link>
 
-          <span>
-            {isFreeTier ? (
-              <span className='inline-flex items-center rounded-md border border-green-500 px-2.5 py-0.5 text-xs font-semibold text-green-600'>
-                Free
-              </span>
-            ) : (
-              <span className='inline-flex items-center gap-1 rounded-md border bg-black px-2.5 py-0.5 text-xs font-semibold text-white'>
-                <Crown size={11} className='fill-amber-500 text-amber-500' />
-                Pro
-              </span>
-            )}
-          </span>
-        </div>
-
-        <div className='flex items-center justify-between gap-4'>
           <Link
             href={categoryLink}
-            className='text-black text-xs sm:text-xs md:text-sm font-medium capitalize  truncate'
+            className='mt-1 block truncate text-xs text-neutral-500 hover:text-neutral-700 capitalize hover:underline'
             title={categoryName}
           >
             {categoryName.replace(/embroidery designs/gi, '').trim()}
           </Link>
-          <span className='font-medium flex items-center gap-1'>
-            <DownloadIcon />
+        </div>
+
+        {/* Right */}
+        <div className='flex flex-col items-center gap-0.5 shrink-0'>
+          {isFreeTier ? (
+            <span className='inline-flex items-center rounded-md border border-green-500 px-2.5 py-0.5 text-xs font-semibold text-green-600'>
+              Free
+            </span>
+          ) : (
+            <span className='inline-flex items-center gap-1 rounded-md bg-black px-2.5 py-1 text-xs font-semibold text-white'>
+              <Crown size={11} className='fill-amber-400 text-amber-400' />
+              Pro
+            </span>
+          )}
+
+          <span className='inline-flex items-center justify-center gap-1 text-md font-medium text-neutral-700'>
+            <DownloadIcon className='h-4 w-4' />
             {new Intl.NumberFormat('en-US', {
               notation: 'compact',
               maximumFractionDigits: 1,

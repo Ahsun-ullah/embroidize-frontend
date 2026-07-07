@@ -206,7 +206,7 @@ function DownloadLimitModal({ limitModalData = {}, onClose, formatDuration }) {
         <div className='my-6 h-px w-full bg-neutral-100 dark:bg-neutral-800' />
 
         {/* ── Upgrade tiers ── */}
-        {/* {tiers.length > 0 && (
+        {tiers.length > 0 && (
           <div>
             <div className='mb-4 flex justify-center gap-3'>
               <Crown
@@ -292,10 +292,9 @@ function DownloadLimitModal({ limitModalData = {}, onClose, formatDuration }) {
               })}
             </div>
           </div>
-        )} */}
+        )}
 
-
-        {/* <div className='mt-6 space-y-2'>
+        <div className='mt-6 space-y-2'>
           <Button
             onPress={goToUpgrade}
             isLoading={isUpgrading}
@@ -309,39 +308,39 @@ function DownloadLimitModal({ limitModalData = {}, onClose, formatDuration }) {
           >
             Upgrade Now
           </Button>
-        </div> */}
+        </div>
 
         {/* ── Manage current plan ── */}
-         <div className='mt-6 rounded-2xl border border-blue-200 bg-blue-50 p-4 dark:border-blue-500/20 dark:bg-blue-500/10'>
-            <div className='flex items-center justify-between gap-4'>
-              <div className='flex items-center gap-3'>
-                <div className='rounded-xl bg-blue-100 p-2 text-blue-600 dark:bg-blue-500/20 dark:text-blue-400'>
-                  <Settings className='h-5 w-5' />
-                </div>
-
-                <div>
-                  <p className='text-sm font-semibold text-neutral-900 dark:text-white'>
-                    Manage your plan
-                  </p>
-                  <p className='text-xs text-neutral-500 dark:text-neutral-400'>
-                    Usage, billing & upgrades.
-                  </p>
-                </div>
+        <div className='mt-6 rounded-2xl border border-blue-200 bg-blue-50 p-4 dark:border-blue-500/20 dark:bg-blue-500/10'>
+          <div className='flex items-center justify-between gap-4'>
+            <div className='flex items-center gap-3'>
+              <div className='rounded-xl bg-blue-100 p-2 text-blue-600 dark:bg-blue-500/20 dark:text-blue-400'>
+                <Settings className='h-5 w-5' />
               </div>
 
-              <Button
-                size='sm'
-                color='primary'
-                onPress={() => {
-                  onClose?.();
-                  router.push('/user/my-plan');
-                }}
-                className='font-semibold'
-              >
-                My Plan →
-              </Button>
+              <div>
+                <p className='text-sm font-semibold text-neutral-900 dark:text-white'>
+                  Manage your plan
+                </p>
+                <p className='text-xs text-neutral-500 dark:text-neutral-400'>
+                  Usage, billing & upgrades.
+                </p>
+              </div>
             </div>
+
+            <Button
+              size='sm'
+              color='primary'
+              onPress={() => {
+                onClose?.();
+                router.push('/user/my-plan');
+              }}
+              className='font-semibold'
+            >
+              My Plan →
+            </Button>
           </div>
+        </div>
 
         {/* ── Footer ── */}
         <div className='mt-5 flex flex-col gap-2 border-t border-neutral-100 pt-4 text-xs text-neutral-500 dark:border-neutral-800 dark:text-neutral-400 sm:flex-row sm:items-center sm:justify-between'>

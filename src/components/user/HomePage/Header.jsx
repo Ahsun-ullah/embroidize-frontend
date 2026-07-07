@@ -157,9 +157,10 @@ export const Header = () => {
                 className='flex items-center justify-center rounded px-2 py-2 font-bold text-gray-800 transition-colors hover:text-yellow-500 focus:outline-none focus-visible:ring focus-visible:ring-gray-400'
               >
                 <CrownIcon
-                  fill='currentColor'
+                  fill='#F59E0B'
                   strokeWidth={1.8}
-                  className='h-6 w-6 text-yellow-500'
+                  className='h-6 w-6 '
+                  color='#F59E0B'
                 />
 
                 <span className='hidden sm:inline ml-2 text-sm md:text-base'>

@@ -179,7 +179,7 @@ export default function BrowseCategories({
           href={viewAllHref}
           prefetch={false}
           aria-label='More categories, explore more'
-          className='group flex flex-col items-center rounded-2xl border border-neutral-100 bg-white p-3 text-center transition-all duration-200 hover:-translate-y-0.5 hover:border-neutral-200 hover:shadow-md focus:outline-none focus-visible:ring-2 focus-visible:ring-neutral-900'
+          className='hidden md:flex group flex-col items-center rounded-2xl border border-neutral-100 bg-white p-3 text-center transition-all duration-200 hover:-translate-y-0.5 hover:border-neutral-200 hover:shadow-md focus:outline-none focus-visible:ring-2 focus-visible:ring-neutral-900'
         >
           <div className='relative mb-3 flex aspect-square w-full items-center justify-center overflow-hidden rounded-xl bg-neutral-50'>
             <span className='flex h-12 w-12 items-center justify-center rounded-full bg-white shadow-sm ring-1 ring-neutral-100 transition-transform duration-300 group-hover:scale-105'>
@@ -189,9 +189,11 @@ export default function BrowseCategories({
               />
             </span>
           </div>
+
           <span className='text-sm font-semibold leading-tight text-neutral-800'>
             More Categories
           </span>
+
           <span className='mt-1 text-xs text-neutral-400'>Explore more</span>
         </Link>
       </div>

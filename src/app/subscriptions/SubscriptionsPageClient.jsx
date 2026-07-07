@@ -260,9 +260,20 @@ export default function SubscriptionsPageClient() {
   useEffect(() => {
     const searchParams = new URLSearchParams(window.location.search);
     const status = searchParams.get('status');
+    const redirect = searchParams.get('redirect');
+
+    // Stash a post-subscribe return path (e.g. the premium product the user
+    // came from). sessionStorage survives the Stripe checkout round-trip so we
+    // can send them back after payment completes.
+    if (redirect) {
+      sessionStorage.setItem('postSubscribeRedirect', redirect);
+    }
+
     if (status === 'success') {
       SuccessToast('Success', 'Payment completed successfully!', 10000);
-      router.push('/subscriptions');
+      const returnTo = sessionStorage.getItem('postSubscribeRedirect');
+      sessionStorage.removeItem('postSubscribeRedirect');
+      router.push(returnTo || '/subscriptions');
     } else if (status === 'cancelled') {
       ErrorToast('Cancelled', 'Payment was cancelled.', 10000);
     }

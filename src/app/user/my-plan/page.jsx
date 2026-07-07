@@ -254,16 +254,16 @@ export default function MyPlanPage({ onClose }) {
             </div>
 
             {/* CTA */}
-            {/* {remaining === 0 && (
+            {remaining === 0 && (
               <div className='text-center space-y-3'>
                 <p className='text-lg text-red-500 font-medium'>
                   Skip the wait and download instantly 🚀
                 </p>
               </div>
-            )} */}
+            )}
 
             {/* ── Upgrade tiers ── */}
-            {/* <div>
+            <div>
               <div className='grid grid-cols-3 gap-2.5'>
                 {tiers.length > 0 && tiers.map((tier) => {
                   const isCurrent =
@@ -323,11 +323,11 @@ export default function MyPlanPage({ onClose }) {
                   );
                 })}
               </div>
-            </div> */}
+            </div>
 
             {/* ── CTAs ── */}
             <div className='mt-6 space-y-2'>
-              {/* <Button
+              <Button
                 onPress={goToUpgrade}
                 isLoading={isUpgrading}
                 aria-label='Upgrade now'
@@ -343,7 +343,7 @@ export default function MyPlanPage({ onClose }) {
                 }
               >
                 Upgrade Now
-              </Button> */}
+              </Button>
 
               {/*  Browse Designs */}
               <button
