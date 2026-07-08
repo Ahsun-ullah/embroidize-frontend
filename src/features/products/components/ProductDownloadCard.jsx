@@ -43,7 +43,6 @@ export default function ProductDownloadCard({ data }) {
 
   const { data: userInfoData, refetch: refetchUserInfo } = useUserInfoQuery();
 
-
   const ACCESS_STATUSES = ['active', 'trialing', 'past_due'];
   const sub = userInfoData?.subscription;
   const isSubscribed = !!(sub && ACCESS_STATUSES.includes(sub.status));
@@ -52,12 +51,10 @@ export default function ProductDownloadCard({ data }) {
   const needsUpgrade = isPremium && !isSubscribed;
   const showUpgrade = needsUpgrade || subscriptionRequired;
 
-
   const handleGetAllAccess = () => {
     const productPath = data?.slug ? `/product/${data.slug}` : pathName;
     router.push(`/subscriptions?redirect=${encodeURIComponent(productPath)}`);
   };
-
 
   useEffect(() => {
     const ua = navigator.userAgent || navigator.vendor || window.opera;
@@ -65,7 +62,6 @@ export default function ProductDownloadCard({ data }) {
       ua.includes('FBAN') || ua.includes('FBAV') || ua.includes('Instagram');
     setIsFacebookBrowser(isFBApp);
   }, []);
-
 
   useEffect(() => {
     const ua = navigator.userAgent;
@@ -87,7 +83,6 @@ export default function ProductDownloadCard({ data }) {
     return `${num} ${units[unit]}${num === '1' ? '' : 's'}`;
   };
 
-
   const copyLinkToClipboard = () => {
     navigator.clipboard.writeText(window.location.href);
     setLinkCopied(true);
@@ -96,22 +91,17 @@ export default function ProductDownloadCard({ data }) {
     }, 2000);
   };
 
-
   const tryOpenInExternalBrowser = () => {
     const currentUrl = window.location.href;
     const ua = navigator.userAgent;
 
-
     if (/Android/.test(ua)) {
-
       window.location.href = `googlechrome://navigate?url=${encodeURIComponent(currentUrl)}`;
-
 
       setTimeout(() => {
         window.location.href = `intent://${currentUrl.replace(/^https?:\/\//, '')}#Intent;scheme=https;action=android.intent.action.VIEW;end`;
       }, 500);
     }
-
 
     if (/iPhone|iPad|iPod/.test(ua)) {
       return false;
@@ -148,7 +138,6 @@ export default function ProductDownloadCard({ data }) {
   };
 
   const handleSingleZipFileDownload = async (fileData) => {
-
     if (isFacebookBrowser) {
       setShowFormatSheet(false);
       setTimeout(() => {
@@ -188,7 +177,6 @@ export default function ProductDownloadCard({ data }) {
 
           errorMessage = errorJson?.error?.message || errorMessage;
           errorTitle = errorJson?.message || errorTitle;
-
 
           if (
             errorJson?.status === 403 &&
@@ -342,7 +330,7 @@ export default function ProductDownloadCard({ data }) {
           </Button>
         )}
 
-        {isAdmin ? (
+        {showUpgrade && isAdmin ? (
           <Button
             variant='flat'
             size='lg'

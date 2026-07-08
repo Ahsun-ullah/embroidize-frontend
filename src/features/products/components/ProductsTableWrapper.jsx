@@ -30,7 +30,7 @@ import {
   Pagination,
   Textarea,
 } from '@heroui/react';
-import { ImageOff } from 'lucide-react';
+import { Download, Heart, ImageOff } from 'lucide-react';
 
 // Redux & Utils
 import AdminChoiceToggle from '@/components/Common/AdminChoiceToggle';
@@ -42,7 +42,7 @@ import {
   useGetPublicProductSubCategoriesQuery,
 } from '@/lib/redux/admin/categoryAndSubcategory/categoryAndSubcategorySlice';
 import { useDeleteProductMutation } from '@/lib/redux/admin/protectedProducts/protectedProductSlice';
-import { capitalize, slugify } from '@/utils/functions/page';
+import { slugify } from '@/utils/functions/page';
 
 // React-Select Custom Styles
 const customSelectStyles = {
@@ -337,6 +337,8 @@ export default function ProductsTableWrapper({
       const slug = product.slug;
       const imageUrl = product?.image?.url;
       const editHref = `/admin/add-products?productId=${product._id}`;
+      const downloadCount = product.downloadCount ?? 0;
+      const favoriteCount = product.favoriteCount ?? 0;
 
       return (
         <div
@@ -398,31 +400,60 @@ export default function ProductsTableWrapper({
               >
                 {product.name || '—'}
               </Link>
-              {product.serial_no != null && (
-                <span className='shrink-0 font-mono text-[11px] text-gray-400'>
-                  #{product.serial_no}
-                </span>
-              )}
             </div>
 
-            <div className='text-xs text-gray-500'>
-              {capitalize(product?.category?.name || '—')}
-              {product?.sub_category?.name
-                ? ` · ${capitalize(product.sub_category.name)}`
-                : ''}
+            <div className='text-xs text-gray-700 space-y-0.5'>
+              <p className='flex gap-1'>
+                <span className='text-gray-400 shrink-0'>Category:</span>
+                <span className='font-medium line-clamp-1'>
+                  {product.category?.name || '—'}
+                </span>
+              </p>
+              <p className='flex gap-1'>
+                <span className='text-gray-400 shrink-0'>Subcategory:</span>
+                <span className='font-medium line-clamp-1'>
+                  {product.sub_category?.name || '—'}
+                </span>
+              </p>
+            </div>
+
+            {/* Stats row: downloads + favourites (compact) */}
+            <div className='grid grid-cols-2 gap-1.5'>
+              <div
+                className='flex items-center justify-center gap-1 rounded-md bg-gradient-to-br from-gray-900 to-gray-700 text-white py-1'
+                title={`${downloadCount} downloads`}
+              >
+                <Download size={12} />
+                <span className='text-xs font-bold leading-none'>
+                  {downloadCount}
+                </span>
+              </div>
+              <div
+                className='flex items-center justify-center gap-1 rounded-md border border-gray-300 py-1'
+                title={`${favoriteCount} favourites`}
+              >
+                <Heart size={12} className='fill-gray-900 text-gray-900' />
+                <span className='text-xs font-bold leading-none'>
+                  {favoriteCount}
+                </span>
+              </div>
             </div>
 
             <div className='flex items-center justify-between text-xs'>
               <span className='font-semibold text-gray-900'>
-                {product.price ? `$${product.price}` : 'Free'}
+                {product.serial_no != null && (
+                  <span className='shrink-0 font-mono text-[11px] text-gray-400'>
+                    #{product.serial_no}
+                  </span>
+                )}
               </span>
-              <span className='text-gray-400'>
+              <span className='text-gray-950'>
                 SKU: {product.sku_code || '—'}
               </span>
             </div>
 
             {/* Tier + Status toggles */}
-            <div className='flex flex-wrap items-center gap-2'>
+            <div className='flex flex-wrap items-center justify-between gap-2'>
               <ProductFlagToggle
                 productId={product._id}
                 field='isFree'
@@ -618,8 +649,7 @@ export default function ProductsTableWrapper({
       ? new Set(initialData.map((p) => p._id))
       : selectedKeys;
   const allOnPageSelected =
-    initialData.length > 0 &&
-    initialData.every((p) => selectedSet.has(p._id));
+    initialData.length > 0 && initialData.every((p) => selectedSet.has(p._id));
 
   return (
     <>

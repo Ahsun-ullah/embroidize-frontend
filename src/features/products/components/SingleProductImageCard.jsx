@@ -224,11 +224,16 @@ export const SingleProductImageCard = ({ data, onImageLoad }) => {
           </div>
         )}
 
+        {/* Product-page hero shows the REAL, full-resolution original (not a
+            resized/recompressed variant). `unoptimized` opts this single image
+            out of Next's optimizer — thumbnails/cards elsewhere stay optimized.
+            Bonus: it's the same URL the zoom lightbox uses, so opening zoom is
+            instant (already cached) with no quality jump. */}
         <Image
           src={imageUrl}
           alt={imageAlt}
           fill
-          quality={100}
+          unoptimized
           sizes='(max-width: 768px) 100vw, 800px'
           className='object-cover transition-opacity duration-300'
           onLoad={() => {
