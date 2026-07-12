@@ -1,4 +1,6 @@
 'use client';
+import { ErrorToast } from '@/components/Common/ErrorToast';
+import { SuccessToast } from '@/components/Common/SuccessToast';
 import UserTable from '@/components/Common/Table';
 import { VerticalDotsIcon } from '@/components/icons';
 import {
@@ -83,18 +85,80 @@ export default function UsersTableWrapper({
     router.push(`?${params.toString()}`);
   };
 
+  // --- Active vs Blocked view ---
+  const blockedView = searchParams.get('blocked') === '1';
+  const setBlockedView = (val) => {
+    const params = new URLSearchParams(searchParams);
+    if (val) params.set('blocked', '1');
+    else params.delete('blocked');
+    params.set('page', '1');
+    router.push(`?${params.toString()}`);
+  };
+
+  const [blockConfirm, setBlockConfirm] = useState(null);
+  const [isBlocking, setIsBlocking] = useState(false);
+
+  const performBlock = useCallback(
+    async (user) => {
+      if (!user) return;
+      const isBlocked = user.status === 'blocked';
+      setIsBlocking(true);
+      try {
+        const token = document.cookie
+          .split('; ')
+          .find((row) => row.startsWith('token='))
+          ?.split('=')[1];
+        const apiUrl = process.env.NEXT_PUBLIC_BASE_API_URL_PROD;
+        const res = await fetch(`${apiUrl}/admin/users/${user._id}/block`, {
+          method: 'PATCH',
+          headers: {
+            'Content-Type': 'application/json',
+            ...(token ? { Authorization: `Bearer ${token}` } : {}),
+          },
+          body: JSON.stringify({ blocked: !isBlocked }),
+        });
+        const result = await res.json();
+        if (!res.ok) throw new Error(result.message || 'Action failed');
+        SuccessToast(
+          'Success',
+          isBlocked ? 'User unblocked.' : 'User blocked.',
+          3000,
+        );
+        router.refresh();
+      } catch (err) {
+        ErrorToast('Error', err.message || 'Action failed', 3000);
+      } finally {
+        setIsBlocking(false);
+        setBlockConfirm(null);
+      }
+    },
+    [router],
+  );
+
+  // Both block and unblock ask for confirmation first.
+  const handleBlockClick = useCallback((user) => {
+    setBlockConfirm(user);
+  }, []);
+
   // --- Render Cell ---
   const renderCell = useCallback((user, columnKey) => {
     const cellValue = user[columnKey];
     switch (columnKey) {
       case 'name':
         return (
-          <User
-            avatarProps={{ radius: 'lg', src: user.avatar }}
-            name={user.fullName || user.name || cellValue} // Uses the aggregated fullName
-          >
-            {user.email}
-          </User>
+          <div className='flex items-center gap-2'>
+            <User
+              avatarProps={{ radius: 'lg', src: user.avatar }}
+              name={user.fullName || user.name || cellValue} // Uses the aggregated fullName
+            >
+              {user.email}
+            </User>
+            {user.status === 'blocked' && (
+              <span className='rounded-full bg-red-100 px-2 py-0.5 text-[10px] font-semibold text-red-700'>
+                Blocked
+              </span>
+            )}
+          </div>
         );
       case 'createdAt':
         return <>{new Date(user.createdAt).toISOString().split('T')[0]}</>;
@@ -148,6 +212,14 @@ export default function UsersTableWrapper({
                 >
                   More Info
                 </DropdownItem>
+                <DropdownItem
+                  key='block'
+                  className={user.status === 'blocked' ? '' : 'text-danger'}
+                  color={user.status === 'blocked' ? 'default' : 'danger'}
+                  onPress={() => handleBlockClick(user)}
+                >
+                  {user.status === 'blocked' ? 'Unblock user' : 'Block user'}
+                </DropdownItem>
               </DropdownMenu>
             </Dropdown>
           </div>
@@ -155,7 +227,7 @@ export default function UsersTableWrapper({
       default:
         return cellValue;
     }
-  }, []);
+  }, [handleBlockClick]);
 
   const [isExporting, setIsExporting] = useState(false);
 
@@ -262,6 +334,24 @@ export default function UsersTableWrapper({
   // --- Custom Filter Bar ---
   const topContent = (
     <div className='mb-4'>
+      <div className='mb-3 flex gap-2'>
+        <Button
+          size='sm'
+          variant={!blockedView ? 'solid' : 'flat'}
+          className={!blockedView ? 'bg-black text-white' : ''}
+          onPress={() => setBlockedView(false)}
+        >
+          Active Users
+        </Button>
+        <Button
+          size='sm'
+          variant={blockedView ? 'solid' : 'flat'}
+          className={blockedView ? 'bg-black text-white' : ''}
+          onPress={() => setBlockedView(true)}
+        >
+          Blocked Users
+        </Button>
+      </div>
       <div className='flex flex-nowrap items-end gap-3 overflow-x-auto'>
         <Input
           isClearable
@@ -337,7 +427,9 @@ export default function UsersTableWrapper({
   return (
     <>
       <div className='flex justify-between items-center mx-6'>
-        <h1 className='text-2xl font-bold mb-4'>All Users</h1>
+        <h1 className='text-2xl font-bold mb-4'>
+          {blockedView ? 'Blocked Users' : 'All Users'}
+        </h1>
         <div className='mb-4 font-semibold text-lg'>
           Found {pagination?.total} results
         </div>
@@ -352,6 +444,61 @@ export default function UsersTableWrapper({
         onPageChange={onPageChange}
         topContent={topContent}
       />
+
+      {/* Block / unblock confirmation */}
+      <Modal
+        isOpen={!!blockConfirm}
+        onClose={() => !isBlocking && setBlockConfirm(null)}
+        size='sm'
+      >
+        <ModalContent>
+          {(() => {
+            const isUnblock = blockConfirm?.status === 'blocked';
+            const who = blockConfirm?.name || blockConfirm?.email;
+            return (
+              <>
+                <ModalHeader>
+                  {isUnblock ? 'Unblock user?' : 'Block user?'}
+                </ModalHeader>
+                <ModalBody className='text-sm text-gray-600'>
+                  {isUnblock ? (
+                    <>
+                      Unblock{' '}
+                      <span className='font-semibold text-gray-900'>{who}</span>?
+                      They&apos;ll be able to log in and download again, and
+                      return to the active users list.
+                    </>
+                  ) : (
+                    <>
+                      Block{' '}
+                      <span className='font-semibold text-gray-900'>{who}</span>?
+                      They won&apos;t be able to log in or download, and
+                      they&apos;ll move to the Blocked list. You can unblock them
+                      anytime.
+                    </>
+                  )}
+                </ModalBody>
+                <ModalFooter>
+                  <Button
+                    variant='light'
+                    onPress={() => setBlockConfirm(null)}
+                    isDisabled={isBlocking}
+                  >
+                    Cancel
+                  </Button>
+                  <Button
+                    color={isUnblock ? 'primary' : 'danger'}
+                    isLoading={isBlocking}
+                    onPress={() => performBlock(blockConfirm)}
+                  >
+                    {isUnblock ? 'Unblock user' : 'Block user'}
+                  </Button>
+                </ModalFooter>
+              </>
+            );
+          })()}
+        </ModalContent>
+      </Modal>
 
       <Modal isOpen={isModalOpen} onClose={handleCloseModal}>
         <ModalContent>

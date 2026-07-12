@@ -591,7 +591,7 @@ export default function SubscribersTableWrapper({ subscribers, stats, revenue })
             value={search}
             onValueChange={handleSearch}
             onClear={() => handleSearch('')}
-            className='sm:w-64'
+            className='w-full sm:w-96'
           />
           <Dropdown>
             <DropdownTrigger>

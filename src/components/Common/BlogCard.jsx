@@ -27,7 +27,7 @@ const BlogCard = React.memo(function BlogCard({ data }) {
             fill
             sizes='(max-width: 640px) 100vw, (max-width: 768px) 50vw, 33vw'
             className='transition-transform duration-300 group-hover:scale-105'
-            quality={80}
+            quality={78}
             priority={true}
           />
         </div>

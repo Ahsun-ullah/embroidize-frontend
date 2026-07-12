@@ -4,6 +4,8 @@ import SubscribersTableWrapper from '@/features/users/SubscribersTableWrapper';
 import { checkFinanceUnlocked } from '@/lib/apis/protected/financeAuth';
 import { getRevenueStats, getSubscribedUsers } from '@/lib/apis/protected/subscriptions';
 
+export const dynamic = 'force-dynamic';
+
 export default async function SubscribersPage() {
   if (!(await checkFinanceUnlocked())) {
     return <FinanceGate title='Subscribers' />;

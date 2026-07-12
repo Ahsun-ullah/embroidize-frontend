@@ -10,6 +10,8 @@ import {
   getPaypalSummary,
 } from '@/lib/apis/protected/customOrders';
 
+export const dynamic = 'force-dynamic';
+
 export default async function CustomOrdersPage({ searchParams }) {
   if (!(await checkFinanceUnlocked())) {
     return <FinanceGate title='Custom Orders' />;
@@ -21,6 +23,7 @@ export default async function CustomOrdersPage({ searchParams }) {
   const search = params?.search || '';
   const status = params?.status || 'all';
   const paymentTag = params?.paymentTag || 'all';
+  const needsAction = params?.needsAction === '1';
   const perPage = 20;
 
   const [{ orders, pagination }, { stats }, { summary }] = await Promise.all([
@@ -32,6 +35,7 @@ export default async function CustomOrdersPage({ searchParams }) {
       'createdAt',
       'desc',
       paymentTag,
+      needsAction,
     ),
     getCustomOrderStats(),
     getPaypalSummary(),
@@ -46,6 +50,8 @@ export default async function CustomOrdersPage({ searchParams }) {
     { name: 'FORMAT', uid: 'fileFormat' },
     { name: 'TURNAROUND', uid: 'turnaround' },
     { name: 'PREFERRED BUDGET', uid: 'preferredBudget' },
+    { name: 'PAID', uid: 'amountPaid' },
+    { name: 'ETA', uid: 'estimatedDelivery' },
     { name: 'STATUS', uid: 'status' },
     { name: 'CREATED AT', uid: 'createdAt' },
     { name: 'ACTIONS', uid: 'actions' },

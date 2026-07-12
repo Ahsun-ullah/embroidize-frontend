@@ -46,7 +46,18 @@ export async function fetchOrder(orderId) {
     headers: orderAuthHeaders(),
     cache: 'no-store',
   });
-  return (await parse(res)).data.order;
+  const data = (await parse(res)).data;
+  // Attach the customer's own review (if any) onto the order object.
+  return { ...data.order, myReview: data.myReview || null };
+}
+
+export async function submitReview(orderId, rating, comment) {
+  const res = await fetch(`${API}/public/orders/custom/${orderId}/review`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', ...orderAuthHeaders() },
+    body: JSON.stringify({ rating, comment }),
+  });
+  return (await parse(res)).data.review;
 }
 
 export async function createCheckoutSession(orderId) {
@@ -82,6 +93,23 @@ export async function requestRevision(orderId, notes) {
     body: JSON.stringify({ notes }),
   });
   return parse(res);
+}
+
+export async function fetchOrderMessages(orderId) {
+  const res = await fetch(`${API}/public/orders/custom/${orderId}/messages`, {
+    headers: orderAuthHeaders(),
+    cache: 'no-store',
+  });
+  return (await parse(res)).data.messages || [];
+}
+
+export async function sendOrderMessage(orderId, body) {
+  const res = await fetch(`${API}/public/orders/custom/${orderId}/messages`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', ...orderAuthHeaders() },
+    body: JSON.stringify({ body }),
+  });
+  return (await parse(res)).data.message;
 }
 
 // Streams the delivery ZIP as a blob and returns { blob, filename }.

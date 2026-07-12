@@ -1,6 +1,8 @@
 import RedirectsWrapper from '@/features/settings/RedirectsWrapper';
 import { getRedirects } from '@/lib/apis/protected/redirects';
 
+export const dynamic = 'force-dynamic';
+
 export const metadata = {
   title: 'URL Redirects',
 };

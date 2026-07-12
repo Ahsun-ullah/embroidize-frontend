@@ -1,6 +1,8 @@
 import ScriptsWrapper from '@/features/settings/ScriptsWrapper';
 import { getAdminActionLog } from '@/lib/apis/protected/adminScripts';
 
+export const dynamic = 'force-dynamic';
+
 export const metadata = {
   title: 'Admin Scripts',
 };

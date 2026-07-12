@@ -33,15 +33,19 @@ import {
   CreditCard,
   Download,
   Eye,
+  FileText,
   Globe,
   Link as LinkIcon,
   Mail,
   MapPin,
+  MessageSquare,
   Search,
   Send,
   Trash2,
   Upload,
 } from 'lucide-react';
+import MessageThread from '@/features/customOrders/MessageThread';
+import { openOrderReceipt } from '@/features/customOrders/receipt';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { startTransition, useState } from 'react';
 
@@ -133,6 +137,7 @@ export default function CustomOrdersTableWrapper({
   const [paymentTagFilter, setPaymentTagFilter] = useState(
     searchParams.get('paymentTag') || 'all',
   );
+  const needsActionActive = searchParams.get('needsAction') === '1';
 
   // View details modal
   const {
@@ -191,6 +196,7 @@ export default function CustomOrdersTableWrapper({
   } = useDisclosure();
   const [quoteOrder, setQuoteOrder] = useState(null);
   const [quoteAmount, setQuoteAmount] = useState('');
+  const [quoteEta, setQuoteEta] = useState('');
   const [isQuoting, setIsQuoting] = useState(false);
 
   // Deliver (upload ZIP) modal
@@ -201,6 +207,7 @@ export default function CustomOrdersTableWrapper({
   } = useDisclosure();
   const [deliverOrder, setDeliverOrder] = useState(null);
   const [deliverFile, setDeliverFile] = useState(null);
+  const [deliverPreview, setDeliverPreview] = useState(null);
   const [isDelivering, setIsDelivering] = useState(false);
   const [downloadingDelivery, setDownloadingDelivery] = useState(false);
 
@@ -215,6 +222,30 @@ export default function CustomOrdersTableWrapper({
   const [payReqNote, setPayReqNote] = useState('');
   const [payReqUrl, setPayReqUrl] = useState('');
   const [isPayRequesting, setIsPayRequesting] = useState(false);
+
+  // Message thread modal
+  const {
+    isOpen: isMessagesOpen,
+    onOpen: onMessagesOpen,
+    onOpenChange: onMessagesChange,
+  } = useDisclosure();
+  const [messagesOrder, setMessagesOrder] = useState(null);
+  const [messagesList, setMessagesList] = useState([]);
+  const [loadingMessages, setLoadingMessages] = useState(false);
+  const [sendingMessage, setSendingMessage] = useState(false);
+
+  // Activity log (shown in View Details)
+  const [activityList, setActivityList] = useState([]);
+  const [loadingActivity, setLoadingActivity] = useState(false);
+
+  // Email-invoice confirmation modal
+  const {
+    isOpen: isInvoiceOpen,
+    onOpen: onInvoiceOpen,
+    onOpenChange: onInvoiceChange,
+  } = useDisclosure();
+  const [invoiceOrder, setInvoiceOrder] = useState(null);
+  const [sendingInvoice, setSendingInvoice] = useState(false);
 
   const handleSearch = (value) => {
     const params = new URLSearchParams(searchParams.toString());
@@ -243,15 +274,37 @@ export default function CustomOrdersTableWrapper({
     router.push(`?${params.toString()}`);
   };
 
+  const toggleNeedsAction = () => {
+    const params = new URLSearchParams(searchParams.toString());
+    if (needsActionActive) params.delete('needsAction');
+    else params.set('needsAction', '1');
+    params.set('page', '1');
+    router.push(`?${params.toString()}`);
+  };
+
   const handlePageChange = (page) => {
     const params = new URLSearchParams(searchParams.toString());
     params.set('page', page.toString());
     router.push(`?${params.toString()}`);
   };
 
-  const handleViewDetails = (order) => {
+  const handleViewDetails = async (order) => {
     setViewOrder(order);
+    setActivityList([]);
+    setLoadingActivity(true);
     onViewModalOpen();
+    try {
+      const res = await fetch(
+        `${apiBase()}/admin/orders/custom/${order._id}/activity`,
+        { headers: adminHeaders(false) },
+      );
+      const result = await res.json();
+      if (res.ok) setActivityList(result?.data?.activity || []);
+    } catch {
+      // Non-fatal — the rest of the details still show.
+    } finally {
+      setLoadingActivity(false);
+    }
   };
 
   const handleStatusUpdate = (order) => {
@@ -341,6 +394,7 @@ export default function CustomOrdersTableWrapper({
   const handleQuote = (order) => {
     setQuoteOrder(order);
     setQuoteAmount(order.estimatedPrice > 0 ? String(order.estimatedPrice) : '');
+    setQuoteEta(order.estimatedDelivery || '');
     onQuoteOpen();
   };
 
@@ -357,7 +411,7 @@ export default function CustomOrdersTableWrapper({
         {
           method: 'POST',
           headers: adminHeaders(),
-          body: JSON.stringify({ amount }),
+          body: JSON.stringify({ amount, estimatedDelivery: quoteEta.trim() }),
         },
       );
       const result = await res.json();
@@ -419,9 +473,53 @@ export default function CustomOrdersTableWrapper({
     }
   };
 
+  const handleOpenMessages = async (order) => {
+    setMessagesOrder(order);
+    setMessagesList([]);
+    setLoadingMessages(true);
+    onMessagesOpen();
+    try {
+      const res = await fetch(
+        `${apiBase()}/admin/orders/custom/${order._id}/messages`,
+        { headers: adminHeaders(false) },
+      );
+      const result = await res.json();
+      if (!res.ok) throw new Error(result.message || 'Failed to load messages');
+      setMessagesList(result?.data?.messages || []);
+    } catch (err) {
+      ErrorToast('Error', err.message || 'Failed to load messages', 4000);
+    } finally {
+      setLoadingMessages(false);
+    }
+  };
+
+  const sendAdminMessage = async (body) => {
+    if (!messagesOrder) return;
+    setSendingMessage(true);
+    try {
+      const res = await fetch(
+        `${apiBase()}/admin/orders/custom/${messagesOrder._id}/messages`,
+        {
+          method: 'POST',
+          headers: adminHeaders(),
+          body: JSON.stringify({ message: body }),
+        },
+      );
+      const result = await res.json();
+      if (!res.ok) throw new Error(result.message || 'Failed to send');
+      const msg = result?.data?.message;
+      if (msg) setMessagesList((prev) => [...prev, msg]);
+    } catch (err) {
+      ErrorToast('Error', err.message || 'Failed to send message', 4000);
+    } finally {
+      setSendingMessage(false);
+    }
+  };
+
   const handleDeliver = (order) => {
     setDeliverOrder(order);
     setDeliverFile(null);
+    setDeliverPreview(null);
     onDeliverOpen();
   };
 
@@ -434,6 +532,10 @@ export default function CustomOrdersTableWrapper({
       ErrorToast('Error', 'Delivery must be a single .zip containing all formats', 3000);
       return;
     }
+    if (deliverPreview && !deliverPreview.type.startsWith('image/')) {
+      ErrorToast('Error', 'Preview must be an image (JPG, PNG, WebP).', 3000);
+      return;
+    }
     setIsDelivering(true);
     try {
       const fd = new FormData();
@@ -444,17 +546,72 @@ export default function CustomOrdersTableWrapper({
       );
       const result = await res.json();
       if (!res.ok) throw new Error(result.message || 'Failed to upload delivery');
-      SuccessToast('Success', result?.message || 'Delivery uploaded and customer notified.', 4000);
+
+      // Optional preview image — best-effort, uploaded after the ZIP succeeds.
+      let previewWarning = '';
+      if (deliverPreview) {
+        try {
+          const pfd = new FormData();
+          pfd.append('preview', deliverPreview);
+          const pres = await fetch(
+            `${apiBase()}/admin/orders/custom/${deliverOrder._id}/preview`,
+            { method: 'POST', headers: adminHeaders(false), body: pfd },
+          );
+          if (!pres.ok) {
+            const pbody = await pres.json().catch(() => ({}));
+            previewWarning = pbody?.message || 'preview image failed to upload';
+          }
+        } catch {
+          previewWarning = 'preview image failed to upload';
+        }
+      }
+
+      if (previewWarning) {
+        ErrorToast('Delivery uploaded', `Files delivered, but the ${previewWarning}.`, 5000);
+      } else {
+        SuccessToast('Success', result?.message || 'Delivery uploaded and customer notified.', 4000);
+      }
       startTransition(() => {
         router.refresh();
         onDeliverChange(false);
         setDeliverOrder(null);
         setDeliverFile(null);
+        setDeliverPreview(null);
       });
     } catch (err) {
       ErrorToast('Error', err.message || 'Failed to upload delivery', 4000);
     } finally {
       setIsDelivering(false);
+    }
+  };
+
+  // Email the invoice / receipt — opens a confirmation first, then sends.
+  const handleEmailInvoice = (order) => {
+    setInvoiceOrder(order);
+    onInvoiceOpen();
+  };
+
+  const confirmEmailInvoice = async () => {
+    if (!invoiceOrder) return;
+    setSendingInvoice(true);
+    try {
+      const res = await fetch(
+        `${apiBase()}/admin/orders/custom/${invoiceOrder._id}/invoice`,
+        { method: 'POST', headers: adminHeaders() },
+      );
+      const result = await res.json();
+      if (!res.ok) throw new Error(result.message || 'Failed to send invoice');
+      SuccessToast(
+        'Invoice sent',
+        result?.message || `Invoice emailed to ${invoiceOrder.email}`,
+        4000,
+      );
+      onInvoiceChange(false);
+      setInvoiceOrder(null);
+    } catch (err) {
+      ErrorToast('Error', err.message || 'Failed to send invoice', 4000);
+    } finally {
+      setSendingInvoice(false);
     }
   };
 
@@ -720,11 +877,33 @@ export default function CustomOrdersTableWrapper({
           </div>
         );
 
+      case 'amountPaid': {
+        const paid = Number(order.amountPaid) || 0;
+        return paid > 0 ? (
+          <span className='text-sm font-semibold text-gray-900'>
+            ${paid.toFixed(2)}
+          </span>
+        ) : (
+          <span className='text-gray-400 text-xs'>—</span>
+        );
+      }
+
+      case 'estimatedDelivery':
+        return order.estimatedDelivery ? (
+          <span className='text-sm'>{order.estimatedDelivery}</span>
+        ) : (
+          <span className='text-gray-400 text-xs'>—</span>
+        );
+
       case 'status': {
         // Priced order with no payment channel yet → flag it so it can be tagged.
         const untagged =
           Number(order.estimatedPrice) > 0 &&
           !(order.paymentChannel || '').trim();
+        // Revision beyond the 2 included free ones — needs a paid quote.
+        const paidRevision =
+          order.status === 'in_revision' && (order.revisions?.length || 0) > 2;
+        const unread = Number(order.unreadCount) || 0;
         return (
           <div className='flex flex-col items-start gap-1'>
             <Chip
@@ -734,6 +913,25 @@ export default function CustomOrdersTableWrapper({
             >
               {STATUS_LABELS[order.status] || order.status}
             </Chip>
+            {unread > 0 && (
+              <Chip
+                size='sm'
+                variant='flat'
+                startContent={<MessageSquare size={11} className='ml-1' />}
+                className='bg-black text-white text-[10px]'
+              >
+                {unread} new
+              </Chip>
+            )}
+            {paidRevision && (
+              <Chip
+                size='sm'
+                variant='flat'
+                className='bg-amber-100 text-amber-700 text-[10px]'
+              >
+                Paid revision
+              </Chip>
+            )}
             {untagged && (
               <Chip
                 size='sm'
@@ -758,7 +956,29 @@ export default function CustomOrdersTableWrapper({
           </div>
         );
 
-      case 'actions':
+      case 'actions': {
+        // Only surface the actions that make sense for this order's status.
+        const hasPrice = Number(order.estimatedPrice) > 0;
+        const hasFiles = order.deliveryFiles?.length > 0;
+        const canQuote = [
+          'pending_review',
+          'awaiting_payment',
+          'expired',
+          'cancelled',
+        ].includes(order.status);
+        const canRequestPayment = ![
+          'pending_review',
+          'cancelled',
+          'expired',
+        ].includes(order.status);
+        const canDeliver = [
+          'paid',
+          'in_progress',
+          'in_revision',
+          'delivered',
+          'completed',
+        ].includes(order.status);
+
         return (
           <Dropdown>
             <DropdownTrigger>
@@ -787,35 +1007,68 @@ export default function CustomOrdersTableWrapper({
                 View Details
               </DropdownItem>
               <DropdownItem
-                key='quote'
-                startContent={<CreditCard size={16} />}
-                onClick={() => handleQuote(order)}
+                key='messages'
+                startContent={<MessageSquare size={16} />}
+                onClick={() => handleOpenMessages(order)}
               >
-                {['awaiting_payment', 'expired', 'cancelled'].includes(order.status)
-                  ? 'Re-quote / Update Price'
-                  : 'Set Price & Request Payment'}
+                Messages
               </DropdownItem>
-              <DropdownItem
-                key='payment-request'
-                startContent={<Send size={16} />}
-                onClick={() => handlePayRequest(order)}
-              >
-                Request Payment (Stripe Link)
-              </DropdownItem>
-              <DropdownItem
-                key='deliver'
-                startContent={<Upload size={16} />}
-                onClick={() => handleDeliver(order)}
-              >
-                {order.deliveryFiles?.length > 0 ? 'Upload New Version' : 'Upload Delivery ZIP'}
-              </DropdownItem>
-              {order.deliveryFiles?.length > 0 ? (
+              {canQuote ? (
+                <DropdownItem
+                  key='quote'
+                  startContent={<CreditCard size={16} />}
+                  onClick={() => handleQuote(order)}
+                >
+                  {['awaiting_payment', 'expired', 'cancelled'].includes(
+                    order.status,
+                  )
+                    ? 'Re-quote / Update Price'
+                    : 'Set Price & Request Payment'}
+                </DropdownItem>
+              ) : null}
+              {canRequestPayment ? (
+                <DropdownItem
+                  key='payment-request'
+                  startContent={<Send size={16} />}
+                  onClick={() => handlePayRequest(order)}
+                >
+                  Request Payment (Stripe Link)
+                </DropdownItem>
+              ) : null}
+              {canDeliver ? (
+                <DropdownItem
+                  key='deliver'
+                  startContent={<Upload size={16} />}
+                  onClick={() => handleDeliver(order)}
+                >
+                  {hasFiles ? 'Upload New Version' : 'Upload Delivery ZIP'}
+                </DropdownItem>
+              ) : null}
+              {hasFiles ? (
                 <DropdownItem
                   key='download-delivery'
                   startContent={<Download size={16} />}
                   onClick={() => downloadDelivery(order)}
                 >
                   Download Delivery ZIP
+                </DropdownItem>
+              ) : null}
+              {hasPrice ? (
+                <DropdownItem
+                  key='view-invoice'
+                  startContent={<FileText size={16} />}
+                  onClick={() => openOrderReceipt(order)}
+                >
+                  View Invoice
+                </DropdownItem>
+              ) : null}
+              {hasPrice ? (
+                <DropdownItem
+                  key='email-invoice'
+                  startContent={<Mail size={16} />}
+                  onClick={() => handleEmailInvoice(order)}
+                >
+                  Email Invoice
                 </DropdownItem>
               ) : null}
               <DropdownItem
@@ -837,6 +1090,7 @@ export default function CustomOrdersTableWrapper({
             </DropdownMenu>
           </Dropdown>
         );
+      }
 
       default:
         return order[columnKey];
@@ -874,6 +1128,18 @@ export default function CustomOrdersTableWrapper({
           }}
           className='flex-1'
         />
+        <Button
+          variant={needsActionActive ? 'solid' : 'flat'}
+          className={
+            needsActionActive
+              ? 'bg-black text-white min-w-[140px]'
+              : 'min-w-[140px]'
+          }
+          startContent={<MessageSquare size={16} />}
+          onPress={toggleNeedsAction}
+        >
+          Needs action
+        </Button>
         <Dropdown>
           <DropdownTrigger>
             <Button variant='flat' className='capitalize min-w-[140px]'>
@@ -1372,6 +1638,42 @@ export default function CustomOrdersTableWrapper({
                     </div>
                   </>
                 )}
+
+                {/* Activity log — internal audit trail */}
+                <div className='mt-2 border-t border-gray-100 pt-4'>
+                  <p className='mb-2 text-xs font-semibold uppercase tracking-wide text-gray-400'>
+                    Activity Log
+                  </p>
+                  {loadingActivity ? (
+                    <p className='text-xs text-gray-400'>Loading…</p>
+                  ) : activityList.length === 0 ? (
+                    <p className='text-xs text-gray-400'>
+                      No activity recorded yet.
+                    </p>
+                  ) : (
+                    <ol className='space-y-2'>
+                      {activityList.map((a, i) => (
+                        <li key={i} className='flex gap-2 text-sm'>
+                          <span className='mt-1.5 h-2 w-2 shrink-0 rounded-full bg-gray-400' />
+                          <div>
+                            <p className='text-gray-800 dark:text-gray-100'>
+                              {a.message}
+                            </p>
+                            <p className='text-[11px] capitalize text-gray-400'>
+                              {a.actor} ·{' '}
+                              {new Date(a.createdAt).toLocaleString('en-US', {
+                                month: 'short',
+                                day: 'numeric',
+                                hour: 'numeric',
+                                minute: '2-digit',
+                              })}
+                            </p>
+                          </div>
+                        </li>
+                      ))}
+                    </ol>
+                  )}
+                </div>
               </ModalBody>
 
               <ModalFooter className='flex-wrap gap-2'>
@@ -1607,6 +1909,13 @@ export default function CustomOrdersTableWrapper({
                     startContent={<span className='text-sm'>$</span>}
                     autoFocus
                   />
+                  <Input
+                    label='Estimated delivery (optional)'
+                    placeholder='e.g. Within 24 hours'
+                    value={quoteEta}
+                    onChange={(e) => setQuoteEta(e.target.value)}
+                    description='Shown to the customer with the quote and while they wait.'
+                  />
                   <p className='text-xs text-gray-500'>
                     The order moves to <strong>Awaiting Payment</strong> and the
                     customer gets an email with this price and a secure Stripe
@@ -1724,6 +2033,86 @@ export default function CustomOrdersTableWrapper({
         </ModalContent>
       </Modal>
 
+      {/* ─── Email Invoice Confirmation ─── */}
+      <Modal
+        isOpen={isInvoiceOpen}
+        onOpenChange={onInvoiceChange}
+        backdrop='blur'
+        size='sm'
+      >
+        <ModalContent>
+          {(onClose) => (
+            <>
+              <ModalHeader>
+                <div className='flex items-center gap-2'>
+                  <Mail size={20} />
+                  Email Invoice
+                </div>
+              </ModalHeader>
+              <ModalBody>
+                <p className='text-sm text-gray-600'>
+                  Send the invoice for order{' '}
+                  <span className='font-semibold'>
+                    {invoiceOrder?.orderNumber}
+                  </span>{' '}
+                  to{' '}
+                  <span className='font-semibold'>{invoiceOrder?.email}</span>?
+                </p>
+              </ModalBody>
+              <ModalFooter>
+                <Button variant='light' onPress={onClose}>
+                  Cancel
+                </Button>
+                <Button
+                  color='primary'
+                  isLoading={sendingInvoice}
+                  onPress={confirmEmailInvoice}
+                >
+                  Send Invoice
+                </Button>
+              </ModalFooter>
+            </>
+          )}
+        </ModalContent>
+      </Modal>
+
+      {/* ─── Messages Modal ─── */}
+      <Modal
+        isOpen={isMessagesOpen}
+        onOpenChange={onMessagesChange}
+        backdrop='blur'
+        size='lg'
+        scrollBehavior='inside'
+      >
+        <ModalContent>
+          {() => (
+            <>
+              <ModalHeader>
+                <div className='flex items-center gap-2'>
+                  <MessageSquare size={20} />
+                  Messages — {messagesOrder?.orderNumber}
+                </div>
+              </ModalHeader>
+              <ModalBody className='pb-6'>
+                {loadingMessages ? (
+                  <p className='py-6 text-center text-sm text-gray-400'>
+                    Loading…
+                  </p>
+                ) : (
+                  <MessageThread
+                    messages={messagesList}
+                    onSend={sendAdminMessage}
+                    sending={sendingMessage}
+                    viewerSide='admin'
+                    emptyHint='No messages yet. Start the conversation with the customer.'
+                  />
+                )}
+              </ModalBody>
+            </>
+          )}
+        </ModalContent>
+      </Modal>
+
       {/* ─── Deliver (Upload ZIP) Modal ─── */}
       <Modal isOpen={isDeliverOpen} onOpenChange={onDeliverChange} backdrop='blur'>
         <ModalContent>
@@ -1744,17 +2133,46 @@ export default function CustomOrdersTableWrapper({
                     </p>
                   </div>
 
-                  <input
-                    type='file'
-                    accept='.zip'
-                    onChange={(e) => setDeliverFile(e.target.files?.[0] || null)}
-                    className='block w-full text-sm text-gray-600 file:mr-3 file:rounded-lg file:border-0 file:bg-black file:px-4 file:py-2 file:text-sm file:font-semibold file:text-white hover:file:bg-gray-800'
-                  />
-                  {deliverFile && (
-                    <p className='text-xs text-gray-600'>
-                      {deliverFile.name} ({(deliverFile.size / 1024 / 1024).toFixed(2)} MB)
+                  <div>
+                    <p className='mb-1 text-xs font-semibold text-gray-500'>
+                      Delivery ZIP (all formats)
                     </p>
-                  )}
+                    <input
+                      type='file'
+                      accept='.zip'
+                      onChange={(e) => setDeliverFile(e.target.files?.[0] || null)}
+                      className='block w-full text-sm text-gray-600 file:mr-3 file:rounded-lg file:border-0 file:bg-black file:px-4 file:py-2 file:text-sm file:font-semibold file:text-white hover:file:bg-gray-800'
+                    />
+                    {deliverFile && (
+                      <p className='mt-1 text-xs text-gray-600'>
+                        {deliverFile.name} ({(deliverFile.size / 1024 / 1024).toFixed(2)} MB)
+                      </p>
+                    )}
+                  </div>
+
+                  {/* Optional preview image — shown to the customer before download */}
+                  <div>
+                    <p className='mb-1 text-xs font-semibold text-gray-500'>
+                      Preview image (optional)
+                    </p>
+                    <input
+                      type='file'
+                      accept='image/*'
+                      onChange={(e) => setDeliverPreview(e.target.files?.[0] || null)}
+                      className='block w-full text-sm text-gray-600 file:mr-3 file:rounded-lg file:border-0 file:bg-gray-200 file:px-4 file:py-2 file:text-sm file:font-semibold file:text-gray-800 hover:file:bg-gray-300'
+                    />
+                    {deliverPreview && (
+                      <p className='mt-1 text-xs text-gray-600'>
+                        {deliverPreview.name} — the customer sees this on their
+                        order page before downloading.
+                      </p>
+                    )}
+                    {deliverOrder?.deliveryPreview?.url && !deliverPreview && (
+                      <p className='mt-1 text-xs text-gray-400'>
+                        A preview is already attached — upload a new one to replace it.
+                      </p>
+                    )}
+                  </div>
 
                   {/* Current file + verify download */}
                   {deliverOrder?.deliveryFiles?.length > 0 && (

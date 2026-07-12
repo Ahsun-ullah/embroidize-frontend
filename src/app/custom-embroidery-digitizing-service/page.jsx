@@ -1,6 +1,7 @@
 import CustomOrderForm from '@/components/Common/CustomOrderForm';
 import Footer from '@/components/user/HomePage/Footer';
 import Header from '@/components/user/HomePage/Header';
+import { getCustomOrderReviews } from '@/lib/apis/public/customOrderReviews';
 import Image from 'next/image';
 import Link from 'next/link';
 
@@ -174,7 +175,8 @@ function Testimonial({ quote, author, role }) {
   );
 }
 
-export default function CustomEmbroideryOrderPage() {
+export default async function CustomEmbroideryOrderPage() {
+  const orderReviews = await getCustomOrderReviews(15);
   return (
     <>
       <Header />
@@ -445,6 +447,47 @@ export default function CustomEmbroideryOrderPage() {
             </div>
           </div>
         </section>
+
+        {/* ── REAL CUSTOMER REVIEWS (latest 15) ── */}
+        {orderReviews.length > 0 && (
+          <section className='bg-slate-50 py-12 lg:py-16'>
+            <div className='mx-auto max-w-7xl px-4 sm:px-6 lg:px-8'>
+              <SectionTitle sub='Verified reviews from customers who ordered custom digitizing.'>
+                Recent Customer Reviews
+              </SectionTitle>
+              <div className='mt-10 grid gap-6 sm:grid-cols-2 lg:grid-cols-3'>
+                {orderReviews.map((r, i) => (
+                  <figure
+                    key={i}
+                    className='rounded-xl border-2 border-slate-200 bg-white p-6 shadow-md'
+                  >
+                    <div className='flex items-center gap-0.5'>
+                      {[1, 2, 3, 4, 5].map((n) => (
+                        <svg
+                          key={n}
+                          width={18}
+                          height={18}
+                          viewBox='0 0 24 24'
+                          fill={n <= r.rating ? '#F59E0B' : '#E5E7EB'}
+                        >
+                          <path d='M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z' />
+                        </svg>
+                      ))}
+                    </div>
+                    {r.comment && (
+                      <blockquote className='mt-3 text-base text-slate-800'>
+                        &ldquo;{r.comment}&rdquo;
+                      </blockquote>
+                    )}
+                    <figcaption className='mt-4 text-sm font-semibold text-slate-600'>
+                      — {r.name || 'Verified customer'}
+                    </figcaption>
+                  </figure>
+                ))}
+              </div>
+            </div>
+          </section>
+        )}
 
         {/* ── READY CTA ── */}
         <section className='bg-slate-50 py-12 lg:py-16'>

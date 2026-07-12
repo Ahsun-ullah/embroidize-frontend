@@ -1,6 +1,8 @@
 import BypassEmailsWrapper from '@/features/settings/BypassEmailsWrapper';
 import { getBypassEmails } from '@/lib/apis/protected/bypassEmails';
 
+export const dynamic = 'force-dynamic';
+
 export const metadata = {
   title: 'Registration Bypass Emails',
 };

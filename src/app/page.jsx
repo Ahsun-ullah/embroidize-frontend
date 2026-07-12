@@ -24,6 +24,7 @@ import {
 import Link from 'next/link';
 import { Suspense } from 'react';
 import ProductUpdates from './products/ProductUpdates';
+import PopularDesign from '@/components/user/HomePage/PopularDesign';
 // for dynamic data fetching and no caching
 export const dynamic = 'force-dynamic';
 export const fetchCache = 'force-no-store';
@@ -354,7 +355,7 @@ export default async function Home() {
 
       <BrowseCategories />
 
-      {/* <section
+      <section
         aria-labelledby='popular-designs-heading'
         className=' text-black mb-8 py-6'
       >
@@ -379,7 +380,7 @@ export default async function Home() {
             <GridSkeleton />
           )}
         </Suspense>
-      </section> */}
+      </section>
 
       {/* Most Favourited Designs Section */}
       {mostFavoritedProducts?.products?.length ? (

@@ -8,6 +8,7 @@ export default async function AllUsersListPage({ searchParams }) {
   const minDownloads = searchParams?.minDownloads || '';
   const startDate = searchParams?.startDate || '';
   const endDate = searchParams?.endDate || '';
+  const blocked = searchParams?.blocked === '1';
 
   // 2. Fetch data with filters
   const usersResponse = await getUsers(
@@ -17,6 +18,7 @@ export default async function AllUsersListPage({ searchParams }) {
     minDownloads,
     startDate,
     endDate,
+    blocked,
   );
   const { data: users, pagination } = usersResponse;
 
