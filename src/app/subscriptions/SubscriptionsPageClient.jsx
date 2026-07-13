@@ -220,7 +220,8 @@ const getStaticDefaults = (plan) => {
 export default function SubscriptionsPageClient({ siteConfig }) {
   // Admin-managed free-tier quota (from /public/site-config via the server
   // page). Fallback matches the backend's hardcoded default.
-  const freeLimit = siteConfig?.freeDownloadLimit ?? 5;
+  const freeLimit = siteConfig?.freeDownloadLimit;
+  console.log(siteConfig?.freeDownloadLimit);
   const freeWindow = windowPhrase(siteConfig?.freeDownloadWindow);
   const [plans, setPlans] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -450,7 +451,7 @@ export default function SubscriptionsPageClient({ siteConfig }) {
                     </div>
                     <div className='bg-gray-100 rounded-xl px-4 py-2 text-center min-w-[80px]'>
                       <div className='text-2xl font-bold text-black leading-none'>
-                        5
+                        {freeLimit}
                       </div>
                       <div className='text-[10px] text-gray-600 mt-1 leading-tight'>
                         Downloads
