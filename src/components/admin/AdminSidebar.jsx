@@ -368,6 +368,11 @@ export default function AdminSidebar({ isCollapsed, setIsCollapsed }) {
               icon: 'ri-arrow-left-right-line',
             },
             {
+              href: '/admin/settings/download-limits',
+              label: 'Download Limits',
+              icon: 'ri-download-2-line',
+            },
+            {
               label: 'Financial',
               icon: 'ri-lock-2-fill',
               items: [

@@ -30,6 +30,7 @@ export function useDownloadReset({ tickMs = 1000 } = {}) {
 
   const usedDownloads = userInfo?.usedDownloads ?? 0;
   const limit = userInfo?.downloadLimit ?? 0;
+  const downloadWindow = userInfo?.downloadWindow ?? '1d';
   const remaining =
     userInfo?.remainingDownloads ?? Math.max(0, limit - usedDownloads);
   const currentPlanName = userInfo?.subscription?.planId?.name ?? null;
@@ -58,6 +59,7 @@ export function useDownloadReset({ tickMs = 1000 } = {}) {
     isReady: now !== null,
     usedDownloads,
     limit,
+    downloadWindow,
     remaining,
     isLimitReached: limit > 0 && remaining <= 0,
     currentPlanName,

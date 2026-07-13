@@ -73,7 +73,19 @@ export default function MessageThread({
                         : 'bg-zinc-100 text-zinc-900'
                   }`}
                 >
-                  <p className='whitespace-pre-wrap break-words'>{m.body}</p>
+                  <p
+                    className={`whitespace-pre-wrap break-words ${
+                      mine
+                        ? dark
+                          ? 'text-zinc-500'
+                          : 'text-zinc-300'
+                        : dark
+                          ? 'text-zinc-400'
+                          : 'text-zinc-400'
+                    }`}
+                  >
+                    {m.body}
+                  </p>
                   <p
                     className={`mt-1 text-[10px] ${
                       mine
@@ -107,9 +119,7 @@ export default function MessageThread({
           <Button
             size='sm'
             className={
-              dark
-                ? 'bg-white font-medium text-black'
-                : 'bg-black text-white'
+              dark ? 'bg-white font-medium text-black' : 'bg-black text-white'
             }
             isLoading={sending}
             onPress={submit}

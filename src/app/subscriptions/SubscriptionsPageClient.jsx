@@ -4,6 +4,7 @@ import PurchaseButton from '@/components/Common/PurchaseButton';
 import { SuccessToast } from '@/components/Common/SuccessToast';
 import Footer from '@/components/user/HomePage/Footer';
 import Header from '@/components/user/HomePage/Header';
+import { windowPhrase } from '@/lib/apis/public/siteConfig';
 import { useUserInfoQuery } from '@/lib/redux/common/user/userInfoSlice';
 import { Divider } from '@heroui/divider';
 import { GiftIcon } from 'lucide-react';
@@ -216,7 +217,11 @@ const getStaticDefaults = (plan) => {
   };
 };
 
-export default function SubscriptionsPageClient() {
+export default function SubscriptionsPageClient({ siteConfig }) {
+  // Admin-managed free-tier quota (from /public/site-config via the server
+  // page). Fallback matches the backend's hardcoded default.
+  const freeLimit = siteConfig?.freeDownloadLimit ?? 5;
+  const freeWindow = windowPhrase(siteConfig?.freeDownloadWindow);
   const [plans, setPlans] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -463,7 +468,7 @@ export default function SubscriptionsPageClient() {
                   {/* Features list */}
                   <ul className='space-y-2.5 mb-6 flex-1'>
                     {[
-                      '5 Downloads per day',
+                      `${freeLimit} Downloads per ${freeWindow}`,
                       'Access For Life Time new designs',
                       'All Design Formats',
                       'Personal Use Only',

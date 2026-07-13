@@ -4,6 +4,7 @@ import ProductCard from '@/components/Common/ProductCard';
 import Footer from '@/components/user/HomePage/Footer';
 import Header from '@/components/user/HomePage/Header';
 import { getPopularProducts } from '@/lib/apis/public/products';
+import { getSiteConfig, windowPhrase } from '@/lib/apis/public/siteConfig';
 import Image from 'next/image';
 import Link from 'next/link';
 import { Suspense } from 'react';
@@ -71,10 +72,12 @@ const MACHINE_BRANDS = [
   'Melco commercial (EXP)',
 ];
 
-const FAQS = [
+// The first answer quotes the live free-tier quota (admin-managed), so the FAQ
+// and its JSON-LD are built per request instead of at module load.
+const buildFaqs = (freeLimit, freeWindow) => [
   {
     q: 'Are the machine embroidery designs on Embroidize really free?',
-    a: 'Yes. Every design is 100% free to download. No hidden fees, no subscription required, no designs locked behind a paywall. Create a free account and download as many designs as you need.',
+    a: `Yes. Every design in our free collection is 100% free to download — no hidden fees and no credit card required. Create a free account and download up to ${freeLimit} free designs per ${freeWindow}; your allowance resets automatically.`,
   },
   {
     q: 'Can I use Embroidize designs to sell embroidered products?',
@@ -99,15 +102,15 @@ const FAQS = [
 ];
 
 // FAQPage structured data for rich results
-const faqJsonLd = {
+const buildFaqJsonLd = (faqs) => ({
   '@context': 'https://schema.org',
   '@type': 'FAQPage',
-  mainEntity: FAQS.map(({ q, a }) => ({
+  mainEntity: faqs.map(({ q, a }) => ({
     '@type': 'Question',
     name: q,
     acceptedAnswer: { '@type': 'Answer', text: a },
   })),
-};
+});
 
 // Reusable check icon
 function CheckIcon({ className = 'w-5 h-5 mr-3 text-black' }) {
@@ -143,17 +146,23 @@ function GridSkeleton({ rows = 2, cols = 6 }) {
 }
 
 export default async function LandingPage() {
-  const popularProducts = await getPopularProducts('', 1, 12, {
-    cache: 'no-store',
-  });
+  const [popularProducts, siteConfig] = await Promise.all([
+    getPopularProducts('', 1, 12, { cache: 'no-store' }),
+    getSiteConfig(),
+  ]);
   const { products: allProducts } = popularProducts;
+
+  const faqs = buildFaqs(
+    siteConfig.freeDownloadLimit,
+    windowPhrase(siteConfig.freeDownloadWindow)
+  );
 
   return (
     <>
       {/* FAQ structured data */}
       <script
         type='application/ld+json'
-        dangerouslySetInnerHTML={{ __html: JSON.stringify(faqJsonLd) }}
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(buildFaqJsonLd(faqs)) }}
       />
 
       {/* Navbar + Categories menu (client component — owns the toggle state) */}
@@ -612,7 +621,7 @@ export default async function LandingPage() {
           </h2>
 
           <div className='space-y-4'>
-            {FAQS.map(({ q, a }) => (
+            {faqs.map(({ q, a }) => (
               <details
                 key={q}
                 className='group rounded-2xl border border-gray-200 bg-gray-50 px-6 py-4'

@@ -1,3 +1,4 @@
+import { getSiteConfig } from '@/lib/apis/public/siteConfig';
 import SubscriptionsPageClient from './SubscriptionsPageClient';
 
 // Metadata must live in a server component — the pricing UI is fully client
@@ -35,6 +36,10 @@ export const metadata = {
   },
 };
 
-export default function SubscriptionsPage() {
-  return <SubscriptionsPageClient />;
+export default async function SubscriptionsPage() {
+  // Admin-managed free-tier quota — keeps the static Free plan card's copy in
+  // sync with what the backend actually enforces.
+  const siteConfig = await getSiteConfig();
+
+  return <SubscriptionsPageClient siteConfig={siteConfig} />;
 }

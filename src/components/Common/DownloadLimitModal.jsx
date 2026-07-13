@@ -1,5 +1,6 @@
 'use client';
 
+import { windowPhrase } from '@/lib/apis/public/siteConfig';
 import { useDownloadReset } from '@/lib/hooks/useDownloadReset';
 import { formatResetCountdown, formatResetTime } from '@/utils/functions/page';
 import { Button } from '@heroui/react';
@@ -21,8 +22,25 @@ function DownloadLimitModal({ limitModalData = {}, onClose, formatDuration }) {
   const [isUpgrading, setIsUpgrading] = useState(false);
   const [barReady, setBarReady] = useState(false);
 
-  const { usedDownloads, limit, msLeft, nextResetTime, currentPlanName } =
-    useDownloadReset({ tickMs: 60_000 });
+  const {
+    usedDownloads,
+    limit,
+    downloadWindow,
+    msLeft,
+    nextResetTime,
+    currentPlanName,
+  } = useDownloadReset({ tickMs: 60_000 });
+
+  // "1d" (the default) keeps the original "24 hours" phrasing — it's a rolling
+  // window, not a calendar day. Other windows read naturally: "2 days", "week".
+  const windowEvery =
+    windowPhrase(downloadWindow) === 'day'
+      ? '24 hours'
+      : windowPhrase(downloadWindow);
+  // Adjective form for "this … window": "24-hour", "2-day", "week-long".
+  const windowAdj = windowEvery.includes(' ')
+    ? windowEvery.replace(' ', '-').replace(/s$/, '')
+    : `${windowEvery}-long`;
 
   // Upgrade tiers are pulled live from the real subscription plans so they never
   // drift from what's actually offered. Recurring plans only.
@@ -62,7 +80,7 @@ function DownloadLimitModal({ limitModalData = {}, onClose, formatDuration }) {
   const subtitle = isPeriod
     ? `You've used all ${total} downloads for this billing period.`
     : isFree
-      ? `You've used all ${total} free download${total === 1 ? '' : 's'} for this 24-hour window. They all reset together when the timer below ends.`
+      ? `You've used all ${total} free download${total === 1 ? '' : 's'} for this ${windowAdj} window. They all reset together when the timer below ends.`
       : `You've used all ${total} download${total === 1 ? '' : 's'} available today. Your limit will reset automatically.`;
 
   useEffect(() => {
@@ -350,7 +368,7 @@ function DownloadLimitModal({ limitModalData = {}, onClose, formatDuration }) {
               <span>
                 Free Plan:{' '}
                 <span className='font-semibold text-neutral-700 dark:text-neutral-200'>
-                  {limit} download{limit === 1 ? '' : 's'} every 24 hours
+                  {limit} download{limit === 1 ? '' : 's'} every {windowEvery}
                 </span>
               </span>
             ) : limitModalData?.duration && formatDuration ? (
