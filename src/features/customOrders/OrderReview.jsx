@@ -3,8 +3,11 @@
 import { ErrorToast } from '@/components/Common/ErrorToast';
 import { SuccessToast } from '@/components/Common/SuccessToast';
 import { Button, Textarea } from '@heroui/react';
-import { useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { submitReview } from './ordersApi';
+
+const IMAGE_TYPES = ['image/jpeg', 'image/png', 'image/gif', 'image/webp'];
+const MAX_IMAGE_MB = 10;
 
 // HeroUI Textarea restyled for dark surfaces.
 const DARK_TEXTAREA = {
@@ -58,7 +61,47 @@ export default function OrderReview({
   const [review, setReview] = useState(initialReview || null);
   const [rating, setRating] = useState(0);
   const [comment, setComment] = useState('');
+  const [image, setImage] = useState(null);
+  const [imagePreview, setImagePreview] = useState(null);
   const [saving, setSaving] = useState(false);
+  const fileInputRef = useRef(null);
+
+  // Object URLs must be released or they leak for the tab's lifetime.
+  useEffect(() => {
+    return () => {
+      if (imagePreview) URL.revokeObjectURL(imagePreview);
+    };
+  }, [imagePreview]);
+
+  const handlePickImage = (e) => {
+    const file = e.target.files?.[0];
+    // Allow re-selecting the same file after removing it.
+    e.target.value = '';
+    if (!file) return;
+    if (!IMAGE_TYPES.includes(file.type)) {
+      ErrorToast(
+        'Unsupported file',
+        'Please attach a JPG, PNG, GIF or WebP image.',
+        4000,
+      );
+      return;
+    }
+    if (file.size > MAX_IMAGE_MB * 1024 * 1024) {
+      ErrorToast(
+        'File too large',
+        `Please keep the image under ${MAX_IMAGE_MB} MB.`,
+        4000,
+      );
+      return;
+    }
+    setImage(file);
+    setImagePreview(URL.createObjectURL(file));
+  };
+
+  const removeImage = () => {
+    setImage(null);
+    setImagePreview(null);
+  };
 
   const handleSubmit = async () => {
     if (!rating) {
@@ -67,7 +110,7 @@ export default function OrderReview({
     }
     setSaving(true);
     try {
-      const saved = await submitReview(orderId, rating, comment.trim());
+      const saved = await submitReview(orderId, rating, comment.trim(), image);
       setReview(saved);
       SuccessToast('Thank you!', 'Your review has been submitted.', 4000);
       // Submitting closes the order — refresh so the new status shows.
@@ -91,6 +134,17 @@ export default function OrderReview({
           {review.comment}
         </p>
       )}
+      {review.image?.url && (
+        <a href={review.image.url} target='_blank' rel='noopener noreferrer'>
+          <img
+            src={review.image.url}
+            alt='Review photo'
+            className={`mt-1 max-h-40 w-auto rounded-lg border object-cover ${
+              dark ? 'border-white/10' : 'border-zinc-200'
+            }`}
+          />
+        </a>
+      )}
       <p className={`text-xs ${dark ? 'text-zinc-500' : 'text-zinc-400'}`}>
         Thanks for your feedback — it helps other customers.
       </p>
@@ -98,6 +152,61 @@ export default function OrderReview({
   ) : (
     <div className='flex flex-col gap-3'>
       <Stars value={rating} onChange={setRating} dark={dark} />
+      <input
+        ref={fileInputRef}
+        type='file'
+        accept={IMAGE_TYPES.join(',')}
+        className='hidden'
+        onChange={handlePickImage}
+      />
+      {imagePreview ? (
+        <div className='flex items-start gap-3'>
+          <img
+            src={imagePreview}
+            alt='Selected review photo'
+            className={`max-h-32 w-auto rounded-lg border object-cover ${
+              dark ? 'border-white/10' : 'border-zinc-200'
+            }`}
+          />
+          <button
+            type='button'
+            onClick={removeImage}
+            className={`text-xs underline ${
+              dark
+                ? 'text-zinc-400 hover:text-white'
+                : 'text-zinc-500 hover:text-black'
+            }`}
+          >
+            Remove
+          </button>
+        </div>
+      ) : (
+        <button
+          type='button'
+          onClick={() => fileInputRef.current?.click()}
+          className={`flex w-fit items-center gap-2 rounded-lg border border-dashed px-3 py-2 text-xs ${
+            dark
+              ? 'border-white/20 text-zinc-400 hover:border-white/40 hover:text-white'
+              : 'border-zinc-300 text-zinc-500 hover:border-zinc-500 hover:text-black'
+          }`}
+        >
+          <svg
+            width={16}
+            height={16}
+            viewBox='0 0 24 24'
+            fill='none'
+            stroke='currentColor'
+            strokeWidth={2}
+            strokeLinecap='round'
+            strokeLinejoin='round'
+          >
+            <rect x='3' y='3' width='18' height='18' rx='2' />
+            <circle cx='8.5' cy='8.5' r='1.5' />
+            <path d='m21 15-5-5L5 21' />
+          </svg>
+          Add a photo (optional)
+        </button>
+      )}
       <Textarea
         minRows={3}
         maxRows={6}
@@ -106,6 +215,7 @@ export default function OrderReview({
         onValueChange={setComment}
         classNames={dark ? DARK_TEXTAREA : undefined}
       />
+
       <div className='flex justify-end'>
         <Button
           size='sm'

@@ -32,10 +32,10 @@ export default function OrderMessages({
     load();
   }, [load]);
 
-  const handleSend = async (body) => {
+  const handleSend = async (body, image) => {
     setSending(true);
     try {
-      const msg = await sendOrderMessage(orderId, body);
+      const msg = await sendOrderMessage(orderId, body, image);
       setMessages((prev) => [...prev, msg]);
     } catch (err) {
       ErrorToast('Could not send', err.message, 4000);

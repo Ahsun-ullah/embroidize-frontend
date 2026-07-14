@@ -1,12 +1,6 @@
 'use client';
 
-// Compact progress stepper for a custom order's lifecycle, shown at the top of
-// the customer's order page. Deliberately short: a thin connector line, small
-// markers and tiny labels — no large card chrome. Timestamps live in the order
-// details panel, so they are intentionally left off here to keep it slim.
-// Pass `dark` when rendering on a dark surface (checkout page).
-
-const STEPS = [
+const BASE_STEPS = [
   { key: 'submitted', label: 'Submitted' },
   { key: 'quoted', label: 'Quoted' },
   { key: 'paid', label: 'Paid' },
@@ -15,24 +9,35 @@ const STEPS = [
   { key: 'completed', label: 'Completed' },
 ];
 
-// How far along the six steps each status has reached (index into STEPS).
-const STATUS_LEVEL = {
-  pending_review: 0, // submitted, awaiting quote
-  awaiting_payment: 1, // quoted
-  paid: 2,
-  in_progress: 3,
-  delivered: 4,
-  in_revision: 4, // files delivered; a revision is underway
-  completed: 5,
-  cancelled: -1,
-  expired: -1,
+// Which step each status sits on.
+const STATUS_STEP = {
+  pending_review: 'submitted',
+  awaiting_payment: 'quoted',
+  paid: 'paid',
+  in_progress: 'in_progress',
+  delivered: 'delivered',
+  in_revision: 'in_revision',
+  completed: 'completed',
 };
 
 export default function OrderTimeline({ order, dark = false }) {
   const status = order?.status;
   if (!status) return null;
 
-  // Cancelled / expired orders don't follow the happy path — show a short note
+  // "In revision" comes AFTER "Delivered" (a revision happens on a delivered
+  // design, so Delivered stays checked) and only appears at all when the
+  // order actually has revisions — most orders keep the clean 6-step story.
+  const revisionsUsed =
+    order?.revisionsUsed ?? order?.revisions?.length ?? 0;
+  const STEPS =
+    status === 'in_revision' || revisionsUsed > 0
+      ? [
+          ...BASE_STEPS.slice(0, 5),
+          { key: 'in_revision', label: 'In revision' },
+          BASE_STEPS[5],
+        ]
+      : BASE_STEPS;
+
   // instead of a misleading half-finished stepper.
   if (status === 'cancelled' || status === 'expired') {
     return (
@@ -46,7 +51,10 @@ export default function OrderTimeline({ order, dark = false }) {
     );
   }
 
-  const level = STATUS_LEVEL[status] ?? 0;
+  const level = Math.max(
+    0,
+    STEPS.findIndex((s) => s.key === STATUS_STEP[status]),
+  );
   const pct = STEPS.length > 1 ? (level / (STEPS.length - 1)) * 100 : 0;
   const current = STEPS[Math.min(level, STEPS.length - 1)];
 

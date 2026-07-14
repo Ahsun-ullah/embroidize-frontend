@@ -479,6 +479,14 @@ export default async function CustomEmbroideryOrderPage() {
                         &ldquo;{r.comment}&rdquo;
                       </blockquote>
                     )}
+                    {r.image?.url && (
+                      <img
+                        src={r.image.url}
+                        alt={`Photo shared by ${r.name || 'a customer'}`}
+                        loading='lazy'
+                        className='mt-3 max-h-48 w-auto rounded-lg border border-slate-200 object-cover'
+                      />
+                    )}
                     <figcaption className='mt-4 text-sm font-semibold text-slate-600'>
                       — {r.name || 'Verified customer'}
                     </figcaption>

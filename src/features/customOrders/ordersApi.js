@@ -51,11 +51,17 @@ export async function fetchOrder(orderId) {
   return { ...data.order, myReview: data.myReview || null };
 }
 
-export async function submitReview(orderId, rating, comment) {
+export async function submitReview(orderId, rating, comment, imageFile) {
+  // Multipart (not JSON) so an optional photo can ride along; the backend
+  // parses the fields with multer either way.
+  const form = new FormData();
+  form.append('rating', rating);
+  form.append('comment', comment);
+  if (imageFile) form.append('image', imageFile);
   const res = await fetch(`${API}/public/orders/custom/${orderId}/review`, {
     method: 'POST',
-    headers: { 'Content-Type': 'application/json', ...orderAuthHeaders() },
-    body: JSON.stringify({ rating, comment }),
+    headers: orderAuthHeaders(),
+    body: form,
   });
   return (await parse(res)).data.review;
 }
@@ -103,11 +109,16 @@ export async function fetchOrderMessages(orderId) {
   return (await parse(res)).data.messages || [];
 }
 
-export async function sendOrderMessage(orderId, body) {
+export async function sendOrderMessage(orderId, body, imageFile) {
+  // Multipart (not JSON) so an optional photo can ride along; the backend
+  // parses the fields with multer either way.
+  const form = new FormData();
+  form.append('body', body);
+  if (imageFile) form.append('image', imageFile);
   const res = await fetch(`${API}/public/orders/custom/${orderId}/messages`, {
     method: 'POST',
-    headers: { 'Content-Type': 'application/json', ...orderAuthHeaders() },
-    body: JSON.stringify({ body }),
+    headers: orderAuthHeaders(),
+    body: form,
   });
   return (await parse(res)).data.message;
 }

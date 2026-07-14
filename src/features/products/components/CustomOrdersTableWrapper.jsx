@@ -29,6 +29,7 @@ import {
   useDisclosure,
 } from '@heroui/react';
 import {
+  Banknote,
   Copy,
   CreditCard,
   Download,
@@ -222,6 +223,19 @@ export default function CustomOrdersTableWrapper({
   const [payReqNote, setPayReqNote] = useState('');
   const [payReqUrl, setPayReqUrl] = useState('');
   const [isPayRequesting, setIsPayRequesting] = useState(false);
+
+  // Record off-platform payment (PayPal/Etsy/bank/…) modal — money that
+  // arrived outside Stripe gets logged into the order's payment ledger.
+  const {
+    isOpen: isRecPayOpen,
+    onOpen: onRecPayOpen,
+    onOpenChange: onRecPayChange,
+  } = useDisclosure();
+  const [recPayOrder, setRecPayOrder] = useState(null);
+  const [recPayAmount, setRecPayAmount] = useState('');
+  const [recPayChannel, setRecPayChannel] = useState('');
+  const [recPayNote, setRecPayNote] = useState('');
+  const [isRecordingPay, setIsRecordingPay] = useState(false);
 
   // Message thread modal
   const {
@@ -457,10 +471,38 @@ export default function CustomOrdersTableWrapper({
       if (!res.ok) throw new Error(result.message || 'Failed to create payment link');
       setPayReqUrl(result?.data?.url || '');
       SuccessToast('Success', result?.message || 'Payment link created.', 5000);
+      // The request also appears as a "balance due" on the customer's order
+      // page — refresh so the table row picks up the new duePayment.
+      startTransition(() => {
+        router.refresh();
+      });
     } catch (err) {
       ErrorToast('Error', err.message || 'Failed to create payment link', 4000);
     } finally {
       setIsPayRequesting(false);
+    }
+  };
+
+  const cancelPayRequest = async () => {
+    if (!payReqOrder) return;
+    try {
+      const res = await fetch(
+        `${apiBase()}/admin/orders/custom/${payReqOrder._id}/payment-request`,
+        { method: 'DELETE', headers: adminHeaders(false) },
+      );
+      const result = await res.json();
+      if (!res.ok) throw new Error(result.message || 'Failed to cancel request');
+      SuccessToast(
+        'Cancelled',
+        'Payment request cleared from the customer page.',
+        3000,
+      );
+      setPayReqOrder({ ...payReqOrder, duePayment: null });
+      startTransition(() => {
+        router.refresh();
+      });
+    } catch (err) {
+      ErrorToast('Error', err.message || 'Failed to cancel request', 4000);
     }
   };
 
@@ -470,6 +512,56 @@ export default function CustomOrdersTableWrapper({
       SuccessToast('Copied', 'Payment link copied to clipboard', 2500);
     } catch {
       ErrorToast('Error', 'Copy failed — select and copy the link manually', 3000);
+    }
+  };
+
+  const handleRecordPayment = (order) => {
+    setRecPayOrder(order);
+    setRecPayAmount('');
+    setRecPayChannel(order.paymentChannel || '');
+    setRecPayNote('');
+    onRecPayOpen();
+  };
+
+  const submitRecordPayment = async (onClose) => {
+    const amount = parseFloat(recPayAmount);
+    if (!recPayOrder || isNaN(amount) || amount <= 0) {
+      ErrorToast('Error', 'Enter a valid positive amount', 3000);
+      return;
+    }
+    if (!recPayChannel.trim()) {
+      ErrorToast(
+        'Error',
+        'Enter the payment channel (e.g. "PayPal – saklain", "Etsy")',
+        3000,
+      );
+      return;
+    }
+    setIsRecordingPay(true);
+    try {
+      const res = await fetch(
+        `${apiBase()}/admin/orders/custom/${recPayOrder._id}/record-payment`,
+        {
+          method: 'POST',
+          headers: adminHeaders(),
+          body: JSON.stringify({
+            amount,
+            channel: recPayChannel.trim(),
+            note: recPayNote.trim() || undefined,
+          }),
+        },
+      );
+      const result = await res.json();
+      if (!res.ok) throw new Error(result.message || 'Failed to record payment');
+      SuccessToast('Success', result?.message || 'Payment recorded.', 6000);
+      onClose?.();
+      startTransition(() => {
+        router.refresh();
+      });
+    } catch (err) {
+      ErrorToast('Error', err.message || 'Failed to record payment', 4000);
+    } finally {
+      setIsRecordingPay(false);
     }
   };
 
@@ -493,16 +585,20 @@ export default function CustomOrdersTableWrapper({
     }
   };
 
-  const sendAdminMessage = async (body) => {
+  const sendAdminMessage = async (body, image) => {
     if (!messagesOrder) return;
     setSendingMessage(true);
     try {
+      // Multipart (not JSON) so an optional photo can ride along.
+      const form = new FormData();
+      form.append('message', body);
+      if (image) form.append('image', image);
       const res = await fetch(
         `${apiBase()}/admin/orders/custom/${messagesOrder._id}/messages`,
         {
           method: 'POST',
-          headers: adminHeaders(),
-          body: JSON.stringify({ message: body }),
+          headers: adminHeaders(false),
+          body: form,
         },
       );
       const result = await res.json();
@@ -1033,6 +1129,15 @@ export default function CustomOrdersTableWrapper({
                   onClick={() => handlePayRequest(order)}
                 >
                   Request Payment (Stripe Link)
+                </DropdownItem>
+              ) : null}
+              {canRequestPayment ? (
+                <DropdownItem
+                  key='record-payment'
+                  startContent={<Banknote size={16} />}
+                  onClick={() => handleRecordPayment(order)}
+                >
+                  Record Payment (PayPal / Manual)
                 </DropdownItem>
               ) : null}
               {canDeliver ? (
@@ -1584,7 +1689,51 @@ export default function CustomOrdersTableWrapper({
                             value={viewOrder.revisions.length}
                           />
                         )}
+                        {Number(viewOrder?.amountPaid) > 0 && (
+                          <DetailRow
+                            label='Total Collected'
+                            value={`$${Number(viewOrder.amountPaid).toFixed(2)}`}
+                          />
+                        )}
                       </div>
+                      {viewOrder?.payments?.length > 0 && (
+                        <div className='mt-3'>
+                          <p className='text-xs font-semibold text-gray-400 uppercase tracking-wide mb-2'>
+                            Payment History
+                          </p>
+                          <div className='space-y-2'>
+                            {viewOrder.payments.map((p, i) => (
+                              <div
+                                key={i}
+                                className='flex items-start justify-between gap-3 rounded-lg bg-gray-50 dark:bg-gray-900 p-3 text-sm'
+                              >
+                                <div>
+                                  <p className='font-semibold'>
+                                    ${Number(p.amount).toFixed(2)}
+                                    <span className='ml-2 font-normal text-gray-600'>
+                                      via {p.channel || 'Unknown'}
+                                    </span>
+                                  </p>
+                                  {p.note && (
+                                    <p className='mt-0.5 text-xs text-gray-500'>
+                                      {p.note}
+                                    </p>
+                                  )}
+                                </div>
+                                <p className='shrink-0 text-right text-xs text-gray-400'>
+                                  {new Date(p.at).toLocaleString()}
+                                  <br />
+                                  {p.recordedBy === 'webhook'
+                                    ? 'Stripe webhook'
+                                    : p.recordedBy === 'system'
+                                      ? 'Backfilled'
+                                      : 'Recorded by admin'}
+                                </p>
+                              </div>
+                            ))}
+                          </div>
+                        </div>
+                      )}
                       {viewOrder?.revisions?.length > 0 && (
                         <div className='mt-3 space-y-2'>
                           {viewOrder.revisions.map((r, i) => (
@@ -1833,6 +1982,16 @@ export default function CustomOrdersTableWrapper({
                       </SelectItem>
                     ))}
                   </Select>
+                  {newStatus === 'paid' && (
+                    <p className='rounded-lg bg-amber-50 px-3 py-2 text-xs text-amber-700 dark:bg-amber-900/20 dark:text-amber-400'>
+                      Received money? Use{' '}
+                      <strong>Record Payment (PayPal / Manual)</strong> from the
+                      actions menu instead — it logs the amount into the payment
+                      history (so it counts in income stats) and keeps the
+                      download button visible on delivered orders. Setting
+                      &ldquo;Paid&rdquo; here only changes the label.
+                    </p>
+                  )}
                   <Input
                     type='number'
                     label='Estimated Price (Optional)'
@@ -1964,6 +2123,27 @@ export default function CustomOrdersTableWrapper({
 
                   {!payReqUrl ? (
                     <>
+                      {Number(payReqOrder?.duePayment?.amount) > 0 && (
+                        <div className='flex items-center justify-between gap-3 rounded-lg bg-amber-50 px-3 py-2 dark:bg-amber-900/20'>
+                          <p className='text-xs text-amber-700 dark:text-amber-400'>
+                            Pending request:{' '}
+                            <strong>
+                              $
+                              {Number(payReqOrder.duePayment.amount).toFixed(2)}
+                            </strong>{' '}
+                            — shown as &ldquo;balance due&rdquo; on the
+                            customer&apos;s order page. Creating a new one
+                            replaces it.
+                          </p>
+                          <Button
+                            size='sm'
+                            variant='light'
+                            onPress={cancelPayRequest}
+                          >
+                            Clear
+                          </Button>
+                        </div>
+                      )}
                       <Input
                         type='number'
                         label='Amount (USD)'
@@ -1982,9 +2162,12 @@ export default function CustomOrdersTableWrapper({
                       />
                       <p className='text-xs text-gray-500'>
                         Creates a direct Stripe checkout link — the customer just
-                        clicks and pays, no order page needed. The link is emailed
-                        to them automatically and shown here to copy. The order
-                        status doesn&apos;t change until Stripe confirms payment.
+                        clicks and pays. The link is emailed to them
+                        automatically, shown here to copy, AND the amount appears
+                        as a &ldquo;balance due&rdquo; with a pay button on their
+                        order page. The order status doesn&apos;t change until
+                        Stripe confirms payment, so delivered files stay
+                        downloadable.
                       </p>
                     </>
                   ) : (
@@ -2027,6 +2210,83 @@ export default function CustomOrdersTableWrapper({
                     Copy Link
                   </Button>
                 )}
+              </ModalFooter>
+            </>
+          )}
+        </ModalContent>
+      </Modal>
+
+      {/* ─── Record Off-Platform Payment (PayPal / manual) Modal ─── */}
+      <Modal
+        isOpen={isRecPayOpen}
+        onOpenChange={onRecPayChange}
+        backdrop='blur'
+      >
+        <ModalContent>
+          {(onClose) => (
+            <>
+              <ModalHeader>
+                <div className='flex items-center gap-2'>
+                  <Banknote size={20} />
+                  Record Payment (PayPal / Manual)
+                </div>
+              </ModalHeader>
+              <ModalBody>
+                <div className='space-y-4'>
+                  <div className='bg-gray-50 dark:bg-gray-900 p-3 rounded-lg'>
+                    <p className='font-semibold'>{recPayOrder?.name}</p>
+                    <p className='text-sm text-gray-600'>{recPayOrder?.email}</p>
+                    <p className='text-xs font-mono text-gray-500 mt-1'>
+                      Order: {recPayOrder?.orderNumber}
+                      {Number(recPayOrder?.amountPaid) > 0 &&
+                        ` · collected so far: $${Number(recPayOrder.amountPaid).toFixed(2)}`}
+                    </p>
+                  </div>
+                  <Input
+                    type='number'
+                    label='Amount received (USD)'
+                    placeholder='e.g. 5'
+                    value={recPayAmount}
+                    onChange={(e) => setRecPayAmount(e.target.value)}
+                    startContent={<span className='text-sm'>$</span>}
+                    autoFocus
+                  />
+                  <Input
+                    label='Payment channel'
+                    placeholder='e.g. PayPal – saklain, Etsy, Bank transfer'
+                    value={recPayChannel}
+                    onChange={(e) => setRecPayChannel(e.target.value)}
+                  />
+                  <Textarea
+                    label='Note (optional)'
+                    placeholder='e.g. Paid revision fee — 3rd revision'
+                    value={recPayNote}
+                    onChange={(e) => setRecPayNote(e.target.value)}
+                    maxRows={3}
+                  />
+                  <p className='text-xs text-gray-500'>
+                    Use this when money arrived OUTSIDE Stripe (PayPal, Etsy,
+                    bank). It adds the amount to the order&apos;s payment
+                    history and total — so revision income shows up in your
+                    stats — and sets the right status automatically: an
+                    already-delivered order moves to{' '}
+                    <strong>In Revision</strong> (the customer keeps the
+                    download button). Stripe-link payments do all this on their
+                    own — don&apos;t record those here.
+                  </p>
+                </div>
+              </ModalBody>
+              <ModalFooter>
+                <Button variant='light' onPress={onClose}>
+                  Cancel
+                </Button>
+                <Button
+                  color='primary'
+                  isLoading={isRecordingPay}
+                  onPress={() => submitRecordPayment(onClose)}
+                >
+                  Record Payment
+                </Button>
               </ModalFooter>
             </>
           )}
