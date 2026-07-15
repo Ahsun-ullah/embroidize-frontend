@@ -2,6 +2,7 @@
 
 import { getFinanceToken } from '@/lib/financeLock';
 import {
+  Button,
   Card,
   CardBody,
   Input,
@@ -13,8 +14,13 @@ import {
   TableHeader,
   TableRow,
 } from '@heroui/react';
-import { Wallet } from 'lucide-react';
+import { Download, FileText, Wallet } from 'lucide-react';
 import { useState } from 'react';
+import {
+  openStatementShell,
+  renderStatement,
+  renderStatementError,
+} from '@/features/admin/statement';
 
 // Income reconciliation: shows how much was collected per payment channel
 // (the structured `paymentChannel` on each priced order, with a legacy fallback
@@ -96,6 +102,115 @@ export function PaypalSummaryClient({ summary }) {
   const [loading, setLoading] = useState(false);
   const [activePreset, setActivePreset] = useState('all');
   const [range, setRange] = useState({ startDate: '', endDate: '' });
+  const [exporting, setExporting] = useState(false);
+  const [buildingStatement, setBuildingStatement] = useState(false);
+
+  const periodLabel = () => {
+    if (!range.startDate && !range.endDate) return 'All time';
+    const f = (d) =>
+      new Date(d).toLocaleDateString('en-US', {
+        year: 'numeric',
+        month: 'short',
+        day: 'numeric',
+      });
+    return `${range.startDate ? f(range.startDate) : 'Start'} – ${range.endDate ? f(range.endDate) : 'Today'}`;
+  };
+
+  // Printable income statement for the selected range. The window opens
+  // synchronously in the click gesture (opening after the awaited fetch gets
+  // popup-blocked), then the statement renders into it.
+  const showStatement = async () => {
+    const shell = openStatementShell();
+    if (!shell) {
+      console.error('Statement popup blocked — allow popups for this site.');
+      return;
+    }
+    setBuildingStatement(true);
+    try {
+      const url = new URL(`${apiBase()}/admin/orders/custom/statement`);
+      if (range.startDate) url.searchParams.set('startDate', range.startDate);
+      if (range.endDate) url.searchParams.set('endDate', range.endDate);
+      const res = await fetch(url.toString(), { headers: authHeaders() });
+      const result = await res.json();
+      if (!res.ok) throw new Error(result.message || 'Failed to build statement');
+      const { rows = [], summary = {}, byChannel = [] } = result.data || {};
+      renderStatement(shell, {
+        title: 'Custom Orders Statement',
+        periodLabel: periodLabel(),
+        columns: [
+          { key: 'date', label: 'Date' },
+          { key: 'orderNumber', label: 'Order' },
+          { key: 'customer', label: 'Customer' },
+          { key: 'channel', label: 'Channel' },
+          { key: 'note', label: 'Note' },
+          { key: 'amount', label: 'Amount', align: 'right' },
+        ],
+        rows,
+        totals: [
+          {
+            label: `Payments in (${summary.count ?? 0} transactions)`,
+            value: `$${Number(summary.gross || 0).toFixed(2)}`,
+          },
+          {
+            label: 'Refunds',
+            value: `−$${Number(summary.refunds || 0).toFixed(2)}`,
+          },
+          {
+            label: 'Net collected',
+            value: `$${Number(summary.net || 0).toFixed(2)}`,
+            strong: true,
+          },
+        ],
+        sections: [
+          {
+            heading: 'Net by channel',
+            columns: [
+              { key: 'name', label: 'Channel' },
+              { key: 'net', label: 'Net', align: 'right', format: 'money' },
+            ],
+            rows: byChannel,
+          },
+        ],
+      });
+    } catch (err) {
+      renderStatementError(shell, err.message);
+      console.error('Statement failed:', err);
+    } finally {
+      setBuildingStatement(false);
+    }
+  };
+
+  // Bookkeeping CSV for the currently selected range (one row per payment;
+  // refunds appear as negative amounts). Same shaping as the panel's totals.
+  const exportCsv = async () => {
+    setExporting(true);
+    try {
+      const url = new URL(`${apiBase()}/admin/orders/custom/payments-export`);
+      if (range.startDate) url.searchParams.set('startDate', range.startDate);
+      if (range.endDate) url.searchParams.set('endDate', range.endDate);
+      const res = await fetch(url.toString(), { headers: authHeaders() });
+      if (!res.ok) {
+        const body = await res.json().catch(() => ({}));
+        throw new Error(body.message || 'Export failed');
+      }
+      const disposition = res.headers.get('Content-Disposition') || '';
+      const match = disposition.match(/filename="?([^";]+)"?/i);
+      const filename = match?.[1] || 'embroidize-custom-order-payments.csv';
+      const blob = await res.blob();
+      const blobUrl = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = blobUrl;
+      a.download = filename;
+      document.body.appendChild(a);
+      a.click();
+      a.remove();
+      URL.revokeObjectURL(blobUrl);
+    } catch (err) {
+      console.error('Payments CSV export failed:', err);
+    } finally {
+      setExporting(false);
+    }
+  };
 
   const accounts = data?.accounts || [];
   const grandTotal = data?.grandTotal || 0;
@@ -198,6 +313,24 @@ export function PaypalSummaryClient({ summary }) {
               value={range.endDate}
               onChange={(e) => onManualDate('endDate', e.target.value)}
             />
+            <Button
+              size='sm'
+              variant='flat'
+              isLoading={exporting}
+              startContent={!exporting && <Download size={14} />}
+              onPress={exportCsv}
+            >
+              Export CSV
+            </Button>
+            <Button
+              size='sm'
+              variant='flat'
+              isLoading={buildingStatement}
+              startContent={!buildingStatement && <FileText size={14} />}
+              onPress={showStatement}
+            >
+              Statement
+            </Button>
             {loading && <Spinner size='sm' />}
           </div>
         </div>

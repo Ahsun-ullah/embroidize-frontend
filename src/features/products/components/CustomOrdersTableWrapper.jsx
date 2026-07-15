@@ -4,6 +4,7 @@ import { ErrorToast } from '@/components/Common/ErrorToast';
 import { SuccessToast } from '@/components/Common/SuccessToast';
 import {
   Button,
+  Checkbox,
   Chip,
   Divider,
   Dropdown,
@@ -43,6 +44,7 @@ import {
   Search,
   Send,
   Trash2,
+  Undo2,
   Upload,
 } from 'lucide-react';
 import MessageThread from '@/features/customOrders/MessageThread';
@@ -122,10 +124,55 @@ function getFinanceToken() {
   return c ? c.split('=').slice(1).join('=') : undefined;
 }
 
+// Promised turnaround in hours, keyed by the order form's options. Used only
+// for the admin-side "overdue" hint — customers never see these chips.
+const TURNAROUND_HOURS = {
+  'Rush (2–4h)': 4,
+  'Standard (4–8h)': 8,
+  'Next Day': 24,
+};
+// Mirrors EXPIRE_AFTER_DAYS in the backend lifecycle cron.
+const QUOTE_EXPIRES_AFTER_DAYS = 7;
+
+const hoursSince = (d) => (Date.now() - new Date(d).getTime()) / 36e5;
+const fmtWait = (h) => (h < 48 ? `${Math.round(h)}h` : `${Math.round(h / 24)}d`);
+
+// Returns an "admin is late" hint for a row, or null when on track:
+// pending_review = customer waiting on a quote; paid/in_progress = work
+// overdue vs the promised turnaround; in_revision = revision waiting.
+function agingInfo(order) {
+  if (order.status === 'pending_review') {
+    const h = hoursSince(order.createdAt);
+    return h >= 4 ? `Quote due · waiting ${fmtWait(h)}` : null;
+  }
+  if (['paid', 'in_progress'].includes(order.status)) {
+    const limit = order.rushOrder
+      ? 4
+      : TURNAROUND_HOURS[order.turnaround] || 24;
+    const h = hoursSince(order.paidAt || order.updatedAt || order.createdAt);
+    return h > limit ? `Overdue · waiting ${fmtWait(h)}` : null;
+  }
+  if (order.status === 'in_revision' && order.revisions?.length) {
+    const h = hoursSince(order.revisions[order.revisions.length - 1].requestedAt);
+    return h > 24 ? `Revision waiting ${fmtWait(h)}` : null;
+  }
+  return null;
+}
+
+// Days until an unpaid quote auto-expires (matches the lifecycle cron).
+function quoteExpiryDays(order) {
+  if (order.status !== 'awaiting_payment' || !order.quotedAt) return null;
+  const expiresAt =
+    new Date(order.quotedAt).getTime() +
+    QUOTE_EXPIRES_AFTER_DAYS * 24 * 36e5;
+  return Math.ceil((expiresAt - Date.now()) / (24 * 36e5));
+}
+
 export default function CustomOrdersTableWrapper({
   initialData,
   pagination,
   columns,
+  needsActionCount = 0,
 }) {
   const router = useRouter();
   const searchParams = useSearchParams();
@@ -236,6 +283,20 @@ export default function CustomOrdersTableWrapper({
   const [recPayChannel, setRecPayChannel] = useState('');
   const [recPayNote, setRecPayNote] = useState('');
   const [isRecordingPay, setIsRecordingPay] = useState(false);
+
+  // Record refund modal — negative ledger entry; the actual refund happens in
+  // Stripe/PayPal first, this keeps income numbers honest.
+  const {
+    isOpen: isRefundOpen,
+    onOpen: onRefundOpen,
+    onOpenChange: onRefundChange,
+  } = useDisclosure();
+  const [refundOrder, setRefundOrder] = useState(null);
+  const [refundAmount, setRefundAmount] = useState('');
+  const [refundChannel, setRefundChannel] = useState('');
+  const [refundNote, setRefundNote] = useState('');
+  const [refundViaStripe, setRefundViaStripe] = useState(false);
+  const [isRefunding, setIsRefunding] = useState(false);
 
   // Message thread modal
   const {
@@ -562,6 +623,57 @@ export default function CustomOrdersTableWrapper({
       ErrorToast('Error', err.message || 'Failed to record payment', 4000);
     } finally {
       setIsRecordingPay(false);
+    }
+  };
+
+  const handleRecordRefund = (order) => {
+    setRefundOrder(order);
+    // Full refund is the common case — prefill with the collected total.
+    setRefundAmount(
+      Number(order.amountPaid) > 0 ? String(order.amountPaid) : '',
+    );
+    setRefundChannel(order.paymentChannel || '');
+    setRefundNote('');
+    // Stripe-paid orders default to a real Stripe refund; off-platform orders
+    // can only be record-only.
+    setRefundViaStripe(Boolean(order.stripePaymentIntentId));
+    onRefundOpen();
+  };
+
+  const submitRecordRefund = async (onClose) => {
+    const amount = parseFloat(refundAmount);
+    if (!refundOrder || isNaN(amount) || amount <= 0) {
+      ErrorToast('Error', 'Enter a valid positive refund amount', 3000);
+      return;
+    }
+    setIsRefunding(true);
+    try {
+      const res = await fetch(
+        `${apiBase()}/admin/orders/custom/${refundOrder._id}/record-refund`,
+        {
+          method: 'POST',
+          headers: adminHeaders(),
+          body: JSON.stringify({
+            amount,
+            viaStripe: refundViaStripe,
+            channel: refundViaStripe
+              ? undefined
+              : refundChannel.trim() || undefined,
+            note: refundNote.trim() || undefined,
+          }),
+        },
+      );
+      const result = await res.json();
+      if (!res.ok) throw new Error(result.message || 'Failed to record refund');
+      SuccessToast('Success', result?.message || 'Refund recorded.', 6000);
+      onClose?.();
+      startTransition(() => {
+        router.refresh();
+      });
+    } catch (err) {
+      ErrorToast('Error', err.message || 'Failed to record refund', 4000);
+    } finally {
+      setIsRefunding(false);
     }
   };
 
@@ -909,7 +1021,17 @@ export default function CustomOrdersTableWrapper({
       case 'name':
         return (
           <div>
-            <div className='text-sm font-medium'>{order.name}</div>
+            <div className='flex items-center gap-1.5 text-sm font-medium'>
+              {order.name}
+              {Number(order.customerOrderCount) > 1 && (
+                <span
+                  className='rounded-full bg-gray-900 px-1.5 py-0.5 text-[10px] font-bold text-white dark:bg-gray-100 dark:text-gray-900'
+                  title={`Repeat customer — ${order.customerOrderCount} orders, $${Number(order.customerLifetimeCollected || 0).toFixed(2)} lifetime`}
+                >
+                  ×{order.customerOrderCount}
+                </span>
+              )}
+            </div>
             <div className='text-xs text-gray-500'>{order.email}</div>
           </div>
         );
@@ -997,9 +1119,11 @@ export default function CustomOrdersTableWrapper({
           Number(order.estimatedPrice) > 0 &&
           !(order.paymentChannel || '').trim();
         // Revision beyond the 2 included free ones — needs a paid quote.
-        const paidRevision =
-          order.status === 'in_revision' && (order.revisions?.length || 0) > 2;
+        const revisionCount = order.revisions?.length || 0;
+        const paidRevision = order.status === 'in_revision' && revisionCount > 2;
         const unread = Number(order.unreadCount) || 0;
+        const overdue = agingInfo(order);
+        const expiresIn = quoteExpiryDays(order);
         return (
           <div className='flex flex-col items-start gap-1'>
             <Chip
@@ -1019,6 +1143,39 @@ export default function CustomOrdersTableWrapper({
                 {unread} new
               </Chip>
             )}
+            {overdue && (
+              <Chip
+                size='sm'
+                variant='flat'
+                className='bg-gray-900 text-white text-[10px] dark:bg-gray-100 dark:text-gray-900'
+              >
+                {overdue}
+              </Chip>
+            )}
+            {expiresIn != null && (
+              <Chip
+                size='sm'
+                variant='flat'
+                className='bg-gray-200 text-gray-700 text-[10px]'
+              >
+                {expiresIn > 0
+                  ? `Quote expires in ${expiresIn}d`
+                  : 'Quote expiring today'}
+                {order.reminderSentAt ? ' · reminded' : ''}
+              </Chip>
+            )}
+            {revisionCount > 0 &&
+              ['delivered', 'in_revision', 'completed'].includes(
+                order.status,
+              ) && (
+                <Chip
+                  size='sm'
+                  variant='flat'
+                  className='bg-gray-100 text-gray-600 text-[10px]'
+                >
+                  {Math.min(revisionCount, 2)}/2 free revisions used
+                </Chip>
+              )}
             {paidRevision && (
               <Chip
                 size='sm'
@@ -1140,6 +1297,15 @@ export default function CustomOrdersTableWrapper({
                   Record Payment (PayPal / Manual)
                 </DropdownItem>
               ) : null}
+              {Number(order.amountPaid) > 0 ? (
+                <DropdownItem
+                  key='record-refund'
+                  startContent={<Undo2 size={16} />}
+                  onClick={() => handleRecordRefund(order)}
+                >
+                  Record Refund
+                </DropdownItem>
+              ) : null}
               {canDeliver ? (
                 <DropdownItem
                   key='deliver'
@@ -1241,6 +1407,19 @@ export default function CustomOrdersTableWrapper({
               : 'min-w-[140px]'
           }
           startContent={<MessageSquare size={16} />}
+          endContent={
+            needsActionCount > 0 ? (
+              <span
+                className={`ml-1 inline-flex min-w-[20px] items-center justify-center rounded-full px-1.5 text-[11px] font-bold ${
+                  needsActionActive
+                    ? 'bg-white text-black'
+                    : 'bg-black text-white'
+                }`}
+              >
+                {needsActionCount}
+              </span>
+            ) : null
+          }
           onPress={toggleNeedsAction}
         >
           Needs action
@@ -1691,10 +1870,40 @@ export default function CustomOrdersTableWrapper({
                         )}
                         {Number(viewOrder?.amountPaid) > 0 && (
                           <DetailRow
-                            label='Total Collected'
+                            label='Total Collected (Net)'
                             value={`$${Number(viewOrder.amountPaid).toFixed(2)}`}
                           />
                         )}
+                        {Number(viewOrder?.customerOrderCount) > 1 && (
+                          <DetailRow
+                            label='Customer Lifetime'
+                            value={`$${Number(viewOrder.customerLifetimeCollected || 0).toFixed(2)} across ${viewOrder.customerOrderCount} orders`}
+                          />
+                        )}
+                        {viewOrder?.status === 'awaiting_payment' &&
+                          viewOrder?.quotedAt && (
+                            <DetailRow
+                              label='Payment Reminder'
+                              value={
+                                viewOrder.reminderSentAt
+                                  ? `Sent ${new Date(viewOrder.reminderSentAt).toLocaleString()}`
+                                  : 'Not sent yet (auto after 3 days)'
+                              }
+                            />
+                          )}
+                        {(() => {
+                          const d = quoteExpiryDays(viewOrder || {});
+                          return d != null ? (
+                            <DetailRow
+                              label='Quote Expires'
+                              value={
+                                d > 0
+                                  ? `In ${d} day${d === 1 ? '' : 's'} (auto-expires unpaid quotes)`
+                                  : 'Today'
+                              }
+                            />
+                          ) : null;
+                        })()}
                       </div>
                       {viewOrder?.payments?.length > 0 && (
                         <div className='mt-3'>
@@ -1709,9 +1918,12 @@ export default function CustomOrdersTableWrapper({
                               >
                                 <div>
                                   <p className='font-semibold'>
-                                    ${Number(p.amount).toFixed(2)}
+                                    {Number(p.amount) < 0
+                                      ? `−$${Math.abs(Number(p.amount)).toFixed(2)}`
+                                      : `$${Number(p.amount).toFixed(2)}`}
                                     <span className='ml-2 font-normal text-gray-600'>
-                                      via {p.channel || 'Unknown'}
+                                      {Number(p.amount) < 0 ? 'refund via' : 'via'}{' '}
+                                      {p.channel || 'Unknown'}
                                     </span>
                                   </p>
                                   {p.note && (
@@ -2286,6 +2498,110 @@ export default function CustomOrdersTableWrapper({
                   onPress={() => submitRecordPayment(onClose)}
                 >
                   Record Payment
+                </Button>
+              </ModalFooter>
+            </>
+          )}
+        </ModalContent>
+      </Modal>
+
+      {/* ─── Record Refund Modal ─── */}
+      <Modal isOpen={isRefundOpen} onOpenChange={onRefundChange} backdrop='blur'>
+        <ModalContent>
+          {(onClose) => (
+            <>
+              <ModalHeader>
+                <div className='flex items-center gap-2'>
+                  <Undo2 size={20} />
+                  Record Refund
+                </div>
+              </ModalHeader>
+              <ModalBody>
+                <div className='space-y-4'>
+                  <div className='bg-gray-50 dark:bg-gray-900 p-3 rounded-lg'>
+                    <p className='font-semibold'>{refundOrder?.name}</p>
+                    <p className='text-sm text-gray-600'>{refundOrder?.email}</p>
+                    <p className='text-xs font-mono text-gray-500 mt-1'>
+                      Order: {refundOrder?.orderNumber}
+                      {Number(refundOrder?.amountPaid) > 0 &&
+                        ` · collected: $${Number(refundOrder.amountPaid).toFixed(2)}`}
+                    </p>
+                  </div>
+                  <Input
+                    type='number'
+                    label='Amount to refund (USD)'
+                    placeholder='e.g. 5'
+                    description={
+                      Number(refundOrder?.amountPaid) > 0
+                        ? `Up to $${Number(refundOrder.amountPaid).toFixed(2)} (partial refunds are fine)`
+                        : undefined
+                    }
+                    value={refundAmount}
+                    onChange={(e) => setRefundAmount(e.target.value)}
+                    startContent={<span className='text-sm'>$</span>}
+                    autoFocus
+                  />
+                  {refundOrder?.stripePaymentIntentId ? (
+                    <Checkbox
+                      isSelected={refundViaStripe}
+                      onValueChange={setRefundViaStripe}
+                      size='sm'
+                    >
+                      Send the money back via Stripe now (refunds the
+                      customer&apos;s card)
+                    </Checkbox>
+                  ) : null}
+                  {!refundViaStripe && (
+                    <Input
+                      label='Channel (optional)'
+                      placeholder={
+                        refundOrder?.paymentChannel
+                          ? `defaults to ${refundOrder.paymentChannel}`
+                          : 'e.g. Stripe, PayPal – saklain'
+                      }
+                      value={refundChannel}
+                      onChange={(e) => setRefundChannel(e.target.value)}
+                    />
+                  )}
+                  <Textarea
+                    label='Note (optional)'
+                    placeholder='e.g. Customer cancelled before work started'
+                    value={refundNote}
+                    onChange={(e) => setRefundNote(e.target.value)}
+                    maxRows={3}
+                  />
+                  <p className='text-xs text-gray-500'>
+                    {refundViaStripe ? (
+                      <>
+                        This <strong>sends the money back</strong> to the
+                        customer&apos;s card through Stripe (it typically
+                        arrives in 5–10 business days), then records a negative
+                        entry in the payment history so income by channel,
+                        collected revenue, and the CSV export stay accurate.
+                        The order&apos;s status is not changed.
+                      </>
+                    ) : (
+                      <>
+                        Record-only: refund the money where it was paid
+                        (PayPal, Etsy, bank) first — this adds a negative entry
+                        to the payment history and subtracts from the
+                        order&apos;s total so your income numbers stay
+                        accurate. The order&apos;s status is not changed.
+                      </>
+                    )}
+                  </p>
+                </div>
+              </ModalBody>
+              <ModalFooter>
+                <Button variant='light' onPress={onClose}>
+                  Cancel
+                </Button>
+                <Button
+                  color='primary'
+                  isLoading={isRefunding}
+                  onPress={() => submitRecordRefund(onClose)}
+                >
+                  {refundViaStripe ? 'Refund via Stripe' : 'Record Refund'}
                 </Button>
               </ModalFooter>
             </>

@@ -66,6 +66,7 @@ export default async function CustomOrdersPage({ searchParams }) {
         initialData={orders}
         pagination={pagination}
         columns={columns}
+        needsActionCount={stats?.needsActionCount ?? 0}
       />
     </div>
   );

@@ -28,9 +28,14 @@ import {
   Textarea,
   useDisclosure,
 } from '@heroui/react';
-import { AlertTriangle, Ban, DollarSign, Edit, Eye, RotateCcw, Search, TrendingUp, Users } from 'lucide-react';
+import { AlertTriangle, Ban, DollarSign, Edit, Eye, FileText, RotateCcw, Search, TrendingUp, Users } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import { useMemo, useState } from 'react';
+import {
+  openStatementShell,
+  renderStatement,
+  renderStatementError,
+} from '@/features/admin/statement';
 
 // ─── Constants ────────────────────────────────────────────────────────────────
 
@@ -190,6 +195,71 @@ export default function SubscribersTableWrapper({ subscribers, stats, revenue })
   const [refundAmount, setRefundAmount] = useState('');
   const [refundReason, setRefundReason] = useState('');
   const [isRefunding, setIsRefunding] = useState(false);
+
+  // Income statement (built from Stripe: invoices + one-time plan purchases
+  // + refunds). Defaults to the current month.
+  const monthStart = () => {
+    const d = new Date();
+    return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-01`;
+  };
+  const todayStr = () => {
+    const d = new Date();
+    return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+  };
+  const [stmtStart, setStmtStart] = useState(monthStart());
+  const [stmtEnd, setStmtEnd] = useState(todayStr());
+  const [buildingStatement, setBuildingStatement] = useState(false);
+
+  const showStatement = async () => {
+    // Open the window synchronously, inside the click gesture — opening it
+    // after the awaited fetch gets popup-blocked by the browser.
+    const shell = openStatementShell();
+    if (!shell) {
+      ErrorToast('Popup blocked', 'Allow popups to view the statement', 4000);
+      return;
+    }
+    setBuildingStatement(true);
+    try {
+      const url = new URL(`${apiBase()}/admin/subscriptions/statement`);
+      if (stmtStart) url.searchParams.set('startDate', stmtStart);
+      if (stmtEnd) url.searchParams.set('endDate', stmtEnd);
+      const res = await fetch(url.toString(), { headers: authHeaders() });
+      const result = await res.json();
+      if (!res.ok) throw new Error(result?.message || 'Failed to build statement');
+      const { rows = [], summary = {} } = result?.data || {};
+      const f = (d) =>
+        new Date(d).toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric' });
+      renderStatement(shell, {
+        title: 'Subscriptions Statement',
+        periodLabel:
+          !stmtStart && !stmtEnd
+            ? 'All time'
+            : `${stmtStart ? f(stmtStart) : 'Start'} – ${stmtEnd ? f(stmtEnd) : 'Today'}`,
+        columns: [
+          { key: 'date', label: 'Date' },
+          { key: 'type', label: 'Type' },
+          { key: 'description', label: 'Description' },
+          { key: 'customer', label: 'Customer' },
+          { key: 'ref', label: 'Reference' },
+          { key: 'amount', label: 'Amount', align: 'right' },
+        ],
+        rows,
+        totals: [
+          {
+            label: `Payments in (${summary.count ?? 0} transactions)`,
+            value: `$${Number(summary.gross || 0).toFixed(2)}`,
+          },
+          { label: 'Refunds', value: `−$${Number(summary.refunds || 0).toFixed(2)}` },
+          { label: 'Net collected', value: `$${Number(summary.net || 0).toFixed(2)}`, strong: true },
+        ],
+      });
+    } catch (err) {
+      renderStatementError(shell, err.message);
+      ErrorToast('Error', err.message || 'Failed to build statement', 4000);
+    } finally {
+      setBuildingStatement(false);
+    }
+  };
 
   // ── Filtering ──────────────────────────────────────────────────────────────
 
@@ -536,9 +606,40 @@ export default function SubscribersTableWrapper({ subscribers, stats, revenue })
       {/* ── Revenue Dashboard ── */}
       {revenue && (
         <div className='bg-white dark:bg-gray-900 rounded-xl border border-gray-200 dark:border-gray-800 p-5'>
-          <div className='flex items-center gap-2 mb-4'>
-            <TrendingUp size={18} className='text-indigo-500' />
-            <h2 className='text-sm font-bold text-gray-700 dark:text-gray-300 uppercase tracking-wide'>Revenue Overview</h2>
+          <div className='flex flex-wrap items-center justify-between gap-3 mb-4'>
+            <div className='flex items-center gap-2'>
+              <TrendingUp size={18} className='text-indigo-500' />
+              <h2 className='text-sm font-bold text-gray-700 dark:text-gray-300 uppercase tracking-wide'>Revenue Overview</h2>
+            </div>
+            {/* Income statement for a period — pulled live from Stripe. */}
+            <div className='flex items-center gap-2'>
+              <Input
+                type='date'
+                size='sm'
+                aria-label='Statement start date'
+                className='w-36'
+                value={stmtStart}
+                onChange={(e) => setStmtStart(e.target.value)}
+              />
+              <span className='text-gray-400'>-</span>
+              <Input
+                type='date'
+                size='sm'
+                aria-label='Statement end date'
+                className='w-36'
+                value={stmtEnd}
+                onChange={(e) => setStmtEnd(e.target.value)}
+              />
+              <Button
+                size='sm'
+                variant='flat'
+                isLoading={buildingStatement}
+                startContent={!buildingStatement && <FileText size={14} />}
+                onPress={showStatement}
+              >
+                Statement
+              </Button>
+            </div>
           </div>
           <div className='grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-6 gap-4 mb-5'>
             {/* All-time gross from Stripe (invoices + one-time plan purchases,
