@@ -189,6 +189,12 @@ export default function SubscribersTableWrapper({ subscribers, stats, revenue })
   const [cancelReason, setCancelReason] = useState('');
   const [isCancelling, setIsCancelling] = useState(false);
 
+  // Reset downloads modal
+  const { isOpen: isResetOpen, onOpen: onResetOpen, onOpenChange: onResetChange } = useDisclosure();
+  const [resetUser, setResetUser] = useState(null);
+  const [resetTarget, setResetTarget] = useState('daily'); // 'daily' | 'period' | 'both'
+  const [isResetting, setIsResetting] = useState(false);
+
   // Refund modal
   const { isOpen: isRefundOpen, onOpen: onRefundOpen, onOpenChange: onRefundChange } = useDisclosure();
   const [refundUser, setRefundUser] = useState(null);
@@ -356,19 +362,38 @@ export default function SubscribersTableWrapper({ subscribers, stats, revenue })
     }
   };
 
-  const resetDownloads = async (user) => {
+  const handleReset = (user) => {
+    setResetUser(user);
+    setResetTarget('daily');
+    onResetOpen();
+  };
+
+  const confirmReset = async () => {
+    if (!resetUser) return;
+    setIsResetting(true);
     try {
-      const res = await fetch(`${apiBase()}/admin/users/${user._id}/subscription`, {
+      const body = {};
+      if (resetTarget === 'daily' || resetTarget === 'both') body.dailyDownloadCount = 0;
+      if (resetTarget === 'period' || resetTarget === 'both') body.downloadCount = 0;
+
+      const res = await fetch(`${apiBase()}/admin/users/${resetUser._id}/subscription`, {
         method: 'PUT',
         headers: authHeaders(),
-        body: JSON.stringify({ downloadCount: 0, dailyDownloadCount: 0 }),
+        body: JSON.stringify(body),
       });
       const result = await res.json();
       if (!res.ok) throw new Error(result.message || 'Failed to reset');
-      SuccessToast('Success', 'Download counts reset to 0.', 3000);
+      const label =
+        resetTarget === 'daily' ? 'Daily download count reset to 0.'
+        : resetTarget === 'period' ? 'Period download count reset to 0.'
+        : 'Daily and period download counts reset to 0.';
+      SuccessToast('Success', label, 3000);
+      onResetChange(false);
       router.refresh();
     } catch (err) {
       ErrorToast('Error', err.message || 'Failed to reset downloads', 3000);
+    } finally {
+      setIsResetting(false);
     }
   };
 
@@ -558,7 +583,7 @@ export default function SubscribersTableWrapper({ subscribers, stats, revenue })
               <DropdownItem key='edit' startContent={<Edit size={16} />} onClick={() => handleEdit(user)}>
                 Adjust Quotas
               </DropdownItem>
-              <DropdownItem key='reset' startContent={<RotateCcw size={16} />} onClick={() => resetDownloads(user)}>
+              <DropdownItem key='reset' startContent={<RotateCcw size={16} />} onClick={() => handleReset(user)}>
                 Reset Download Counts
               </DropdownItem>
               <DropdownItem
@@ -1061,6 +1086,78 @@ export default function SubscribersTableWrapper({ subscribers, stats, revenue })
                 <Button variant='light' onPress={onClose}>Go Back</Button>
                 <Button color='danger' isLoading={isCancelling} onPress={confirmCancel}>
                   {cancelImmediately ? 'Cancel Immediately' : 'Schedule Cancellation'}
+                </Button>
+              </ModalFooter>
+            </>
+          )}
+        </ModalContent>
+      </Modal>
+
+      {/* ── Reset Downloads Modal ── */}
+      <Modal isOpen={isResetOpen} onOpenChange={onResetChange} backdrop='blur' size='md'>
+        <ModalContent>
+          {(onClose) => (
+            <>
+              <ModalHeader>
+                <div>
+                  <p className='font-bold'>Reset Download Counts</p>
+                  <p className='text-xs text-gray-400 font-normal mt-0.5'>{resetUser?.name} · {resetUser?.email}</p>
+                </div>
+              </ModalHeader>
+              <ModalBody>
+                <div className='space-y-2'>
+                  <p className='text-sm font-medium'>What do you want to reset?</p>
+                  <div className='flex flex-col gap-2'>
+                    <label className='flex items-start gap-3 p-3 border rounded-lg cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-800'>
+                      <input
+                        type='radio'
+                        name='resetTarget'
+                        checked={resetTarget === 'daily'}
+                        onChange={() => setResetTarget('daily')}
+                        className='mt-0.5'
+                      />
+                      <div>
+                        <p className='text-sm font-medium'>Daily count only</p>
+                        <p className='text-xs text-gray-500'>
+                          Today's downloads: {resetUser?.subscription?.dailyDownloadCount ?? 0} → 0. Period count stays unchanged.
+                        </p>
+                      </div>
+                    </label>
+                    <label className='flex items-start gap-3 p-3 border rounded-lg cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-800'>
+                      <input
+                        type='radio'
+                        name='resetTarget'
+                        checked={resetTarget === 'period'}
+                        onChange={() => setResetTarget('period')}
+                        className='mt-0.5'
+                      />
+                      <div>
+                        <p className='text-sm font-medium'>Period count only</p>
+                        <p className='text-xs text-gray-500'>
+                          Period downloads: {resetUser?.subscription?.downloadCount ?? 0} → 0. Daily count stays unchanged.
+                        </p>
+                      </div>
+                    </label>
+                    <label className='flex items-start gap-3 p-3 border rounded-lg cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-800'>
+                      <input
+                        type='radio'
+                        name='resetTarget'
+                        checked={resetTarget === 'both'}
+                        onChange={() => setResetTarget('both')}
+                        className='mt-0.5'
+                      />
+                      <div>
+                        <p className='text-sm font-medium'>Both</p>
+                        <p className='text-xs text-gray-500'>Reset the daily and period counts to 0.</p>
+                      </div>
+                    </label>
+                  </div>
+                </div>
+              </ModalBody>
+              <ModalFooter>
+                <Button variant='light' onPress={onClose}>Cancel</Button>
+                <Button color='primary' isLoading={isResetting} startContent={!isResetting && <RotateCcw size={16} />} onPress={confirmReset}>
+                  Reset
                 </Button>
               </ModalFooter>
             </>

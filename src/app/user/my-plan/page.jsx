@@ -4,6 +4,7 @@ import { useUserInfoQuery } from '@/lib/redux/common/user/userInfoSlice';
 import {
   formatCountdown,
   formatDate,
+  formatResetTime,
   formatWindow,
 } from '@/utils/functions/page';
 import { Divider } from '@heroui/divider';
@@ -45,8 +46,23 @@ export default function MyPlanPage({ onClose }) {
     limit,
     remaining,
     isLimitReached,
+    isReady,
     msLeft: timeLeft,
   } = useDownloadReset();
+
+  // Subscriber daily quota rolls over at the server day boundary (UTC
+  // midnight), not the user's local midnight — so show the actual local
+  // wall-clock moment plus a live countdown. The hook above already ticks
+  // every second, so these recompute on each render.
+  const nextDailyReset = new Date();
+  nextDailyReset.setUTCHours(24, 0, 0, 0);
+  const dailyResetMsLeft = Math.max(0, nextDailyReset.getTime() - Date.now());
+  const dailyResetLabel = (() => {
+    const label = formatResetTime(nextDailyReset);
+    // "Today at 8:00 PM" → "today at 8:00 PM" (mid-sentence). Next UTC
+    // midnight is always today or tomorrow locally, never a dated label.
+    return label ? label.charAt(0).toLowerCase() + label.slice(1) : '';
+  })();
 
   // PAID DATA
   const usagePercent =
@@ -620,9 +636,18 @@ export default function MyPlanPage({ onClose }) {
                           <div className='h-full bg-gradient-to-r from-indigo-300 to-violet-300 w-full rounded-full' />
                         )}
                       </div>
-                      <p className='text-sm text-slate-600 mt-2'>
-                        Daily limit resets at midnight
-                      </p>
+                      {dailyUsagePercent !== null && (
+                        <div className='flex flex-wrap items-center justify-between gap-2 mt-2'>
+                          <p className='text-sm text-slate-600'>
+                            Daily limit resets {dailyResetLabel}
+                          </p>
+                          {isReady && (
+                            <span className='text-xs font-bold px-2.5 py-1 rounded-full bg-indigo-50 text-indigo-600 tabular-nums'>
+                              ⏳ {formatCountdown(dailyResetMsLeft)}
+                            </span>
+                          )}
+                        </div>
+                      )}
                     </div>
                   </div>
                 </div>
