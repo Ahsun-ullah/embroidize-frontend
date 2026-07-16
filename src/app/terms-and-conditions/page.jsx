@@ -76,7 +76,7 @@ No partial refunds are provided.`,
     },
     {
       title: '6. Payments',
-      content: `All payments are processed securely via third-party providers such as Stripe or PayPal.
+      content: `All payments are processed through a secure payment system operated by trusted third-party providers.
 
 We do not store your full payment details.`,
     },

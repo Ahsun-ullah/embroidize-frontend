@@ -457,7 +457,8 @@ function CustomOrderCheckoutInner() {
                   <div className='flex flex-col items-center gap-3 py-6 text-center'>
                     <Spinner size='sm' color='default' />
                     <p className='text-sm text-zinc-700'>
-                      Payment received — confirming with Stripe…
+                      Payment received — confirming with our secure payment
+                      system…
                     </p>
                   </div>
                 </Section>
@@ -488,7 +489,7 @@ function CustomOrderCheckoutInner() {
                           }
                           onPress={handlePay}
                         >
-                          Pay with Stripe
+                          Pay Securely
                         </Button>
                         <p className='flex items-center justify-center gap-1.5 text-[11px] text-zinc-500 sm:justify-end'>
                           <ShieldCheck size={12} />
@@ -515,7 +516,8 @@ function CustomOrderCheckoutInner() {
                   <div className='flex flex-col items-center gap-3 py-6 text-center'>
                     <Spinner size='sm' color='default' />
                     <p className='text-sm text-zinc-700'>
-                      Payment received — confirming with Stripe…
+                      Payment received — confirming with our secure payment
+                      system…
                     </p>
                   </div>
                 </Section>
@@ -543,7 +545,7 @@ function CustomOrderCheckoutInner() {
                           startContent={paying ? null : <CreditCard size={18} />}
                           onPress={handlePay}
                         >
-                          Pay with Stripe
+                          Pay Securely
                         </Button>
                         <p className='flex items-center justify-center gap-1.5 text-[11px] text-zinc-500 sm:justify-end'>
                           <ShieldCheck size={12} />

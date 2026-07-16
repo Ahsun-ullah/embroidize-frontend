@@ -36,7 +36,13 @@ function receiptHtml(order) {
   const docTitle = isPaid ? 'RECEIPT' : 'INVOICE';
   const amount = money(order.estimatedPrice, order.currency);
   const docDate = fmtDate(order.paidAt || order.updatedAt || order.createdAt);
-  const channel = order.paymentChannel || 'Stripe';
+  // Never surface the processor's brand name to the customer — old orders
+  // have a literal "Stripe" channel in their ledger.
+  const rawChannel = order.paymentChannel || '';
+  const channel =
+    !rawChannel || /^stripe$/i.test(rawChannel.trim())
+      ? 'Secure online payment'
+      : rawChannel;
 
   return `<!doctype html>
 <html lang="en">

@@ -227,8 +227,9 @@ const Footer = () => {
 
           <p className='text-[11px] text-gray-500 flex items-center gap-1.5'>
             <i className='ri-shield-check-line text-gray-700' />
-            Secured by{' '}
-            <span className='font-semibold text-gray-700'>Stripe</span>
+            <span className='font-semibold text-gray-700'>
+              Secure Payment System
+            </span>
           </p>
         </div>
       </div>

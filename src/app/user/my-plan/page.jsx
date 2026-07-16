@@ -776,7 +776,7 @@ export default function MyPlanPage({ onClose }) {
 
                       <p className='text-xs text-slate-400 leading-relaxed mb-5'>
                         Manage payment method, download invoices, or cancel your
-                        plan via the secure Stripe portal.
+                        plan via the secure billing portal.
                       </p>
 
                       {error && (

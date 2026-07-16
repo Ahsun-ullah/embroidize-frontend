@@ -42,7 +42,7 @@ export default function PrivacyPolicyPage() {
     },
     {
       title: '4. Payment Processing',
-      content: `All payments are securely handled by third-party providers such as Stripe or PayPal.\n\nWe do not store your full payment card details on our servers.`,
+      content: `All payments are securely handled through a secure payment system operated by trusted third-party providers.\n\nWe do not store your full payment card details on our servers.`,
     },
     {
       title: '5. Cookies & Tracking Technologies',
@@ -62,7 +62,7 @@ export default function PrivacyPolicyPage() {
     },
     {
       title: '9. Data Sharing',
-      content: `We do not sell your personal data.\n\nWe may share information with trusted third parties including:\n\n- Payment processors (Stripe, PayPal)\n- Analytics providers\n- Hosting and infrastructure services\n\nThese parties are required to protect your data.`,
+      content: `We do not sell your personal data.\n\nWe may share information with trusted third parties including:\n\n- Secure payment processors\n- Analytics providers\n- Hosting and infrastructure services\n\nThese parties are required to protect your data.`,
     },
     {
       title: '10. International Data Transfers',
