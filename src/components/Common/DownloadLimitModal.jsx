@@ -71,6 +71,19 @@ function DownloadLimitModal({ limitModalData = {}, onClose, formatDuration }) {
 
   const isPeriod = limitModalData?.type === 'period';
   const isFree = limitModalData?.type === 'free';
+  const isDaily = !isPeriod && !isFree;
+
+  // Subscriber daily quota rolls over at the server day boundary (UTC
+  // midnight), not the user's local midnight — same math as My Plan. The hook
+  // above ticks the component, so this recomputes on each render. The hook's
+  // own msLeft/nextResetTime only cover the free-tier window and stay at 0 for
+  // subscribers, which is why the daily case needs its own reset moment.
+  const nextDailyReset = new Date();
+  nextDailyReset.setUTCHours(24, 0, 0, 0);
+  const dailyMsLeft = Math.max(0, nextDailyReset.getTime() - Date.now());
+
+  const effectiveMsLeft = isDaily ? dailyMsLeft : msLeft;
+  const effectiveResetTime = isDaily ? nextDailyReset : nextResetTime;
 
   const title =
     isPeriod || isFree
@@ -106,7 +119,7 @@ function DownloadLimitModal({ limitModalData = {}, onClose, formatDuration }) {
     router.push('/subscriptions');
   };
 
-  const resetLabel = formatResetTime(nextResetTime);
+  const resetLabel = formatResetTime(effectiveResetTime);
 
   return (
     <div
@@ -155,7 +168,7 @@ function DownloadLimitModal({ limitModalData = {}, onClose, formatDuration }) {
 
         {/* ── Countdown ── */}
         <div className='mt-6 rounded-2xl border border-red-100 bg-red-50 p-4 dark:border-red-500/20 dark:bg-red-500/10'>
-          {msLeft > 0 ? (
+          {effectiveMsLeft > 0 ? (
             <div className='flex items-center justify-center gap-4'>
               <div className='flex items-center gap-2 text-neutral-500 dark:text-neutral-300'>
                 <Clock
@@ -166,7 +179,7 @@ function DownloadLimitModal({ limitModalData = {}, onClose, formatDuration }) {
               </div>
               <div className='text-left'>
                 <p className='text-2xl font-extrabold tabular-nums leading-none text-red-500 dark:text-red-400'>
-                  {formatResetCountdown(msLeft)}
+                  {formatResetCountdown(effectiveMsLeft)}
                 </p>
                 {resetLabel && (
                   <p className='mt-1 text-xs text-neutral-500 dark:text-neutral-400'>
