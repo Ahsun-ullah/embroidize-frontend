@@ -28,9 +28,10 @@ import {
   Textarea,
   useDisclosure,
 } from '@heroui/react';
-import { AlertTriangle, Ban, DollarSign, Edit, Eye, FileText, RotateCcw, Search, TrendingUp, Users } from 'lucide-react';
+import { AlertTriangle, Ban, DollarSign, Edit, ExternalLink, Eye, FileText, Receipt, RotateCcw, Search, TrendingUp, Users } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import { useMemo, useState } from 'react';
+import { openInvoice } from '@/features/admin/invoice';
 import {
   openStatementShell,
   renderStatement,
@@ -169,9 +170,14 @@ export default function SubscribersTableWrapper({ subscribers, stats, revenue })
   // View details modal
   const { isOpen: isViewOpen, onOpen: onViewOpen, onOpenChange: onViewChange } = useDisclosure();
   const [viewUser, setViewUser] = useState(null);
-  const [viewTab, setViewTab] = useState('details'); // 'details' | 'audit'
+  const [viewTab, setViewTab] = useState('details'); // 'details' | 'invoices' | 'audit'
   const [auditLogs, setAuditLogs] = useState([]);
   const [auditLoading, setAuditLoading] = useState(false);
+
+  // Invoices tab (payment history pulled live from Stripe)
+  const [invoiceData, setInvoiceData] = useState(null); // { invoices, customer, summary }
+  const [invoicesLoading, setInvoicesLoading] = useState(false);
+  const [invoicesError, setInvoicesError] = useState('');
 
   // Adjust quotas modal
   const { isOpen: isEditOpen, onOpen: onEditOpen, onOpenChange: onEditChange } = useDisclosure();
@@ -298,6 +304,8 @@ export default function SubscribersTableWrapper({ subscribers, stats, revenue })
     setViewUser(user);
     setViewTab('details');
     setAuditLogs([]);
+    setInvoiceData(null);
+    setInvoicesError('');
     onViewOpen();
   };
 
@@ -316,11 +324,43 @@ export default function SubscribersTableWrapper({ subscribers, stats, revenue })
     }
   };
 
+  const loadInvoices = async (userId) => {
+    setInvoicesLoading(true);
+    setInvoicesError('');
+    try {
+      const res = await fetch(`${apiBase()}/admin/users/${userId}/subscription/invoices`, {
+        headers: authHeaders(),
+      });
+      const result = await res.json();
+      if (!res.ok) throw new Error(result?.message || 'Failed to load invoices');
+      setInvoiceData(result?.data || null);
+    } catch (err) {
+      setInvoiceData(null);
+      setInvoicesError(err.message || 'Failed to load invoices');
+    } finally {
+      setInvoicesLoading(false);
+    }
+  };
+
   const switchTab = (tab, user) => {
     setViewTab(tab);
     if (tab === 'audit' && auditLogs.length === 0) {
       loadAuditLog(user._id);
     }
+    if (tab === 'invoices' && !invoiceData && !invoicesLoading) {
+      loadInvoices(user._id);
+    }
+  };
+
+  // Dropdown shortcut: open the view modal directly on the Invoices tab.
+  const handleInvoices = (user) => {
+    setViewUser(user);
+    setViewTab('invoices');
+    setAuditLogs([]);
+    setInvoiceData(null);
+    setInvoicesError('');
+    onViewOpen();
+    loadInvoices(user._id);
   };
 
   // ── Edit modal ─────────────────────────────────────────────────────────────
@@ -580,6 +620,9 @@ export default function SubscribersTableWrapper({ subscribers, stats, revenue })
               <DropdownItem key='view' startContent={<Eye size={16} />} onClick={() => handleView(user)}>
                 View Details
               </DropdownItem>
+              <DropdownItem key='invoices' startContent={<Receipt size={16} />} onClick={() => handleInvoices(user)}>
+                Invoices / Payments
+              </DropdownItem>
               <DropdownItem key='edit' startContent={<Edit size={16} />} onClick={() => handleEdit(user)}>
                 Adjust Quotas
               </DropdownItem>
@@ -792,7 +835,7 @@ export default function SubscribersTableWrapper({ subscribers, stats, revenue })
 
               {/* Tabs */}
               <div className='flex border-b border-gray-200 dark:border-gray-700 px-6'>
-                {['details', 'audit'].map((tab) => (
+                {['details', 'invoices', 'audit'].map((tab) => (
                   <button
                     key={tab}
                     onClick={() => switchTab(tab, v)}
@@ -802,7 +845,7 @@ export default function SubscribersTableWrapper({ subscribers, stats, revenue })
                         : 'border-transparent text-gray-500 hover:text-gray-700'
                     }`}
                   >
-                    {tab === 'audit' ? 'Audit Log' : 'Details'}
+                    {tab === 'audit' ? 'Audit Log' : tab === 'invoices' ? 'Invoices' : 'Details'}
                   </button>
                 ))}
               </div>
@@ -890,6 +933,152 @@ export default function SubscribersTableWrapper({ subscribers, stats, revenue })
                       </div>
                     </div>
                   </>
+                ) : viewTab === 'invoices' ? (
+                  /* Invoices Tab — payment history pulled live from Stripe */
+                  <div>
+                    {invoicesLoading ? (
+                      <div className='flex justify-center py-10 text-gray-400 text-sm'>Loading invoices from Stripe…</div>
+                    ) : invoicesError ? (
+                      <div className='flex flex-col items-center py-10 text-gray-400 gap-2'>
+                        <AlertTriangle size={28} strokeWidth={1.5} />
+                        <p className='text-sm'>{invoicesError}</p>
+                        <Button size='sm' variant='flat' onPress={() => loadInvoices(v._id)}>Retry</Button>
+                      </div>
+                    ) : !invoiceData || invoiceData.invoices.length === 0 ? (
+                      <div className='flex flex-col items-center py-10 text-gray-400 gap-2'>
+                        <Receipt size={28} strokeWidth={1.5} />
+                        <p className='text-sm'>No payments found in Stripe for this user</p>
+                      </div>
+                    ) : (
+                      <div className='space-y-4'>
+                        {/* Current package */}
+                        {invoiceData.customer?.plan && (
+                          <div className='p-3 bg-gray-50 dark:bg-gray-800 rounded-lg flex items-center justify-between gap-3 flex-wrap'>
+                            <div>
+                              <p className='text-sm font-semibold'>{invoiceData.customer.plan.name}</p>
+                              <p className='text-xs text-gray-500'>
+                                {invoiceData.customer.plan.type === 'one-time'
+                                  ? 'One-time purchase'
+                                  : `Recurring · billed ${invoiceData.customer.plan.billingInterval || 'month'}ly`}
+                                {' · '}${invoiceData.customer.plan.price}
+                                {' · '}
+                                {invoiceData.customer.plan.downloadLimit != null
+                                  ? `${invoiceData.customer.plan.downloadLimit} downloads/period`
+                                  : 'Unlimited downloads'}
+                              </p>
+                            </div>
+                            {invoiceData.customer.subscriptionStatus && (
+                              <Chip
+                                size='sm'
+                                variant='flat'
+                                className='capitalize'
+                                color={STATUS_CHIP[invoiceData.customer.subscriptionStatus] || 'default'}
+                              >
+                                {invoiceData.customer.subscriptionStatus.replace('_', ' ')}
+                              </Chip>
+                            )}
+                          </div>
+                        )}
+
+                        {/* Summary strip */}
+                        <div className='grid grid-cols-3 gap-3'>
+                          <div className='p-3 bg-gray-50 dark:bg-gray-800 rounded-lg text-center'>
+                            <p className='text-xs text-gray-400 uppercase tracking-wide'>Payments</p>
+                            <p className='text-lg font-bold'>{invoiceData.summary.count}</p>
+                          </div>
+                          <div className='p-3 bg-gray-50 dark:bg-gray-800 rounded-lg text-center'>
+                            <p className='text-xs text-gray-400 uppercase tracking-wide'>Total Paid</p>
+                            <p className='text-lg font-bold'>${Number(invoiceData.summary.totalPaid).toFixed(2)}</p>
+                          </div>
+                          <div className='p-3 bg-gray-50 dark:bg-gray-800 rounded-lg text-center'>
+                            <p className='text-xs text-gray-400 uppercase tracking-wide'>Refunded</p>
+                            <p className='text-lg font-bold'>${Number(invoiceData.summary.totalRefunded).toFixed(2)}</p>
+                          </div>
+                        </div>
+
+                        {/* One card per payment */}
+                        {invoiceData.invoices.map((inv) => (
+                          <div key={inv.id} className='p-4 bg-gray-50 dark:bg-gray-800 rounded-lg space-y-2'>
+                            <div className='flex items-start justify-between gap-3 flex-wrap'>
+                              <div className='min-w-0'>
+                                <p className='text-sm font-semibold'>{inv.description}</p>
+                                <p className='text-xs text-gray-500'>
+                                  {fmtDateTime(inv.date)} · Invoice {inv.number}
+                                  {inv.cardBrand && inv.cardLast4 && (
+                                    <> · <span className='capitalize'>{inv.cardBrand}</span> •••• {inv.cardLast4}</>
+                                  )}
+                                </p>
+                                {inv.periodStart && inv.periodEnd && (
+                                  <p className='text-xs text-gray-400'>
+                                    Service period: {fmt(inv.periodStart)} – {fmt(inv.periodEnd)}
+                                  </p>
+                                )}
+                              </div>
+                              <div className='flex items-center gap-2 shrink-0'>
+                                <span className='text-base font-bold'>${Number(inv.amount).toFixed(2)}</span>
+                                <Chip
+                                  size='sm'
+                                  variant='flat'
+                                  className='capitalize'
+                                  color={inv.status === 'paid' ? 'success' : inv.status === 'open' ? 'warning' : 'default'}
+                                >
+                                  {inv.status}
+                                </Chip>
+                              </div>
+                            </div>
+                            {Number(inv.amountRefunded) > 0 && (
+                              <p className='text-xs font-medium text-gray-600 dark:text-gray-300'>
+                                Refunded: ${Number(inv.amountRefunded).toFixed(2)}
+                              </p>
+                            )}
+                            <div className='flex items-center gap-2 pt-1 flex-wrap'>
+                              <Button
+                                size='sm'
+                                variant='flat'
+                                startContent={<FileText size={14} />}
+                                onPress={() => openInvoice({ invoice: inv, customer: invoiceData.customer })}
+                              >
+                                Invoice (PDF)
+                              </Button>
+                              {/* Real anchors: window.open inside onPress gets
+                                  popup-blocked (press events aren't click gestures). */}
+                              {inv.hostedInvoiceUrl && (
+                                <Button
+                                  as='a'
+                                  href={inv.hostedInvoiceUrl}
+                                  target='_blank'
+                                  rel='noreferrer'
+                                  size='sm'
+                                  variant='light'
+                                  startContent={<ExternalLink size={14} />}
+                                >
+                                  Stripe page
+                                </Button>
+                              )}
+                              {inv.invoicePdf && (
+                                <Button
+                                  as='a'
+                                  href={inv.invoicePdf}
+                                  target='_blank'
+                                  rel='noreferrer'
+                                  size='sm'
+                                  variant='light'
+                                  startContent={<ExternalLink size={14} />}
+                                >
+                                  Stripe PDF
+                                </Button>
+                              )}
+                            </div>
+                          </div>
+                        ))}
+
+                        <p className='text-[11px] text-gray-400'>
+                          Pulled live from Stripe. "Invoice (PDF)" opens a printable Embroidize invoice
+                          (use the browser's Save as PDF); "Stripe copy" opens Stripe's own hosted invoice.
+                        </p>
+                      </div>
+                    )}
+                  </div>
                 ) : (
                   /* Audit Log Tab */
                   <div>
