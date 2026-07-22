@@ -152,6 +152,31 @@ export default function ReviewSection({ productId, initialAvgRating = 0, initial
     setModalOpen(true);
   };
 
+  // ── Deep link from the admin "update your review" email ──────────────────
+  // A link like /product/{slug}?review=edit#review-section lands the customer
+  // here. Once their existing review has loaded, scroll to the section and open
+  // the edit modal pre-filled with it. Fires once. If they aren't logged in (so
+  // myReview never loads), the #review-section anchor still scrolls them here —
+  // after they log in and the review loads, this opens the editor.
+  //
+  // We read window.location.search directly rather than Next's useSearchParams()
+  // to avoid forcing a Suspense boundary / client-render bailout on this
+  // SEO-critical product page — the auto-open is inherently client-only anyway.
+  const autoOpenedRef = useRef(false);
+  useEffect(() => {
+    if (autoOpenedRef.current) return;
+    if (!isLoggedIn || !myReview) return;
+    if (typeof window === 'undefined') return;
+
+    const wantsEdit =
+      new URLSearchParams(window.location.search).get('review') === 'edit';
+    if (!wantsEdit) return;
+
+    autoOpenedRef.current = true;
+    reviewsRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    handleOpenModal(myReview);
+  }, [isLoggedIn, myReview]); // eslint-disable-line react-hooks/exhaustive-deps
+
   // ── Submit (create or update) ─────────────────────────────────────────────
   const handleSubmit = async ({ rating, reviewText, images = [], removeImages = [] }) => {
     setIsSubmitting(true);

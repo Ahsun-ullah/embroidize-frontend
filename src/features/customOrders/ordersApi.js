@@ -146,7 +146,9 @@ export function saveBlob(blob, filename) {
   document.body.appendChild(a);
   a.click();
   a.remove();
-  URL.revokeObjectURL(url);
+  // Delay revoke so iOS Safari has time to start the download before the blob
+  // URL is invalidated — revoking immediately can abort it on iOS.
+  setTimeout(() => URL.revokeObjectURL(url), 1000);
 }
 
 // Human labels + grayscale chip styling per status (brand: black & white only).

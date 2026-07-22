@@ -111,22 +111,6 @@ export default function ProductDownloadCard({ data }) {
   };
 
   const safeDownload = (blob, filename) => {
-    const ua = navigator.userAgent;
-    const isiOS = /iPad|iPhone|iPod/.test(ua);
-
-    if (isiOS) {
-      const reader = new FileReader();
-      reader.onloadend = () => {
-        const base64Data = reader.result;
-        const a = document.createElement('a');
-        a.href = base64Data;
-        a.download = filename;
-        a.click();
-      };
-      reader.readAsDataURL(blob);
-      return;
-    }
-
     const url = window.URL.createObjectURL(blob);
     const a = document.createElement('a');
     a.href = url;
@@ -134,7 +118,9 @@ export default function ProductDownloadCard({ data }) {
     document.body.appendChild(a);
     a.click();
     document.body.removeChild(a);
-    window.URL.revokeObjectURL(url);
+    // Delay revoke so iOS Safari has time to start the download before the
+    // blob URL is invalidated — revoking immediately can abort it on iOS.
+    setTimeout(() => window.URL.revokeObjectURL(url), 1000);
   };
 
   const handleSingleZipFileDownload = async (fileData) => {

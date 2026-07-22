@@ -20,10 +20,11 @@ import {
   TableColumn,
   TableHeader,
   TableRow,
+  Textarea,
   Tooltip,
   useDisclosure,
 } from '@heroui/react';
-import { ExternalLink, Search, Star, Trash2 } from 'lucide-react';
+import { ExternalLink, Mail, Search, Star, Trash2 } from 'lucide-react';
 import Link from 'next/link';
 import { usePathname, useRouter, useSearchParams } from 'next/navigation';
 import { useEffect, useRef, useState } from 'react';
@@ -97,6 +98,17 @@ export default function ReviewsWrapper({
   const [deleteTarget, setDeleteTarget] = useState(null);
   const [isDeleting, setIsDeleting] = useState(false);
 
+  // "Ask customer to update their review" email composer
+  const {
+    isOpen: isEmailOpen,
+    onOpen: onEmailOpen,
+    onOpenChange: onEmailOpenChange,
+  } = useDisclosure();
+  const [emailTarget, setEmailTarget] = useState(null);
+  const [emailSubject, setEmailSubject] = useState('');
+  const [emailMessage, setEmailMessage] = useState('');
+  const [isSending, setIsSending] = useState(false);
+
   // Keep local rows in sync when the server sends a new page/filter.
   useEffect(() => {
     setReviews(items || []);
@@ -154,6 +166,51 @@ export default function ReviewsWrapper({
       ErrorToast('Error', err.message || 'Failed to delete review', 3000);
     } finally {
       setIsDeleting(false);
+    }
+  };
+
+  const openEmailModal = (item) => {
+    const productName = item.productId?.name || 'your design';
+    const customerName = item.userId?.name || 'there';
+    setEmailTarget(item);
+    setEmailSubject(`We've updated ${productName} — take another look`);
+    setEmailMessage(
+      `Hi ${customerName},\n\n` +
+        `We've made some improvements to "${productName}" based on your feedback. ` +
+        `We'd love for you to take another look and update your review if you're happy with the changes.\n\n` +
+        `Thank you for helping us improve!`,
+    );
+    onEmailOpen();
+  };
+
+  const sendUpdateRequest = async () => {
+    if (!emailTarget) return;
+    setIsSending(true);
+    try {
+      const res = await fetch(
+        `${apiBase()}/admin/reviews/${emailTarget._id}/request-update`,
+        {
+          method: 'POST',
+          headers: authHeaders(),
+          body: JSON.stringify({
+            subject: emailSubject.trim(),
+            message: emailMessage.trim(),
+          }),
+        },
+      );
+      const result = await res.json();
+      if (!res.ok) throw new Error(result.message || 'Failed to send email');
+      SuccessToast(
+        'Email sent',
+        `Update request sent to ${emailTarget.userId?.email || 'the customer'}.`,
+        3000,
+      );
+      onEmailOpenChange(false);
+      setEmailTarget(null);
+    } catch (err) {
+      ErrorToast('Error', err.message || 'Failed to send email', 3000);
+    } finally {
+      setIsSending(false);
     }
   };
 
@@ -247,6 +304,19 @@ export default function ReviewsWrapper({
                   aria-label='Open product page'
                 >
                   <ExternalLink size={15} />
+                </Button>
+              </Tooltip>
+            )}
+            {user.email && (
+              <Tooltip content='Ask customer to update review'>
+                <Button
+                  isIconOnly
+                  size='sm'
+                  variant='light'
+                  onPress={() => openEmailModal(item)}
+                  aria-label='Ask customer to update review'
+                >
+                  <Mail size={15} />
                 </Button>
               </Tooltip>
             )}
@@ -376,6 +446,66 @@ export default function ReviewsWrapper({
                 </Button>
                 <Button color='danger' isLoading={isDeleting} onPress={confirmDelete}>
                   Delete
+                </Button>
+              </ModalFooter>
+            </>
+          )}
+        </ModalContent>
+      </Modal>
+
+      {/* ── Ask Customer to Update Review Modal ── */}
+      <Modal
+        isOpen={isEmailOpen}
+        onOpenChange={onEmailOpenChange}
+        backdrop='blur'
+        size='lg'
+        scrollBehavior='inside'
+      >
+        <ModalContent>
+          {(onClose) => (
+            <>
+              <ModalHeader className='flex flex-col gap-1'>
+                Ask customer to update review
+                <span className='text-xs font-normal text-gray-500'>
+                  To {emailTarget?.userId?.name || 'customer'}
+                  {emailTarget?.userId?.email
+                    ? ` · ${emailTarget.userId.email}`
+                    : ''}
+                  {emailTarget?.productId?.name
+                    ? ` · on “${emailTarget.productId.name}”`
+                    : ''}
+                </span>
+              </ModalHeader>
+              <ModalBody>
+                <Input
+                  label='Subject'
+                  value={emailSubject}
+                  onChange={(e) => setEmailSubject(e.target.value)}
+                  size='sm'
+                />
+                <Textarea
+                  label='Message'
+                  value={emailMessage}
+                  onChange={(e) => setEmailMessage(e.target.value)}
+                  minRows={6}
+                />
+                <p className='text-xs text-gray-500'>
+                  An “Update Your Review” button linking straight to this
+                  product&apos;s review section is added to the email
+                  automatically.
+                </p>
+              </ModalBody>
+              <ModalFooter>
+                <Button variant='light' onPress={onClose}>
+                  Cancel
+                </Button>
+                <Button
+                  color='primary'
+                  isLoading={isSending}
+                  isDisabled={!emailSubject.trim() || !emailMessage.trim()}
+                  onPress={sendUpdateRequest}
+                >
+                  Send Email
                 </Button>
               </ModalFooter>
             </>
