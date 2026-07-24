@@ -391,6 +391,11 @@ export default function AdminSidebar({ isCollapsed, setIsCollapsed }) {
                   label: 'Payment Keys',
                   icon: 'ri-bank-card-line',
                 },
+                {
+                  href: '/admin/settings/creem',
+                  label: 'Payment Gateway',
+                  icon: 'ri-toggle-line',
+                },
               ],
             },
           ]}
