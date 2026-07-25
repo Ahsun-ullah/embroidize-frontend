@@ -10,6 +10,7 @@ import {
   CardHeader,
   Chip,
   Input,
+  Textarea,
 } from '@heroui/react';
 import Cookies from 'js-cookie';
 import {
@@ -44,11 +45,17 @@ function StatusChip({ set, last4 }) {
   );
 }
 
-export default function CreemConfigWrapper({ settings, activeGateway }) {
+export default function CreemConfigWrapper({
+  settings,
+  activeGateway,
+  checkoutDisabledMessage,
+}) {
   const router = useRouter();
 
   const [gateway, setGateway] = useState(activeGateway || 'stripe');
   const [switching, setSwitching] = useState(false);
+  const [disabledMsg, setDisabledMsg] = useState(checkoutDisabledMessage || '');
+  const [savingMsg, setSavingMsg] = useState(false);
 
   const [form, setForm] = useState({ apiKey: '', webhookSecret: '' });
   const [isSaving, setIsSaving] = useState(false);
@@ -73,17 +80,47 @@ export default function CreemConfigWrapper({ settings, activeGateway }) {
       const res = await fetch(`${apiBase()}/admin/settings/payment-gateway`, {
         method: 'PUT',
         headers: authHeaders(),
-        body: JSON.stringify({ activePaymentGateway: next }),
+        body: JSON.stringify({
+          activePaymentGateway: next,
+          checkoutDisabledMessage: disabledMsg,
+        }),
       });
       const result = await res.json();
       if (!res.ok) throw new Error(result.message || 'Failed to switch gateway');
       setGateway(next);
-      SuccessToast('Gateway switched', `New checkouts now use ${next}.`, 3000);
+      SuccessToast(
+        'Gateway updated',
+        next === 'none'
+          ? 'Payments are OFF — plans show a message instead of a pay button.'
+          : `New checkouts now use ${next}.`,
+        3500,
+      );
       router.refresh();
     } catch (err) {
       ErrorToast('Error', err.message || 'Failed to switch gateway', 3000);
     } finally {
       setSwitching(false);
+    }
+  };
+
+  const saveMessage = async () => {
+    setSavingMsg(true);
+    try {
+      const res = await fetch(`${apiBase()}/admin/settings/payment-gateway`, {
+        method: 'PUT',
+        headers: authHeaders(),
+        body: JSON.stringify({
+          activePaymentGateway: gateway,
+          checkoutDisabledMessage: disabledMsg,
+        }),
+      });
+      const result = await res.json();
+      if (!res.ok) throw new Error(result.message || 'Failed to save message');
+      SuccessToast('Saved', 'Payments-off message updated.', 3000);
+    } catch (err) {
+      ErrorToast('Error', err.message || 'Failed to save message', 3000);
+    } finally {
+      setSavingMsg(false);
     }
   };
 
@@ -148,30 +185,67 @@ export default function CreemConfigWrapper({ settings, activeGateway }) {
         <CardHeader className='font-semibold'>Active gateway (new checkouts)</CardHeader>
         <CardBody className='space-y-3'>
           <div className='flex gap-3'>
-            {['stripe', 'creem'].map((g) => {
-              const active = gateway === g;
+            {[
+              { key: 'stripe', label: 'Stripe' },
+              { key: 'creem', label: 'Creem' },
+              { key: 'none', label: 'Off' },
+            ].map(({ key, label }) => {
+              const active = gateway === key;
               return (
                 <button
-                  key={g}
+                  key={key}
                   type='button'
                   disabled={switching}
-                  onClick={() => switchGateway(g)}
-                  className={`flex-1 rounded-lg border px-4 py-3 text-sm font-semibold capitalize transition ${
+                  onClick={() => switchGateway(key)}
+                  className={`flex-1 rounded-lg border px-4 py-3 text-sm font-semibold transition ${
                     active
                       ? 'border-gray-900 bg-gray-900 text-white'
                       : 'border-gray-200 bg-white text-gray-700 hover:border-gray-400'
                   }`}
                 >
-                  {g}
-                  {active && <span className='ml-2 text-xs font-normal'>· live</span>}
+                  {label}
+                  {active && (
+                    <span className='ml-2 text-xs font-normal'>
+                      {key === 'none' ? '· off' : '· live'}
+                    </span>
+                  )}
                 </button>
               );
             })}
           </div>
           <p className='text-xs text-gray-500'>
-            Switching to Creem requires a saved, valid Creem API key and each plan
-            mapped to a Creem product. Test the connection below first.
+            <strong>Off</strong> keeps the plans visible but replaces the pay
+            button with the message below (no payments taken). Switching to Creem
+            requires a saved, valid Creem API key and each plan mapped to a Creem
+            product — test the connection first.
           </p>
+
+          {/* Message shown to users when payments are off / a plan is unmapped */}
+          <div className='pt-2'>
+            <label className='block text-sm font-medium text-gray-700 mb-1'>
+              “Payments off” message
+            </label>
+            <Textarea
+              minRows={2}
+              placeholder="Subscriptions are temporarily unavailable. Please check back soon or contact us and we'll help you get set up."
+              value={disabledMsg}
+              onValueChange={setDisabledMsg}
+            />
+            <div className='flex justify-end mt-2'>
+              <Button
+                size='sm'
+                variant='bordered'
+                isLoading={savingMsg}
+                onPress={saveMessage}
+              >
+                Save message
+              </Button>
+            </div>
+            <p className='text-xs text-gray-400 mt-1'>
+              Leave blank to use the default. Shown on the subscriptions page in
+              place of the pay button.
+            </p>
+          </div>
         </CardBody>
       </Card>
 

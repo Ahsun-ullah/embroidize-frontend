@@ -9,25 +9,25 @@ export default function PurchaseButton({
   isActivePlan,
   ctaTitle,
   ctaSubtitle,
+  checkoutMessage,
 }) {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState(null);
   const pathName = usePathname();
 
-  const priceId = plan.stripePriceId;
   const endpoint = '/subscriptions/create-checkout-session';
-  const isUnavailable = !priceId;
+  // The backend decides purchasability (a gateway is live AND this plan is
+  // mapped to it). Fall back to the legacy "has a stripe price" check for older
+  // API responses that don't include the flag.
+  const isUnavailable =
+    plan.purchasable === false ||
+    (plan.purchasable == null && !plan.stripePriceId);
 
   const handlePurchase = async () => {
     const token = Cookies.get('token');
 
     if (!token) {
       window.location.href = `/auth/login?pathName=${pathName}`;
-      return;
-    }
-
-    if (isUnavailable) {
-      setError('This plan is not available right now. Please try again later.');
       return;
     }
 
@@ -43,7 +43,8 @@ export default function PurchaseButton({
             'Content-Type': 'application/json',
             Authorization: `Bearer ${token}`,
           },
-          body: JSON.stringify({ priceId }),
+          // Canonical planId — the backend resolves the active gateway's product.
+          body: JSON.stringify({ planId: plan._id }),
         },
       );
 
@@ -88,12 +89,30 @@ export default function PurchaseButton({
     );
   }
 
+  // Payments unavailable (gateway off, or plan not mapped to the active gateway)
+  // — show the admin-configured message + a Contact CTA instead of a dead button.
+  if (isUnavailable) {
+    return (
+      <div className='w-full'>
+        <div className='w-full py-3.5 px-4 rounded-xl bg-gray-100 text-gray-600 text-center text-sm font-medium'>
+          {checkoutMessage || 'Subscriptions are temporarily unavailable.'}
+        </div>
+        <a
+          href='mailto:support@embroidize.com?subject=Subscription enquiry'
+          className='w-full mt-2 inline-flex items-center justify-center py-3 px-4 rounded-xl bg-black text-white hover:bg-gray-900 transition-all duration-200 font-semibold text-sm'
+        >
+          Contact us
+        </a>
+      </div>
+    );
+  }
+
   // Normal subscribe button
   return (
     <div>
       <button
         onClick={handlePurchase}
-        disabled={isLoading || isUnavailable}
+        disabled={isLoading}
         className='w-full py-5 px-4 rounded-xl bg-black text-white hover:bg-gray-900 active:scale-[0.99] transition-all duration-200 disabled:bg-gray-400 disabled:cursor-not-allowed flex flex-col items-center justify-center gap-0.5'
       >
         {isLoading ? (
@@ -104,9 +123,7 @@ export default function PurchaseButton({
         ) : (
           <>
             <span className='font-semibold text-base leading-tight'>
-              {isUnavailable
-                ? 'Not available'
-                : ctaTitle || `Subscribe to ${plan.name}`}
+              {ctaTitle || `Subscribe to ${plan.name}`}
             </span>
           </>
         )}

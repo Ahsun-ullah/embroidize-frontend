@@ -32,7 +32,8 @@ export async function getCreemSettings() {
   }
 }
 
-export async function getActiveGateway() {
+export async function getPaymentGatewaySettings() {
+  const fallback = { activePaymentGateway: 'stripe', checkoutDisabledMessage: '' };
   try {
     const headers = await financeHeaders();
     const apiUrl = process.env.NEXT_PUBLIC_BASE_API_URL_PROD;
@@ -41,11 +42,14 @@ export async function getActiveGateway() {
       cache: 'no-store',
       next: { revalidate: 0 },
     });
-    if (!res.ok) return 'stripe';
+    if (!res.ok) return fallback;
     const data = await res.json();
-    return data?.data?.activePaymentGateway || 'stripe';
+    return {
+      activePaymentGateway: data?.data?.activePaymentGateway || 'stripe',
+      checkoutDisabledMessage: data?.data?.checkoutDisabledMessage || '',
+    };
   } catch (error) {
-    console.error('Error fetching active gateway:', error);
-    return 'stripe';
+    console.error('Error fetching payment gateway settings:', error);
+    return fallback;
   }
 }

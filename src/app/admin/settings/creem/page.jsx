@@ -2,7 +2,7 @@ import { FinanceGate } from '@/features/admin/FinanceGate';
 import { FinanceUnlockedBar } from '@/features/admin/FinanceUnlockedBar';
 import CreemConfigWrapper from '@/features/settings/CreemConfigWrapper';
 import { checkFinanceUnlocked } from '@/lib/apis/protected/financeAuth';
-import { getActiveGateway, getCreemSettings } from '@/lib/apis/protected/creemConfig';
+import { getPaymentGatewaySettings, getCreemSettings } from '@/lib/apis/protected/creemConfig';
 
 export const dynamic = 'force-dynamic';
 
@@ -15,15 +15,19 @@ export default async function CreemSettingsPage() {
     return <FinanceGate title='Payment Gateway' />;
   }
 
-  const [settings, activeGateway] = await Promise.all([
+  const [settings, gatewaySettings] = await Promise.all([
     getCreemSettings(),
-    getActiveGateway(),
+    getPaymentGatewaySettings(),
   ]);
 
   return (
     <div className='space-y-6'>
       <FinanceUnlockedBar />
-      <CreemConfigWrapper settings={settings} activeGateway={activeGateway} />
+      <CreemConfigWrapper
+        settings={settings}
+        activeGateway={gatewaySettings.activePaymentGateway}
+        checkoutDisabledMessage={gatewaySettings.checkoutDisabledMessage}
+      />
     </div>
   );
 }

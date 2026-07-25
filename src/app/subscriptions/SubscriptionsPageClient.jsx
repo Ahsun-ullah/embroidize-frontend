@@ -226,6 +226,9 @@ export default function SubscriptionsPageClient({ siteConfig }) {
   const [plans, setPlans] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  // Message shown (with a Contact CTA) when a plan can't be bought right now —
+  // gateway is off or the plan isn't mapped to the active gateway.
+  const [checkoutMessage, setCheckoutMessage] = useState('');
   const pathName = usePathname();
   const router = useRouter();
   const { data: userInfoData } = useUserInfoQuery();
@@ -294,6 +297,7 @@ export default function SubscriptionsPageClient({ siteConfig }) {
         if (!response.ok) throw new Error('Failed to fetch plans');
         const data = await response.json();
         setPlans(sortPlans(data.data.plans ?? [])); // ← sort here
+        setCheckoutMessage(data.data.checkoutMessage ?? '');
       } catch (err) {
         setError(err.message);
       } finally {
@@ -379,17 +383,9 @@ export default function SubscriptionsPageClient({ siteConfig }) {
         </div>
 
         <div className='max-w-7xl mx-auto relative z-10 items-center'>
-          {plans.length === 0 ? (
-            <div className='text-center py-24 border border-gray-200 rounded-xl bg-white'>
-              <p className='text-gray-400 text-lg'>No plans available yet.</p>
-              <p className='text-gray-300 text-sm mt-1'>
-                Check back soon for new offers.
-              </p>
-            </div>
-          ) : (
-            <>
-              {/* ONE container for all cards → centered, equal height, consistent */}
-              <div className='w-full flex flex-wrap justify-center items-stretch gap-6 mb-8'>
+          {/* The Free plan is ALWAYS shown. Paid plans render when available;
+              otherwise a "premium coming soon" message sits beside Free. */}
+          <div className='w-full flex flex-wrap justify-center items-stretch gap-6 mb-8'>
                 {/* ---------- STATIC FREE PLAN CARD ---------- */}
                 <div
                   className={`w-full max-w-sm md:w-[360px] relative bg-white rounded-3xl shadow-lg p-7 pt-8 flex flex-col transition-all duration-300 hover:-translate-y-1 hover:shadow-2xl ${
@@ -530,8 +526,29 @@ export default function SubscriptionsPageClient({ siteConfig }) {
                   </div>
                 </div>
 
-                {/* ---------- DYNAMIC PRICING CARDS ---------- */}
-                {plans.map((plan) => {
+                {/* ---------- PAID PLANS (or coming-soon message) ---------- */}
+                {plans.length === 0 ? (
+                  <div className='w-full max-w-sm md:w-[360px] relative bg-white rounded-3xl shadow-lg p-7 pt-8 flex flex-col items-center justify-center text-center'>
+                    <div className='w-16 h-16 rounded-2xl bg-gray-100 flex items-center justify-center text-black mb-4'>
+                      <StarFilled />
+                    </div>
+                    <h2 className='text-xl font-bold text-black'>
+                      Premium plans coming soon
+                    </h2>
+                    <p className='text-sm text-gray-600 mt-2'>
+                      We’re putting the finishing touches on our premium
+                      subscriptions. In the meantime, enjoy the free plan — check
+                      back shortly.
+                    </p>
+                    <a
+                      href='mailto:support@embroidize.com?subject=Notify me about premium plans'
+                      className='w-full mt-6 py-3.5 px-4 rounded-xl bg-black text-white hover:bg-gray-900 transition-all duration-200 font-semibold text-sm'
+                    >
+                      Notify me
+                    </a>
+                  </div>
+                ) : (
+                  plans.map((plan) => {
                   const isActivePlan = activePlanId === plan._id;
                   const isPopular = (plan.billingInterval || '')
                     .toLowerCase()
@@ -677,6 +694,7 @@ export default function SubscriptionsPageClient({ siteConfig }) {
                         isActivePlan={isActivePlan}
                         ctaTitle={d.ctaTitle}
                         ctaSubtitle={d.ctaSub}
+                        checkoutMessage={checkoutMessage}
                       />
 
                       {/* Footer trust row */}
@@ -687,10 +705,9 @@ export default function SubscriptionsPageClient({ siteConfig }) {
                       </div>
                     </div>
                   );
-                })}
+                  })
+                )}
               </div>
-            </>
-          )}
           {/* ---------- TRUST BAR ---------- */}
           <div className='bg-white rounded-2xl shadow-md p-6 md:p-8'>
             <div className='grid grid-cols-2 md:grid-cols-4 gap-6'>
