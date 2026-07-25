@@ -129,10 +129,6 @@ const Footer = () => {
                   { name: 'Pricing', href: '/subscriptions' },
                   { name: 'Contact', href: '/contact-us' },
                   {
-                    name: 'Custom Digitizing',
-                    href: '/custom-embroidery-digitizing-service',
-                  },
-                  {
                     name: 'Etsy Shop',
                     href: 'https://www.etsy.com/shop/embroidize',
                     external: true,

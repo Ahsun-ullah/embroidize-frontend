@@ -2,7 +2,6 @@ export const dynamic = 'force-dynamic';
 
 import DashboardCharts from '@/features/dashboard/components/DashboardCharts';
 import { getNewReviewCount } from '@/lib/apis/protected/adminReviews';
-import { getCustomOrderCount } from '@/lib/apis/protected/customOrders';
 import { getDashboardStatsAPI } from '@/lib/apis/protected/users';
 import { getProducts } from '@/lib/apis/public/products';
 import Link from 'next/link';
@@ -10,7 +9,6 @@ import Link from 'next/link';
 export default async function AdminDashboard() {
   // 1. Fetch Aggregated Stats from Backend (Fast)
   const stats = await getDashboardStatsAPI();
-  const { total: customOrderTotal } = await getCustomOrderCount();
   const newReviewCount = await getNewReviewCount();
 
   // 2. Fetch Product Count (keep existing logic or create similar aggregated endpoint)
@@ -36,7 +34,7 @@ export default async function AdminDashboard() {
         This is where you can manage users, view reports, and adjust settings.
       </p>
 
-      <div className='grid grid-cols-1 md:grid-cols-2 lg:grid-cols-6 gap-4 mb-8'>
+      <div className='grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4 mb-8'>
         <Link
           href='/admin/all-products'
           className='bg-white rounded shadow p-4 flex flex-col items-center'
@@ -62,14 +60,6 @@ export default async function AdminDashboard() {
           </span>
           <span className='text-gray-500 mt-2'>Top Countries</span>
         </div>
-        <Link
-          href='/admin/custom-orders'
-          className='bg-white rounded shadow p-4 flex flex-col items-center'
-        >
-          <span className='text-2xl font-bold'>{customOrderTotal || 0}</span>
-          <span className='text-gray-500 mt-2'>Custom Orders</span>
-        </Link>
-
         <Link
           href='/admin/reviews'
           className='relative bg-white rounded shadow p-4 flex flex-col items-center'
