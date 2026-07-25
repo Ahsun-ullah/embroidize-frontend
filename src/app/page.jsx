@@ -15,11 +15,9 @@ import {
 import {
   ArrowRight,
   BadgeCheck,
-  Clock,
   Download,
   ShieldCheck,
   Sparkles,
-  Timer,
 } from 'lucide-react';
 import Link from 'next/link';
 import { Suspense } from 'react';
@@ -132,7 +130,7 @@ export default async function Home() {
       <section className='container overflow-hidden py-10 sm:py-12  mx-auto max-w-7xl'>
         <div className='flex flex-col lg:flex-row items-center justify-between gap-10 lg:gap-16'>
           {/* LEFT: Text */}
-          <div className='w-full text-center lg:text-left'>
+          <div className='w-full lg:w-1/2 text-center lg:text-left'>
             {/* Badge */}
             <span className='inline-flex items-center gap-2 rounded-full bg-gray-300/70 px-4 py-1.5 text-sm font-semibold text-black'>
               <Sparkles className='h-4 w-4' aria-hidden />
@@ -206,6 +204,57 @@ export default async function Home() {
                 <ArrowRight className='h-5 w-5' aria-hidden />
               </span>
             </Link>
+          </div>
+
+          {/* RIGHT: Subscription promo */}
+          <div className='w-full lg:w-1/2 flex justify-center lg:justify-end'>
+            <div className='animate-float w-full max-w-md rounded-3xl bg-white p-8 sm:p-12 shadow-md ring-1 ring-black/5'>
+              <span className='inline-flex items-center gap-2 rounded-full bg-black px-4 py-1.5 text-sm font-semibold text-white'>
+                <Sparkles className='h-4 w-4' aria-hidden />
+                Go Premium
+              </span>
+
+              <h2 className='mt-5 text-3xl sm:text-4xl font-extrabold leading-[1.1] tracking-tight text-slate-900'>
+                Unlimited Premium Designs
+              </h2>
+              <p className='mt-3 text-base text-slate-500'>
+                Subscribe once and download as much as you need — premium,
+                professionally digitized designs in every popular format.
+              </p>
+
+              <div className='mt-7 space-y-4'>
+                <div className='flex items-center gap-3'>
+                  <span className='flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-gray-100 text-slate-900'>
+                    <Download className='h-5 w-5' aria-hidden />
+                  </span>
+                  <p className='font-semibold text-slate-900'>Unlimited downloads</p>
+                </div>
+                <div className='flex items-center gap-3'>
+                  <span className='flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-gray-100 text-slate-900'>
+                    <BadgeCheck className='h-5 w-5' aria-hidden />
+                  </span>
+                  <p className='font-semibold text-slate-900'>
+                    All machine formats included
+                  </p>
+                </div>
+                <div className='flex items-center gap-3'>
+                  <span className='flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-gray-100 text-slate-900'>
+                    <ShieldCheck className='h-5 w-5' aria-hidden />
+                  </span>
+                  <p className='font-semibold text-slate-900'>Cancel anytime</p>
+                </div>
+              </div>
+
+              <Link
+                href='/subscriptions'
+                className='group mt-8 inline-flex w-full items-center justify-between gap-4 rounded-full bg-black py-4 px-7 text-base font-bold text-white transition hover:bg-gray-800'
+              >
+                View Plans
+                <span className='flex h-9 w-9 items-center justify-center rounded-full bg-white text-gray-500 transition-transform group-hover:translate-x-0.5'>
+                  <ArrowRight className='h-5 w-5' aria-hidden />
+                </span>
+              </Link>
+            </div>
           </div>
 
         </div>

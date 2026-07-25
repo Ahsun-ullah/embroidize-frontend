@@ -1,7 +1,6 @@
 import { ContactUsForm } from '@/components/Common/ContactUsForm';
 import Footer from '@/components/user/HomePage/Footer';
 import Header from '@/components/user/HomePage/Header';
-import Link from 'next/link';
 
 export const metadata = {
   title: 'Contact Embroidize – Support & Custom Embroidery Requests',
@@ -41,12 +40,12 @@ const ContactUsPage = () => {
           </h1>
 
           <p className='text-lg text-gray-600'>
-            Need help with a design, having trouble with a file, or want a
-            custom embroidery design? Our team is here to assist you.
+            Need help with a design or having trouble with a file? Our team is
+            here to assist you.
           </p>
         </div>
         {/* /* QUICK CONTACT INFO */}
-        <section className='grid md:grid-cols-3 gap-6 mb-14'>
+        <section className='grid md:grid-cols-2 gap-6 mb-14'>
           <div className='p-6 border rounded-xl text-center shadow-sm hover:shadow-lg hover:border-blue-400 transition-all duration-300 cursor-pointer'>
             <h3 className='font-semibold text-lg mb-2'>Email Support</h3>
             <p className='text-gray-600 text-sm mb-2'>
