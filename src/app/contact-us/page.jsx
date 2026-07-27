@@ -3,16 +3,16 @@ import Footer from '@/components/user/HomePage/Footer';
 import Header from '@/components/user/HomePage/Header';
 
 export const metadata = {
-  title: 'Contact Embroidize – Support & Custom Embroidery Requests',
+  title: 'Contact Embroidize – Customer Support',
   description:
-    'Contact Embroidize for support, custom embroidery design requests, or business inquiries. Fast response and reliable assistance for all your embroidery needs.',
+    'Contact Embroidize for help with downloads, file formats, account questions, or business inquiries. Fast, reliable support for all your embroidery design needs.',
   alternates: {
     canonical: 'https://embroidize.com/contact-us',
   },
   openGraph: {
-    title: 'Contact Embroidize – Support & Custom Requests',
+    title: 'Contact Embroidize – Customer Support',
     description:
-      'Need help with embroidery files or custom designs? Contact Embroidize support team for fast and reliable assistance.',
+      'Need help with a download, file format, or your account? Contact the Embroidize support team for fast and reliable assistance.',
     url: 'https://embroidize.com/contact-us',
     siteName: 'Embroidize',
     images: [
@@ -79,11 +79,11 @@ const ContactUsPage = () => {
             <h2 className='text-2xl font-semibold'>How We Can Help</h2>
 
             <ul className='space-y-3 text-gray-700'>
-              <li>✔ Fix embroidery file issues</li>
-              <li>✔ Resize or adjust designs</li>
-              <li>✔ Provide correct formats (PES, DST, JEF, etc.)</li>
-              <li>✔ Custom embroidery design requests</li>
               <li>✔ Help with downloads or account issues</li>
+              <li>✔ Questions about available file formats (PES, DST, JEF, etc.)</li>
+              <li>✔ Trouble opening or downloading a file</li>
+              <li>✔ Billing and subscription questions</li>
+              <li>✔ Business and licensing inquiries</li>
             </ul>
 
             <div className='bg-gray-50 p-6 rounded-xl'>
