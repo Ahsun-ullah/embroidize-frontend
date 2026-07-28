@@ -2,6 +2,12 @@
 
 import { ErrorToast } from '@/components/Common/ErrorToast';
 import { SuccessToast } from '@/components/Common/SuccessToast';
+import { openInvoice } from '@/features/admin/invoice';
+import {
+  openStatementShell,
+  renderStatement,
+  renderStatementError,
+} from '@/features/admin/statement';
 import {
   Button,
   Chip,
@@ -17,8 +23,6 @@ import {
   ModalFooter,
   ModalHeader,
   Pagination,
-  Select,
-  SelectItem,
   Table,
   TableBody,
   TableCell,
@@ -28,15 +32,22 @@ import {
   Textarea,
   useDisclosure,
 } from '@heroui/react';
-import { AlertTriangle, Ban, DollarSign, Edit, ExternalLink, Eye, FileText, Receipt, RotateCcw, Search, TrendingUp, Users } from 'lucide-react';
+import {
+  AlertTriangle,
+  Ban,
+  DollarSign,
+  Edit,
+  ExternalLink,
+  Eye,
+  FileText,
+  Receipt,
+  RotateCcw,
+  Search,
+  TrendingUp,
+  Users,
+} from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import { useMemo, useState } from 'react';
-import { openInvoice } from '@/features/admin/invoice';
-import {
-  openStatementShell,
-  renderStatement,
-  renderStatementError,
-} from '@/features/admin/statement';
 
 // ─── Constants ────────────────────────────────────────────────────────────────
 
@@ -68,7 +79,10 @@ function getToken() {
 }
 
 function apiBase() {
-  return process.env.NEXT_PUBLIC_BASE_API_URL_PROD || process.env.NEXT_PUBLIC_BASE_API_URL;
+  return (
+    process.env.NEXT_PUBLIC_BASE_API_URL_PROD ||
+    process.env.NEXT_PUBLIC_BASE_API_URL
+  );
 }
 
 function getFinanceToken() {
@@ -88,15 +102,37 @@ function authHeaders() {
   return h;
 }
 
+// Which payment gateway owns a subscription record. Mirrors the backend's
+// subscriptionGateway(): prefer the stamped `gateway` field, else infer from
+// the presence of Creem ids (legacy records written before the field existed).
+function subProvider(sub) {
+  if (!sub) return 'stripe';
+  if (sub.gateway === 'stripe' || sub.gateway === 'creem') return sub.gateway;
+  return sub.creemSubscriptionId || sub.creemCustomerId ? 'creem' : 'stripe';
+}
+
+// Human label for a provider key.
+function providerLabel(p) {
+  return p === 'creem' ? 'Creem' : 'Stripe';
+}
+
 function fmt(date) {
   if (!date) return '—';
-  return new Date(date).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
+  return new Date(date).toLocaleDateString('en-US', {
+    month: 'short',
+    day: 'numeric',
+    year: 'numeric',
+  });
 }
 
 function fmtDateTime(date) {
   if (!date) return '—';
   return new Date(date).toLocaleString('en-US', {
-    month: 'short', day: 'numeric', year: 'numeric', hour: '2-digit', minute: '2-digit',
+    month: 'short',
+    day: 'numeric',
+    year: 'numeric',
+    hour: '2-digit',
+    minute: '2-digit',
   });
 }
 
@@ -107,9 +143,11 @@ function quotaLabel(used, limit) {
 }
 
 function QuotaBar({ used, limit }) {
-  if (limit == null) return <span className='text-sm text-gray-500'>Unlimited</span>;
+  if (limit == null)
+    return <span className='text-sm text-gray-500'>Unlimited</span>;
   const pct = Math.min(100, Math.round((used / limit) * 100));
-  const color = pct >= 90 ? 'bg-red-500' : pct >= 70 ? 'bg-yellow-400' : 'bg-green-500';
+  const color =
+    pct >= 90 ? 'bg-red-500' : pct >= 70 ? 'bg-yellow-400' : 'bg-green-500';
   return (
     <div className='w-full'>
       <div className='flex justify-between text-xs text-gray-500 mb-1'>
@@ -117,7 +155,10 @@ function QuotaBar({ used, limit }) {
         <span>{limit} limit</span>
       </div>
       <div className='h-1.5 w-full bg-gray-200 rounded-full overflow-hidden'>
-        <div className={`h-full ${color} rounded-full transition-all`} style={{ width: `${pct}%` }} />
+        <div
+          className={`h-full ${color} rounded-full transition-all`}
+          style={{ width: `${pct}%` }}
+        />
       </div>
     </div>
   );
@@ -126,8 +167,14 @@ function QuotaBar({ used, limit }) {
 function StatCard({ label, value, color, sub }) {
   return (
     <div className='bg-white dark:bg-gray-900 rounded-xl border border-gray-200 dark:border-gray-800 p-4 flex flex-col gap-1'>
-      <span className='text-xs font-semibold text-gray-400 uppercase tracking-wide'>{label}</span>
-      <span className={`text-2xl font-bold ${color || 'text-gray-900 dark:text-white'}`}>{value}</span>
+      <span className='text-xs font-semibold text-gray-400 uppercase tracking-wide'>
+        {label}
+      </span>
+      <span
+        className={`text-2xl font-bold ${color || 'text-gray-900 dark:text-white'}`}
+      >
+        {value}
+      </span>
       {sub && <span className='text-xs text-gray-400'>{sub}</span>}
     </div>
   );
@@ -137,30 +184,87 @@ function DetailRow({ label, value }) {
   if (value == null || value === '') return null;
   return (
     <div className='flex flex-col gap-0.5'>
-      <span className='text-xs font-semibold text-gray-400 uppercase tracking-wide'>{label}</span>
-      <span className='text-sm text-gray-900 dark:text-gray-100 break-all'>{value}</span>
+      <span className='text-xs font-semibold text-gray-400 uppercase tracking-wide'>
+        {label}
+      </span>
+      <span className='text-sm text-gray-900 dark:text-gray-100 break-all'>
+        {value}
+      </span>
+    </div>
+  );
+}
+
+// Per-month download history as a compact grayscale bar list (newest first).
+function MonthlyBars({ months = [], total = 0 }) {
+  const max = Math.max(1, ...months.map((m) => m.count));
+  return (
+    <div className='space-y-1.5'>
+      {months.map((m) => (
+        <div key={m.month} className='flex items-center gap-3'>
+          <span className='text-xs text-gray-500 w-20 shrink-0'>{m.label}</span>
+          <div className='flex-1 h-2 bg-gray-100 dark:bg-gray-800 rounded-full overflow-hidden'>
+            <div
+              className='h-full bg-gray-700 dark:bg-gray-300 rounded-full transition-all'
+              style={{ width: `${(m.count / max) * 100}%` }}
+            />
+          </div>
+          <span className='text-xs font-mono text-gray-700 dark:text-gray-300 w-10 text-right shrink-0'>
+            {m.count}
+          </span>
+        </div>
+      ))}
+      <div className='flex justify-between pt-1 text-xs text-gray-400'>
+        <span>Last {months.length} months</span>
+        <span className='font-semibold text-gray-600 dark:text-gray-300'>
+          {total} total
+        </span>
+      </div>
     </div>
   );
 }
 
 function AuditActionBadge({ action }) {
   const map = {
-    cancel_immediately: { label: 'Cancelled Immediately', color: 'bg-red-100 text-red-700' },
-    cancel_at_period_end: { label: 'Cancel at Period End', color: 'bg-orange-100 text-orange-700' },
-    update_quota: { label: 'Quota Updated', color: 'bg-blue-100 text-blue-700' },
-    update_status: { label: 'Status Updated', color: 'bg-yellow-100 text-yellow-700' },
+    cancel_immediately: {
+      label: 'Cancelled Immediately',
+      color: 'bg-red-100 text-red-700',
+    },
+    cancel_at_period_end: {
+      label: 'Cancel at Period End',
+      color: 'bg-orange-100 text-orange-700',
+    },
+    update_quota: {
+      label: 'Quota Updated',
+      color: 'bg-blue-100 text-blue-700',
+    },
+    update_status: {
+      label: 'Status Updated',
+      color: 'bg-yellow-100 text-yellow-700',
+    },
     refund: { label: 'Refund Issued', color: 'bg-purple-100 text-purple-700' },
-    reset_downloads: { label: 'Downloads Reset', color: 'bg-green-100 text-green-700' },
+    reset_downloads: {
+      label: 'Downloads Reset',
+      color: 'bg-green-100 text-green-700',
+    },
   };
-  const { label, color } = map[action] || { label: action, color: 'bg-gray-100 text-gray-600' };
+  const { label, color } = map[action] || {
+    label: action,
+    color: 'bg-gray-100 text-gray-600',
+  };
   return (
-    <span className={`px-2 py-0.5 rounded-full text-xs font-semibold ${color}`}>{label}</span>
+    <span className={`px-2 py-0.5 rounded-full text-xs font-semibold ${color}`}>
+      {label}
+    </span>
   );
 }
 
 // ─── Component ────────────────────────────────────────────────────────────────
 
-export default function SubscribersTableWrapper({ subscribers, stats, revenue }) {
+export default function SubscribersTableWrapper({
+  subscribers,
+  stats,
+  revenue,
+}) {
   const router = useRouter();
 
   const [search, setSearch] = useState('');
@@ -168,7 +272,11 @@ export default function SubscribersTableWrapper({ subscribers, stats, revenue })
   const [page, setPage] = useState(1);
 
   // View details modal
-  const { isOpen: isViewOpen, onOpen: onViewOpen, onOpenChange: onViewChange } = useDisclosure();
+  const {
+    isOpen: isViewOpen,
+    onOpen: onViewOpen,
+    onOpenChange: onViewChange,
+  } = useDisclosure();
   const [viewUser, setViewUser] = useState(null);
   const [viewTab, setViewTab] = useState('details'); // 'details' | 'invoices' | 'audit'
   const [auditLogs, setAuditLogs] = useState([]);
@@ -179,8 +287,16 @@ export default function SubscribersTableWrapper({ subscribers, stats, revenue })
   const [invoicesLoading, setInvoicesLoading] = useState(false);
   const [invoicesError, setInvoicesError] = useState('');
 
+  // Monthly download history (aggregated from the Download log, gateway-agnostic)
+  const [monthly, setMonthly] = useState(null); // { months: [...], total }
+  const [monthlyLoading, setMonthlyLoading] = useState(false);
+
   // Adjust quotas modal
-  const { isOpen: isEditOpen, onOpen: onEditOpen, onOpenChange: onEditChange } = useDisclosure();
+  const {
+    isOpen: isEditOpen,
+    onOpen: onEditOpen,
+    onOpenChange: onEditChange,
+  } = useDisclosure();
   const [editUser, setEditUser] = useState(null);
   const [editStatus, setEditStatus] = useState('');
   const [editDownloadCount, setEditDownloadCount] = useState('');
@@ -189,20 +305,32 @@ export default function SubscribersTableWrapper({ subscribers, stats, revenue })
   const [isUpdating, setIsUpdating] = useState(false);
 
   // Cancel modal
-  const { isOpen: isCancelOpen, onOpen: onCancelOpen, onOpenChange: onCancelChange } = useDisclosure();
+  const {
+    isOpen: isCancelOpen,
+    onOpen: onCancelOpen,
+    onOpenChange: onCancelChange,
+  } = useDisclosure();
   const [cancelUser, setCancelUser] = useState(null);
   const [cancelImmediately, setCancelImmediately] = useState(false);
   const [cancelReason, setCancelReason] = useState('');
   const [isCancelling, setIsCancelling] = useState(false);
 
   // Reset downloads modal
-  const { isOpen: isResetOpen, onOpen: onResetOpen, onOpenChange: onResetChange } = useDisclosure();
+  const {
+    isOpen: isResetOpen,
+    onOpen: onResetOpen,
+    onOpenChange: onResetChange,
+  } = useDisclosure();
   const [resetUser, setResetUser] = useState(null);
   const [resetTarget, setResetTarget] = useState('daily'); // 'daily' | 'period' | 'both'
   const [isResetting, setIsResetting] = useState(false);
 
   // Refund modal
-  const { isOpen: isRefundOpen, onOpen: onRefundOpen, onOpenChange: onRefundChange } = useDisclosure();
+  const {
+    isOpen: isRefundOpen,
+    onOpen: onRefundOpen,
+    onOpenChange: onRefundChange,
+  } = useDisclosure();
   const [refundUser, setRefundUser] = useState(null);
   const [refundAmount, setRefundAmount] = useState('');
   const [refundReason, setRefundReason] = useState('');
@@ -237,10 +365,15 @@ export default function SubscribersTableWrapper({ subscribers, stats, revenue })
       if (stmtEnd) url.searchParams.set('endDate', stmtEnd);
       const res = await fetch(url.toString(), { headers: authHeaders() });
       const result = await res.json();
-      if (!res.ok) throw new Error(result?.message || 'Failed to build statement');
+      if (!res.ok)
+        throw new Error(result?.message || 'Failed to build statement');
       const { rows = [], summary = {} } = result?.data || {};
       const f = (d) =>
-        new Date(d).toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric' });
+        new Date(d).toLocaleDateString('en-US', {
+          year: 'numeric',
+          month: 'short',
+          day: 'numeric',
+        });
       renderStatement(shell, {
         title: 'Subscriptions Statement',
         periodLabel:
@@ -261,8 +394,15 @@ export default function SubscribersTableWrapper({ subscribers, stats, revenue })
             label: `Payments in (${summary.count ?? 0} transactions)`,
             value: `$${Number(summary.gross || 0).toFixed(2)}`,
           },
-          { label: 'Refunds', value: `−$${Number(summary.refunds || 0).toFixed(2)}` },
-          { label: 'Net collected', value: `$${Number(summary.net || 0).toFixed(2)}`, strong: true },
+          {
+            label: 'Refunds',
+            value: `−$${Number(summary.refunds || 0).toFixed(2)}`,
+          },
+          {
+            label: 'Net collected',
+            value: `$${Number(summary.net || 0).toFixed(2)}`,
+            strong: true,
+          },
         ],
       });
     } catch (err) {
@@ -295,8 +435,14 @@ export default function SubscribersTableWrapper({ subscribers, stats, revenue })
   const totalPages = Math.max(1, Math.ceil(filtered.length / PER_PAGE));
   const paginated = filtered.slice((page - 1) * PER_PAGE, page * PER_PAGE);
 
-  const handleSearch = (val) => { setSearch(val); setPage(1); };
-  const handleStatusFilter = (val) => { setStatusFilter(val); setPage(1); };
+  const handleSearch = (val) => {
+    setSearch(val);
+    setPage(1);
+  };
+  const handleStatusFilter = (val) => {
+    setStatusFilter(val);
+    setPage(1);
+  };
 
   // ── View modal ─────────────────────────────────────────────────────────────
 
@@ -306,15 +452,36 @@ export default function SubscribersTableWrapper({ subscribers, stats, revenue })
     setAuditLogs([]);
     setInvoiceData(null);
     setInvoicesError('');
+    setMonthly(null);
     onViewOpen();
+    loadMonthly(user._id);
+  };
+
+  const loadMonthly = async (userId) => {
+    setMonthlyLoading(true);
+    try {
+      const res = await fetch(
+        `${apiBase()}/downloads/user/${userId}/monthly`,
+        { headers: authHeaders() },
+      );
+      const result = await res.json();
+      setMonthly(res.ok ? result?.data || null : null);
+    } catch {
+      setMonthly(null);
+    } finally {
+      setMonthlyLoading(false);
+    }
   };
 
   const loadAuditLog = async (userId) => {
     setAuditLoading(true);
     try {
-      const res = await fetch(`${apiBase()}/admin/users/${userId}/subscription/audit-log`, {
-        headers: authHeaders(),
-      });
+      const res = await fetch(
+        `${apiBase()}/admin/users/${userId}/subscription/audit-log`,
+        {
+          headers: authHeaders(),
+        },
+      );
       const data = await res.json();
       setAuditLogs(data?.data?.logs || []);
     } catch {
@@ -328,11 +495,15 @@ export default function SubscribersTableWrapper({ subscribers, stats, revenue })
     setInvoicesLoading(true);
     setInvoicesError('');
     try {
-      const res = await fetch(`${apiBase()}/admin/users/${userId}/subscription/invoices`, {
-        headers: authHeaders(),
-      });
+      const res = await fetch(
+        `${apiBase()}/admin/users/${userId}/subscription/invoices`,
+        {
+          headers: authHeaders(),
+        },
+      );
       const result = await res.json();
-      if (!res.ok) throw new Error(result?.message || 'Failed to load invoices');
+      if (!res.ok)
+        throw new Error(result?.message || 'Failed to load invoices');
       setInvoiceData(result?.data || null);
     } catch (err) {
       setInvoiceData(null);
@@ -359,8 +530,10 @@ export default function SubscribersTableWrapper({ subscribers, stats, revenue })
     setAuditLogs([]);
     setInvoiceData(null);
     setInvoicesError('');
+    setMonthly(null);
     onViewOpen();
     loadInvoices(user._id);
+    loadMonthly(user._id);
   };
 
   // ── Edit modal ─────────────────────────────────────────────────────────────
@@ -380,17 +553,24 @@ export default function SubscribersTableWrapper({ subscribers, stats, revenue })
     try {
       const body = {};
       if (editStatus) body.status = editStatus;
-      if (editDownloadCount !== '') body.downloadCount = parseInt(editDownloadCount, 10);
-      if (editDailyCount !== '') body.dailyDownloadCount = parseInt(editDailyCount, 10);
-      if (editPeriodEnd) body.periodEndDate = new Date(editPeriodEnd).toISOString();
+      if (editDownloadCount !== '')
+        body.downloadCount = parseInt(editDownloadCount, 10);
+      if (editDailyCount !== '')
+        body.dailyDownloadCount = parseInt(editDailyCount, 10);
+      if (editPeriodEnd)
+        body.periodEndDate = new Date(editPeriodEnd).toISOString();
 
-      const res = await fetch(`${apiBase()}/admin/users/${editUser._id}/subscription`, {
-        method: 'PUT',
-        headers: authHeaders(),
-        body: JSON.stringify(body),
-      });
+      const res = await fetch(
+        `${apiBase()}/admin/users/${editUser._id}/subscription`,
+        {
+          method: 'PUT',
+          headers: authHeaders(),
+          body: JSON.stringify(body),
+        },
+      );
       const result = await res.json();
-      if (!res.ok) throw new Error(result.message || 'Failed to update subscription');
+      if (!res.ok)
+        throw new Error(result.message || 'Failed to update subscription');
 
       SuccessToast('Success', 'Subscription updated successfully!', 3000);
       onEditChange(false);
@@ -413,20 +593,27 @@ export default function SubscribersTableWrapper({ subscribers, stats, revenue })
     setIsResetting(true);
     try {
       const body = {};
-      if (resetTarget === 'daily' || resetTarget === 'both') body.dailyDownloadCount = 0;
-      if (resetTarget === 'period' || resetTarget === 'both') body.downloadCount = 0;
+      if (resetTarget === 'daily' || resetTarget === 'both')
+        body.dailyDownloadCount = 0;
+      if (resetTarget === 'period' || resetTarget === 'both')
+        body.downloadCount = 0;
 
-      const res = await fetch(`${apiBase()}/admin/users/${resetUser._id}/subscription`, {
-        method: 'PUT',
-        headers: authHeaders(),
-        body: JSON.stringify(body),
-      });
+      const res = await fetch(
+        `${apiBase()}/admin/users/${resetUser._id}/subscription`,
+        {
+          method: 'PUT',
+          headers: authHeaders(),
+          body: JSON.stringify(body),
+        },
+      );
       const result = await res.json();
       if (!res.ok) throw new Error(result.message || 'Failed to reset');
       const label =
-        resetTarget === 'daily' ? 'Daily download count reset to 0.'
-        : resetTarget === 'period' ? 'Period download count reset to 0.'
-        : 'Daily and period download counts reset to 0.';
+        resetTarget === 'daily'
+          ? 'Daily download count reset to 0.'
+          : resetTarget === 'period'
+            ? 'Period download count reset to 0.'
+            : 'Daily and period download counts reset to 0.';
       SuccessToast('Success', label, 3000);
       onResetChange(false);
       router.refresh();
@@ -450,14 +637,22 @@ export default function SubscribersTableWrapper({ subscribers, stats, revenue })
     if (!cancelUser) return;
     setIsCancelling(true);
     try {
-      const res = await fetch(`${apiBase()}/admin/users/${cancelUser._id}/subscription/cancel`, {
-        method: 'POST',
-        headers: authHeaders(),
-        body: JSON.stringify({ cancelImmediately, reason: cancelReason }),
-      });
+      const res = await fetch(
+        `${apiBase()}/admin/users/${cancelUser._id}/subscription/cancel`,
+        {
+          method: 'POST',
+          headers: authHeaders(),
+          body: JSON.stringify({ cancelImmediately, reason: cancelReason }),
+        },
+      );
       const result = await res.json();
-      if (!res.ok) throw new Error(result.message || 'Failed to cancel subscription');
-      SuccessToast('Success', result.message || 'Subscription cancelled.', 3000);
+      if (!res.ok)
+        throw new Error(result.message || 'Failed to cancel subscription');
+      SuccessToast(
+        'Success',
+        result.message || 'Subscription cancelled.',
+        3000,
+      );
       onCancelChange(false);
       router.refresh();
     } catch (err) {
@@ -486,13 +681,17 @@ export default function SubscribersTableWrapper({ subscribers, stats, revenue })
         body.amount = Math.round(parseFloat(refundAmount) * 100);
       }
 
-      const res = await fetch(`${apiBase()}/admin/users/${refundUser._id}/subscription/refund`, {
-        method: 'POST',
-        headers: authHeaders(),
-        body: JSON.stringify(body),
-      });
+      const res = await fetch(
+        `${apiBase()}/admin/users/${refundUser._id}/subscription/refund`,
+        {
+          method: 'POST',
+          headers: authHeaders(),
+          body: JSON.stringify(body),
+        },
+      );
       const result = await res.json();
-      if (!res.ok) throw new Error(result.message || 'Failed to process refund');
+      if (!res.ok)
+        throw new Error(result.message || 'Failed to process refund');
       SuccessToast('Success', result.message || 'Refund processed.', 4000);
       onRefundChange(false);
     } catch (err) {
@@ -526,14 +725,20 @@ export default function SubscribersTableWrapper({ subscribers, stats, revenue })
           <div className='flex items-center gap-3'>
             {user.profile_image?.url ? (
               // eslint-disable-next-line @next/next/no-img-element
-              <img src={user.profile_image.url} alt={user.name} className='w-9 h-9 rounded-full object-cover shrink-0' />
+              <img
+                src={user.profile_image.url}
+                alt={user.name}
+                className='w-9 h-9 rounded-full object-cover shrink-0'
+              />
             ) : (
               <div className='w-9 h-9 rounded-full bg-gradient-to-br from-indigo-400 to-pink-400 flex items-center justify-center text-white font-bold text-sm shrink-0'>
                 {(user.name || user.email || '?').charAt(0).toUpperCase()}
               </div>
             )}
             <div className='min-w-0'>
-              <p className='text-sm font-semibold truncate'>{user.name || '—'}</p>
+              <p className='text-sm font-semibold truncate'>
+                {user.name || '—'}
+              </p>
               <p className='text-xs text-gray-500 truncate'>{user.email}</p>
             </div>
           </div>
@@ -544,25 +749,37 @@ export default function SubscribersTableWrapper({ subscribers, stats, revenue })
           <div>
             <p className='text-sm font-semibold'>{plan.name}</p>
             <p className='text-xs text-gray-500 capitalize'>
-              {plan.type === 'one-time' ? 'One-time' : `${plan.billingInterval}ly`} · ${plan.price}
+              {plan.type === 'one-time'
+                ? 'One-time'
+                : `${plan.billingInterval}ly`}{' '}
+              · ${plan.price}
             </p>
           </div>
-        ) : <span className='text-gray-400 text-xs'>—</span>;
+        ) : (
+          <span className='text-gray-400 text-xs'>—</span>
+        );
 
       case 'provider': {
-        const p = sub?.provider || 'stripe';
+        const p = subProvider(sub);
         return (
           <Chip size='sm' variant='flat' className='capitalize' color='default'>
-            {p}
+            {providerLabel(p)}
           </Chip>
         );
       }
 
       case 'status':
         return (
-          <Chip color={STATUS_CHIP[sub?.status] || 'default'} size='sm' variant='flat' className='capitalize'>
+          <Chip
+            color={STATUS_CHIP[sub?.status] || 'default'}
+            size='sm'
+            variant='flat'
+            className='capitalize'
+          >
             {sub?.status?.replace('_', ' ') || '—'}
-            {sub?.cancelAtPeriodEnd && <span className='ml-1 text-[10px] opacity-70'>(cancels)</span>}
+            {sub?.cancelAtPeriodEnd && (
+              <span className='ml-1 text-[10px] opacity-70'>(cancels)</span>
+            )}
           </Chip>
         );
 
@@ -571,7 +788,9 @@ export default function SubscribersTableWrapper({ subscribers, stats, revenue })
         const limit = plan?.downloadLimit ?? null;
         return (
           <div className='min-w-[120px]'>
-            <p className='text-xs font-mono text-gray-700 dark:text-gray-300 mb-1'>{quotaLabel(used, limit)}</p>
+            <p className='text-xs font-mono text-gray-700 dark:text-gray-300 mb-1'>
+              {quotaLabel(used, limit)}
+            </p>
             <QuotaBar used={used} limit={limit} />
           </div>
         );
@@ -582,7 +801,9 @@ export default function SubscribersTableWrapper({ subscribers, stats, revenue })
         const limit = plan?.dailyLimit ?? null;
         return (
           <div className='min-w-[100px]'>
-            <p className='text-xs font-mono text-gray-700 dark:text-gray-300 mb-1'>{quotaLabel(used, limit)}</p>
+            <p className='text-xs font-mono text-gray-700 dark:text-gray-300 mb-1'>
+              {quotaLabel(used, limit)}
+            </p>
             <QuotaBar used={used} limit={limit} />
           </div>
         );
@@ -595,38 +816,69 @@ export default function SubscribersTableWrapper({ subscribers, stats, revenue })
               <>
                 <p>{fmt(sub.periodEndDate)}</p>
                 {sub.cancelAtPeriodEnd && (
-                  <p className='text-xs text-red-500 mt-0.5'>Cancels at period end</p>
+                  <p className='text-xs text-red-500 mt-0.5'>
+                    Cancels at period end
+                  </p>
                 )}
               </>
-            ) : <span className='text-gray-400'>—</span>}
+            ) : (
+              <span className='text-gray-400'>—</span>
+            )}
           </div>
         );
 
       case 'joined':
-        return <div className='text-sm text-gray-600'>{fmt(user.createdAt)}</div>;
+        return (
+          <div className='text-sm text-gray-600'>{fmt(user.createdAt)}</div>
+        );
 
       case 'actions':
         return (
           <Dropdown>
             <DropdownTrigger>
               <Button isIconOnly size='sm' variant='light'>
-                <svg className='w-4 h-4' fill='none' stroke='currentColor' viewBox='0 0 24 24'>
-                  <path strokeLinecap='round' strokeLinejoin='round' strokeWidth={2}
-                    d='M12 5v.01M12 12v.01M12 19v.01M12 6a1 1 0 110-2 1 1 0 010 2zm0 7a1 1 0 110-2 1 1 0 010 2zm0 7a1 1 0 110-2 1 1 0 010 2z' />
+                <svg
+                  className='w-4 h-4'
+                  fill='none'
+                  stroke='currentColor'
+                  viewBox='0 0 24 24'
+                >
+                  <path
+                    strokeLinecap='round'
+                    strokeLinejoin='round'
+                    strokeWidth={2}
+                    d='M12 5v.01M12 12v.01M12 19v.01M12 6a1 1 0 110-2 1 1 0 010 2zm0 7a1 1 0 110-2 1 1 0 010 2zm0 7a1 1 0 110-2 1 1 0 010 2z'
+                  />
                 </svg>
               </Button>
             </DropdownTrigger>
             <DropdownMenu aria-label='Subscriber actions'>
-              <DropdownItem key='view' startContent={<Eye size={16} />} onClick={() => handleView(user)}>
+              <DropdownItem
+                key='view'
+                startContent={<Eye size={16} />}
+                onClick={() => handleView(user)}
+              >
                 View Details
               </DropdownItem>
-              <DropdownItem key='invoices' startContent={<Receipt size={16} />} onClick={() => handleInvoices(user)}>
+              <DropdownItem
+                key='invoices'
+                startContent={<Receipt size={16} />}
+                onClick={() => handleInvoices(user)}
+              >
                 Invoices / Payments
               </DropdownItem>
-              <DropdownItem key='edit' startContent={<Edit size={16} />} onClick={() => handleEdit(user)}>
+              <DropdownItem
+                key='edit'
+                startContent={<Edit size={16} />}
+                onClick={() => handleEdit(user)}
+              >
                 Adjust Quotas
               </DropdownItem>
-              <DropdownItem key='reset' startContent={<RotateCcw size={16} />} onClick={() => handleReset(user)}>
+              <DropdownItem
+                key='reset'
+                startContent={<RotateCcw size={16} />}
+                onClick={() => handleReset(user)}
+              >
                 Reset Download Counts
               </DropdownItem>
               <DropdownItem
@@ -660,14 +912,25 @@ export default function SubscribersTableWrapper({ subscribers, stats, revenue })
 
   return (
     <div className='space-y-6'>
-
       {/* ── Stats ── */}
       <div className='grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3'>
         <StatCard label='Total' value={stats.total} />
         <StatCard label='Active' value={stats.active} color='text-green-600' />
-        <StatCard label='Trialing' value={stats.trialing} color='text-blue-600' />
-        <StatCard label='Past Due' value={stats.pastDue} color='text-yellow-600' />
-        <StatCard label='Cancelled' value={stats.canceled} color='text-red-500' />
+        <StatCard
+          label='Trialing'
+          value={stats.trialing}
+          color='text-blue-600'
+        />
+        <StatCard
+          label='Past Due'
+          value={stats.pastDue}
+          color='text-yellow-600'
+        />
+        <StatCard
+          label='Cancelled'
+          value={stats.canceled}
+          color='text-red-500'
+        />
         <StatCard label='Expired' value={stats.expired} color='text-gray-500' />
       </div>
 
@@ -677,7 +940,9 @@ export default function SubscribersTableWrapper({ subscribers, stats, revenue })
           <div className='flex flex-wrap items-center justify-between gap-3 mb-4'>
             <div className='flex items-center gap-2'>
               <TrendingUp size={18} className='text-indigo-500' />
-              <h2 className='text-sm font-bold text-gray-700 dark:text-gray-300 uppercase tracking-wide'>Revenue Overview</h2>
+              <h2 className='text-sm font-bold text-gray-700 dark:text-gray-300 uppercase tracking-wide'>
+                Revenue Overview
+              </h2>
             </div>
             {/* Income statement for a period — pulled live from Stripe. */}
             <div className='flex items-center gap-2'>
@@ -717,27 +982,60 @@ export default function SubscribersTableWrapper({ subscribers, stats, revenue })
                 label='Total Collected'
                 value={`$${Number(revenue.totalCollected).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`}
                 color='text-emerald-600'
-                sub='All-time, from Stripe'
+                sub='All-time gross (all gateways)'
               />
             )}
-            <StatCard label='MRR' value={`$${revenue.mrr}`} color='text-indigo-600' />
-            <StatCard label='ARR' value={`$${revenue.arr}`} color='text-indigo-500' />
-            <StatCard label='Active Subs' value={revenue.totalActive} color='text-green-600' />
-            <StatCard label='New This Month' value={revenue.newThisMonth} color='text-blue-600' />
-            <StatCard label='Cancelled (Month)' value={revenue.canceledThisMonth} color='text-red-500' />
-            <StatCard label='Churn Rate' value={`${revenue.churnRate}%`} color='text-orange-500' />
+            <StatCard
+              label='MRR'
+              value={`$${revenue.mrr}`}
+              color='text-indigo-600'
+            />
+            <StatCard
+              label='ARR'
+              value={`$${revenue.arr}`}
+              color='text-indigo-500'
+            />
+            <StatCard
+              label='Active Subs'
+              value={revenue.totalActive}
+              color='text-green-600'
+            />
+            <StatCard
+              label='New This Month'
+              value={revenue.newThisMonth}
+              color='text-blue-600'
+            />
+            <StatCard
+              label='Cancelled (Month)'
+              value={revenue.canceledThisMonth}
+              color='text-red-500'
+            />
+            <StatCard
+              label='Churn Rate'
+              value={`${revenue.churnRate}%`}
+              color='text-orange-500'
+            />
           </div>
           {revenue.revenueByPlan?.length > 0 && (
             <div>
-              <p className='text-xs font-semibold text-gray-400 uppercase tracking-wide mb-2'>Revenue by Plan</p>
+              <p className='text-xs font-semibold text-gray-400 uppercase tracking-wide mb-2'>
+                Revenue by Plan
+              </p>
               <div className='grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2'>
                 {revenue.revenueByPlan.map((p) => (
-                  <div key={p.name} className='flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-800 rounded-lg'>
+                  <div
+                    key={p.name}
+                    className='flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-800 rounded-lg'
+                  >
                     <div>
                       <p className='text-sm font-semibold'>{p.name}</p>
-                      <p className='text-xs text-gray-400'>{p.count} subscriber{p.count !== 1 ? 's' : ''}</p>
+                      <p className='text-xs text-gray-400'>
+                        {p.count} subscriber{p.count !== 1 ? 's' : ''}
+                      </p>
                     </div>
-                    <span className='text-sm font-bold text-indigo-600'>${p.revenue.toFixed(2)}/mo</span>
+                    <span className='text-sm font-bold text-indigo-600'>
+                      ${p.revenue.toFixed(2)}/mo
+                    </span>
                   </div>
                 ))}
               </div>
@@ -750,7 +1048,9 @@ export default function SubscribersTableWrapper({ subscribers, stats, revenue })
       <div className='flex flex-col sm:flex-row gap-3 items-start sm:items-center justify-between'>
         <div>
           <h1 className='text-2xl font-bold'>Subscribers</h1>
-          <p className='text-sm text-gray-500 mt-0.5'>{filtered.length} result{filtered.length !== 1 ? 's' : ''}</p>
+          <p className='text-sm text-gray-500 mt-0.5'>
+            {filtered.length} result{filtered.length !== 1 ? 's' : ''}
+          </p>
         </div>
         <div className='flex flex-col sm:flex-row gap-2 w-full sm:w-auto'>
           <Input
@@ -765,10 +1065,17 @@ export default function SubscribersTableWrapper({ subscribers, stats, revenue })
           <Dropdown>
             <DropdownTrigger>
               <Button variant='flat' className='capitalize min-w-[130px]'>
-                Status: {statusFilter === 'all' ? 'All' : statusFilter.replace('_', ' ')}
+                Status:{' '}
+                {statusFilter === 'all'
+                  ? 'All'
+                  : statusFilter.replace('_', ' ')}
               </Button>
             </DropdownTrigger>
-            <DropdownMenu aria-label='Status filter' selectedKeys={[statusFilter]} onAction={(k) => handleStatusFilter(k)}>
+            <DropdownMenu
+              aria-label='Status filter'
+              selectedKeys={[statusFilter]}
+              onAction={(k) => handleStatusFilter(k)}
+            >
               <DropdownItem key='all'>All</DropdownItem>
               <DropdownItem key='active'>Active</DropdownItem>
               <DropdownItem key='trialing'>Trialing</DropdownItem>
@@ -786,12 +1093,15 @@ export default function SubscribersTableWrapper({ subscribers, stats, revenue })
         <TableHeader columns={columns}>
           {(col) => <TableColumn key={col.uid}>{col.name}</TableColumn>}
         </TableHeader>
-        <TableBody items={paginated} emptyContent={
-          <div className='flex flex-col items-center gap-2 py-12 text-gray-400'>
-            <Users size={36} strokeWidth={1.5} />
-            <p className='text-sm'>No subscribers found</p>
-          </div>
-        }>
+        <TableBody
+          items={paginated}
+          emptyContent={
+            <div className='flex flex-col items-center gap-2 py-12 text-gray-400'>
+              <Users size={36} strokeWidth={1.5} />
+              <p className='text-sm'>No subscribers found</p>
+            </div>
+          }
+        >
           {(item) => (
             <TableRow key={item._id}>
               {(colKey) => <TableCell>{renderCell(item, colKey)}</TableCell>}
@@ -802,12 +1112,25 @@ export default function SubscribersTableWrapper({ subscribers, stats, revenue })
 
       {totalPages > 1 && (
         <div className='flex justify-center'>
-          <Pagination total={totalPages} page={page} onChange={setPage} showControls isCompact showShadow />
+          <Pagination
+            total={totalPages}
+            page={page}
+            onChange={setPage}
+            showControls
+            isCompact
+            showShadow
+          />
         </div>
       )}
 
       {/* ── View Details Modal ── */}
-      <Modal isOpen={isViewOpen} onOpenChange={onViewChange} backdrop='blur' size='3xl' scrollBehavior='inside'>
+      <Modal
+        isOpen={isViewOpen}
+        onOpenChange={onViewChange}
+        backdrop='blur'
+        size='3xl'
+        scrollBehavior='inside'
+      >
         <ModalContent>
           {(onClose) => (
             <>
@@ -815,19 +1138,27 @@ export default function SubscribersTableWrapper({ subscribers, stats, revenue })
                 <div className='flex items-center gap-3'>
                   {v?.profile_image?.url ? (
                     // eslint-disable-next-line @next/next/no-img-element
-                    <img src={v.profile_image.url} alt={v.name} className='w-10 h-10 rounded-full object-cover' />
+                    <img
+                      src={v.profile_image.url}
+                      alt={v.name}
+                      className='w-10 h-10 rounded-full object-cover'
+                    />
                   ) : (
                     <div className='w-10 h-10 rounded-full bg-gradient-to-br from-indigo-400 to-pink-400 flex items-center justify-center text-white font-bold'>
                       {(v?.name || v?.email || '?').charAt(0).toUpperCase()}
                     </div>
                   )}
                   <div>
-                    <p className='text-base font-bold'>{v?.name || '(no name)'}</p>
+                    <p className='text-base font-bold'>
+                      {v?.name || '(no name)'}
+                    </p>
                     <p className='text-xs text-gray-400'>{v?.email}</p>
                   </div>
                 </div>
                 {vs?.status && (
-                  <span className={`shrink-0 px-2.5 py-1 rounded-full text-xs font-semibold capitalize ${STATUS_BADGE[vs.status] || 'bg-gray-100 text-gray-700'}`}>
+                  <span
+                    className={`shrink-0 px-2.5 py-1 rounded-full text-xs font-semibold capitalize ${STATUS_BADGE[vs.status] || 'bg-gray-100 text-gray-700'}`}
+                  >
                     {vs.status.replace('_', ' ')}
                   </span>
                 )}
@@ -845,7 +1176,11 @@ export default function SubscribersTableWrapper({ subscribers, stats, revenue })
                         : 'border-transparent text-gray-500 hover:text-gray-700'
                     }`}
                   >
-                    {tab === 'audit' ? 'Audit Log' : tab === 'invoices' ? 'Invoices' : 'Details'}
+                    {tab === 'audit'
+                      ? 'Audit Log'
+                      : tab === 'invoices'
+                        ? 'Invoices'
+                        : 'Details'}
                   </button>
                 ))}
               </div>
@@ -855,18 +1190,48 @@ export default function SubscribersTableWrapper({ subscribers, stats, revenue })
                   <>
                     {/* Plan */}
                     <div>
-                      <p className='text-xs font-semibold text-gray-400 uppercase tracking-wide mb-3'>Subscription Plan</p>
+                      <p className='text-xs font-semibold text-gray-400 uppercase tracking-wide mb-3'>
+                        Subscription Plan
+                      </p>
                       <div className='grid grid-cols-1 sm:grid-cols-2 gap-4'>
                         <DetailRow label='Plan Name' value={vp?.name} />
-                        <DetailRow label='Type' value={vp?.type === 'one-time' ? 'One-time payment' : `Recurring — ${vp?.billingInterval}ly`} />
-                        <DetailRow label='Price' value={vp?.price != null ? `$${vp.price}` : null} />
-                        <DetailRow label='Download Limit' value={vp?.downloadLimit != null ? String(vp.downloadLimit) : 'Unlimited'} />
-                        <DetailRow label='Daily Limit' value={vp?.dailyLimit != null ? String(vp.dailyLimit) : 'Unlimited'} />
+                        <DetailRow
+                          label='Type'
+                          value={
+                            vp?.type === 'one-time'
+                              ? 'One-time payment'
+                              : `Recurring — ${vp?.billingInterval}ly`
+                          }
+                        />
+                        <DetailRow
+                          label='Price'
+                          value={vp?.price != null ? `$${vp.price}` : null}
+                        />
+                        <DetailRow
+                          label='Download Limit'
+                          value={
+                            vp?.downloadLimit != null
+                              ? String(vp.downloadLimit)
+                              : 'Unlimited'
+                          }
+                        />
+                        <DetailRow
+                          label='Daily Limit'
+                          value={
+                            vp?.dailyLimit != null
+                              ? String(vp.dailyLimit)
+                              : 'Unlimited'
+                          }
+                        />
                         {vp?.features?.length > 0 && (
                           <div className='col-span-2 flex flex-col gap-0.5'>
-                            <span className='text-xs font-semibold text-gray-400 uppercase tracking-wide'>Features</span>
+                            <span className='text-xs font-semibold text-gray-400 uppercase tracking-wide'>
+                              Features
+                            </span>
                             <ul className='text-sm text-gray-800 dark:text-gray-200 list-disc list-inside space-y-0.5'>
-                              {vp.features.map((f, i) => <li key={i}>{f}</li>)}
+                              {vp.features.map((f, i) => (
+                                <li key={i}>{f}</li>
+                              ))}
                             </ul>
                           </div>
                         )}
@@ -877,34 +1242,118 @@ export default function SubscribersTableWrapper({ subscribers, stats, revenue })
 
                     {/* Usage */}
                     <div>
-                      <p className='text-xs font-semibold text-gray-400 uppercase tracking-wide mb-3'>Usage</p>
+                      <p className='text-xs font-semibold text-gray-400 uppercase tracking-wide mb-3'>
+                        Usage
+                      </p>
                       <div className='grid grid-cols-1 sm:grid-cols-2 gap-5'>
                         <div>
-                          <p className='text-xs text-gray-400 mb-1'>Period Downloads</p>
-                          <p className='text-sm font-mono mb-1'>{quotaLabel(vs?.downloadCount ?? 0, vp?.downloadLimit ?? null)}</p>
-                          <QuotaBar used={vs?.downloadCount ?? 0} limit={vp?.downloadLimit ?? null} />
+                          <p className='text-xs text-gray-400 mb-1'>
+                            Period Downloads
+                          </p>
+                          <p className='text-sm font-mono mb-1'>
+                            {quotaLabel(
+                              vs?.downloadCount ?? 0,
+                              vp?.downloadLimit ?? null,
+                            )}
+                          </p>
+                          <QuotaBar
+                            used={vs?.downloadCount ?? 0}
+                            limit={vp?.downloadLimit ?? null}
+                          />
                         </div>
                         <div>
-                          <p className='text-xs text-gray-400 mb-1'>Daily Downloads</p>
-                          <p className='text-sm font-mono mb-1'>{quotaLabel(vs?.dailyDownloadCount ?? 0, vp?.dailyLimit ?? null)}</p>
-                          <QuotaBar used={vs?.dailyDownloadCount ?? 0} limit={vp?.dailyLimit ?? null} />
+                          <p className='text-xs text-gray-400 mb-1'>
+                            Daily Downloads
+                          </p>
+                          <p className='text-sm font-mono mb-1'>
+                            {quotaLabel(
+                              vs?.dailyDownloadCount ?? 0,
+                              vp?.dailyLimit ?? null,
+                            )}
+                          </p>
+                          <QuotaBar
+                            used={vs?.dailyDownloadCount ?? 0}
+                            limit={vp?.dailyLimit ?? null}
+                          />
                         </div>
-                        <DetailRow label='Last Daily Reset' value={fmtDateTime(vs?.lastDailyResetDate)} />
-                        <DetailRow label='Total Downloads (all time)' value={v?.downloadCount != null ? String(v.downloadCount) : null} />
+                        <DetailRow
+                          label='Last Daily Reset'
+                          value={fmtDateTime(vs?.lastDailyResetDate)}
+                        />
+                        <DetailRow
+                          label='Total Downloads (all time)'
+                          value={
+                            v?.downloadCount != null
+                              ? String(v.downloadCount)
+                              : null
+                          }
+                        />
                       </div>
+                    </div>
+
+                    <Divider />
+
+                    {/* Downloads by month — aggregated from the download log,
+                        so it works the same for Stripe and Creem subscribers. */}
+                    <div>
+                      <p className='text-xs font-semibold text-gray-400 uppercase tracking-wide mb-3'>
+                        Downloads by Month
+                      </p>
+                      {monthlyLoading ? (
+                        <p className='text-sm text-gray-400'>Loading history…</p>
+                      ) : !monthly ||
+                        !monthly.months?.some((m) => m.count > 0) ? (
+                        <p className='text-sm text-gray-400'>
+                          No downloads recorded yet.
+                        </p>
+                      ) : (
+                        <MonthlyBars
+                          months={monthly.months}
+                          total={monthly.total}
+                        />
+                      )}
                     </div>
 
                     <Divider />
 
                     {/* Billing */}
                     <div>
-                      <p className='text-xs font-semibold text-gray-400 uppercase tracking-wide mb-3'>Billing</p>
+                      <p className='text-xs font-semibold text-gray-400 uppercase tracking-wide mb-3'>
+                        Billing
+                      </p>
                       <div className='grid grid-cols-1 sm:grid-cols-2 gap-4'>
-                        <DetailRow label='Period End' value={fmtDateTime(vs?.periodEndDate)} />
-                        <DetailRow label='Cancel at Period End' value={vs?.cancelAtPeriodEnd ? 'Yes' : 'No'} />
-                        <DetailRow label='Stripe Subscription ID' value={vs?.stripeSubscriptionId} />
-                        <DetailRow label='Stripe Customer ID' value={vs?.stripeCustomerId} />
-                        <DetailRow label='Subscription Since' value={fmtDateTime(vs?.createdAt)} />
+                        <DetailRow
+                          label='Payment Provider'
+                          value={providerLabel(subProvider(vs))}
+                        />
+                        <DetailRow
+                          label='Period End'
+                          value={fmtDateTime(vs?.periodEndDate)}
+                        />
+                        <DetailRow
+                          label='Cancel at Period End'
+                          value={vs?.cancelAtPeriodEnd ? 'Yes' : 'No'}
+                        />
+                        <DetailRow
+                          label='Stripe Subscription ID'
+                          value={vs?.stripeSubscriptionId}
+                        />
+                        <DetailRow
+                          label='Stripe Customer ID'
+                          value={vs?.stripeCustomerId}
+                        />
+                        <DetailRow
+                          label='Creem Subscription ID'
+                          value={vs?.creemSubscriptionId}
+                        />
+                        <DetailRow
+                          label='Creem Customer ID'
+                          value={vs?.creemCustomerId}
+                        />
+                        <DetailRow
+                          label='Subscription Since'
+                          value={fmtDateTime(vs?.createdAt)}
+                        />
                       </div>
                     </div>
 
@@ -912,22 +1361,42 @@ export default function SubscribersTableWrapper({ subscribers, stats, revenue })
 
                     {/* Account */}
                     <div>
-                      <p className='text-xs font-semibold text-gray-400 uppercase tracking-wide mb-3'>Account</p>
+                      <p className='text-xs font-semibold text-gray-400 uppercase tracking-wide mb-3'>
+                        Account
+                      </p>
                       <div className='grid grid-cols-1 sm:grid-cols-2 gap-4'>
                         <DetailRow label='Name' value={v?.name} />
                         <DetailRow label='Email' value={v?.email} />
                         <DetailRow label='Phone' value={v?.phone} />
-                        <DetailRow label='Email Verified' value={v?.isEmailVerified ? 'Yes' : 'No'} />
+                        <DetailRow
+                          label='Email Verified'
+                          value={v?.isEmailVerified ? 'Yes' : 'No'}
+                        />
                         <DetailRow label='Account Status' value={v?.status} />
                         <DetailRow label='Role' value={v?.role} />
-                        <DetailRow label='Registered' value={fmtDateTime(v?.createdAt)} />
-                        {v?.ipInfo?.country && <DetailRow label='Country' value={v.ipInfo.country} />}
-                        {v?.ipInfo?.city && <DetailRow label='City' value={v.ipInfo.city} />}
+                        <DetailRow
+                          label='Registered'
+                          value={fmtDateTime(v?.createdAt)}
+                        />
+                        {v?.ipInfo?.country && (
+                          <DetailRow label='Country' value={v.ipInfo.country} />
+                        )}
+                        {v?.ipInfo?.city && (
+                          <DetailRow label='City' value={v.ipInfo.city} />
+                        )}
                         {(v?.address_line_1 || v?.city) && (
                           <DetailRow
                             label='Address'
-                            value={[v.address_line_1, v.address_line_2, v.city, v.state, v.zip, v.country]
-                              .filter(Boolean).join(', ')}
+                            value={[
+                              v.address_line_1,
+                              v.address_line_2,
+                              v.city,
+                              v.state,
+                              v.zip,
+                              v.country,
+                            ]
+                              .filter(Boolean)
+                              .join(', ')}
                           />
                         )}
                       </div>
@@ -937,17 +1406,27 @@ export default function SubscribersTableWrapper({ subscribers, stats, revenue })
                   /* Invoices Tab — payment history pulled live from Stripe */
                   <div>
                     {invoicesLoading ? (
-                      <div className='flex justify-center py-10 text-gray-400 text-sm'>Loading invoices from Stripe…</div>
+                      <div className='flex justify-center py-10 text-gray-400 text-sm'>
+                        Loading payment history…
+                      </div>
                     ) : invoicesError ? (
                       <div className='flex flex-col items-center py-10 text-gray-400 gap-2'>
                         <AlertTriangle size={28} strokeWidth={1.5} />
                         <p className='text-sm'>{invoicesError}</p>
-                        <Button size='sm' variant='flat' onPress={() => loadInvoices(v._id)}>Retry</Button>
+                        <Button
+                          size='sm'
+                          variant='flat'
+                          onPress={() => loadInvoices(v._id)}
+                        >
+                          Retry
+                        </Button>
                       </div>
                     ) : !invoiceData || invoiceData.invoices.length === 0 ? (
                       <div className='flex flex-col items-center py-10 text-gray-400 gap-2'>
                         <Receipt size={28} strokeWidth={1.5} />
-                        <p className='text-sm'>No payments found in Stripe for this user</p>
+                        <p className='text-sm'>
+                          No payments found for this user
+                        </p>
                       </div>
                     ) : (
                       <div className='space-y-4'>
@@ -955,7 +1434,9 @@ export default function SubscribersTableWrapper({ subscribers, stats, revenue })
                         {invoiceData.customer?.plan && (
                           <div className='p-3 bg-gray-50 dark:bg-gray-800 rounded-lg flex items-center justify-between gap-3 flex-wrap'>
                             <div>
-                              <p className='text-sm font-semibold'>{invoiceData.customer.plan.name}</p>
+                              <p className='text-sm font-semibold'>
+                                {invoiceData.customer.plan.name}
+                              </p>
                               <p className='text-xs text-gray-500'>
                                 {invoiceData.customer.plan.type === 'one-time'
                                   ? 'One-time purchase'
@@ -972,9 +1453,16 @@ export default function SubscribersTableWrapper({ subscribers, stats, revenue })
                                 size='sm'
                                 variant='flat'
                                 className='capitalize'
-                                color={STATUS_CHIP[invoiceData.customer.subscriptionStatus] || 'default'}
+                                color={
+                                  STATUS_CHIP[
+                                    invoiceData.customer.subscriptionStatus
+                                  ] || 'default'
+                                }
                               >
-                                {invoiceData.customer.subscriptionStatus.replace('_', ' ')}
+                                {invoiceData.customer.subscriptionStatus.replace(
+                                  '_',
+                                  ' ',
+                                )}
                               </Chip>
                             )}
                           </div>
@@ -983,44 +1471,81 @@ export default function SubscribersTableWrapper({ subscribers, stats, revenue })
                         {/* Summary strip */}
                         <div className='grid grid-cols-3 gap-3'>
                           <div className='p-3 bg-gray-50 dark:bg-gray-800 rounded-lg text-center'>
-                            <p className='text-xs text-gray-400 uppercase tracking-wide'>Payments</p>
-                            <p className='text-lg font-bold'>{invoiceData.summary.count}</p>
+                            <p className='text-xs text-gray-400 uppercase tracking-wide'>
+                              Payments
+                            </p>
+                            <p className='text-lg font-bold'>
+                              {invoiceData.summary.count}
+                            </p>
                           </div>
                           <div className='p-3 bg-gray-50 dark:bg-gray-800 rounded-lg text-center'>
-                            <p className='text-xs text-gray-400 uppercase tracking-wide'>Total Paid</p>
-                            <p className='text-lg font-bold'>${Number(invoiceData.summary.totalPaid).toFixed(2)}</p>
+                            <p className='text-xs text-gray-400 uppercase tracking-wide'>
+                              Total Paid
+                            </p>
+                            <p className='text-lg font-bold'>
+                              $
+                              {Number(invoiceData.summary.totalPaid).toFixed(2)}
+                            </p>
                           </div>
                           <div className='p-3 bg-gray-50 dark:bg-gray-800 rounded-lg text-center'>
-                            <p className='text-xs text-gray-400 uppercase tracking-wide'>Refunded</p>
-                            <p className='text-lg font-bold'>${Number(invoiceData.summary.totalRefunded).toFixed(2)}</p>
+                            <p className='text-xs text-gray-400 uppercase tracking-wide'>
+                              Refunded
+                            </p>
+                            <p className='text-lg font-bold'>
+                              $
+                              {Number(
+                                invoiceData.summary.totalRefunded,
+                              ).toFixed(2)}
+                            </p>
                           </div>
                         </div>
 
                         {/* One card per payment */}
                         {invoiceData.invoices.map((inv) => (
-                          <div key={inv.id} className='p-4 bg-gray-50 dark:bg-gray-800 rounded-lg space-y-2'>
+                          <div
+                            key={inv.id}
+                            className='p-4 bg-gray-50 dark:bg-gray-800 rounded-lg space-y-2'
+                          >
                             <div className='flex items-start justify-between gap-3 flex-wrap'>
                               <div className='min-w-0'>
-                                <p className='text-sm font-semibold'>{inv.description}</p>
+                                <p className='text-sm font-semibold'>
+                                  {inv.description}
+                                </p>
                                 <p className='text-xs text-gray-500'>
                                   {fmtDateTime(inv.date)} · Invoice {inv.number}
                                   {inv.cardBrand && inv.cardLast4 && (
-                                    <> · <span className='capitalize'>{inv.cardBrand}</span> •••• {inv.cardLast4}</>
+                                    <>
+                                      {' '}
+                                      ·{' '}
+                                      <span className='capitalize'>
+                                        {inv.cardBrand}
+                                      </span>{' '}
+                                      •••• {inv.cardLast4}
+                                    </>
                                   )}
                                 </p>
                                 {inv.periodStart && inv.periodEnd && (
                                   <p className='text-xs text-gray-400'>
-                                    Service period: {fmt(inv.periodStart)} – {fmt(inv.periodEnd)}
+                                    Service period: {fmt(inv.periodStart)} –{' '}
+                                    {fmt(inv.periodEnd)}
                                   </p>
                                 )}
                               </div>
                               <div className='flex items-center gap-2 shrink-0'>
-                                <span className='text-base font-bold'>${Number(inv.amount).toFixed(2)}</span>
+                                <span className='text-base font-bold'>
+                                  ${Number(inv.amount).toFixed(2)}
+                                </span>
                                 <Chip
                                   size='sm'
                                   variant='flat'
                                   className='capitalize'
-                                  color={inv.status === 'paid' ? 'success' : inv.status === 'open' ? 'warning' : 'default'}
+                                  color={
+                                    inv.status === 'paid'
+                                      ? 'success'
+                                      : inv.status === 'open'
+                                        ? 'warning'
+                                        : 'default'
+                                  }
                                 >
                                   {inv.status}
                                 </Chip>
@@ -1028,7 +1553,8 @@ export default function SubscribersTableWrapper({ subscribers, stats, revenue })
                             </div>
                             {Number(inv.amountRefunded) > 0 && (
                               <p className='text-xs font-medium text-gray-600 dark:text-gray-300'>
-                                Refunded: ${Number(inv.amountRefunded).toFixed(2)}
+                                Refunded: $
+                                {Number(inv.amountRefunded).toFixed(2)}
                               </p>
                             )}
                             <div className='flex items-center gap-2 pt-1 flex-wrap'>
@@ -1036,7 +1562,12 @@ export default function SubscribersTableWrapper({ subscribers, stats, revenue })
                                 size='sm'
                                 variant='flat'
                                 startContent={<FileText size={14} />}
-                                onPress={() => openInvoice({ invoice: inv, customer: invoiceData.customer })}
+                                onPress={() =>
+                                  openInvoice({
+                                    invoice: inv,
+                                    customer: invoiceData.customer,
+                                  })
+                                }
                               >
                                 Invoice (PDF)
                               </Button>
@@ -1073,8 +1604,10 @@ export default function SubscribersTableWrapper({ subscribers, stats, revenue })
                         ))}
 
                         <p className='text-[11px] text-gray-400'>
-                          Pulled live from Stripe. "Invoice (PDF)" opens a printable Embroidize invoice
-                          (use the browser's Save as PDF); "Stripe copy" opens Stripe's own hosted invoice.
+                          Pulled live from the payment provider. "Invoice (PDF)"
+                          opens a printable Embroidize invoice (use the
+                          browser's Save as PDF); the "Stripe page/PDF" links
+                          appear only for Stripe-billed payments.
                         </p>
                       </div>
                     )}
@@ -1083,52 +1616,74 @@ export default function SubscribersTableWrapper({ subscribers, stats, revenue })
                   /* Audit Log Tab */
                   <div>
                     {auditLoading ? (
-                      <div className='flex justify-center py-10 text-gray-400 text-sm'>Loading audit log…</div>
+                      <div className='flex justify-center py-10 text-gray-400 text-sm'>
+                        Loading audit log…
+                      </div>
                     ) : auditLogs.length === 0 ? (
                       <div className='flex flex-col items-center py-10 text-gray-400 gap-2'>
                         <AlertTriangle size={28} strokeWidth={1.5} />
-                        <p className='text-sm'>No audit log entries for this user</p>
+                        <p className='text-sm'>
+                          No audit log entries for this user
+                        </p>
                       </div>
                     ) : (
                       <div className='space-y-3'>
                         {auditLogs.map((log) => (
-                          <div key={log._id} className='p-3 bg-gray-50 dark:bg-gray-800 rounded-lg space-y-2'>
+                          <div
+                            key={log._id}
+                            className='p-3 bg-gray-50 dark:bg-gray-800 rounded-lg space-y-2'
+                          >
                             <div className='flex items-start justify-between gap-2 flex-wrap'>
                               <AuditActionBadge action={log.action} />
-                              <span className='text-xs text-gray-400'>{fmtDateTime(log.createdAt)}</span>
+                              <span className='text-xs text-gray-400'>
+                                {fmtDateTime(log.createdAt)}
+                              </span>
                             </div>
                             {log.adminId && (
                               <p className='text-xs text-gray-500'>
-                                By: <span className='font-medium text-gray-700 dark:text-gray-300'>{log.adminId.name || log.adminId.email}</span>
+                                By:{' '}
+                                <span className='font-medium text-gray-700 dark:text-gray-300'>
+                                  {log.adminId.name || log.adminId.email}
+                                </span>
                               </p>
                             )}
                             {log.note && (
-                              <p className='text-xs text-gray-600 dark:text-gray-400 italic'>"{log.note}"</p>
+                              <p className='text-xs text-gray-600 dark:text-gray-400 italic'>
+                                "{log.note}"
+                              </p>
                             )}
                             {log.action === 'refund' && log.after?.amount && (
                               <p className='text-xs font-medium text-purple-600'>
-                                Amount: ${(log.after.amount / 100).toFixed(2)} · ID: {log.after.refundId}
+                                Amount: ${(log.after.amount / 100).toFixed(2)} ·
+                                ID: {log.after.refundId}
                               </p>
                             )}
-                            {(log.before && Object.keys(log.before).length > 0) && (
-                              <details className='text-xs text-gray-400 cursor-pointer'>
-                                <summary className='hover:text-gray-600'>Show before/after</summary>
-                                <div className='mt-1 grid grid-cols-2 gap-2'>
-                                  <div>
-                                    <p className='font-semibold mb-1'>Before</p>
-                                    <pre className='text-[10px] bg-white dark:bg-gray-900 p-2 rounded border overflow-auto'>
-                                      {JSON.stringify(log.before, null, 2)}
-                                    </pre>
+                            {log.before &&
+                              Object.keys(log.before).length > 0 && (
+                                <details className='text-xs text-gray-400 cursor-pointer'>
+                                  <summary className='hover:text-gray-600'>
+                                    Show before/after
+                                  </summary>
+                                  <div className='mt-1 grid grid-cols-2 gap-2'>
+                                    <div>
+                                      <p className='font-semibold mb-1'>
+                                        Before
+                                      </p>
+                                      <pre className='text-[10px] bg-white dark:bg-gray-900 p-2 rounded border overflow-auto'>
+                                        {JSON.stringify(log.before, null, 2)}
+                                      </pre>
+                                    </div>
+                                    <div>
+                                      <p className='font-semibold mb-1'>
+                                        After
+                                      </p>
+                                      <pre className='text-[10px] bg-white dark:bg-gray-900 p-2 rounded border overflow-auto'>
+                                        {JSON.stringify(log.after, null, 2)}
+                                      </pre>
+                                    </div>
                                   </div>
-                                  <div>
-                                    <p className='font-semibold mb-1'>After</p>
-                                    <pre className='text-[10px] bg-white dark:bg-gray-900 p-2 rounded border overflow-auto'>
-                                      {JSON.stringify(log.after, null, 2)}
-                                    </pre>
-                                  </div>
-                                </div>
-                              </details>
-                            )}
+                                </details>
+                              )}
                           </div>
                         ))}
                       </div>
@@ -1138,11 +1693,28 @@ export default function SubscribersTableWrapper({ subscribers, stats, revenue })
               </ModalBody>
 
               <ModalFooter>
-                <Button variant='light' onPress={onClose}>Close</Button>
-                <Button color='danger' variant='flat' startContent={<Ban size={16} />} onPress={() => { onClose(); handleCancel(v); }}>
+                <Button variant='light' onPress={onClose}>
+                  Close
+                </Button>
+                <Button
+                  color='danger'
+                  variant='flat'
+                  startContent={<Ban size={16} />}
+                  onPress={() => {
+                    onClose();
+                    handleCancel(v);
+                  }}
+                >
                   Cancel Sub
                 </Button>
-                <Button color='primary' startContent={<Edit size={16} />} onPress={() => { onClose(); handleEdit(v); }}>
+                <Button
+                  color='primary'
+                  startContent={<Edit size={16} />}
+                  onPress={() => {
+                    onClose();
+                    handleEdit(v);
+                  }}
+                >
                   Edit Subscription
                 </Button>
               </ModalFooter>
@@ -1152,30 +1724,56 @@ export default function SubscribersTableWrapper({ subscribers, stats, revenue })
       </Modal>
 
       {/* ── Adjust Quotas Modal ── */}
-      <Modal isOpen={isEditOpen} onOpenChange={onEditChange} backdrop='blur' size='md'>
+      <Modal
+        isOpen={isEditOpen}
+        onOpenChange={onEditChange}
+        backdrop='blur'
+        size='md'
+      >
         <ModalContent>
           {(onClose) => (
             <>
               <ModalHeader>
                 <div>
                   <p className='font-bold'>Adjust Download Quotas</p>
-                  <p className='text-xs text-gray-400 font-normal mt-0.5'>{editUser?.name} · {editUser?.email}</p>
+                  <p className='text-xs text-gray-400 font-normal mt-0.5'>
+                    {editUser?.name} · {editUser?.email}
+                  </p>
                 </div>
               </ModalHeader>
               <ModalBody>
                 <div className='space-y-4'>
                   <div className='bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-700 rounded-lg p-3'>
                     <p className='text-xs text-blue-700 dark:text-blue-300'>
-                      These are app-level counters only — Stripe does not track downloads.
-                      Use this to grant extra quota, fix a wrong count, or manually reset usage.
-                      To cancel the subscription, use the <strong>Cancel Subscription</strong> action instead.
+                      These are app-level counters only — the payment provider
+                      does not track downloads. Use this to grant extra quota,
+                      fix a wrong count, or manually reset usage. To cancel the
+                      subscription, use the <strong>Cancel Subscription</strong>{' '}
+                      action instead.
                     </p>
                   </div>
 
                   <div className='p-3 bg-gray-50 dark:bg-gray-800 rounded-lg text-xs text-gray-500 space-y-1'>
-                    <p>Plan: <strong className='text-gray-700 dark:text-gray-300'>{editUser?.subscription?.planId?.name || '—'}</strong></p>
-                    <p>Download limit: <strong className='text-gray-700 dark:text-gray-300'>{editUser?.subscription?.planId?.downloadLimit ?? 'Unlimited'}</strong></p>
-                    <p>Daily limit: <strong className='text-gray-700 dark:text-gray-300'>{editUser?.subscription?.planId?.dailyLimit ?? 'Unlimited'}</strong></p>
+                    <p>
+                      Plan:{' '}
+                      <strong className='text-gray-700 dark:text-gray-300'>
+                        {editUser?.subscription?.planId?.name || '—'}
+                      </strong>
+                    </p>
+                    <p>
+                      Download limit:{' '}
+                      <strong className='text-gray-700 dark:text-gray-300'>
+                        {editUser?.subscription?.planId?.downloadLimit ??
+                          'Unlimited'}
+                      </strong>
+                    </p>
+                    <p>
+                      Daily limit:{' '}
+                      <strong className='text-gray-700 dark:text-gray-300'>
+                        {editUser?.subscription?.planId?.dailyLimit ??
+                          'Unlimited'}
+                      </strong>
+                    </p>
                   </div>
 
                   <div className='grid grid-cols-2 gap-3'>
@@ -1201,8 +1799,14 @@ export default function SubscribersTableWrapper({ subscribers, stats, revenue })
                 </div>
               </ModalBody>
               <ModalFooter>
-                <Button variant='light' onPress={onClose}>Cancel</Button>
-                <Button color='primary' isLoading={isUpdating} onPress={saveSubscription}>
+                <Button variant='light' onPress={onClose}>
+                  Cancel
+                </Button>
+                <Button
+                  color='primary'
+                  isLoading={isUpdating}
+                  onPress={saveSubscription}
+                >
                   Save Quotas
                 </Button>
               </ModalFooter>
@@ -1212,21 +1816,30 @@ export default function SubscribersTableWrapper({ subscribers, stats, revenue })
       </Modal>
 
       {/* ── Cancel Subscription Modal ── */}
-      <Modal isOpen={isCancelOpen} onOpenChange={onCancelChange} backdrop='blur' size='md'>
+      <Modal
+        isOpen={isCancelOpen}
+        onOpenChange={onCancelChange}
+        backdrop='blur'
+        size='md'
+      >
         <ModalContent>
           {(onClose) => (
             <>
               <ModalHeader>
                 <div>
                   <p className='font-bold text-red-600'>Cancel Subscription</p>
-                  <p className='text-xs text-gray-400 font-normal mt-0.5'>{cancelUser?.name} · {cancelUser?.email}</p>
+                  <p className='text-xs text-gray-400 font-normal mt-0.5'>
+                    {cancelUser?.name} · {cancelUser?.email}
+                  </p>
                 </div>
               </ModalHeader>
               <ModalBody>
                 <div className='space-y-4'>
                   <div className='bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-700 rounded-lg p-3'>
                     <p className='text-xs text-red-700 dark:text-red-300 font-medium'>
-                      This action is synced with Stripe. The subscription will be cancelled for real.
+                      This action is synced with{' '}
+                      {providerLabel(subProvider(cancelUser?.subscription))}.
+                      The subscription will be cancelled for real.
                     </p>
                   </div>
 
@@ -1242,8 +1855,13 @@ export default function SubscribersTableWrapper({ subscribers, stats, revenue })
                           className='mt-0.5'
                         />
                         <div>
-                          <p className='text-sm font-medium'>At period end (recommended)</p>
-                          <p className='text-xs text-gray-500'>User retains access until their current billing period ends</p>
+                          <p className='text-sm font-medium'>
+                            At period end (recommended)
+                          </p>
+                          <p className='text-xs text-gray-500'>
+                            User retains access until their current billing
+                            period ends
+                          </p>
                         </div>
                       </label>
                       <label className='flex items-start gap-3 p-3 border border-red-200 rounded-lg cursor-pointer hover:bg-red-50 dark:hover:bg-red-900/10'>
@@ -1255,8 +1873,13 @@ export default function SubscribersTableWrapper({ subscribers, stats, revenue })
                           className='mt-0.5'
                         />
                         <div>
-                          <p className='text-sm font-medium text-red-600'>Immediately</p>
-                          <p className='text-xs text-gray-500'>Access is revoked right now. Consider issuing a refund separately.</p>
+                          <p className='text-sm font-medium text-red-600'>
+                            Immediately
+                          </p>
+                          <p className='text-xs text-gray-500'>
+                            Access is revoked right now. Consider issuing a
+                            refund separately.
+                          </p>
                         </div>
                       </label>
                     </div>
@@ -1272,9 +1895,17 @@ export default function SubscribersTableWrapper({ subscribers, stats, revenue })
                 </div>
               </ModalBody>
               <ModalFooter>
-                <Button variant='light' onPress={onClose}>Go Back</Button>
-                <Button color='danger' isLoading={isCancelling} onPress={confirmCancel}>
-                  {cancelImmediately ? 'Cancel Immediately' : 'Schedule Cancellation'}
+                <Button variant='light' onPress={onClose}>
+                  Go Back
+                </Button>
+                <Button
+                  color='danger'
+                  isLoading={isCancelling}
+                  onPress={confirmCancel}
+                >
+                  {cancelImmediately
+                    ? 'Cancel Immediately'
+                    : 'Schedule Cancellation'}
                 </Button>
               </ModalFooter>
             </>
@@ -1283,19 +1914,28 @@ export default function SubscribersTableWrapper({ subscribers, stats, revenue })
       </Modal>
 
       {/* ── Reset Downloads Modal ── */}
-      <Modal isOpen={isResetOpen} onOpenChange={onResetChange} backdrop='blur' size='md'>
+      <Modal
+        isOpen={isResetOpen}
+        onOpenChange={onResetChange}
+        backdrop='blur'
+        size='md'
+      >
         <ModalContent>
           {(onClose) => (
             <>
               <ModalHeader>
                 <div>
                   <p className='font-bold'>Reset Download Counts</p>
-                  <p className='text-xs text-gray-400 font-normal mt-0.5'>{resetUser?.name} · {resetUser?.email}</p>
+                  <p className='text-xs text-gray-400 font-normal mt-0.5'>
+                    {resetUser?.name} · {resetUser?.email}
+                  </p>
                 </div>
               </ModalHeader>
               <ModalBody>
                 <div className='space-y-2'>
-                  <p className='text-sm font-medium'>What do you want to reset?</p>
+                  <p className='text-sm font-medium'>
+                    What do you want to reset?
+                  </p>
                   <div className='flex flex-col gap-2'>
                     <label className='flex items-start gap-3 p-3 border rounded-lg cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-800'>
                       <input
@@ -1308,7 +1948,9 @@ export default function SubscribersTableWrapper({ subscribers, stats, revenue })
                       <div>
                         <p className='text-sm font-medium'>Daily count only</p>
                         <p className='text-xs text-gray-500'>
-                          Today's downloads: {resetUser?.subscription?.dailyDownloadCount ?? 0} → 0. Period count stays unchanged.
+                          Today's downloads:{' '}
+                          {resetUser?.subscription?.dailyDownloadCount ?? 0} →
+                          0. Period count stays unchanged.
                         </p>
                       </div>
                     </label>
@@ -1323,7 +1965,9 @@ export default function SubscribersTableWrapper({ subscribers, stats, revenue })
                       <div>
                         <p className='text-sm font-medium'>Period count only</p>
                         <p className='text-xs text-gray-500'>
-                          Period downloads: {resetUser?.subscription?.downloadCount ?? 0} → 0. Daily count stays unchanged.
+                          Period downloads:{' '}
+                          {resetUser?.subscription?.downloadCount ?? 0} → 0.
+                          Daily count stays unchanged.
                         </p>
                       </div>
                     </label>
@@ -1337,15 +1981,24 @@ export default function SubscribersTableWrapper({ subscribers, stats, revenue })
                       />
                       <div>
                         <p className='text-sm font-medium'>Both</p>
-                        <p className='text-xs text-gray-500'>Reset the daily and period counts to 0.</p>
+                        <p className='text-xs text-gray-500'>
+                          Reset the daily and period counts to 0.
+                        </p>
                       </div>
                     </label>
                   </div>
                 </div>
               </ModalBody>
               <ModalFooter>
-                <Button variant='light' onPress={onClose}>Cancel</Button>
-                <Button color='primary' isLoading={isResetting} startContent={!isResetting && <RotateCcw size={16} />} onPress={confirmReset}>
+                <Button variant='light' onPress={onClose}>
+                  Cancel
+                </Button>
+                <Button
+                  color='primary'
+                  isLoading={isResetting}
+                  startContent={!isResetting && <RotateCcw size={16} />}
+                  onPress={confirmReset}
+                >
                   Reset
                 </Button>
               </ModalFooter>
@@ -1355,35 +2008,50 @@ export default function SubscribersTableWrapper({ subscribers, stats, revenue })
       </Modal>
 
       {/* ── Refund Modal ── */}
-      <Modal isOpen={isRefundOpen} onOpenChange={onRefundChange} backdrop='blur' size='md'>
+      <Modal
+        isOpen={isRefundOpen}
+        onOpenChange={onRefundChange}
+        backdrop='blur'
+        size='md'
+      >
         <ModalContent>
           {(onClose) => (
             <>
               <ModalHeader>
                 <div>
                   <p className='font-bold'>Issue Refund</p>
-                  <p className='text-xs text-gray-400 font-normal mt-0.5'>{refundUser?.name} · {refundUser?.email}</p>
+                  <p className='text-xs text-gray-400 font-normal mt-0.5'>
+                    {refundUser?.name} · {refundUser?.email}
+                  </p>
                 </div>
               </ModalHeader>
               <ModalBody>
                 <div className='space-y-4'>
                   <div className='bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-700 rounded-lg p-3'>
                     <p className='text-xs text-blue-700 dark:text-blue-300'>
-                      Refunds the most recent invoice payment via Stripe. Leave the amount empty for a full refund.
+                      {subProvider(refundUser?.subscription) === 'creem'
+                        ? 'Refunds the most recent payment via Creem. Creem issues full refunds only — the entire payment is refunded.'
+                        : 'Refunds the most recent invoice payment via Stripe. Leave the amount empty for a full refund.'}
                     </p>
                   </div>
 
-                  <Input
-                    type='number'
-                    label='Refund Amount (USD)'
-                    placeholder='Leave empty for full refund'
-                    value={refundAmount}
-                    onChange={(e) => setRefundAmount(e.target.value)}
-                    min='0'
-                    step='0.01'
-                    startContent={<span className='text-gray-400 text-sm'>$</span>}
-                    description='Partial refund amount in dollars (e.g. 4.99)'
-                  />
+                  {/* Creem supports full refunds only, so the partial-amount
+                      field is Stripe-only (the backend rejects a Creem amount). */}
+                  {subProvider(refundUser?.subscription) !== 'creem' && (
+                    <Input
+                      type='number'
+                      label='Refund Amount (USD)'
+                      placeholder='Leave empty for full refund'
+                      value={refundAmount}
+                      onChange={(e) => setRefundAmount(e.target.value)}
+                      min='0'
+                      step='0.01'
+                      startContent={
+                        <span className='text-gray-400 text-sm'>$</span>
+                      }
+                      description='Partial refund amount in dollars (e.g. 4.99)'
+                    />
+                  )}
 
                   <Textarea
                     label='Reason (optional)'
@@ -1395,16 +2063,24 @@ export default function SubscribersTableWrapper({ subscribers, stats, revenue })
                 </div>
               </ModalBody>
               <ModalFooter>
-                <Button variant='light' onPress={onClose}>Cancel</Button>
-                <Button color='primary' isLoading={isRefunding} onPress={confirmRefund}>
-                  {refundAmount ? `Refund $${refundAmount}` : 'Full Refund'}
+                <Button variant='light' onPress={onClose}>
+                  Cancel
+                </Button>
+                <Button
+                  color='primary'
+                  isLoading={isRefunding}
+                  onPress={confirmRefund}
+                >
+                  {subProvider(refundUser?.subscription) !== 'creem' &&
+                  refundAmount
+                    ? `Refund $${refundAmount}`
+                    : 'Full Refund'}
                 </Button>
               </ModalFooter>
             </>
           )}
         </ModalContent>
       </Modal>
-
     </div>
   );
 }

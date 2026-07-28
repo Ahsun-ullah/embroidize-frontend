@@ -22,25 +22,15 @@ export default function MyPlanPage({ onClose }) {
   const [isUpgrading, setIsUpgrading] = useState(false);
   const { currentPlanName } = useDownloadReset({ tickMs: 60_000 });
 
-  // ─── FIX #1: Keep the subscription as an object, not a boolean ───────────
-  // BUG WAS: userInfoData?.subscription ? true : false
-  //          This turned the object into `true`, making every subscription?.xxx → undefined
   const subscription = userInfoData?.subscription ?? null;
 
-  // After Mongoose populate, subscription.planId holds the full plan object
   const plan = subscription?.planId ?? null;
 
-  // ✅ USER TYPE
-  // ─── FIX #3: These now work correctly because subscription is the real object ─
-  // BUG WAS: subscription was `true` (boolean), so subscription.status was always undefined,
-  //          isPaidUser was always false, isFreeUser was always true
   const isPaidUser = !!subscription;
   const isFreeUser = !isPaidUser;
-  const isOneTime = isPaidUser && !subscription?.stripeSubscriptionId;
+  const isOneTime = isPaidUser && subscription?.type === 'one-time';
   const isCancelled = subscription?.cancelAtPeriodEnd === true;
 
-  // FREE DATA — sourced from the shared hook so the reset countdown here and the
-  // Download Limit modal are computed in exactly one place (no duplicated logic).
   const {
     usedDownloads,
     limit,
@@ -50,17 +40,11 @@ export default function MyPlanPage({ onClose }) {
     msLeft: timeLeft,
   } = useDownloadReset();
 
-  // Subscriber daily quota rolls over at the server day boundary (UTC
-  // midnight), not the user's local midnight — so show the actual local
-  // wall-clock moment plus a live countdown. The hook above already ticks
-  // every second, so these recompute on each render.
   const nextDailyReset = new Date();
   nextDailyReset.setUTCHours(24, 0, 0, 0);
   const dailyResetMsLeft = Math.max(0, nextDailyReset.getTime() - Date.now());
   const dailyResetLabel = (() => {
     const label = formatResetTime(nextDailyReset);
-    // "Today at 8:00 PM" → "today at 8:00 PM" (mid-sentence). Next UTC
-    // midnight is always today or tomorrow locally, never a dated label.
     return label ? label.charAt(0).toLowerCase() + label.slice(1) : '';
   })();
 
@@ -117,6 +101,32 @@ export default function MyPlanPage({ onClose }) {
       active = false;
     };
   }, []);
+
+  // Per-month download history (aggregated from the download log — gateway
+  // agnostic, so it works the same for Stripe and Creem subscribers).
+  const userId = userInfoData?._id;
+  const [monthly, setMonthly] = useState(null);
+  useEffect(() => {
+    if (!userId || !isPaidUser) return;
+    let active = true;
+    (async () => {
+      try {
+        const token = Cookies.get('token');
+        const res = await fetch(
+          `${process.env.NEXT_PUBLIC_BASE_API_URL_PROD}/downloads/user/${userId}/monthly?months=6`,
+          { headers: token ? { Authorization: `Bearer ${token}` } : {} },
+        );
+        if (!res.ok) return;
+        const data = await res.json();
+        if (active) setMonthly(data?.data || null);
+      } catch {
+        // Non-critical — the plan page still renders without the history card.
+      }
+    })();
+    return () => {
+      active = false;
+    };
+  }, [userId, isPaidUser]);
 
   const handleManagePlan = async () => {
     setIsRedirecting(true);
@@ -281,63 +291,65 @@ export default function MyPlanPage({ onClose }) {
             {/* ── Upgrade tiers ── */}
             <div>
               <div className='grid grid-cols-3 gap-2.5'>
-                {tiers.length > 0 && tiers.map((tier) => {
-                  const isCurrent =
-                    currentPlanName?.toLowerCase() === tier.name.toLowerCase();
-                  return (
-                    <button
-                      key={tier.name}
-                      onClick={() => {
-                        onClose?.();
-                        router.push('/subscriptions');
-                      }}
-                      aria-label={`Upgrade to ${tier.name}, ${tier.dailyLimit} downloads per day`}
-                      className={`group relative flex items-center gap-2.5 rounded-2xl border p-3 text-left transition-all duration-200 hover:-translate-y-0.5 hover:shadow-md focus:outline-none focus-visible:ring-2 focus-visible:ring-green-500 ${
-                        isCurrent
-                          ? 'border-green-600 bg-green-600 text-white'
-                          : 'border-green-100 bg-green-50 hover:border-green-400 dark:border-green-500/20 dark:bg-green-500/10 dark:hover:border-green-400'
-                      }`}
-                    >
-                      <span
-                        className={`flex h-9 w-9 shrink-0 items-center justify-center rounded-lg ${
+                {tiers.length > 0 &&
+                  tiers.map((tier) => {
+                    const isCurrent =
+                      currentPlanName?.toLowerCase() ===
+                      tier.name.toLowerCase();
+                    return (
+                      <button
+                        key={tier.name}
+                        onClick={() => {
+                          onClose?.();
+                          router.push('/subscriptions');
+                        }}
+                        aria-label={`Upgrade to ${tier.name}, ${tier.dailyLimit} downloads per day`}
+                        className={`group relative flex items-center gap-2.5 rounded-2xl border p-3 text-left transition-all duration-200 hover:-translate-y-0.5 hover:shadow-md focus:outline-none focus-visible:ring-2 focus-visible:ring-green-500 ${
                           isCurrent
-                            ? 'bg-white/20 text-white'
-                            : 'bg-green-100 text-green-600 dark:bg-green-500/20 dark:text-green-400'
+                            ? 'border-green-600 bg-green-600 text-white'
+                            : 'border-green-100 bg-green-50 hover:border-green-400 dark:border-green-500/20 dark:bg-green-500/10 dark:hover:border-green-400'
                         }`}
                       >
-                        <Download className='h-5 w-5' aria-hidden />
-                      </span>
-                      <span className='flex flex-col leading-tight'>
                         <span
-                          className={`text-base font-extrabold tabular-nums ${
+                          className={`flex h-9 w-9 shrink-0 items-center justify-center rounded-lg ${
                             isCurrent
-                              ? 'text-white'
-                              : 'text-green-700 dark:text-green-400'
+                              ? 'bg-white/20 text-white'
+                              : 'bg-green-100 text-green-600 dark:bg-green-500/20 dark:text-green-400'
                           }`}
                         >
-                          {tier.dailyLimit}
-                          <span className='ml-0.5 text-[11px] font-medium'>
-                            / day
+                          <Download className='h-5 w-5' aria-hidden />
+                        </span>
+                        <span className='flex flex-col leading-tight'>
+                          <span
+                            className={`text-base font-extrabold tabular-nums ${
+                              isCurrent
+                                ? 'text-white'
+                                : 'text-green-700 dark:text-green-400'
+                            }`}
+                          >
+                            {tier.dailyLimit}
+                            <span className='ml-0.5 text-[11px] font-medium'>
+                              / day
+                            </span>
+                          </span>
+                          <span
+                            className={`text-xs font-semibold ${
+                              isCurrent
+                                ? 'text-white/90'
+                                : 'text-green-800 dark:text-green-300'
+                            }`}
+                          >
+                            {tier.name}
+                            {isCurrent && (
+                              <span className='ml-1 text-[9px] font-semibold uppercase opacity-80'>
+                                · Current
+                              </span>
+                            )}
                           </span>
                         </span>
-                        <span
-                          className={`text-xs font-semibold ${
-                            isCurrent
-                              ? 'text-white/90'
-                              : 'text-green-800 dark:text-green-300'
-                          }`}
-                        >
-                          {tier.name}
-                          {isCurrent && (
-                            <span className='ml-1 text-[9px] font-semibold uppercase opacity-80'>
-                              · Current
-                            </span>
-                          )}
-                        </span>
-                      </span>
-                    </button>
-                  );
-                })}
+                      </button>
+                    );
+                  })}
               </div>
             </div>
 
@@ -369,7 +381,6 @@ export default function MyPlanPage({ onClose }) {
                 Browse Designs
               </button>
             </div>
-
           </div>
         </div>
       )}
@@ -682,6 +693,51 @@ export default function MyPlanPage({ onClose }) {
                             </span>
                           </div>
                         ))}
+                      </div>
+                    </div>
+                  </div>
+                )}
+
+                {/* Downloads by month — history from the download log (works
+                    the same whether billed through Stripe or Creem). */}
+                {monthly && monthly.months?.some((m) => m.count > 0) && (
+                  <div className='bg-white border border-slate-100 rounded-2xl overflow-hidden shadow-sm'>
+                    <div className='px-6 py-4 border-b border-slate-50'>
+                      <h2 className='text-sm font-bold text-slate-700 uppercase tracking-widest'>
+                        Downloads by Month
+                      </h2>
+                    </div>
+                    <div className='p-6 space-y-2.5'>
+                      {(() => {
+                        const max = Math.max(
+                          1,
+                          ...monthly.months.map((m) => m.count),
+                        );
+                        return monthly.months.map((m) => (
+                          <div
+                            key={m.month}
+                            className='flex items-center gap-3'
+                          >
+                            <span className='text-xs text-slate-500 w-16 shrink-0'>
+                              {m.label}
+                            </span>
+                            <div className='flex-1 h-2 bg-slate-100 rounded-full overflow-hidden'>
+                              <div
+                                className='h-full bg-gradient-to-r from-violet-500 to-indigo-500 rounded-full transition-all duration-500'
+                                style={{ width: `${(m.count / max) * 100}%` }}
+                              />
+                            </div>
+                            <span className='text-xs font-bold text-slate-700 w-8 text-right shrink-0 tabular-nums'>
+                              {m.count}
+                            </span>
+                          </div>
+                        ));
+                      })()}
+                      <div className='flex justify-between pt-1 text-xs text-slate-400'>
+                        <span>Last {monthly.months.length} months</span>
+                        <span className='font-bold text-slate-600'>
+                          {monthly.total} total
+                        </span>
                       </div>
                     </div>
                   </div>

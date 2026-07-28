@@ -50,6 +50,7 @@ const EMPTY_FORM = {
   type: 'recurring',
   billingInterval: 'month',
   stripePriceId: '',
+  creemProductId: '',
   price: '',
   downloadLimit: '',
   dailyLimit: '',
@@ -145,7 +146,8 @@ export default function PlansWrapper({ plans: initialPlans }) {
       name: plan.name || '',
       type: plan.type || 'recurring',
       billingInterval: plan.billingInterval || 'month',
-      stripePriceId: plan.stripePriceId || '',
+      stripePriceId: plan.gatewayRefs?.stripe || plan.stripePriceId || '',
+      creemProductId: plan.gatewayRefs?.creem || plan.creemProductId || '',
       price: String(plan.price ?? ''),
       savePercent: plan.savePercent != null ? String(plan.savePercent) : '',
       downloadLimit:
@@ -161,8 +163,15 @@ export default function PlansWrapper({ plans: initialPlans }) {
       ErrorToast('Validation', 'Name and price are required.', 3000);
       return;
     }
-    if (!form.stripePriceId) {
-      ErrorToast('Validation', 'Stripe Price ID is required.', 3000);
+    // A plan needs at least one gateway reference. The backend enforces the
+    // precise rule (it must have a ref for whichever gateway is currently live)
+    // and returns a message naming that gateway.
+    if (!form.stripePriceId && !form.creemProductId) {
+      ErrorToast(
+        'Validation',
+        'Enter a Stripe Price ID or a Creem Product ID.',
+        3000,
+      );
       return;
     }
 
@@ -174,6 +183,7 @@ export default function PlansWrapper({ plans: initialPlans }) {
         billingInterval:
           form.type === 'recurring' ? form.billingInterval : null,
         stripePriceId: form.stripePriceId || undefined,
+        creemProductId: form.creemProductId || undefined,
         price: parseFloat(form.price),
         savePercent:
           form.savePercent !== '' ? parseFloat(form.savePercent) : null,
@@ -274,6 +284,7 @@ export default function PlansWrapper({ plans: initialPlans }) {
     { uid: 'savePercent', name: 'SAVE %' },
     { uid: 'limits', name: 'LIMITS' },
     { uid: 'stripe', name: 'STRIPE PRICE ID' },
+    { uid: 'creem', name: 'CREEM PRODUCT ID' },
     { uid: 'status', name: 'STATUS' },
     { uid: 'actions', name: 'ACTIONS' },
   ];
@@ -316,6 +327,15 @@ export default function PlansWrapper({ plans: initialPlans }) {
             )}
           </span>
         );
+      case 'creem': {
+        // Effective Creem ref: canonical gatewayRefs.creem, else legacy field.
+        const creemRef = plan.gatewayRefs?.creem || plan.creemProductId;
+        return (
+          <span className='text-xs font-mono text-gray-500 break-all max-w-[160px] block'>
+            {creemRef || <span className='italic text-gray-300'>—</span>}
+          </span>
+        );
+      }
       case 'status':
         return (
           <Switch
@@ -513,7 +533,6 @@ export default function PlansWrapper({ plans: initialPlans }) {
                           form.stripePriceId ? [form.stripePriceId] : []
                         }
                         onChange={(e) => applyStripePrice(e.target.value)}
-                        isRequired
                       >
                         {priceOptions.map((p) => (
                           <SelectItem
@@ -540,7 +559,6 @@ export default function PlansWrapper({ plans: initialPlans }) {
                         placeholder='price_...'
                         value={form.stripePriceId}
                         onChange={(e) => setField('stripePriceId', e.target.value)}
-                        isRequired
                       />
                     )}
 
@@ -554,6 +572,26 @@ export default function PlansWrapper({ plans: initialPlans }) {
                         price, interval and type.
                       </p>
                     )}
+                  </div>
+
+                  {/* Creem product mapping. A plan is purchasable on whichever
+                      gateway is currently live, so it needs that gateway's ref —
+                      the backend enforces which one. Create the product in Creem
+                      (or via the createCreemProducts script) and paste its id. */}
+                  <div className='space-y-2'>
+                    <span className='text-sm font-medium'>Creem Product ID</span>
+                    <Input
+                      aria-label='Creem Product ID'
+                      placeholder='prod_...'
+                      value={form.creemProductId}
+                      onChange={(e) =>
+                        setField('creemProductId', e.target.value)
+                      }
+                    />
+                    <p className='text-xs text-gray-400'>
+                      Required when Creem is the active payment gateway. Leave
+                      blank for Stripe-only plans.
+                    </p>
                   </div>
 
                   <Input

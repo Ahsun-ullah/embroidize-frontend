@@ -17,6 +17,7 @@ import {
   CheckCircle2,
   KeyRound,
   PlugZap,
+  Receipt,
   ShieldCheck,
   XCircle,
 } from 'lucide-react';
@@ -61,6 +62,8 @@ export default function CreemConfigWrapper({
   const [isSaving, setIsSaving] = useState(false);
   const [isTesting, setIsTesting] = useState(false);
   const [testResult, setTestResult] = useState(null);
+  const [isProbing, setIsProbing] = useState(false);
+  const [probeResult, setProbeResult] = useState(null);
 
   const setField = (k, v) => setForm((f) => ({ ...f, [k]: v }));
 
@@ -139,6 +142,24 @@ export default function CreemConfigWrapper({
       setTestResult({ ok: false, message: err.message || 'Connection failed' });
     } finally {
       setIsTesting(false);
+    }
+  };
+
+  const handleProbe = async () => {
+    setIsProbing(true);
+    setProbeResult(null);
+    try {
+      const res = await fetch(
+        `${apiBase()}/admin/settings/creem/transactions-probe`,
+        { method: 'GET', headers: authHeaders() },
+      );
+      const result = await res.json();
+      if (!res.ok) throw new Error(result.message || 'Probe failed');
+      setProbeResult({ ok: true, ...result.data });
+    } catch (err) {
+      setProbeResult({ ok: false, message: err.message || 'Probe failed' });
+    } finally {
+      setIsProbing(false);
     }
   };
 
@@ -340,15 +361,75 @@ export default function CreemConfigWrapper({
         </div>
       )}
 
-      <div className='flex items-center justify-between gap-3'>
-        <Button
-          variant='bordered'
-          startContent={<PlugZap size={16} />}
-          isLoading={isTesting}
-          onPress={handleTest}
+      {/* Transactions probe result — confirms the income/invoices data path. */}
+      {probeResult && (
+        <div
+          className={`rounded-lg border p-4 text-sm ${
+            probeResult.ok && probeResult.recognised
+              ? 'border-gray-300 bg-gray-50'
+              : probeResult.ok
+                ? 'border-amber-300 bg-amber-50 text-amber-800'
+                : 'border-red-200 bg-red-50 text-red-700'
+          }`}
         >
-          Test connection
-        </Button>
+          {!probeResult.ok ? (
+            <p className='flex items-center gap-2'>
+              <XCircle size={16} /> {probeResult.message}
+            </p>
+          ) : (
+            <div className='space-y-2'>
+              <p className='flex items-center gap-2 font-semibold text-gray-900'>
+                {probeResult.recognised ? (
+                  <>
+                    <CheckCircle2 size={16} /> Transactions readable — income &
+                    invoices will populate.
+                  </>
+                ) : (
+                  <>
+                    <XCircle size={16} /> Response not recognised — send this to
+                    your developer to map it.
+                  </>
+                )}
+              </p>
+              <p className='text-xs text-gray-600'>
+                Items key: <code>{String(probeResult.detectedItemsKey)}</code> ·
+                found {probeResult.itemCount} transaction(s) · top-level keys:{' '}
+                <code>{(probeResult.topLevelKeys || []).join(', ') || '—'}</code>
+              </p>
+              {probeResult.firstItem && (
+                <details className='text-xs'>
+                  <summary className='cursor-pointer text-gray-500 hover:text-gray-800'>
+                    Show first transaction (copy this if asked)
+                  </summary>
+                  <pre className='mt-2 max-h-64 overflow-auto rounded bg-white p-2 text-[11px] text-gray-700 border'>
+                    {JSON.stringify(probeResult.firstItem, null, 2)}
+                  </pre>
+                </details>
+              )}
+            </div>
+          )}
+        </div>
+      )}
+
+      <div className='flex items-center justify-between gap-3'>
+        <div className='flex items-center gap-2'>
+          <Button
+            variant='bordered'
+            startContent={<PlugZap size={16} />}
+            isLoading={isTesting}
+            onPress={handleTest}
+          >
+            Test connection
+          </Button>
+          <Button
+            variant='bordered'
+            startContent={<Receipt size={16} />}
+            isLoading={isProbing}
+            onPress={handleProbe}
+          >
+            Check transactions
+          </Button>
+        </div>
         <Button
           className='bg-gray-900 text-white'
           isLoading={isSaving}

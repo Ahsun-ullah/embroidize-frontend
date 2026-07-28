@@ -1,9 +1,4 @@
-// Printable per-payment invoice (admin-only), used by the Subscribers page.
-// Follows the statement.js pattern: opens a clean print-ready document in a
-// new window — the browser's "Save as PDF" is the download. Built to be
-// evidence-grade for Stripe reviews: merchant + customer blocks, line item
-// with service period, card details, every Stripe reference ID, and a
-// digital-delivery note. Grayscale only, per brand.
+
 
 const LOGO_URL =
   'https://embroidize-assets.nyc3.cdn.digitaloceanspaces.com/logo-black.png';
@@ -33,16 +28,21 @@ function fmtDate(value) {
   });
 }
 
-// config = {
-//   invoice:  one row from GET /admin/users/:userId/subscription/invoices
-//   customer: the `customer` block from the same response
-// }
+
 function invoiceHtml({ invoice, customer }) {
   const generated = new Date().toLocaleString('en-US');
   const currency = invoice.currency || 'USD';
   const isPaid = invoice.status === 'paid';
+
+  const gateway = customer.gateway === 'creem' ? 'creem' : 'stripe';
+  const providerName = gateway === 'creem' ? 'Creem' : 'Stripe';
+  const providerCustomerId = customer.stripeCustomerId || customer.creemCustomerId || '';
+  const providerSubscriptionId =
+    customer.stripeSubscriptionId || customer.creemSubscriptionId || '';
   const hasRefund = Number(invoice.amountRefunded) > 0;
   const netTotal = (Number(invoice.amount) || 0) - (Number(invoice.amountRefunded) || 0);
+
+  
 
   const servicePeriod =
     invoice.periodStart && invoice.periodEnd
@@ -52,7 +52,7 @@ function invoiceHtml({ invoice, customer }) {
   const paymentMethod =
     invoice.cardBrand && invoice.cardLast4
       ? `${invoice.cardBrand.charAt(0).toUpperCase() + invoice.cardBrand.slice(1)} •••• ${invoice.cardLast4}`
-      : 'Card (via Stripe)';
+      : `Card (via ${providerName})`;
 
   const refRow = (label, value) =>
     value
@@ -172,7 +172,7 @@ function invoiceHtml({ invoice, customer }) {
         <p><strong>${esc(invoice.billingName || customer.name || '—')}</strong></p>
         <p>${esc(invoice.billingEmail || customer.email || '—')}</p>
         ${invoice.billingCountry || customer.country ? `<p>Country: ${esc(invoice.billingCountry || customer.country)}</p>` : ''}
-        <p class="muted">Stripe customer: ${esc(customer.stripeCustomerId || '—')}</p>
+        <p class="muted">${esc(providerName)} customer: ${esc(providerCustomerId || '—')}</p>
       </div>
     </div>
 
@@ -220,11 +220,12 @@ function invoiceHtml({ invoice, customer }) {
     <div class="refs">
       ${refRow('Payment method', paymentMethod)}
       ${refRow('Currency', currency)}
-      ${refRow('Stripe customer ID', customer.stripeCustomerId)}
-      ${refRow('Stripe subscription ID', customer.stripeSubscriptionId)}
+      ${refRow(`${providerName} customer ID`, providerCustomerId)}
+      ${refRow(`${providerName} subscription ID`, providerSubscriptionId)}
       ${refRow('Stripe invoice ID', invoice.stripeInvoiceId)}
       ${refRow('Payment intent', invoice.paymentIntentId)}
       ${refRow('Charge ID', invoice.chargeId)}
+      ${refRow('Transaction ID', gateway === 'creem' ? invoice.id : null)}
       ${refRow('Receipt number', invoice.receiptNumber)}
     </div>
 
@@ -240,7 +241,7 @@ function invoiceHtml({ invoice, customer }) {
     </div>
 
     <div class="footer">
-      All referenced IDs are verifiable in the Stripe Dashboard.<br />
+      All referenced IDs are verifiable in the ${esc(providerName)} Dashboard.<br />
       Embroidize · <a href="https://embroidize.com">embroidize.com</a> · ${SUPPORT_EMAIL} · Generated ${esc(generated)}
     </div>
   </div>
