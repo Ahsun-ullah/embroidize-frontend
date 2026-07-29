@@ -16,19 +16,13 @@ export default async function SubscribersPage() {
     getRevenueStats(),
   ]);
 
-  const stats = {
-    total: subscribers.length,
-    active: subscribers.filter((u) => u.subscription?.status === 'active').length,
-    canceled: subscribers.filter((u) => u.subscription?.status === 'canceled').length,
-    pastDue: subscribers.filter((u) => u.subscription?.status === 'past_due').length,
-    trialing: subscribers.filter((u) => u.subscription?.status === 'trialing').length,
-    expired: subscribers.filter((u) => u.subscription?.status === 'expired').length,
-  };
-
+  // Stat-card counts and revenue amounts are recomputed client-side from the
+  // active filters (see SubscribersTableWrapper), so no server-side stats are
+  // passed here — only the raw rows and the all-time revenue figures.
   return (
     <div className='space-y-6'>
       <FinanceUnlockedBar />
-      <SubscribersTableWrapper subscribers={subscribers} stats={stats} revenue={revenue} />
+      <SubscribersTableWrapper subscribers={subscribers} revenue={revenue} />
     </div>
   );
 }

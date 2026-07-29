@@ -142,6 +142,32 @@ function quotaLabel(used, limit) {
   return `${used} / ${limit} (${pct}%)`;
 }
 
+// Rough lifetime value: what a subscriber has plausibly paid so far. We do NOT
+// store per-user payment history (it lives in Stripe/Creem), so this ESTIMATES
+// it as plan price × billing cycles elapsed since they subscribed — the first
+// charge at signup plus one per renewal. One-time plans are a single payment.
+// Labeled "Est." everywhere it surfaces; it is not exact collected money.
+function estLtv(sub) {
+  const plan = sub?.planId;
+  if (!plan || plan.price == null) return 0;
+  if (plan.type === 'one-time' || !plan.billingInterval) return plan.price;
+  const start = sub.createdAt ? new Date(sub.createdAt).getTime() : null;
+  if (!start) return plan.price;
+  const ended =
+    (sub.status === 'canceled' || sub.status === 'expired') && sub.periodEndDate
+      ? new Date(sub.periodEndDate).getTime()
+      : Date.now();
+  const days = Math.max(0, ended - start) / 86400000;
+  const periodDays =
+    plan.billingInterval === 'year'
+      ? 365
+      : plan.billingInterval === 'week'
+        ? 7
+        : 30.44;
+  const cycles = 1 + Math.floor(days / periodDays);
+  return plan.price * cycles;
+}
+
 function QuotaBar({ used, limit }) {
   if (limit == null)
     return <span className='text-sm text-gray-500'>Unlimited</span>;
@@ -260,16 +286,30 @@ function AuditActionBadge({ action }) {
 
 // ─── Component ────────────────────────────────────────────────────────────────
 
-export default function SubscribersTableWrapper({
-  subscribers,
-  stats,
-  revenue,
-}) {
+export default function SubscribersTableWrapper({ subscribers, revenue }) {
   const router = useRouter();
 
   const [search, setSearch] = useState('');
   const [statusFilter, setStatusFilter] = useState('all');
+  const [providerFilter, setProviderFilter] = useState('all'); // all | stripe | creem
+  const [planFilter, setPlanFilter] = useState('all'); // all | planId
+  const [cancelingOnly, setCancelingOnly] = useState(false); // cancels at period end
   const [page, setPage] = useState(1);
+  // Table sort. Defaults to newest-subscribed, matching the server's ordering.
+  const [sortDescriptor, setSortDescriptor] = useState({
+    column: 'subscribed',
+    direction: 'descending',
+  });
+
+  // Distinct plans present in the current subscriber set, for the plan filter.
+  const planOptions = useMemo(() => {
+    const m = new Map();
+    subscribers.forEach((u) => {
+      const p = u.subscription?.planId;
+      if (p?._id) m.set(p._id, p.name);
+    });
+    return [...m.entries()].map(([id, name]) => ({ id, name }));
+  }, [subscribers]);
 
   // View details modal
   const {
@@ -420,6 +460,15 @@ export default function SubscribersTableWrapper({
     if (statusFilter !== 'all') {
       list = list.filter((u) => u.subscription?.status === statusFilter);
     }
+    if (providerFilter !== 'all') {
+      list = list.filter((u) => subProvider(u.subscription) === providerFilter);
+    }
+    if (planFilter !== 'all') {
+      list = list.filter((u) => u.subscription?.planId?._id === planFilter);
+    }
+    if (cancelingOnly) {
+      list = list.filter((u) => u.subscription?.cancelAtPeriodEnd);
+    }
     if (search.trim()) {
       const q = search.toLowerCase();
       list = list.filter(
@@ -430,10 +479,43 @@ export default function SubscribersTableWrapper({
       );
     }
     return list;
-  }, [subscribers, statusFilter, search]);
+  }, [subscribers, statusFilter, providerFilter, planFilter, cancelingOnly, search]);
 
-  const totalPages = Math.max(1, Math.ceil(filtered.length / PER_PAGE));
-  const paginated = filtered.slice((page - 1) * PER_PAGE, page * PER_PAGE);
+  // Sorting. Accessors return comparable primitives; missing values sort low.
+  const sorted = useMemo(() => {
+    const accessors = {
+      user: (u) => (u.name || u.email || '').toLowerCase(),
+      status: (u) => u.subscription?.status || '',
+      periodEnd: (u) =>
+        u.subscription?.periodEndDate
+          ? new Date(u.subscription.periodEndDate).getTime()
+          : 0,
+      subscribed: (u) =>
+        u.subscription?.createdAt
+          ? new Date(u.subscription.createdAt).getTime()
+          : 0,
+      joined: (u) => (u.createdAt ? new Date(u.createdAt).getTime() : 0),
+      ltv: (u) => estLtv(u.subscription),
+    };
+    const acc = accessors[sortDescriptor.column];
+    if (!acc) return filtered;
+    const dir = sortDescriptor.direction === 'ascending' ? 1 : -1;
+    return [...filtered].sort((a, b) => {
+      const av = acc(a);
+      const bv = acc(b);
+      if (av < bv) return -1 * dir;
+      if (av > bv) return 1 * dir;
+      return 0;
+    });
+  }, [filtered, sortDescriptor]);
+
+  const totalPages = Math.max(1, Math.ceil(sorted.length / PER_PAGE));
+  const paginated = sorted.slice((page - 1) * PER_PAGE, page * PER_PAGE);
+
+  const handleSortChange = (descriptor) => {
+    setSortDescriptor(descriptor);
+    setPage(1);
+  };
 
   const handleSearch = (val) => {
     setSearch(val);
@@ -443,6 +525,132 @@ export default function SubscribersTableWrapper({
     setStatusFilter(val);
     setPage(1);
   };
+  const handleProviderFilter = (val) => {
+    setProviderFilter(val);
+    setPage(1);
+  };
+  const handlePlanFilter = (val) => {
+    setPlanFilter(val);
+    setPage(1);
+  };
+  const toggleCancelingOnly = () => {
+    setCancelingOnly((v) => !v);
+    setPage(1);
+  };
+
+  const anyFilterActive =
+    statusFilter !== 'all' ||
+    providerFilter !== 'all' ||
+    planFilter !== 'all' ||
+    cancelingOnly ||
+    search.trim() !== '';
+
+  // Stat-card + revenue aggregates recomputed from the CURRENT filtered set, so
+  // every count and amount reflects the active filters. Mirrors the backend's
+  // revenue math (MRR normalisation, month boundary, churn formula). The only
+  // figure we can't derive here is all-time "Collected" — that money lives in
+  // Stripe/Creem, not in the loaded rows, so it follows the provider filter only.
+  const view = useMemo(() => {
+    const round2 = (n) => Math.round(n * 100) / 100;
+    const monthlyOf = (plan) => {
+      if (!plan) return 0;
+      if (plan.billingInterval === 'month') return plan.price;
+      if (plan.billingInterval === 'year') return plan.price / 12;
+      if (plan.billingInterval === 'week') return plan.price * 4.33;
+      return plan.price; // one-time — face value, matches backend
+    };
+    const som = new Date();
+    som.setDate(1);
+    som.setHours(0, 0, 0, 0);
+
+    const stats = {
+      total: filtered.length,
+      active: 0,
+      trialing: 0,
+      canceled: 0,
+      pastDue: 0,
+      expired: 0,
+    };
+    const prov = {
+      stripe: { active: 0, mrr: 0 },
+      creem: { active: 0, mrr: 0 },
+    };
+    const planMap = new Map();
+    let mrr = 0;
+    let activeCount = 0;
+    let newThisMonth = 0;
+    let canceledThisMonth = 0;
+    let estTotalPaid = 0; // estimated lifetime paid across the filtered set
+
+    filtered.forEach((u) => {
+      const s = u.subscription;
+      const st = s?.status;
+      estTotalPaid += estLtv(s);
+      if (st === 'active') stats.active++;
+      else if (st === 'trialing') stats.trialing++;
+      else if (st === 'canceled') stats.canceled++;
+      else if (st === 'past_due') stats.pastDue++;
+      else if (st === 'expired') stats.expired++;
+
+      if (s?.createdAt && new Date(s.createdAt) >= som) newThisMonth++;
+      if (st === 'canceled' && s?.updatedAt && new Date(s.updatedAt) >= som)
+        canceledThisMonth++;
+
+      if (st === 'active' || st === 'trialing') {
+        const m = monthlyOf(s?.planId);
+        const p = subProvider(s);
+        mrr += m;
+        activeCount++;
+        prov[p].active++;
+        prov[p].mrr += m;
+        const plan = s?.planId;
+        if (plan?._id) {
+          const cur = planMap.get(plan._id) || {
+            name: plan.name,
+            count: 0,
+            revenue: 0,
+          };
+          cur.count++;
+          cur.revenue += m;
+          planMap.set(plan._id, cur);
+        }
+      }
+    });
+
+    const churnRate =
+      activeCount + canceledThisMonth > 0
+        ? Math.round(
+            (canceledThisMonth / (activeCount + canceledThisMonth)) * 10000,
+          ) / 100
+        : 0;
+
+    const revenueByPlan = [...planMap.values()]
+      .map((p) => ({ ...p, revenue: round2(p.revenue) }))
+      .sort((a, b) => b.revenue - a.revenue);
+
+    return {
+      stats,
+      mrr: round2(mrr),
+      arr: round2(mrr * 12),
+      estTotalPaid: round2(estTotalPaid),
+      activeCount,
+      newThisMonth,
+      canceledThisMonth,
+      churnRate,
+      provider: {
+        stripe: { active: prov.stripe.active, mrr: round2(prov.stripe.mrr) },
+        creem: { active: prov.creem.active, mrr: round2(prov.creem.mrr) },
+      },
+      revenueByPlan,
+    };
+  }, [filtered]);
+
+  // All-time gross collected, scoped to the provider filter (the only slice we
+  // can honour — status/plan/cancelling don't apply to historical payments).
+  const collectedInScope =
+    providerFilter === 'all'
+      ? revenue?.totalCollected
+      : revenue?.collectedByProvider?.[providerFilter];
 
   // ── View modal ─────────────────────────────────────────────────────────────
 
@@ -704,14 +912,16 @@ export default function SubscribersTableWrapper({
   // ── Columns ────────────────────────────────────────────────────────────────
 
   const columns = [
-    { uid: 'user', name: 'USER' },
+    { uid: 'user', name: 'USER', sortable: true },
     { uid: 'plan', name: 'PLAN' },
     { uid: 'provider', name: 'PROVIDER' },
-    { uid: 'status', name: 'STATUS' },
+    { uid: 'status', name: 'STATUS', sortable: true },
     { uid: 'downloads', name: 'DOWNLOADS (PERIOD)' },
     { uid: 'daily', name: 'DAILY' },
-    { uid: 'periodEnd', name: 'RENEWS / EXPIRES' },
-    { uid: 'joined', name: 'JOINED' },
+    { uid: 'ltv', name: 'EST. LTV', sortable: true },
+    { uid: 'periodEnd', name: 'RENEWS / EXPIRES', sortable: true },
+    { uid: 'subscribed', name: 'SUBSCRIBED', sortable: true },
+    { uid: 'joined', name: 'JOINED', sortable: true },
     { uid: 'actions', name: 'ACTIONS' },
   ];
 
@@ -809,6 +1019,16 @@ export default function SubscribersTableWrapper({
         );
       }
 
+      case 'ltv':
+        return (
+          <div
+            className='text-sm font-mono text-gray-700 dark:text-gray-300'
+            title='Estimated: plan price × billing cycles since subscribed. Not exact collected money.'
+          >
+            ${Number(estLtv(sub)).toFixed(2)}
+          </div>
+        );
+
       case 'periodEnd':
         return (
           <div className='text-sm'>
@@ -825,6 +1045,11 @@ export default function SubscribersTableWrapper({
               <span className='text-gray-400'>—</span>
             )}
           </div>
+        );
+
+      case 'subscribed':
+        return (
+          <div className='text-sm text-gray-600'>{fmt(sub?.createdAt)}</div>
         );
 
       case 'joined':
@@ -912,26 +1137,34 @@ export default function SubscribersTableWrapper({
 
   return (
     <div className='space-y-6'>
-      {/* ── Stats ── */}
+      {/* ── Stats (reflect the current filter) ── */}
       <div className='grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3'>
-        <StatCard label='Total' value={stats.total} />
-        <StatCard label='Active' value={stats.active} color='text-green-600' />
+        <StatCard label='Total' value={view.stats.total} />
+        <StatCard
+          label='Active'
+          value={view.stats.active}
+          color='text-green-600'
+        />
         <StatCard
           label='Trialing'
-          value={stats.trialing}
+          value={view.stats.trialing}
           color='text-blue-600'
         />
         <StatCard
           label='Past Due'
-          value={stats.pastDue}
+          value={view.stats.pastDue}
           color='text-yellow-600'
         />
         <StatCard
           label='Cancelled'
-          value={stats.canceled}
+          value={view.stats.canceled}
           color='text-red-500'
         />
-        <StatCard label='Expired' value={stats.expired} color='text-gray-500' />
+        <StatCard
+          label='Expired'
+          value={view.stats.expired}
+          color='text-gray-500'
+        />
       </div>
 
       {/* ── Revenue Dashboard ── */}
@@ -943,6 +1176,11 @@ export default function SubscribersTableWrapper({
               <h2 className='text-sm font-bold text-gray-700 dark:text-gray-300 uppercase tracking-wide'>
                 Revenue Overview
               </h2>
+              {anyFilterActive && (
+                <Chip size='sm' variant='flat' color='primary'>
+                  Filtered · {filtered.length} of {subscribers.length}
+                </Chip>
+              )}
             </div>
             {/* Income statement for a period — pulled live from Stripe. */}
             <div className='flex items-center gap-2'>
@@ -975,54 +1213,124 @@ export default function SubscribersTableWrapper({
             </div>
           </div>
           <div className='grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-6 gap-4 mb-5'>
-            {/* All-time gross from Stripe (invoices + one-time plan purchases,
-                custom orders excluded). null = Stripe unreachable → hide. */}
-            {revenue.totalCollected != null && (
+            {/* All-time gross (invoices + one-time plan purchases, custom orders
+                excluded). Follows the provider filter only — status/plan/cancelling
+                don't apply to historical payments. null = unreachable → hide. */}
+            {collectedInScope != null && (
               <StatCard
                 label='Total Collected'
-                value={`$${Number(revenue.totalCollected).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`}
+                value={`$${Number(collectedInScope).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`}
                 color='text-emerald-600'
-                sub='All-time gross (all gateways)'
+                sub={
+                  providerFilter === 'all'
+                    ? 'All-time gross (all gateways)'
+                    : `All-time gross · ${providerLabel(providerFilter)}`
+                }
               />
             )}
             <StatCard
+              label='Est. Total Paid'
+              value={`$${Number(view.estTotalPaid).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`}
+              color='text-emerald-600'
+              sub='Estimated · current filter'
+            />
+            <StatCard
               label='MRR'
-              value={`$${revenue.mrr}`}
+              value={`$${view.mrr}`}
               color='text-indigo-600'
             />
             <StatCard
               label='ARR'
-              value={`$${revenue.arr}`}
+              value={`$${view.arr}`}
               color='text-indigo-500'
             />
             <StatCard
               label='Active Subs'
-              value={revenue.totalActive}
+              value={view.activeCount}
               color='text-green-600'
             />
             <StatCard
               label='New This Month'
-              value={revenue.newThisMonth}
+              value={view.newThisMonth}
               color='text-blue-600'
             />
             <StatCard
               label='Cancelled (Month)'
-              value={revenue.canceledThisMonth}
+              value={view.canceledThisMonth}
               color='text-red-500'
             />
             <StatCard
               label='Churn Rate'
-              value={`${revenue.churnRate}%`}
+              value={`${view.churnRate}%`}
               color='text-orange-500'
             />
           </div>
-          {revenue.revenueByPlan?.length > 0 && (
+
+          {/* Payment amounts split by gateway. Active count + MRR are recomputed
+              from the filtered set; "Collected" is all-time gross per provider
+              (not filterable, hidden when that provider is unreachable). When a
+              single provider is selected, only that card shows. */}
+          <div className='mb-5'>
+            <p className='text-xs font-semibold text-gray-400 uppercase tracking-wide mb-2'>
+              By Provider
+            </p>
+            <div className='grid grid-cols-1 sm:grid-cols-2 gap-3'>
+              {['stripe', 'creem']
+                .filter((p) => providerFilter === 'all' || providerFilter === p)
+                .map((p) => {
+                  const active = view.provider[p].active;
+                  const mrr = view.provider[p].mrr;
+                  const collected = revenue.collectedByProvider?.[p];
+                  return (
+                    <div
+                      key={p}
+                      className='flex items-center justify-between gap-4 p-4 bg-gray-50 dark:bg-gray-800 rounded-lg'
+                    >
+                      <div className='flex items-center gap-2'>
+                        <Chip size='sm' variant='flat' className='capitalize'>
+                          {providerLabel(p)}
+                        </Chip>
+                        <span className='text-xs text-gray-500'>
+                          {active} active
+                        </span>
+                      </div>
+                      <div className='flex items-center gap-5 text-right'>
+                        <div>
+                          <p className='text-[11px] text-gray-400 uppercase tracking-wide'>
+                            MRR
+                          </p>
+                          <p className='text-sm font-bold'>
+                            ${Number(mrr || 0).toFixed(2)}
+                          </p>
+                        </div>
+                        {collected != null && (
+                          <div>
+                            <p className='text-[11px] text-gray-400 uppercase tracking-wide'>
+                              Collected
+                            </p>
+                            <p className='text-sm font-bold'>
+                              $
+                              {Number(collected).toLocaleString('en-US', {
+                                minimumFractionDigits: 2,
+                                maximumFractionDigits: 2,
+                              })}
+                            </p>
+                          </div>
+                        )}
+                      </div>
+                    </div>
+                  );
+                })}
+            </div>
+          </div>
+
+          {view.revenueByPlan.length > 0 && (
             <div>
               <p className='text-xs font-semibold text-gray-400 uppercase tracking-wide mb-2'>
                 Revenue by Plan
               </p>
               <div className='grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2'>
-                {revenue.revenueByPlan.map((p) => (
+                {view.revenueByPlan.map((p) => (
                   <div
                     key={p.name}
                     className='flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-800 rounded-lg'
@@ -1052,7 +1360,7 @@ export default function SubscribersTableWrapper({
             {filtered.length} result{filtered.length !== 1 ? 's' : ''}
           </p>
         </div>
-        <div className='flex flex-col sm:flex-row gap-2 w-full sm:w-auto'>
+        <div className='flex flex-col sm:flex-row flex-wrap gap-2 w-full sm:w-auto'>
           <Input
             isClearable
             placeholder='Search name, email, or plan…'
@@ -1085,13 +1393,76 @@ export default function SubscribersTableWrapper({
               <DropdownItem key='incomplete'>Incomplete</DropdownItem>
             </DropdownMenu>
           </Dropdown>
+          <Dropdown>
+            <DropdownTrigger>
+              <Button variant='flat' className='capitalize min-w-[130px]'>
+                Provider:{' '}
+                {providerFilter === 'all'
+                  ? 'All'
+                  : providerLabel(providerFilter)}
+              </Button>
+            </DropdownTrigger>
+            <DropdownMenu
+              aria-label='Provider filter'
+              selectedKeys={[providerFilter]}
+              onAction={(k) => handleProviderFilter(k)}
+            >
+              <DropdownItem key='all'>All</DropdownItem>
+              <DropdownItem key='stripe'>Stripe</DropdownItem>
+              <DropdownItem key='creem'>Creem</DropdownItem>
+            </DropdownMenu>
+          </Dropdown>
+          {planOptions.length > 0 && (
+            <Dropdown>
+              <DropdownTrigger>
+                <Button variant='flat' className='max-w-[200px] min-w-[130px]'>
+                  <span className='truncate'>
+                    Plan:{' '}
+                    {planFilter === 'all'
+                      ? 'All'
+                      : planOptions.find((p) => p.id === planFilter)?.name ||
+                        'All'}
+                  </span>
+                </Button>
+              </DropdownTrigger>
+              <DropdownMenu
+                aria-label='Plan filter'
+                selectedKeys={[planFilter]}
+                onAction={(k) => handlePlanFilter(k)}
+              >
+                {[
+                  <DropdownItem key='all'>All plans</DropdownItem>,
+                  ...planOptions.map((p) => (
+                    <DropdownItem key={p.id}>{p.name}</DropdownItem>
+                  )),
+                ]}
+              </DropdownMenu>
+            </Dropdown>
+          )}
+          <Button
+            variant={cancelingOnly ? 'solid' : 'flat'}
+            color={cancelingOnly ? 'danger' : 'default'}
+            startContent={<Ban size={16} />}
+            onPress={toggleCancelingOnly}
+          >
+            Cancelling
+          </Button>
         </div>
       </div>
 
       {/* ── Table ── */}
-      <Table aria-label='Subscribers table' removeWrapper>
+      <Table
+        aria-label='Subscribers table'
+        removeWrapper
+        sortDescriptor={sortDescriptor}
+        onSortChange={handleSortChange}
+      >
         <TableHeader columns={columns}>
-          {(col) => <TableColumn key={col.uid}>{col.name}</TableColumn>}
+          {(col) => (
+            <TableColumn key={col.uid} allowsSorting={col.sortable}>
+              {col.name}
+            </TableColumn>
+          )}
         </TableHeader>
         <TableBody
           items={paginated}

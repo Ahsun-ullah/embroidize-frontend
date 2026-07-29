@@ -5,9 +5,9 @@ import { ErrorToast } from '@/components/Common/ErrorToast';
 import ForgotPasswordModal from '@/components/Common/ForgotPasswordForm';
 import LoadingSpinner from '@/components/Common/LoadingSpinner';
 import { SuccessToast } from '@/components/Common/SuccessToast';
+import { setAuthToken } from '@/lib/auth';
 import { useLogInMutation } from '@/lib/redux/public/auth/authSlice';
 import { Input } from '@heroui/react';
-import Cookies from 'js-cookie';
 import Image from 'next/image';
 import Link from 'next/link';
 import { useRouter, useSearchParams } from 'next/navigation';
@@ -50,7 +50,7 @@ const Login = () => {
           3000,
         );
 
-        Cookies.set('token', response.data.data.token);
+        setAuthToken(response.data.data.token);
 
         if (response.data.data.role === 'admin') {
           router.push('/admin');

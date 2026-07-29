@@ -6,7 +6,7 @@ import {
   useAppleAuthMutation,
   useGoogleAuthMutation,
 } from '@/lib/redux/public/auth/authSlice';
-import Cookies from 'js-cookie';
+import { setAuthToken } from '@/lib/auth';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { useEffect, useRef, useState } from 'react';
 
@@ -73,7 +73,7 @@ export default function SocialLoginButtons({ showThankYou = true }) {
                 });
               }
 
-              Cookies.set('token', result.data.token);
+              setAuthToken(result.data.token);
 
               if (showThankYou) {
                 // Register / first-time flow -> go via thank-you
@@ -160,7 +160,7 @@ export default function SocialLoginButtons({ showThankYou = true }) {
               });
             }
 
-            Cookies.set('token', result.data.token);
+            setAuthToken(result.data.token);
 
             if (showThankYou) {
               router.push(

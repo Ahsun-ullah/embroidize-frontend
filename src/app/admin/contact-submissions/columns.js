@@ -3,5 +3,6 @@ export const columns = [
   { name: 'Email', uid: 'email' },
   { name: 'Phone', uid: 'phone' },
   { name: 'Date', uid: 'createdAt' },
+  { name: 'Status', uid: 'status' },
   { name: 'Actions', uid: 'actions' },
 ];

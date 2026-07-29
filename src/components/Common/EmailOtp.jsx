@@ -4,7 +4,7 @@ import {
   useVerifyOtpMutation,
 } from '@/lib/redux/public/auth/authSlice';
 import { handleApiError } from '@/lib/utils/handleError';
-import Cookies from 'js-cookie';
+import { setAuthToken } from '@/lib/auth';
 import { usePathname, useRouter } from 'next/navigation';
 import { useEffect, useState } from 'react';
 import EmailOtpComponent from './EmailOtpComponent';
@@ -95,7 +95,7 @@ const EmailOtp = ({ step, setStep, userDetailsData, pathName }) => {
 
       const loginResult = await logIn(loginPayload).unwrap();
 
-      Cookies.set('token', loginResult.data.token);
+      setAuthToken(loginResult.data.token);
 
       setIsNavigating(true);
       const role = loginResult?.data?.role;

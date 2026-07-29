@@ -1,5 +1,6 @@
 'use client';
 
+import { clearAuthToken } from '@/lib/auth';
 import {
   useGetFavoriteIdsQuery,
   useToggleFavoriteMutation,
@@ -102,8 +103,13 @@ export default function FavoriteButton({
           setDelta(serverCount - Number(initialCount || 0));
         }
       })
-      .catch(() => {
+      .catch((err) => {
         setDelta(delta);
+        // Session expired mid-action: send them to log in, then back here.
+        if (err?.status === 401) {
+          clearAuthToken();
+          router.push(`/auth/login?pathName=${encodeURIComponent(pathname)}`);
+        }
       });
   };
 

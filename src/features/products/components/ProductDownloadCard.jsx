@@ -6,6 +6,7 @@ import FavoriteButton from '@/components/Common/FavoriteButton';
 import LoadingSpinner from '@/components/Common/LoadingSpinner';
 import PremiumDesignBanner from '@/components/Common/PremiumDesignBanner';
 import SkuFlag from '@/components/Common/SkuFlag';
+import { clearAuthToken } from '@/lib/auth';
 import { useUserInfoQuery } from '@/lib/redux/common/user/userInfoSlice';
 import {
   filenameFromContentDisposition,
@@ -155,6 +156,15 @@ export default function ProductDownloadCard({ data }) {
       );
 
       if (!res.ok) {
+        // Session expired: the token is present but the server rejected it.
+        // Clear the dead token and send them to log in again rather than
+        // showing a confusing "Unauthorized Access" toast.
+        if (res.status === 401) {
+          clearAuthToken();
+          window.location.href = redirectPath;
+          return;
+        }
+
         let errorMessage = 'Could not download the ZIP file';
         let errorTitle = 'Download Failed';
 
