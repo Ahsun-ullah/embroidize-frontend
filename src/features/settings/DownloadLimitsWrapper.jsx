@@ -51,6 +51,14 @@ export default function DownloadLimitsWrapper({ settings }) {
   const [window_, setWindow] = useState(
     stored.freeDownloadWindow || effective.freeDownloadWindow || '1d'
   );
+  // How long a subscriber keeps access after a renewal charge FAILS, while the
+  // gateway retries. Separate from the free-tier window above — it only affects
+  // paying customers whose card was declined.
+  const [dunning, setDunning] = useState(
+    stored.dunningGraceDays != null
+      ? String(stored.dunningGraceDays)
+      : String(effective.dunningGraceDays ?? 3)
+  );
   const [isSaving, setIsSaving] = useState(false);
 
   const handleSave = async () => {
@@ -59,6 +67,16 @@ export default function DownloadLimitsWrapper({ settings }) {
       ErrorToast(
         'Invalid limit',
         'The limit must be a whole number between 1 and 1000.',
+        3000
+      );
+      return;
+    }
+
+    const d = Number(dunning);
+    if (!Number.isInteger(d) || d < 0 || d > 30) {
+      ErrorToast(
+        'Invalid grace period',
+        'The payment-retry grace must be a whole number of days between 0 and 30.',
         3000
       );
       return;
@@ -76,6 +94,7 @@ export default function DownloadLimitsWrapper({ settings }) {
         body: JSON.stringify({
           freeDownloadLimit: n,
           freeDownloadWindow: window_,
+          dunningGraceDays: d,
         }),
       });
       const result = await res.json();
@@ -116,6 +135,9 @@ export default function DownloadLimitsWrapper({ settings }) {
             <Chip size='sm' variant='flat' className='bg-gray-900 text-white'>
               {effective.freeDownloadLimit} downloads ·{' '}
               {windowLabel(effective.freeDownloadWindow)}
+            </Chip>{' '}
+            <Chip size='sm' variant='flat' className='bg-gray-900 text-white'>
+              {effective.dunningGraceDays ?? 3}-day failed-payment grace
             </Chip>
           </p>
           <p className='mt-1 text-gray-400'>
@@ -157,6 +179,34 @@ export default function DownloadLimitsWrapper({ settings }) {
               <SelectItem key={o.value}>{o.label}</SelectItem>
             ))}
           </Select>
+        </CardBody>
+      </Card>
+
+      <Card className='border border-gray-200 shadow-none'>
+        <CardHeader className='font-semibold'>
+          Failed payment grace period
+        </CardHeader>
+        <CardBody className='gap-3'>
+          <p className='text-xs text-gray-500'>
+            When a subscriber&apos;s renewal charge is declined, Stripe and Creem
+            both keep retrying the card automatically for around two weeks. This
+            is how long the subscriber keeps their downloads while that happens.
+            They get an email straight away and a final warning before it runs
+            out.
+          </p>
+          <Input
+            type='number'
+            min={0}
+            max={30}
+            value={dunning}
+            onValueChange={setDunning}
+            endContent={
+              <span className='text-sm text-gray-400'>
+                day{dunning === '1' ? '' : 's'}
+              </span>
+            }
+            description='0 means access stops the moment a payment fails. Cutting off immediately turns recoverable card problems — expired cards, bank blocks — into lost customers, so a few days is usually worth more than it costs.'
+          />
         </CardBody>
       </Card>
 
