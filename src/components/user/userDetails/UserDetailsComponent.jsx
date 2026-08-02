@@ -19,14 +19,23 @@ import UserProfile from './UserProfile';
 
 const ITEMS_PER_PAGE = 5;
 
-export default function UserDetailsComponent({ defaultTab = 'account' }) {
+export default function UserDetailsComponent({
+  defaultTab = 'account',
+  // Set when a product page sends the user here because they already own that
+  // design in that format. Seeds the filters so the row they came for is
+  // already on screen — they only have to press its download button.
+  defaultSearch = '',
+  defaultFileType = '',
+}) {
   const router = useRouter();
   const [activeTab, setActiveTab] = useState(defaultTab);
   const [isPlanNavigating, setIsPlanNavigating] = useState(false);
   const [loadingId, setLoadingId] = useState(null);
 
-  const [search, setSearch] = useState('');
-  const [filterType, setFilterType] = useState('all');
+  const [search, setSearch] = useState(defaultSearch || '');
+  const [filterType, setFilterType] = useState(
+    defaultFileType ? defaultFileType.toLowerCase() : 'all',
+  );
   const [currentPage, setCurrentPage] = useState(1);
 
   const { data: userInfo } = useUserInfoQuery();

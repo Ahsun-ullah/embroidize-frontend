@@ -1,4 +1,5 @@
 import ScrollToTopBottom from '@/components/Common/ScrollToTopBottom';
+import SubscriptionStatusBanner from '@/components/Common/SubscriptionStatusBanner';
 import ChatIdentify from '@/components/Common/TawkIdentify';
 import { NProgressProvider } from '@/components/providers/NProgressProvider';
 import ClientProviders from '@/lib/providers/ClientProviders';
@@ -125,6 +126,10 @@ export default function RootLayout({ children }) {
               unwrapped useSearchParams() in its component tree. */}
           <Suspense>
             <NProgressProvider>
+              {/* Renders only for expired / payment-failed accounts; silent for
+                  everyone else. Sits above main so a lapsed subscriber sees it
+                  on the design page they actually landed on. */}
+              <SubscriptionStatusBanner />
               <main
                 id='main-content'
                 className='min-h-screen focus:outline-none'

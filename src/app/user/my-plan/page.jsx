@@ -26,10 +26,27 @@ export default function MyPlanPage({ onClose }) {
 
   const plan = subscription?.planId ?? null;
 
-  const isPaidUser = !!subscription;
+  // accessState is computed server-side and is the single label every screen
+  // reads. Deriving "is this person subscribed?" from the mere presence of a
+  // subscription record is what made this page announce
+  // "Active Plan · Renews August 1, 2026" to someone whose plan had already
+  // lapsed — the record still existed, it just no longer granted anything.
+  const accessState = userInfoData?.accessState;
+  const isExpired = accessState === 'expired';
+  const isPaymentFailed = accessState === 'payment_failed';
+  const isCancelled = accessState === 'cancelling';
+  const isOneTime = accessState === 'lifetime';
+
+  // Anyone without premium access sees the free-plan view — someone who never
+  // subscribed and someone whose plan ended are both on the free tier. The
+  // expired user additionally gets an explanation of what they lost.
+  const isPaidUser = ['active', 'cancelling', 'lifetime', 'payment_failed'].includes(
+    accessState,
+  );
   const isFreeUser = !isPaidUser;
-  const isOneTime = isPaidUser && subscription?.type === 'one-time';
-  const isCancelled = subscription?.cancelAtPeriodEnd === true;
+
+  const endedOn = userInfoData?.subscriptionEndedAt ?? subscription?.periodEndDate;
+  const graceEndsOn = userInfoData?.graceEndsAt ?? null;
 
   const {
     usedDownloads,
@@ -189,7 +206,39 @@ export default function MyPlanPage({ onClose }) {
     <div className='min-h-screen'>
       {/* ── FREE USER BLOCK ─────────────────────────────────────────────────── */}
       {isFreeUser && (
-        <div className='max-w-5xl mx-auto px-6 mt-6'>
+        <div className='max-w-5xl mx-auto px-6 mt-6 space-y-6'>
+          {/* A lapsed subscriber lands here too. Without this they'd simply see
+              the free-plan view with no explanation of where their plan went. */}
+          {isExpired && (
+            <div className='bg-white border border-slate-200 rounded-2xl p-6 shadow-sm'>
+              <div className='flex items-start gap-4'>
+                <span className='flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-slate-100 text-slate-700'>
+                  <Crown className='h-5 w-5' aria-hidden />
+                </span>
+                <div className='flex-1'>
+                  <p className='text-base font-bold text-slate-900'>
+                    Your {plan?.name || 'subscription'} plan has ended
+                  </p>
+                  <p className='mt-1 text-sm leading-relaxed text-slate-600'>
+                    {endedOn
+                      ? `It ended on ${formatDate(endedOn)}, so premium designs aren't included any more. `
+                      : "Premium designs aren't included any more. "}
+                    You&apos;re on the free plan below — and everything you
+                    downloaded while subscribed is still yours to re-download,
+                    free, any time.
+                  </p>
+                  <Button
+                    onPress={goToUpgrade}
+                    isLoading={isUpgrading}
+                    className='mt-4 h-11 rounded-xl bg-slate-900 px-6 font-semibold text-white hover:bg-black'
+                  >
+                    Renew my plan
+                  </Button>
+                </div>
+              </div>
+            </div>
+          )}
+
           <div className='bg-white border border-slate-100 rounded-2xl p-6 shadow-sm space-y-6'>
             {/* Header */}
             <h2 className='text-xs font-bold text-slate-500 uppercase tracking-widest'>
@@ -396,6 +445,40 @@ export default function MyPlanPage({ onClose }) {
             }`}
           >
             <div className='max-w-5xl mx-auto px-6 py-14'>
+              {/* Payment-failed banner. They still have access — this is the
+                  window in which updating a card costs them nothing. */}
+              {isPaymentFailed && (
+                <div className='bg-white/10 border border-white/20 rounded-2xl px-5 py-4 mb-8 flex items-start gap-3'>
+                  <span className='text-xl flex-shrink-0'>⚠️</span>
+                  <div className='flex-1'>
+                    <p className='text-white font-bold text-sm'>
+                      Your last payment didn&apos;t go through
+                    </p>
+                    <p className='text-orange-100 text-xs mt-0.5 leading-relaxed'>
+                      We&apos;re retrying your card automatically. Your downloads
+                      are still working
+                      {graceEndsOn ? (
+                        <>
+                          {' '}
+                          until{' '}
+                          <span className='font-bold text-white'>
+                            {formatDate(graceEndsOn)}
+                          </span>
+                        </>
+                      ) : null}
+                      . Update your payment details to avoid any interruption.
+                    </p>
+                    <button
+                      onClick={handleManagePlan}
+                      disabled={isRedirecting}
+                      className='mt-3 rounded-lg bg-white px-4 py-2 text-xs font-bold text-slate-900 hover:bg-slate-100 disabled:opacity-60'
+                    >
+                      {isRedirecting ? 'Redirecting…' : 'Update payment method'}
+                    </button>
+                  </div>
+                </div>
+              )}
+
               {/* Cancellation warning banner */}
               {isCancelled && (
                 <div className='bg-white/10 border border-white/20 rounded-2xl px-5 py-4 mb-8 flex items-start gap-3'>
@@ -432,7 +515,11 @@ export default function MyPlanPage({ onClose }) {
                       <span
                         className={`text-xs font-semibold uppercase tracking-widest ${isCancelled ? 'text-orange-200' : 'text-violet-200'}`}
                       >
-                        {isCancelled ? 'Cancels at period end' : 'Active Plan'}
+                        {isCancelled
+                          ? 'Cancels at period end'
+                          : isPaymentFailed
+                            ? 'Payment failed'
+                            : 'Active Plan'}
                       </span>
                     </div>
                     <h1 className='text-2xl md:text-3xl font-extrabold text-white tracking-tight'>
@@ -444,8 +531,10 @@ export default function MyPlanPage({ onClose }) {
                       {isOneTime
                         ? 'One-time payment · Lifetime access'
                         : isCancelled
-                          ? `Access until ${formatDate(subscription?.periodEndDate)}`
-                          : `Billed ${plan?.billingInterval}ly · Renews ${formatDate(subscription?.periodEndDate)}`}
+                          ? `Access until ${formatDate(endedOn)}`
+                          : isPaymentFailed
+                            ? `Payment overdue · Update your card${graceEndsOn ? ` by ${formatDate(graceEndsOn)}` : ''}`
+                            : `Billed ${plan?.billingInterval}ly · Renews ${formatDate(endedOn)}`}
                     </p>
                   </div>
                 </div>
@@ -503,19 +592,24 @@ export default function MyPlanPage({ onClose }) {
                     ? 'Expires'
                     : isOneTime
                       ? 'Access'
-                      : 'Renews',
-                  value: isCancelled
-                    ? formatDate(subscription?.periodEndDate)
-                    : isOneTime
-                      ? 'Forever'
-                      : formatDate(subscription?.periodEndDate),
+                      : isPaymentFailed
+                        ? 'Access ends'
+                        : 'Renews',
+                  value: isOneTime
+                    ? 'Forever'
+                    : isPaymentFailed
+                      ? formatDate(graceEndsOn) || formatDate(endedOn)
+                      : formatDate(endedOn),
                   sub: isCancelled
                     ? 'After this, access ends'
                     : isOneTime
                       ? 'No expiry date'
-                      : 'Next billing date',
-                  color: isCancelled ? 'text-red-500' : 'text-amber-600',
-                  dot: isCancelled ? 'bg-red-400' : 'bg-amber-400',
+                      : isPaymentFailed
+                        ? 'Unless payment succeeds'
+                        : 'Next billing date',
+                  color:
+                    isCancelled || isPaymentFailed ? 'text-red-500' : 'text-amber-600',
+                  dot: isCancelled || isPaymentFailed ? 'bg-red-400' : 'bg-amber-400',
                 },
               ].map((stat, i) => (
                 <div
@@ -822,11 +916,23 @@ export default function MyPlanPage({ onClose }) {
                     </div>
                     <div className='p-6'>
                       <p className='text-sm font-semibold text-slate-600 uppercase tracking-wider mb-1'>
-                        Next charge
+                        {isPaymentFailed ? 'Payment overdue' : 'Next charge'}
                       </p>
-                      <p className='text-xl font-extrabold text-slate-800 mb-5'>
-                        {formatDate(subscription?.periodEndDate)}
+                      <p
+                        className={`text-xl font-extrabold mb-5 ${
+                          isPaymentFailed ? 'text-red-600' : 'text-slate-800'
+                        }`}
+                      >
+                        {formatDate(endedOn)}
                       </p>
+                      {isPaymentFailed && (
+                        <p className='-mt-3 mb-5 text-xs leading-relaxed text-red-600'>
+                          We couldn&apos;t take this payment. Update your card to
+                          keep your plan
+                          {graceEndsOn ? ` — access ends ${formatDate(graceEndsOn)}` : ''}
+                          .
+                        </p>
+                      )}
 
                       <Divider className='mb-5 bg-slate-50' />
 

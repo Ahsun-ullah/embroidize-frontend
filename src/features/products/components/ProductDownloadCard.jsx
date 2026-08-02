@@ -42,11 +42,35 @@ export default function ProductDownloadCard({ data }) {
 
   const [subscriptionRequired, setSubscriptionRequired] = useState(false);
 
+  // Set when the server refuses a download because this user already has that
+  // exact design in that exact format. Drives the banner below, which points
+  // them at their download history where the re-download is free.
+  const [alreadyOwned, setAlreadyOwned] = useState(null);
+  const [isGoingToDownloads, setIsGoingToDownloads] = useState(false);
+
+  const goToMyDownloads = () => {
+    if (!alreadyOwned) return;
+    setIsGoingToDownloads(true);
+    // Seed the history page's search + format filter so the design is already
+    // on screen instead of buried in a paginated list.
+    const params = new URLSearchParams({
+      tabName: 'downloads',
+      search: alreadyOwned.productName || '',
+      fileType: alreadyOwned.fileType || '',
+    });
+    router.push(`/user/user-details?${params.toString()}`);
+  };
+
   const { data: userInfoData, refetch: refetchUserInfo } = useUserInfoQuery();
 
-  const ACCESS_STATUSES = ['active', 'trialing', 'past_due'];
-  const sub = userInfoData?.subscription;
-  const isSubscribed = !!(sub && ACCESS_STATUSES.includes(sub.status));
+  // accessState is computed server-side (helpers/subscriptionAccess.ts) and is
+  // the single label every screen reads. It replaces the status-array check that
+  // used to live here: that duplicated the rule, ignored the paid-through date,
+  // and so disagreed with what the download endpoint actually allowed.
+  const accessState = userInfoData?.accessState;
+  const isSubscribed = ['active', 'cancelling', 'lifetime', 'payment_failed'].includes(
+    accessState,
+  );
   const isAdmin = userInfoData?.role === 'admin';
   const isPremium = data?.isFree !== true;
   const needsUpgrade = isPremium && !isSubscribed;
@@ -173,6 +197,41 @@ export default function ProductDownloadCard({ data }) {
 
           errorMessage = errorJson?.error?.message || errorMessage;
           errorTitle = errorJson?.message || errorTitle;
+
+          // They already have this exact design in this exact format. Downloads
+          // aren't re-served from here — send them to their download history,
+          // pre-filtered to that row, where re-downloading is free and doesn't
+          // touch their quota. A DIFFERENT format never lands here: the server
+          // treats it as a new download.
+          if (
+            errorJson?.status === 409 &&
+            errorJson?.error?.code === 'already_downloaded'
+          ) {
+            setAlreadyOwned({
+              productName: errorJson?.error?.productName || data?.name || '',
+              fileType: errorJson?.error?.fileType || fileData.extension,
+            });
+            setShowFormatSheet(false);
+            setIsLoading(false);
+            return;
+          }
+
+          // A lapsed subscriber gets the modal explaining that their plan ended,
+          // not the generic "subscribe" upsell aimed at people who never paid.
+          if (
+            errorJson?.status === 403 &&
+            errorJson?.error?.limitType === 'subscription_expired'
+          ) {
+            setLimitModalData({
+              type: 'subscription_expired',
+              planName: errorJson?.error?.planName,
+              endedAt: errorJson?.error?.endedAt || null,
+            });
+            setShowLimitModal(true);
+            setShowFormatSheet(false);
+            setIsLoading(false);
+            return;
+          }
 
           if (
             errorJson?.status === 403 &&
@@ -466,6 +525,67 @@ export default function ProductDownloadCard({ data }) {
           onClose={() => setShowLimitModal(false)}
           formatDuration={formatDuration}
         />
+      )}
+
+      {/* Already-downloaded notice. Not an error — they own this file. It tells
+          them where it lives and that fetching it again is free. */}
+      {alreadyOwned && (
+        <div
+          className='fixed inset-0 z-50 flex items-center justify-center bg-black/60 p-4 backdrop-blur-sm'
+          onClick={() => setAlreadyOwned(null)}
+        >
+          <div
+            role='dialog'
+            aria-modal='true'
+            aria-labelledby='already-owned-title'
+            onClick={(e) => e.stopPropagation()}
+            className='w-full max-w-md rounded-3xl bg-white p-7 shadow-2xl dark:bg-neutral-900'
+          >
+            <div className='mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded-full bg-gray-100 text-gray-700 dark:bg-neutral-800 dark:text-neutral-200'>
+              <Check className='h-7 w-7' strokeWidth={2.5} aria-hidden />
+            </div>
+
+            <h2
+              id='already-owned-title'
+              className='text-center text-xl font-bold text-neutral-900 dark:text-white'
+            >
+              You already have this design
+            </h2>
+
+            <p className='mx-auto mt-2 text-center text-sm leading-relaxed text-neutral-500 dark:text-neutral-400'>
+              You downloaded{' '}
+              <span className='font-semibold text-neutral-800 dark:text-neutral-200'>
+                {alreadyOwned.productName || 'this design'}
+              </span>{' '}
+              in{' '}
+              <span className='font-semibold uppercase text-neutral-800 dark:text-neutral-200'>
+                {alreadyOwned.fileType}
+              </span>{' '}
+              before. Get it again from your downloads — it&apos;s free and
+              won&apos;t use any of your download limit.
+            </p>
+
+            <Button
+              onPress={goToMyDownloads}
+              isLoading={isGoingToDownloads}
+              className='mt-6 h-12 w-full rounded-xl bg-black text-base font-semibold text-white'
+            >
+              Go to my downloads
+            </Button>
+
+            <button
+              onClick={() => setAlreadyOwned(null)}
+              className='mt-2 w-full rounded-xl py-2.5 text-sm font-semibold text-gray-600 transition hover:bg-gray-50 dark:text-neutral-400 dark:hover:bg-neutral-800'
+            >
+              Cancel
+            </button>
+
+            <p className='mt-4 text-center text-xs text-neutral-400'>
+              Need a different file format? Choose another format on this page —
+              that counts as a new download.
+            </p>
+          </div>
+        </div>
       )}
     </>
   );

@@ -69,9 +69,21 @@ function DownloadLimitModal({ limitModalData = {}, onClose, formatDuration }) {
   const used = limit > 0 ? usedDownloads : (limitModalData?.count ?? total);
   const pct = total > 0 ? Math.min(Math.round((used / total) * 100), 100) : 0;
 
+  // A lapsed subscriber is a FREE user now, so their numbers and countdown are
+  // the free-tier ones — /userinfo reports them that way, which is what feeds
+  // useDownloadReset above. Only the wording and the call to action differ.
+  const isExpired = limitModalData?.type === 'subscription_expired';
   const isPeriod = limitModalData?.type === 'period';
-  const isFree = limitModalData?.type === 'free';
+  const isFree = limitModalData?.type === 'free' || isExpired;
   const isDaily = !isPeriod && !isFree;
+
+  const endedOnLabel = limitModalData?.endedAt
+    ? new Date(limitModalData.endedAt).toLocaleDateString('en-US', {
+        year: 'numeric',
+        month: 'long',
+        day: 'numeric',
+      })
+    : null;
 
   // Subscriber daily quota rolls over at the server day boundary (UTC
   // midnight), not the user's local midnight — same math as My Plan. The hook
@@ -85,16 +97,23 @@ function DownloadLimitModal({ limitModalData = {}, onClose, formatDuration }) {
   const effectiveMsLeft = isDaily ? dailyMsLeft : msLeft;
   const effectiveResetTime = isDaily ? nextDailyReset : nextResetTime;
 
-  const title =
-    isPeriod || isFree
+  const title = isExpired
+    ? 'Your Plan Has Ended'
+    : isPeriod || isFree
       ? 'Download Limit Reached'
       : 'Daily Download Limit Reached';
 
-  const subtitle = isPeriod
-    ? `You've used all ${total} downloads for this billing period.`
-    : isFree
-      ? `You've used all ${total} free download${total === 1 ? '' : 's'} for this ${windowAdj} window. They all reset together when the timer below ends.`
-      : `You've used all ${total} download${total === 1 ? '' : 's'} available today. Your limit will reset automatically.`;
+  const subtitle = isExpired
+    ? `Your ${limitModalData?.planName || 'subscription'} plan ended${
+        endedOnLabel ? ` on ${endedOnLabel}` : ''
+      }, so premium designs aren't included any more. You're on the free plan — ${total} download${
+        total === 1 ? '' : 's'
+      } every ${windowAdj} window — and everything you already downloaded is still yours to re-download free.`
+    : isPeriod
+      ? `You've used all ${total} downloads for this billing period.`
+      : isFree
+        ? `You've used all ${total} free download${total === 1 ? '' : 's'} for this ${windowAdj} window. They all reset together when the timer below ends.`
+        : `You've used all ${total} download${total === 1 ? '' : 's'} available today. Your limit will reset automatically.`;
 
   useEffect(() => {
     const onKeyDown = (e) => e.key === 'Escape' && onClose?.();
@@ -337,7 +356,7 @@ function DownloadLimitModal({ limitModalData = {}, onClose, formatDuration }) {
               ) : null
             }
           >
-            Upgrade Now
+            {isExpired ? 'Renew My Plan' : 'Upgrade Now'}
           </Button>
         </div>
 
