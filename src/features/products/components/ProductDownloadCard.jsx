@@ -73,7 +73,14 @@ export default function ProductDownloadCard({ data }) {
   );
   const isAdmin = userInfoData?.role === 'admin';
   const isPremium = data?.isFree !== true;
-  const needsUpgrade = isPremium && !isSubscribed;
+
+  // Download credits cover premium designs when there is no active plan, so a
+  // credit holder must NOT be shown the upgrade wall — they have already paid.
+  // Mirrors the download gate, which checks credits before refusing.
+  const credits = userInfoData?.availableCredits ?? 0;
+  const canUseCredits = isPremium && !isSubscribed && credits > 0;
+
+  const needsUpgrade = isPremium && !isSubscribed && !canUseCredits;
   const showUpgrade = needsUpgrade || subscriptionRequired;
 
   const handleGetAllAccess = () => {
@@ -233,6 +240,24 @@ export default function ProductDownloadCard({ data }) {
             return;
           }
 
+          // Credits ran out of TIME, not quantity. Pushing them at a
+          // subscription would be wrong — they already paid, and the fix is to
+          // extend the deadline.
+          if (
+            errorJson?.status === 403 &&
+            errorJson?.error?.limitType === 'credits_expired'
+          ) {
+            ErrorToast(
+              'Credits expired',
+              errorJson?.error?.message ||
+                'Your download credits have expired. Contact us to extend them.',
+              8000,
+            );
+            setShowFormatSheet(false);
+            setIsLoading(false);
+            return;
+          }
+
           if (
             errorJson?.status === 403 &&
             errorJson?.error?.limitType === 'subscription'
@@ -374,15 +399,26 @@ export default function ProductDownloadCard({ data }) {
         ) : isLoading ? (
           <LoadingSpinner />
         ) : (
-          <Button
-            variant='flat'
-            size='lg'
-            className='border w-full bg-black text-white font-semibold text-xl h-14'
-            onPress={() => setShowFormatSheet(true)}
-          >
-            <Download color='#ffffff' strokeWidth={3} />{' '}
-            {isSubscribed ? 'Download' : 'Free Download'}
-          </Button>
+          <>
+            <Button
+              variant='flat'
+              size='lg'
+              className='border w-full bg-black text-white font-semibold text-xl h-14'
+              onPress={() => setShowFormatSheet(true)}
+            >
+              <Download color='#ffffff' strokeWidth={3} />{' '}
+              {isSubscribed || canUseCredits ? 'Download' : 'Free Download'}
+            </Button>
+            {/* Tell a credit holder what this download will cost them BEFORE
+                they click — a silent balance decrement feels like a bug. */}
+            {canUseCredits && (
+              <p className='mt-2 text-center text-sm text-gray-600'>
+                Uses 1 of your{' '}
+                <span className='font-semibold text-black'>{credits}</span>{' '}
+                download credit{credits === 1 ? '' : 's'}
+              </p>
+            )}
+          </>
         )}
 
         {showUpgrade && isAdmin ? (

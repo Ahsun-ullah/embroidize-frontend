@@ -40,14 +40,17 @@ import {
   ExternalLink,
   Eye,
   FileText,
+  Gift,
   Receipt,
   RotateCcw,
   Search,
   TrendingUp,
   Users,
 } from 'lucide-react';
+import Cookies from 'js-cookie';
 import { useRouter } from 'next/navigation';
-import { useMemo, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
+import GrantAccessModal from '@/features/admin/GrantAccessModal';
 
 // ─── Constants ────────────────────────────────────────────────────────────────
 
@@ -330,6 +333,31 @@ export default function SubscribersTableWrapper({ subscribers, revenue }) {
   // Monthly download history (aggregated from the Download log, gateway-agnostic)
   const [monthly, setMonthly] = useState(null); // { months: [...], total }
   const [monthlyLoading, setMonthlyLoading] = useState(false);
+
+  // Manual "Grant / Extend Access" modal — for customers who paid outside the
+  // gateways. Holds the user whose access is being granted, or null when shut.
+  const [grantUser, setGrantUser] = useState(null);
+  const [grantPlans, setGrantPlans] = useState([]);
+
+  // Plans for the grant form. Includes INACTIVE plans on purpose: a hidden
+  // "Custom Access" plan is exactly what manual grants are usually attached to.
+  useEffect(() => {
+    if (!grantUser || grantPlans.length) return;
+    (async () => {
+      try {
+        const token = Cookies.get('token');
+        const res = await fetch(
+          `${process.env.NEXT_PUBLIC_BASE_API_URL_PROD}/admin/subscription-plans`,
+          { headers: token ? { Authorization: `Bearer ${token}` } : {} },
+        );
+        if (!res.ok) return;
+        const data = await res.json();
+        setGrantPlans(data?.data?.plans || []);
+      } catch {
+        // Non-fatal: the modal shows an empty plan list and blocks submission.
+      }
+    })();
+  }, [grantUser, grantPlans.length]);
 
   // Adjust quotas modal
   const {
@@ -1091,6 +1119,13 @@ export default function SubscribersTableWrapper({ subscribers, revenue }) {
                 onClick={() => handleInvoices(user)}
               >
                 Invoices / Payments
+              </DropdownItem>
+              <DropdownItem
+                key='grant'
+                startContent={<Gift size={16} />}
+                onClick={() => setGrantUser(user)}
+              >
+                Grant / Extend Access
               </DropdownItem>
               <DropdownItem
                 key='edit'
@@ -2093,6 +2128,16 @@ export default function SubscribersTableWrapper({ subscribers, revenue }) {
           )}
         </ModalContent>
       </Modal>
+
+      {/* ── Grant / Extend Access (manual payments) ── */}
+      {grantUser && (
+        <GrantAccessModal
+          user={grantUser}
+          plans={grantPlans}
+          onClose={() => setGrantUser(null)}
+          onGranted={() => router.refresh()}
+        />
+      )}
 
       {/* ── Adjust Quotas Modal ── */}
       <Modal

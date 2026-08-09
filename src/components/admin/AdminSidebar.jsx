@@ -382,6 +382,11 @@ export default function AdminSidebar({ isCollapsed, setIsCollapsed }) {
                   icon: 'ri-vip-crown-2-fill',
                 },
                 {
+                  href: '/admin/settings/manual-requests',
+                  label: 'Manual Requests',
+                  icon: 'ri-hand-coin-line',
+                },
+                {
                   href: '/admin/settings/stripe',
                   label: 'Payment Keys',
                   icon: 'ri-bank-card-line',

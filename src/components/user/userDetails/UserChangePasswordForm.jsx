@@ -3,6 +3,7 @@
 import { ErrorToast } from '@/components/Common/ErrorToast';
 import LoadingSpinner from '@/components/Common/LoadingSpinner';
 import { SuccessToast } from '@/components/Common/SuccessToast';
+import { setAuthToken } from '@/lib/auth';
 import { useUpdatePasswordMutation } from '@/lib/redux/common/user/userInfoSlice'; // Adjust path
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useState } from 'react';
@@ -39,6 +40,12 @@ export default function ChangePasswordForm() {
   const onSubmit = async (data) => {
     try {
       const response = await updatePassword(data).unwrap();
+      // Changing the password revokes every session issued before it, including
+      // this one. The server hands back a token stamped with the new session
+      // version — store it, or the next request from THIS tab is rejected and
+      // the user is signed out by their own password change.
+      const refreshedToken = response?.data?.token;
+      if (refreshedToken) setAuthToken(refreshedToken);
       SuccessToast('Success', 'Password updated successfully!', 3000);
       reset();
     } catch (error) {

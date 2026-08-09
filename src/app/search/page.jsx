@@ -5,6 +5,7 @@ import Header from '@/components/user/HomePage/Header';
 import { BreadCrumb } from '@/features/products/components/BreadCrumb';
 import { getProducts } from '@/lib/apis/public/products';
 import { capitalize } from '@/utils/functions/page';
+import Link from 'next/link';
 
 export async function generateMetadata({ searchParams }) {
   // Next 15: searchParams is async and must be awaited before property access.
@@ -100,12 +101,12 @@ export default async function SearchPage({ searchParams }) {
                     Try a shorter or more general term — small typos are okay,
                     we handle those automatically.
                   </p>
-                  <a
+                  <Link
                     href='/products'
                     className='mt-6 inline-block rounded-full bg-black px-6 py-2.5 text-sm font-semibold text-white'
                   >
                     Browse all designs
-                  </a>
+                  </Link>
                 </div>
               )}
             </div>

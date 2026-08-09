@@ -17,6 +17,8 @@ import {
   ModalHeader,
   User,
 } from '@heroui/react';
+import GrantAccessModal from '@/features/admin/GrantAccessModal';
+import Cookies from 'js-cookie';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { useCallback, useState } from 'react';
 
@@ -97,6 +99,32 @@ export default function UsersTableWrapper({
 
   const [blockConfirm, setBlockConfirm] = useState(null);
   const [isBlocking, setIsBlocking] = useState(false);
+
+  // ── Manual "Grant / Extend Access" ────────────────────────────────────────
+  // Plans are fetched lazily on first open (including inactive ones, since a
+  // hidden "Custom Access" plan is the usual target for a manual grant).
+  const [grantUser, setGrantUser] = useState(null);
+  const [grantPlans, setGrantPlans] = useState([]);
+
+  const handleGrantClick = useCallback(
+    async (user) => {
+      setGrantUser(user);
+      if (grantPlans.length) return;
+      try {
+        const token = Cookies.get('token');
+        const res = await fetch(
+          `${process.env.NEXT_PUBLIC_BASE_API_URL_PROD}/admin/subscription-plans`,
+          { headers: token ? { Authorization: `Bearer ${token}` } : {} },
+        );
+        if (!res.ok) return;
+        const data = await res.json();
+        setGrantPlans(data?.data?.plans || []);
+      } catch {
+        // Non-fatal — the modal blocks submission with an empty plan list.
+      }
+    },
+    [grantPlans.length],
+  );
 
   const performBlock = useCallback(
     async (user) => {
@@ -212,6 +240,16 @@ export default function UsersTableWrapper({
                 >
                   More Info
                 </DropdownItem>
+                {/* Manual payments: convert any user into a subscriber. Lives
+                    here as well as on the Subscribers page because a first-time
+                    manual customer is not a subscriber yet, so this is where
+                    you find them. */}
+                <DropdownItem
+                  key='grant-access'
+                  onPress={() => handleGrantClick(user)}
+                >
+                  Grant / Extend Access
+                </DropdownItem>
                 <DropdownItem
                   key='block'
                   className={user.status === 'blocked' ? '' : 'text-danger'}
@@ -227,7 +265,7 @@ export default function UsersTableWrapper({
       default:
         return cellValue;
     }
-  }, [handleBlockClick]);
+  }, [handleBlockClick, handleGrantClick]);
 
   const [isExporting, setIsExporting] = useState(false);
 
@@ -444,6 +482,16 @@ export default function UsersTableWrapper({
         onPageChange={onPageChange}
         topContent={topContent}
       />
+
+      {/* Grant / Extend Access — manual payments */}
+      {grantUser && (
+        <GrantAccessModal
+          user={grantUser}
+          plans={grantPlans}
+          onClose={() => setGrantUser(null)}
+          onGranted={() => router.refresh()}
+        />
+      )}
 
       {/* Block / unblock confirmation */}
       <Modal

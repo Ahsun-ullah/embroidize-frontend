@@ -11,6 +11,7 @@ import { Divider } from '@heroui/divider';
 import { Button } from '@heroui/react';
 import Cookies from 'js-cookie';
 import { Crown, Download } from 'lucide-react';
+import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { useEffect, useState } from 'react';
 
@@ -48,6 +49,28 @@ export default function MyPlanPage({ onClose }) {
   const endedOn = userInfoData?.subscriptionEndedAt ?? subscription?.periodEndDate;
   const graceEndsOn = userInfoData?.graceEndsAt ?? null;
 
+  // Access granted by our team after a payment taken outside the gateways.
+  // There is no billing portal to open, so the Manage Billing button becomes a
+  // Renew CTA. Everything else on this page is identical to a card subscriber.
+  const isManual = userInfoData?.subscriptionGateway === 'manual';
+
+  // The caps this subscriber is actually held to — the plan's numbers unless
+  // they were sold different ones. Computed server-side by the same helper the
+  // download gate uses, so this page can never promise a limit that enforcement
+  // won't honour. Falls back to the plan for older API responses.
+  const limits = userInfoData?.effectiveLimits ?? {
+    dailyLimit: plan?.dailyLimit ?? null,
+    downloadLimit: plan?.downloadLimit ?? null,
+  };
+
+  // Prepaid premium downloads. Someone can hold these with OR without a plan —
+  // while a subscription is active it covers their downloads and the credits sit
+  // untouched, then take over when the plan ends. Shown either way so they can
+  // see the balance is still there.
+  const credits = userInfoData?.availableCredits ?? 0;
+  const creditsExpired = userInfoData?.creditsExpired === true;
+  const creditsExpireOn = userInfoData?.creditsExpireAt ?? null;
+
   const {
     usedDownloads,
     limit,
@@ -65,22 +88,22 @@ export default function MyPlanPage({ onClose }) {
     return label ? label.charAt(0).toLowerCase() + label.slice(1) : '';
   })();
 
-  // PAID DATA
+  // PAID DATA — driven by the effective limits, not the raw plan.
   const usagePercent =
-    plan?.downloadLimit > 0
+    limits.downloadLimit > 0
       ? Math.min(
           Math.round(
-            ((subscription?.downloadCount || 0) / plan.downloadLimit) * 100,
+            ((subscription?.downloadCount || 0) / limits.downloadLimit) * 100,
           ),
           100,
         )
       : null;
 
   const dailyUsagePercent =
-    plan?.dailyLimit > 0
+    limits.dailyLimit > 0
       ? Math.min(
           Math.round(
-            ((subscription?.dailyDownloadCount || 0) / plan.dailyLimit) * 100,
+            ((subscription?.dailyDownloadCount || 0) / limits.dailyLimit) * 100,
           ),
           100,
         )
@@ -207,6 +230,44 @@ export default function MyPlanPage({ onClose }) {
       {/* ── FREE USER BLOCK ─────────────────────────────────────────────────── */}
       {isFreeUser && (
         <div className='max-w-5xl mx-auto px-6 mt-6 space-y-6'>
+          {/* Download credits. Sits ABOVE the free-plan usage block on purpose:
+              someone holding credits is a paying customer, and their credits —
+              not the 5-a-day free allowance — are what actually get them premium
+              designs. Showing free usage first would bury what they paid for. */}
+          {(credits > 0 || creditsExpired) && (
+            <div
+              className={`rounded-2xl border p-6 shadow-sm ${
+                creditsExpired
+                  ? 'border-amber-200 bg-amber-50'
+                  : 'border-slate-200 bg-white'
+              }`}
+            >
+              <div className='flex items-start justify-between gap-4'>
+                <div>
+                  <p className='text-xs font-bold uppercase tracking-widest text-slate-500'>
+                    Download credits
+                  </p>
+                  <p className='mt-2 text-4xl font-extrabold text-slate-900'>
+                    {creditsExpired ? 0 : credits}
+                    <span className='ml-2 text-sm font-medium text-slate-400'>
+                      premium download{credits === 1 ? '' : 's'} left
+                    </span>
+                  </p>
+                  <p className='mt-2 text-sm leading-relaxed text-slate-600'>
+                    {creditsExpired
+                      ? 'Your credits have expired. Get in touch and we can extend them for you.'
+                      : creditsExpireOn
+                        ? `Use them any time before ${formatDate(creditsExpireOn)}.`
+                        : "These never expire — use them whenever you like."}
+                  </p>
+                </div>
+                <span className='flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-slate-900 text-white'>
+                  <Download className='h-5 w-5' aria-hidden />
+                </span>
+              </div>
+            </div>
+          )}
+
           {/* A lapsed subscriber lands here too. Without this they'd simply see
               the free-plan view with no explanation of where their plan went. */}
           {isExpired && (
@@ -563,8 +624,8 @@ export default function MyPlanPage({ onClose }) {
                 {
                   label: 'Total Downloads',
                   value: subscription?.downloadCount,
-                  sub: plan?.downloadLimit
-                    ? `of ${plan.downloadLimit}`
+                  sub: limits.downloadLimit
+                    ? `of ${limits.downloadLimit}`
                     : 'Unlimited',
                   color: 'text-violet-600',
                   dot: 'bg-violet-400',
@@ -572,8 +633,8 @@ export default function MyPlanPage({ onClose }) {
                 {
                   label: "Today's Downloads",
                   value: subscription?.dailyDownloadCount,
-                  sub: plan?.dailyLimit
-                    ? `of ${plan.dailyLimit} today`
+                  sub: limits.dailyLimit
+                    ? `of ${limits.dailyLimit} today`
                     : 'Unlimited',
                   color: 'text-indigo-600',
                   dot: 'bg-indigo-400',
@@ -660,9 +721,9 @@ export default function MyPlanPage({ onClose }) {
                           </p>
                           <p className='text-2xl font-extrabold text-slate-800'>
                             {subscription?.downloadCount}
-                            {plan?.downloadLimit && (
+                            {limits.downloadLimit && (
                               <span className='text-slate-500 text-base font-normal'>
-                                /{plan.downloadLimit}
+                                /{limits.downloadLimit}
                               </span>
                             )}
                           </p>
@@ -706,9 +767,9 @@ export default function MyPlanPage({ onClose }) {
                           </p>
                           <p className='text-2xl font-extrabold text-slate-800'>
                             {subscription?.dailyDownloadCount}
-                            {plan?.dailyLimit && (
+                            {limits.dailyLimit && (
                               <span className='text-slate-500 text-base font-normal'>
-                                /{plan.dailyLimit}
+                                /{limits.dailyLimit}
                               </span>
                             )}
                           </p>
@@ -936,31 +997,56 @@ export default function MyPlanPage({ onClose }) {
 
                       <Divider className='mb-5 bg-slate-50' />
 
-                      <p className='text-xs text-slate-400 leading-relaxed mb-5'>
-                        Manage payment method, download invoices, or cancel your
-                        plan via the secure billing portal.
-                      </p>
+                      {/* Manual access has no billing portal — there is no
+                          provider holding a card. Renewal is a conversation, so
+                          the CTA reflects that rather than opening a portal that
+                          would only return an error. */}
+                      {isManual ? (
+                        <>
+                          <p className='text-xs text-slate-400 leading-relaxed mb-5'>
+                            Your access was set up by our team. To renew or
+                            change your plan, just get in touch and we&apos;ll
+                            sort it out for you.
+                          </p>
+                          {/* Lands on the plans page with the "other ways to
+                              pay" form already open, so they can see what they
+                              are renewing and ask for it in one step. */}
+                          <Link
+                            href='/subscriptions?pay=1'
+                            className='block w-full py-3 rounded-xl text-center text-sm font-bold bg-violet-600 text-white hover:bg-black transition-all duration-200'
+                          >
+                            Renew my access →
+                          </Link>
+                        </>
+                      ) : (
+                        <>
+                          <p className='text-xs text-slate-400 leading-relaxed mb-5'>
+                            Manage payment method, download invoices, or cancel
+                            your plan via the secure billing portal.
+                          </p>
 
-                      {error && (
-                        <div className='bg-red-50 border border-red-100 rounded-xl px-4 py-3 mb-4'>
-                          <p className='text-xs text-red-500'>{error}</p>
-                        </div>
+                          {error && (
+                            <div className='bg-red-50 border border-red-100 rounded-xl px-4 py-3 mb-4'>
+                              <p className='text-xs text-red-500'>{error}</p>
+                            </div>
+                          )}
+
+                          <button
+                            onClick={handleManagePlan}
+                            disabled={isRedirecting}
+                            className='w-full py-3 rounded-xl text-sm font-bold bg-violet-600 text-white hover:bg-black transition-all duration-200 disabled:bg-slate-100 disabled:text-slate-400 disabled:cursor-not-allowed shadow-sm shadow-violet-200'
+                          >
+                            {isRedirecting ? (
+                              <span className='flex items-center justify-center gap-2'>
+                                <span className='w-4 h-4 border-2 border-white/40 border-t-white rounded-full animate-spin' />
+                                Redirecting...
+                              </span>
+                            ) : (
+                              'Manage Billing →'
+                            )}
+                          </button>
+                        </>
                       )}
-
-                      <button
-                        onClick={handleManagePlan}
-                        disabled={isRedirecting}
-                        className='w-full py-3 rounded-xl text-sm font-bold bg-violet-600 text-white hover:bg-black transition-all duration-200 disabled:bg-slate-100 disabled:text-slate-400 disabled:cursor-not-allowed shadow-sm shadow-violet-200'
-                      >
-                        {isRedirecting ? (
-                          <span className='flex items-center justify-center gap-2'>
-                            <span className='w-4 h-4 border-2 border-white/40 border-t-white rounded-full animate-spin' />
-                            Redirecting...
-                          </span>
-                        ) : (
-                          'Manage Billing →'
-                        )}
-                      </button>
                     </div>
                   </div>
                 )}

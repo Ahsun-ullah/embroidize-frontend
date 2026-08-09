@@ -1,5 +1,6 @@
 'use client';
 import { ErrorToast } from '@/components/Common/ErrorToast';
+import PaymentHelpModal from '@/components/Common/PaymentHelpModal';
 import PurchaseButton from '@/components/Common/PurchaseButton';
 import { SuccessToast } from '@/components/Common/SuccessToast';
 import Footer from '@/components/user/HomePage/Footer';
@@ -221,7 +222,6 @@ export default function SubscriptionsPageClient({ siteConfig }) {
   // Admin-managed free-tier quota (from /public/site-config via the server
   // page). Fallback matches the backend's hardcoded default.
   const freeLimit = siteConfig?.freeDownloadLimit;
-  console.log(siteConfig?.freeDownloadLimit);
   const freeWindow = windowPhrase(siteConfig?.freeDownloadWindow);
   const [plans, setPlans] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -232,17 +232,20 @@ export default function SubscriptionsPageClient({ siteConfig }) {
   const pathName = usePathname();
   const router = useRouter();
   const { data: userInfoData } = useUserInfoQuery();
-  // A subscription only counts as "active" while its status grants access.
-  // /userinfo keeps returning the subscription doc after a Stripe-portal
-  // cancellation (status 'canceled', pointer never nulled), so checking mere
-  // existence would show the dead plan as "Active" forever and block
-  // re-subscribing. Statuses mirror the backend's accessStatuses list.
-  const ACCESS_STATUSES = ['active', 'trialing', 'past_due'];
+  // `accessState` is computed server-side by helpers/subscriptionAccess.ts and is
+  // the same label the download gate enforces — every other screen (My Plan, the
+  // site banner, the product download card) already reads it.
+  //
+  // This page used to re-derive access from the raw `subscription.status`, which
+  // disagrees with the server whenever the paid-through date has lapsed but the
+  // record still says active/past_due (a missed renewal webhook, or a past_due
+  // sub beyond its dunning grace). That showed "✓ Active Plan" on a dead plan
+  // AND disabled its button, so the one customer most likely to want to pay
+  // again was the one person who couldn't.
+  const HAS_ACCESS_STATES = ['active', 'cancelling', 'lifetime', 'payment_failed'];
   const sub = userInfoData?.subscription;
-  const activePlanId =
-    sub && ACCESS_STATUSES.includes(sub.status)
-      ? (sub.planId?._id ?? null)
-      : null;
+  const hasAccess = HAS_ACCESS_STATES.includes(userInfoData?.accessState);
+  const activePlanId = hasAccess ? (sub?.planId?._id ?? null) : null;
   // Free-plan card state:
   //  - guest (not registered)          → nothing is "active"; CTA → /auth/register
   //  - registered, no live subscription (none, canceled, or expired)
@@ -285,6 +288,17 @@ export default function SubscriptionsPageClient({ siteConfig }) {
       router.push(returnTo || '/subscriptions');
     } else if (status === 'cancelled') {
       ErrorToast('Cancelled', 'Payment was cancelled.', 10000);
+      // They came back from checkout without paying — the one moment we know
+      // something went wrong, so promote the alternative-payment offer.
+      setCheckoutTrouble(true);
+    }
+
+    // ?pay=1 opens the "other ways to pay" modal straight away. Used by the
+    // "Renew my access" button on My Plan, so a manual subscriber lands on the
+    // plans (to see what they're renewing) with the request form already open
+    // rather than having to hunt for the link.
+    if (searchParams.get('pay') === '1') {
+      setShowPayHelp(true);
     }
   }, [pathName]);
 
@@ -306,6 +320,14 @@ export default function SubscriptionsPageClient({ siteConfig }) {
     };
     fetchPlans();
   }, []);
+
+  // "Pay another way". Shown ALWAYS, not only after a failure: a card decline
+  // happens on the gateway's hosted checkout, so this site is never told it
+  // occurred — most declined customers just close the tab. The only signal we
+  // ever get is ?status=cancelled (they clicked back), which we use to make the
+  // same entry point louder rather than to decide whether to show it at all.
+  const [showPayHelp, setShowPayHelp] = useState(false);
+  const [checkoutTrouble, setCheckoutTrouble] = useState(false);
 
   const [dailyResetTime, setDailyResetTime] = useState('Loading...');
 
@@ -382,6 +404,26 @@ export default function SubscriptionsPageClient({ siteConfig }) {
           </p>
         </div>
 
+        {/* Loud version — only after we KNOW checkout didn't complete. */}
+        {checkoutTrouble && (
+          <div className='mx-auto mb-8 max-w-2xl rounded-2xl border-2 border-black bg-white p-6 text-center shadow-lg'>
+            <p className='text-lg font-bold text-black'>
+              Payment didn&apos;t go through?
+            </p>
+            <p className='mx-auto mt-2 max-w-md text-sm leading-relaxed text-gray-600'>
+              Cards are declined for all sorts of reasons that have nothing to do
+              with you. We can take your payment another way and set your account
+              up by hand — usually within a few hours.
+            </p>
+            <button
+              onClick={() => setShowPayHelp(true)}
+              className='mt-4 rounded-xl bg-black px-6 py-3 text-sm font-bold text-white transition hover:bg-gray-900'
+            >
+              See other ways to pay →
+            </button>
+          </div>
+        )}
+
         <div className='max-w-7xl mx-auto relative z-10 items-center'>
           {/* The Free plan is ALWAYS shown. Paid plans render when available;
               otherwise a "premium coming soon" message sits beside Free. */}
@@ -452,7 +494,7 @@ export default function SubscriptionsPageClient({ siteConfig }) {
                       <div className='text-[10px] text-gray-600 mt-1 leading-tight'>
                         Downloads
                         <br />
-                        per day
+                        per {freeWindow}
                       </div>
                     </div>
                   </div>
@@ -708,6 +750,17 @@ export default function SubscriptionsPageClient({ siteConfig }) {
                   })
                 )}
               </div>
+          {/* Quiet, permanent entry point. This is the one that actually
+              catches most people — see the note where showPayHelp is declared. */}
+          <div className='mb-8 text-center'>
+            <button
+              onClick={() => setShowPayHelp(true)}
+              className='text-sm text-gray-600 underline underline-offset-4 transition hover:text-black'
+            >
+              Having trouble paying? Other payment methods →
+            </button>
+          </div>
+
           {/* ---------- TRUST BAR ---------- */}
           <div className='bg-white rounded-2xl shadow-md p-6 md:p-8'>
             <div className='grid grid-cols-2 md:grid-cols-4 gap-6'>
@@ -751,6 +804,13 @@ export default function SubscriptionsPageClient({ siteConfig }) {
           </div>
         </div>
       </div>
+
+      {showPayHelp && (
+        <PaymentHelpModal
+          plans={plans}
+          onClose={() => setShowPayHelp(false)}
+        />
+      )}
 
       <Divider className='bg-gray-200' />
       <Footer />

@@ -13,3 +13,12 @@ export const setFinanceToken = (token) =>
 export const getFinanceToken = () => Cookies.get(FINANCE_COOKIE);
 
 export const clearFinanceToken = () => Cookies.remove(FINANCE_COOKIE);
+
+// Spread into a fetch() headers object for any finance-gated admin call:
+//   headers: { ...financeHeaders() }
+// Returns {} when there is no elevation token, so the backend answers with its
+// normal "Finance Locked" 403 and the UI shows the password screen.
+export const financeHeaders = () => {
+  const token = getFinanceToken();
+  return token ? { 'x-finance-elevation': token } : {};
+};

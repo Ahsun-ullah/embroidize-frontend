@@ -1,6 +1,7 @@
 'use client';
 
 import ProductCard from '@/components/Common/ProductCard';
+import Link from 'next/link';
 
 export default function ClientOnlyRecommendations({
   allProductData,
@@ -35,12 +36,12 @@ export default function ClientOnlyRecommendations({
       <div>
         <div className='flex items-center justify-between mb-6'>
           <h2 className='text-black text-lg font-bold'>Most Popular Designs</h2>
-          <a
+          <Link
             href='/products?filter=popular'
             className='text-sm text-black underline'
           >
             All Popular Designs
-          </a>
+          </Link>
         </div>
         <div className='grid grid-cols-1 sm:grid-cols-2 gap-4'>
           {popularProducts?.slice(0, 4).map((item, index) => (

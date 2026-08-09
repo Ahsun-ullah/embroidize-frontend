@@ -34,11 +34,26 @@ function invoiceHtml({ invoice, customer }) {
   const currency = invoice.currency || 'USD';
   const isPaid = invoice.status === 'paid';
 
-  const gateway = customer.gateway === 'creem' ? 'creem' : 'stripe';
-  const providerName = gateway === 'creem' ? 'Creem' : 'Stripe';
-  const providerCustomerId = customer.stripeCustomerId || customer.creemCustomerId || '';
-  const providerSubscriptionId =
-    customer.stripeSubscriptionId || customer.creemSubscriptionId || '';
+  // A manual invoice is identified by the ROW, not the customer: someone whose
+  // card later failed can hold both Stripe invoices and bank-transfer ones, and
+  // each must print its own payment story.
+  const isManual = invoice.source === 'manual';
+  const gateway = isManual
+    ? 'manual'
+    : customer.gateway === 'creem'
+      ? 'creem'
+      : 'stripe';
+  const providerName = isManual
+    ? 'Direct payment'
+    : gateway === 'creem'
+      ? 'Creem'
+      : 'Stripe';
+  const providerCustomerId = isManual
+    ? ''
+    : customer.stripeCustomerId || customer.creemCustomerId || '';
+  const providerSubscriptionId = isManual
+    ? ''
+    : customer.stripeSubscriptionId || customer.creemSubscriptionId || '';
   const hasRefund = Number(invoice.amountRefunded) > 0;
   const netTotal = (Number(invoice.amount) || 0) - (Number(invoice.amountRefunded) || 0);
 
@@ -49,8 +64,9 @@ function invoiceHtml({ invoice, customer }) {
       ? `Service period: ${fmtDate(invoice.periodStart)} – ${fmtDate(invoice.periodEnd)}`
       : 'One-time purchase — lifetime access per plan terms';
 
-  const paymentMethod =
-    invoice.cardBrand && invoice.cardLast4
+  const paymentMethod = isManual
+    ? invoice.manualMethod || 'Direct payment'
+    : invoice.cardBrand && invoice.cardLast4
       ? `${invoice.cardBrand.charAt(0).toUpperCase() + invoice.cardBrand.slice(1)} •••• ${invoice.cardLast4}`
       : `Card (via ${providerName})`;
 
@@ -65,7 +81,12 @@ function invoiceHtml({ invoice, customer }) {
       : '';
 
   // Full package details — spells out exactly what the customer paid for.
-  const plan = customer.plan || null;
+  //
+  // For a manual invoice this comes from the SNAPSHOT frozen when the payment
+  // was recorded, not from the live plan. Re-deriving it would silently rewrite
+  // an issued invoice whenever a plan is renamed or its limits change, which
+  // would make the document worthless as a record.
+  const plan = isManual ? invoice.manualPlan || null : customer.plan || null;
   const planBilling = plan
     ? plan.type === 'one-time'
       ? 'One-time purchase (no recurring charges)'
@@ -220,13 +241,18 @@ function invoiceHtml({ invoice, customer }) {
     <div class="refs">
       ${refRow('Payment method', paymentMethod)}
       ${refRow('Currency', currency)}
-      ${refRow(`${providerName} customer ID`, providerCustomerId)}
-      ${refRow(`${providerName} subscription ID`, providerSubscriptionId)}
-      ${refRow('Stripe invoice ID', invoice.stripeInvoiceId)}
-      ${refRow('Payment intent', invoice.paymentIntentId)}
-      ${refRow('Charge ID', invoice.chargeId)}
-      ${refRow('Transaction ID', gateway === 'creem' ? invoice.id : null)}
-      ${refRow('Receipt number', invoice.receiptNumber)}
+      ${
+        isManual
+          ? `${refRow('Reference', invoice.manualReference)}
+             ${refRow('Receipt number', invoice.number)}`
+          : `${refRow(`${providerName} customer ID`, providerCustomerId)}
+             ${refRow(`${providerName} subscription ID`, providerSubscriptionId)}
+             ${refRow('Stripe invoice ID', invoice.stripeInvoiceId)}
+             ${refRow('Payment intent', invoice.paymentIntentId)}
+             ${refRow('Charge ID', invoice.chargeId)}
+             ${refRow('Transaction ID', gateway === 'creem' ? invoice.id : null)}
+             ${refRow('Receipt number', invoice.receiptNumber)}`
+      }
     </div>
 
     <h2>Delivery of Goods</h2>
@@ -241,7 +267,11 @@ function invoiceHtml({ invoice, customer }) {
     </div>
 
     <div class="footer">
-      All referenced IDs are verifiable in the ${esc(providerName)} Dashboard.<br />
+      ${
+        isManual
+          ? 'Payment received directly. This receipt is issued by Embroidize as the record of that payment.'
+          : `All referenced IDs are verifiable in the ${esc(providerName)} Dashboard.`
+      }<br />
       Embroidize · <a href="https://embroidize.com">embroidize.com</a> · ${SUPPORT_EMAIL} · Generated ${esc(generated)}
     </div>
   </div>
