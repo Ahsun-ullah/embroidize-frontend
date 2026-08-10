@@ -53,7 +53,8 @@ export default function AboutUsPage() {
               <p className='text-gray-700 leading-relaxed'>
                 At <strong>Embroidize</strong>, our mission is to make
                 embroidery design accessible, reliable, and inspiring for
-                creators worldwide. Whether you're a beginner or a professional,
+                creators worldwide. Whether you&apos;re a beginner or a
+                professional,
                 we provide high-quality digital embroidery files that bring your
                 ideas to life.
               </p>
@@ -122,7 +123,8 @@ export default function AboutUsPage() {
             </h2>
             <p className='text-gray-700 leading-relaxed'>
               Embroidize is designed to support both hobbyists and
-              entrepreneurs. Whether you're creating custom gifts or running a
+              entrepreneurs. Whether you&apos;re creating custom gifts or
+              running a
               small embroidery business, our designs are ready for real-world
               use.
             </p>

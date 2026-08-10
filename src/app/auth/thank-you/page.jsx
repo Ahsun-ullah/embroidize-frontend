@@ -57,14 +57,14 @@ function ThankYouContent() {
         </h1>
         <p className='text-gray-600 mb-3 text-lg'>Thank you for registering!</p>
         <p className='text-gray-500 mb-8'>
-          Your account has been created successfully. You're now ready to
+          Your account has been created successfully. You&apos;re now ready to
           download unlimited embroidery designs and explore our entire
           collection.
         </p>
 
         {/* Features List */}
         <div className='bg-gray-50 rounded-lg p-6 mb-6 text-left'>
-          <h3 className='font-semibold mb-3 text-gray-800'>What's next?</h3>
+          <h3 className='font-semibold mb-3 text-gray-800'>What&apos;s next?</h3>
           <ul className='space-y-2 text-sm text-gray-600'>
             <li className='flex items-start'>
               <span className='text-green-600 mr-2'>✓</span>

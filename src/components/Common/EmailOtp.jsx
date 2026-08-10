@@ -78,7 +78,7 @@ const EmailOtp = ({ step, setStep, userDetailsData, pathName }) => {
     try {
       await verifyOtp({ email, otp: fullOtp }).unwrap();
 
-      const registerResult = await userRegister(userDetailsData).unwrap();
+      await userRegister(userDetailsData).unwrap();
 
       // ✅ TRACK SIGNUP SUCCESS (GTM / dataLayer)
       if (typeof window !== 'undefined') {

@@ -34,7 +34,9 @@ import { Download, Heart, ImageOff } from 'lucide-react';
 
 // Redux & Utils
 import AdminChoiceToggle from '@/components/Common/AdminChoiceToggle';
+import BulkPinToPinterestModal from '@/components/Common/BulkPinToPinterestModal';
 import { ErrorToast } from '@/components/Common/ErrorToast';
+import PinToPinterestModal from '@/components/Common/PinToPinterestModal';
 import ProductFlagToggle from '@/components/Common/ProductFlagToggle';
 import { SuccessToast } from '@/components/Common/SuccessToast';
 import {
@@ -61,13 +63,18 @@ const customSelectStyles = {
 export default function ProductsTableWrapper({
   initialData = [],
   pagination,
-  columns,
 }) {
   const router = useRouter();
   const searchParams = useSearchParams();
   const [selectedKeys, setSelectedKeys] = useState(new Set([]));
   const [isCreatingBundle, setIsCreatingBundle] = useState(false);
   const [isUpdatingChoice, setIsUpdatingChoice] = useState(false);
+
+  // Pinterest. One modal instance for the whole grid, keyed by which product's
+  // "Pin to Pinterest" was clicked — mounting a modal per card would be a few
+  // hundred idle modals on a full page.
+  const [pinProductId, setPinProductId] = useState(null);
+  const [isBulkPinOpen, setIsBulkPinOpen] = useState(false);
 
   // Bundle Modal State
   const [isBundleModalOpen, setIsBundleModalOpen] = useState(false);
@@ -234,8 +241,9 @@ export default function ProductsTableWrapper({
     setIsBundleModalOpen(true);
   };
 
-  // Update bundleName handler
-  const handleBundleNameChange = (value) => {
+  // Update bundleName handler. Currently unwired — the bundle modal sets the
+  // name and slug inline.
+  const _handleBundleNameChange = (value) => {
     setBundleName(value);
     // Auto-generate slug using slugify
     setBundleSlug(slugify(value, { lower: true, strict: true }));
@@ -286,7 +294,7 @@ export default function ProductsTableWrapper({
         router.push('/admin/bundle-products');
         router.refresh();
       }
-    } catch (error) {
+    } catch {
       ErrorToast('Error', 'Something went wrong', 3000);
     } finally {
       setIsCreatingBundle(false);
@@ -325,7 +333,7 @@ export default function ProductsTableWrapper({
           router.refresh();
         });
       }
-    } catch (error) {
+    } catch {
       ErrorToast('Error', 'Update failed', 3000);
     } finally {
       setIsUpdatingChoice(false);
@@ -513,6 +521,12 @@ export default function ProductsTableWrapper({
                     Edit
                   </DropdownItem>
                   <DropdownItem
+                    key='pin'
+                    onPress={() => setPinProductId(product._id)}
+                  >
+                    Pin to Pinterest
+                  </DropdownItem>
+                  <DropdownItem
                     key='delete'
                     className='text-danger'
                     color='danger'
@@ -527,7 +541,7 @@ export default function ProductsTableWrapper({
         </div>
       );
     },
-    [deleteProduct, router, toggleSelect],
+    [deleteProduct, router, toggleSelect, setPinProductId],
   );
 
   const topContent = useMemo(
@@ -619,6 +633,14 @@ export default function ProductsTableWrapper({
                 onPress={() => handleSetAdminChoice(false)}
               >
                 Remove Choice
+              </Button>
+              <Button
+                size='sm'
+                variant='flat'
+                startContent={<i className='ri-pinterest-fill' />}
+                onPress={() => setIsBulkPinOpen(true)}
+              >
+                Pin to Pinterest
               </Button>
             </div>
           </div>
@@ -812,6 +834,27 @@ export default function ProductsTableWrapper({
           </ModalFooter>
         </ModalContent>
       </Modal>
+
+      {/* Single-product pin. Mounted only while a product is chosen so the
+          draft/boards queries don't fire on every page load. */}
+      {pinProductId && (
+        <PinToPinterestModal
+          isOpen={!!pinProductId}
+          onClose={() => setPinProductId(null)}
+          productId={pinProductId}
+        />
+      )}
+
+      {isBulkPinOpen && (
+        <BulkPinToPinterestModal
+          isOpen={isBulkPinOpen}
+          onClose={(queued) => {
+            setIsBulkPinOpen(false);
+            if (queued) setSelectedKeys(new Set([]));
+          }}
+          productIds={selectedIds}
+        />
+      )}
     </>
   );
 }

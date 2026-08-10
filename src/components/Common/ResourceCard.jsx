@@ -4,7 +4,6 @@ import Link from 'next/link';
 import React from 'react';
 
 const ResourceCard = React.memo(function ResourceCard({ data }) {
-  const imageUrl = data?.image?.url;
   const altText = data?.title;
   const readingTime = Math.ceil(data?.description?.length / 200) || 5;
 

@@ -5,11 +5,8 @@ import Footer from '@/components/user/HomePage/Footer';
 import Header from '@/components/user/HomePage/Header';
 import { getPopularProducts } from '@/lib/apis/public/products';
 import { getSiteConfig, windowPhrase } from '@/lib/apis/public/siteConfig';
-import Image from 'next/image';
 import Link from 'next/link';
 import { Suspense } from 'react';
-
-const mainLogo = '/logo-black.png';
 
 // Dynamic data fetching
 export const dynamic = 'force-dynamic';

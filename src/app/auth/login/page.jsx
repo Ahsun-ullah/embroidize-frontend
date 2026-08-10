@@ -157,7 +157,7 @@ const Login = () => {
             {/* Register link */}
             <div className='mt-5 text-center'>
               <p className='mb-0'>
-                Don't have an account?
+                Don&apos;t have an account?
                 <Link
                   href={
                     pathName

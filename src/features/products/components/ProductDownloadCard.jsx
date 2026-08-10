@@ -30,7 +30,7 @@ export default function ProductDownloadCard({ data }) {
   const [isLoading, setIsLoading] = useState(false);
   const [showLimitModal, setShowLimitModal] = useState(false);
   const [showFormatSheet, setShowFormatSheet] = useState(false);
-  const [isMobile, setIsMobile] = useState(false);
+  const [, setIsMobile] = useState(false);
   const [isFacebookBrowser, setIsFacebookBrowser] = useState(false);
   const [showFacebookWarning, setShowFacebookWarning] = useState(false);
   const [downloadingType, setDownloadingType] = useState(null);
@@ -388,7 +388,7 @@ export default function ProductDownloadCard({ data }) {
           <div className='bg-orange-100 border border-orange-400 text-orange-800 px-4 py-3 rounded relative text-sm'>
             <strong className='font-bold'>⚠️ Note: </strong>
             <span>
-              Downloads don't work in Facebook browser. Please open in
+              Downloads don&apos;t work in Facebook browser. Please open in
               Chrome/Safari.
             </span>
           </div>
@@ -446,7 +446,7 @@ export default function ProductDownloadCard({ data }) {
               Open in Browser Required
             </h2>
             <p className='text-gray-600 mb-4 text-center text-sm'>
-              Facebook's browser blocks downloads. Please open this page in
+              Facebook&apos;s browser blocks downloads. Please open this page in
               Chrome or Safari to download your files.
             </p>
 
@@ -487,7 +487,7 @@ export default function ProductDownloadCard({ data }) {
                 </p>
                 <ol className='list-decimal list-inside space-y-1 text-gray-600'>
                   <li>Tap the three dots (⋯) at the top/bottom</li>
-                  <li>Select "Open in browser" or "Open in Chrome"</li>
+                  <li>Select &quot;Open in browser&quot; or &quot;Open in Chrome&quot;</li>
                   <li>Download your file from there</li>
                 </ol>
               </div>

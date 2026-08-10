@@ -2010,9 +2010,11 @@ export default function SubscribersTableWrapper({ subscribers, revenue }) {
                         ))}
 
                         <p className='text-[11px] text-gray-400'>
-                          Pulled live from the payment provider. "Invoice (PDF)"
+                          Pulled live from the payment provider. &quot;Invoice
+                          (PDF)&quot;
                           opens a printable Embroidize invoice (use the
-                          browser's Save as PDF); the "Stripe page/PDF" links
+                          browser&apos;s Save as PDF); the &quot;Stripe
+                          page/PDF&quot; links
                           appear only for Stripe-billed payments.
                         </p>
                       </div>
@@ -2055,7 +2057,7 @@ export default function SubscribersTableWrapper({ subscribers, revenue }) {
                             )}
                             {log.note && (
                               <p className='text-xs text-gray-600 dark:text-gray-400 italic'>
-                                "{log.note}"
+                                &quot;{log.note}&quot;
                               </p>
                             )}
                             {log.action === 'refund' && log.after?.amount && (
@@ -2364,7 +2366,7 @@ export default function SubscribersTableWrapper({ subscribers, revenue }) {
                       <div>
                         <p className='text-sm font-medium'>Daily count only</p>
                         <p className='text-xs text-gray-500'>
-                          Today's downloads:{' '}
+                          Today&apos;s downloads:{' '}
                           {resetUser?.subscription?.dailyDownloadCount ?? 0} →
                           0. Period count stays unchanged.
                         </p>

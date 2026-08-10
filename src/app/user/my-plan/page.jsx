@@ -763,7 +763,7 @@ export default function MyPlanPage({ onClose }) {
                       <div className='flex justify-between items-end mb-3'>
                         <div>
                           <p className='text-sm font-semibold text-slate-600 uppercase tracking-wider mb-1'>
-                            Today's Downloads
+                            Today&apos;s Downloads
                           </p>
                           <p className='text-2xl font-extrabold text-slate-800'>
                             {subscription?.dailyDownloadCount}
@@ -823,7 +823,7 @@ export default function MyPlanPage({ onClose }) {
                   <div className='bg-white border border-slate-100 rounded-2xl overflow-hidden shadow-sm'>
                     <div className='px-6 py-4 border-b border-slate-50'>
                       <h2 className='text-sm font-bold text-slate-700 uppercase tracking-widest'>
-                        What's Included
+                        What&apos;s Included
                       </h2>
                     </div>
                     <div className='p-6'>
@@ -912,7 +912,7 @@ export default function MyPlanPage({ onClose }) {
                     </h3>
                     <p className='text-violet-200 text-sm leading-relaxed mb-5'>
                       You made a one-time payment. Your access never expires and
-                      you'll never be charged again.
+                      you&apos;ll never be charged again.
                     </p>
                     <div className='bg-white/10 border border-white/10 rounded-xl px-4 py-3'>
                       <p className='text-xs text-violet-200 uppercase tracking-widest mb-0.5'>

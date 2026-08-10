@@ -14,7 +14,6 @@ import { useMemo } from 'react';
 const UserTable = ({
   data,
   columns,
-  pageSize,
   renderCell,
   onSearchChange,
   pagination,

@@ -22,9 +22,6 @@ export async function getUsers(
     const apiUrl = process.env.NEXT_PUBLIC_BASE_API_URL_PROD;
     const url = new URL(`${apiUrl}/all-users`);
 
-    console.log(apiUrl);
-    console.log(url);
-
     // Append all params
     url.searchParams.set('page', String(page));
     url.searchParams.set('perPage', String(perPage));
@@ -44,7 +41,6 @@ export async function getUsers(
     }
 
     const responseData = await response.json();
-    console.log(responseData);
 
     // Structure matches the new backend response
     return {

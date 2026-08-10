@@ -112,7 +112,6 @@ export default function PlansWrapper({ plans: initialPlans }) {
       setManualPriceId(false);
       fetchStripePrices();
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [isFormOpen]);
 
   // Selecting a Stripe price auto-fills price, interval, type (and name if empty).

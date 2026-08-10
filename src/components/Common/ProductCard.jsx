@@ -24,20 +24,6 @@ function DownloadIcon(props) {
   );
 }
 
-function StarIcon(props) {
-  return (
-    <svg
-      viewBox='0 0 24 24'
-      width='15'
-      height='15'
-      aria-hidden='true'
-      {...props}
-    >
-      <path d='M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z' />
-    </svg>
-  );
-}
-
 // pass `index` from parent map so the first visible image becomes the LCP image
 const ProductCard = React.memo(function ProductCard({ item, index = 0 }) {
   const { data: userInfoData } = useUserInfoQuery();
@@ -53,8 +39,6 @@ const ProductCard = React.memo(function ProductCard({ item, index = 0 }) {
     ? item?.category?.name
     : item?.sub_category?.name || '';
   const downloadCount = Number(item?.downloadCount || 0);
-  const averageRating = Number(item?.averageRating || 0);
-  const reviewCount = Number(item?.reviewCount || 0);
   // Pricing tier flag. Missing field counts as premium, matching the backend's
   // isFree!==true gating.
   const isFreeTier = item?.isFree === true;

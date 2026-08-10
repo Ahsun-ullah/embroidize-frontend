@@ -1,5 +1,3 @@
-import { Input } from '@heroui/react';
-
 const SubscribeSearchSection = () => {
   return (
     <>

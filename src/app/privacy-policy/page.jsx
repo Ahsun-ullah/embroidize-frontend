@@ -65,36 +65,40 @@ export default function PrivacyPolicyPage() {
       content: `We do not sell your personal data.\n\nWe may share information with trusted third parties including:\n\n- Secure payment processors\n- Analytics providers\n- Hosting and infrastructure services\n\nThese parties are required to protect your data.`,
     },
     {
-      title: '10. International Data Transfers',
+      title: '10. Social Media & Marketing Platform Integrations',
+      content: `We publish our own product listings to third-party social and content platforms, currently including Pinterest.\n\nHow this works:\n\n- Publishing is carried out by our own staff from business accounts that we own and control.\n- The content published consists of our product images, titles, descriptions, and links to product pages on this website.\n- We do not transmit customer or user personal data to these platforms as part of this publishing activity.\n- We never request, collect, or store social media account credentials belonging to our users. Access credentials for our own accounts are stored encrypted on our servers.\n\nIf you choose to interact with our content on those platforms, your activity there is governed by that platform's own privacy policy, not this one.`,
+    },
+    {
+      title: '11. International Data Transfers',
       content: `Your data may be processed in countries outside your location. We ensure appropriate safeguards are applied to protect your information.`,
     },
     {
-      title: '11. Your Rights',
+      title: '12. Your Rights',
       content: `You have the right to:\n\n- Access your personal data\n- Correct inaccurate data\n- Request deletion\n- Withdraw consent\n- Object to certain processing\n\nTo exercise your rights, contact support@embroidize.com`,
     },
     {
-      title: '12. Marketing Communications',
+      title: '13. Marketing Communications',
       content: `We may send promotional emails. You can unsubscribe at any time by contacting us or using the unsubscribe link.`,
     },
     {
-      title: '13. Children’s Privacy',
+      title: '14. Children’s Privacy',
       content: `Our services are not intended for individuals under 13 years of age. We do not knowingly collect data from children.`,
     },
     {
-      title: '14. Security Measures',
+      title: '15. Security Measures',
       content: `We implement appropriate security measures including encryption, access controls, and monitoring systems to protect your data.`,
     },
     {
-      title: '15. Third-Party Links',
+      title: '16. Third-Party Links',
       content: `Our website may contain links to third-party websites. We are not responsible for their privacy practices.`,
     },
     {
-      title: '16. Changes to Policy',
+      title: '17. Changes to Policy',
       content: `We may update this Privacy Policy at any time. Continued use of the platform constitutes acceptance of the updated policy.`,
     },
 
     {
-      title: '17. Contact Information',
+      title: '18. Contact Information',
       content: (
         <>
           <p>For privacy-related inquiries:</p>

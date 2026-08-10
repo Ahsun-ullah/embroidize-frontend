@@ -269,7 +269,8 @@ export default function UsersTableWrapper({
 
   const [isExporting, setIsExporting] = useState(false);
 
-  const convertUsersToCSV = (users) => {
+  // Kept for the CSV export path, which is currently not wired to a button.
+  const _convertUsersToCSV = (users) => {
     const headers = ['Email', 'Name', 'Country', 'Date'];
 
     const escapeCSVValue = (value) => {
@@ -287,7 +288,7 @@ export default function UsersTableWrapper({
     return [headers.join(','), ...rows.map((row) => row.join(','))].join('\n');
   };
 
-  const downloadCSV = (csvContent, fileName) => {
+  const _downloadCSV = (csvContent, fileName) => {
     const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
     const url = window.URL.createObjectURL(blob);
 

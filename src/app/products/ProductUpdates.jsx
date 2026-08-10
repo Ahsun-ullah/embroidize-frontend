@@ -7,8 +7,10 @@ export default function ProductUpdates({ retryInterval = 10000 }) {
   const router = useRouter();
   const esRef = useRef(null);
   const retryTimeout = useRef(null);
-  const [status, setStatus] = useState('connecting');
-  const [product, setProduct] = useState(null);
+  // The status pill and last-product readout are commented out in the JSX
+  // below, so only the setters are live — the values are never read.
+  const [, setStatus] = useState('connecting');
+  const [, setProduct] = useState(null);
 
   const streamUrl =
     process.env.NODE_ENV === 'production'
@@ -38,7 +40,7 @@ export default function ProductUpdates({ retryInterval = 10000 }) {
       router.refresh();
     };
 
-    es.onerror = (err) => {
+    es.onerror = () => {
       setStatus('error');
       es.close();
 
@@ -57,7 +59,7 @@ export default function ProductUpdates({ retryInterval = 10000 }) {
     };
   }, []);
 
-  const statusColor = {
+  const _statusColor = {
     connecting: 'bg-yellow-500',
     open: 'bg-green-500',
     listening: 'bg-green-500',
