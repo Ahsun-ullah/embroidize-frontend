@@ -3,6 +3,7 @@ import { setupListeners } from '@reduxjs/toolkit/query';
 import { adminChoiceSlice } from './admin/adminChoice/adminChoiceSlice';
 import { blogsSlice } from './admin/blogs/blogsSlice';
 import { categoryAndSubcategorySlice } from './admin/categoryAndSubcategory/categoryAndSubcategorySlice';
+import { pinterestSlice } from './admin/pinterest/pinterestSlice';
 import { protectedProductSlice } from './admin/protectedProducts/protectedProductSlice';
 import { userSlice } from './admin/users/userSlice';
 import { favoritesSlice } from './common/favorites/favoritesSlice';
@@ -25,6 +26,7 @@ export const makeStore = () => {
       [blogsSlice.reducerPath]: blogsSlice.reducer,
       [favoritesSlice.reducerPath]: favoritesSlice.reducer,
       [adminChoiceSlice.reducerPath]: adminChoiceSlice.reducer,
+      [pinterestSlice.reducerPath]: pinterestSlice.reducer,
     },
     middleware: (getDefaultMiddleware) =>
       getDefaultMiddleware()
@@ -37,7 +39,8 @@ export const makeStore = () => {
         .concat(blogsSlice.middleware)
         .concat(authSlice.middleware)
         .concat(favoritesSlice.middleware)
-        .concat(adminChoiceSlice.middleware),
+        .concat(adminChoiceSlice.middleware)
+        .concat(pinterestSlice.middleware),
     devTools: process.env.NODE_ENV !== 'production',
   });
 };

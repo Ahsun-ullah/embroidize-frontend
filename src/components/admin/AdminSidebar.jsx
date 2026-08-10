@@ -373,6 +373,11 @@ export default function AdminSidebar({ isCollapsed, setIsCollapsed }) {
               icon: 'ri-download-2-line',
             },
             {
+              href: '/admin/settings/pinterest',
+              label: 'Pinterest',
+              icon: 'ri-pinterest-line',
+            },
+            {
               label: 'Financial',
               icon: 'ri-lock-2-fill',
               items: [

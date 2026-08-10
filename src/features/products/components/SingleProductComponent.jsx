@@ -1,12 +1,12 @@
 'use client';
 
 import LoadingSpinner from '@/components/Common/LoadingSpinner';
+import PinToPinterestButton from '@/components/Common/PinToPinterestButton';
 import {
   capitalize,
   preserveParagraphLineBreaks,
 } from '@/utils/functions/page';
 import { marked } from 'marked';
-import Link from 'next/link';
 import { Suspense, useState } from 'react';
 import { BreadCrumb } from './BreadCrumb';
 import ProductDownloadCard from './ProductDownloadCard';
@@ -91,6 +91,13 @@ export const SingleProductComponent = ({
                 </a>
               )}
             </div>
+
+            {/* Admin-only: post this product to Pinterest. Renders nothing for
+                logged-out visitors and normal users. */}
+            <PinToPinterestButton
+              productId={singleProductData?._id}
+              className='w-full'
+            />
 
             {/* Cards */}
             <div className='flex flex-col sm:flex-row justify-between gap-4 w-full'>
