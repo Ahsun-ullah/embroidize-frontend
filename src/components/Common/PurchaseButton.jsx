@@ -5,10 +5,8 @@ import { useState } from 'react';
 
 export default function PurchaseButton({
   plan,
-  isPopular,
   isActivePlan,
   ctaTitle,
-  ctaSubtitle,
   checkoutMessage,
 }) {
   const [isLoading, setIsLoading] = useState(false);

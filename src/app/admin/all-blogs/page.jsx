@@ -8,7 +8,7 @@ export default function BlogPageInAdmin() {
   const [search, setSearch] = useState('');
   const limit = 10;
 
-  const { data: blogsData, isLoading } = useAllBlogsQuery({
+  const { data: blogsData } = useAllBlogsQuery({
     page,
     limit,
     search,

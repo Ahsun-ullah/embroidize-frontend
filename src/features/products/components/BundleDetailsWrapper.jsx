@@ -26,7 +26,7 @@ import { useState, useTransition } from 'react';
 
 export default function BundleDetailsWrapper({ bundle }) {
   const router = useRouter();
-  const [isPending, startTransition] = useTransition();
+  const [, startTransition] = useTransition();
 
   // Modal Controls
   const {

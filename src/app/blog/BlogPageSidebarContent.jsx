@@ -9,7 +9,7 @@ export default async function BlogPageSidebarContent() {
 
   const recentPosts = blogsData?.blogs;
 
-  const usefulLinks = [
+  const _usefulLinks = [
     { label: 'Useful Link 01', href: '/link1' },
     { label: 'Useful Link 02', href: '/link2' },
     { label: 'Useful Link 03', href: '/link3' },
@@ -65,11 +65,11 @@ export default async function BlogPageSidebarContent() {
       <Divider orientation='horizontal' className=' bg-gray-300' />
 
       {/* Useful Links */}
-      {/* {usefulLinks?.length > 0 && (
+      {/* {_usefulLinks?.length > 0 && (
         <div>
           <h2 className='text-xl font-semibold mb-4'>Useful Links</h2>
           <ul className='space-y-2 text-sm text-blue-600'>
-            {usefulLinks.map((link, index) => (
+            {_usefulLinks.map((link, index) => (
               <li key={index}>
                 <Link href={link.href || '#'} className='hover:underline'>
                   {link.label}

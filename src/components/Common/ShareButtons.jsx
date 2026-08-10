@@ -2,7 +2,6 @@
 
 const ShareButtons = ({ url, title, description }) => {
   const shareUrl = encodeURIComponent(url || window.location.href);
-  const shareTitle = encodeURIComponent(title);
   const shareText = encodeURIComponent(`${title} - ${description}`);
 
   const handleFacebookShare = () => {

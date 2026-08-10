@@ -45,7 +45,7 @@ export function ContactUsForm() {
         const errorData = await response.json();
         setError(errorData.message || 'Something went wrong!');
       }
-    } catch (error) {
+    } catch {
       setError('Something went wrong!');
     }
   };

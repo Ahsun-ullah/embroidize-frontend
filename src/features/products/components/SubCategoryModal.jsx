@@ -166,7 +166,7 @@ export default function SubCategoryModal({
       size='5xl'
     >
       <ModalContent>
-        {(onClose) => (
+        {() => (
           <>
             <ModalHeader className='flex flex-col gap-1'>
               {subCategory ? 'Update Subcategory' : 'Add Subcategory'}

@@ -78,7 +78,7 @@ export default function ProfileForm() {
     }
 
     try {
-      const response = await updateUserInfo(formData).unwrap();
+      await updateUserInfo(formData).unwrap();
       userInfoRefetch();
       SuccessToast('Success', 'Profile updated successfully!', 3000);
     } catch (error) {

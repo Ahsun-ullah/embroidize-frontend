@@ -7,7 +7,6 @@ import { useState } from 'react';
 
 export default function MostDownloadedProductsTableWrapper({
   initialData,
-  pageSize,
   pagination,
 }) {
   const router = useRouter();

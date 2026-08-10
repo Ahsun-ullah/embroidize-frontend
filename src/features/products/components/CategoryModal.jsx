@@ -142,14 +142,16 @@ export default function CategoryModal({
     <Modal
       isOpen={isOpen}
       onOpenChange={() => {
-        setCategoryId(''), reset(), onOpenChange();
+        setCategoryId('');
+        reset();
+        onOpenChange();
       }}
       scrollBehavior='inside'
       placement='center'
       size={'5xl'}
     >
       <ModalContent>
-        {(onClose) => (
+        {() => (
           <>
             <ModalHeader className='flex flex-col gap-1'>
               {category ? 'Update Category' : 'Add Category'}

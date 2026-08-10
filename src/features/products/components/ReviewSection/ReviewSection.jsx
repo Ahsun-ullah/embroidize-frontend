@@ -175,7 +175,7 @@ export default function ReviewSection({ productId, initialAvgRating = 0, initial
     autoOpenedRef.current = true;
     reviewsRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
     handleOpenModal(myReview);
-  }, [isLoggedIn, myReview]); // eslint-disable-line react-hooks/exhaustive-deps
+  }, [isLoggedIn, myReview]);
 
   // ── Submit (create or update) ─────────────────────────────────────────────
   const handleSubmit = async ({ rating, reviewText, images = [], removeImages = [] }) => {

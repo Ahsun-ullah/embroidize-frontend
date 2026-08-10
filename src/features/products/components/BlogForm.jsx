@@ -40,7 +40,6 @@ export function BlogForm({ blog, isOpen, onOpenChange, setBlogId }) {
     formState: { errors, isSubmitting },
     reset,
     setValue,
-    watch,
   } = useForm({
     mode: 'onSubmit',
     resolver: zodResolver(blogSchema),
@@ -55,9 +54,6 @@ export function BlogForm({ blog, isOpen, onOpenChange, setBlogId }) {
       image: null,
     },
   });
-
-  // ⭐ Watch doc_type value
-  const docTypeValue = watch('doc_type');
 
   // ⭐ Populate form when blog data changes
   useEffect(() => {
@@ -210,7 +206,7 @@ export function BlogForm({ blog, isOpen, onOpenChange, setBlogId }) {
       isKeyboardDismissDisabled={isSubmitting}
     >
       <ModalContent>
-        {(onClose) => (
+        {() => (
           <>
             <ModalHeader className='flex flex-col gap-1'>
               {blog ? 'Update Blog' : 'Add Blog'}

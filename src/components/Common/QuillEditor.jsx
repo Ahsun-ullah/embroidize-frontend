@@ -190,7 +190,6 @@ export default function QuillEditor({
         });
         for (const f of imageFiles) {
           // sequential keeps cursor order predictable
-          // eslint-disable-next-line no-await-in-loop
           const url = await uploadImageFile(f);
           insertImageAtCursor(url, f.name?.replace(/\.[^.]+$/, '') || '');
         }
@@ -360,7 +359,6 @@ export default function QuillEditor({
               kind: 'error',
               text: `Imported ${total - failed}/${total} images. ${failed} kept their original URL.`,
             });
-            // eslint-disable-next-line no-console
             console.warn('Editor image import warnings:', warnings);
             setTimeout(() => setStatus(null), 5000);
           } else {

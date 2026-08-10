@@ -7,7 +7,7 @@ import {
 } from '@/lib/utils/categoryCache';
 import Image from 'next/image';
 import Link from 'next/link';
-import { ChevronRight, Search, X } from 'lucide-react';
+import { ChevronRight } from 'lucide-react';
 import { useEffect, useMemo, useState } from 'react';
 
 const cleanName = (name = '') =>
@@ -55,7 +55,8 @@ function Skeleton() {
 
 export default function AllCategoriesGrid() {
   const [cachedData, setCachedDataState] = useState(null);
-  const [query, setQuery] = useState('');
+  // Read-only: nothing currently sets this, so the filter below is inert.
+  const [query] = useState('');
 
   // Load cache after hydration (null on server + first render → no mismatch).
   useEffect(() => {
