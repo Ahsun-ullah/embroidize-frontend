@@ -108,15 +108,44 @@ function authHeaders() {
 // Which payment gateway owns a subscription record. Mirrors the backend's
 // subscriptionGateway(): prefer the stamped `gateway` field, else infer from
 // the presence of Creem ids (legacy records written before the field existed).
+//
+// 'manual' MUST be handled here. It was missing, and because a manual grant has
+// no Creem ids it fell through to the final line and reported as Stripe — which
+// silently mislabelled every hand-granted subscriber and folded their money
+// into the Stripe revenue bucket.
 function subProvider(sub) {
   if (!sub) return 'stripe';
-  if (sub.gateway === 'stripe' || sub.gateway === 'creem') return sub.gateway;
+  if (
+    sub.gateway === 'stripe' ||
+    sub.gateway === 'creem' ||
+    sub.gateway === 'manual'
+  ) {
+    return sub.gateway;
+  }
   return sub.creemSubscriptionId || sub.creemCustomerId ? 'creem' : 'stripe';
 }
 
 // Human label for a provider key.
 function providerLabel(p) {
-  return p === 'creem' ? 'Creem' : 'Stripe';
+  if (p === 'creem') return 'Creem';
+  if (p === 'manual') return 'Manual';
+  return 'Stripe';
+}
+
+// A manual grant does not clear the old gateway ids, so a customer who paid by
+// card and later paid by hand still carries them. Surfacing that stops the row
+// looking like a data error and points at where the rest of the history lives.
+function priorGatewayLabel(sub) {
+  if (!sub || sub.gateway !== 'manual') return null;
+  if (sub.stripeSubscriptionId || sub.stripeCustomerId) return 'Stripe';
+  if (sub.creemSubscriptionId || sub.creemCustomerId) return 'Creem';
+  return null;
+}
+
+// "PayPal · amara@example.com" → "PayPal". The detail belongs in the invoice,
+// not in a table cell.
+function manualMethodLabel(sub) {
+  return sub?.manualPayment?.method || null;
 }
 
 function fmt(date) {
@@ -294,7 +323,7 @@ export default function SubscribersTableWrapper({ subscribers, revenue }) {
 
   const [search, setSearch] = useState('');
   const [statusFilter, setStatusFilter] = useState('all');
-  const [providerFilter, setProviderFilter] = useState('all'); // all | stripe | creem
+  const [providerFilter, setProviderFilter] = useState('all'); // all | stripe | creem | manual
   const [planFilter, setPlanFilter] = useState('all'); // all | planId
   const [cancelingOnly, setCancelingOnly] = useState(false); // cancels at period end
   const [page, setPage] = useState(1);
@@ -599,9 +628,13 @@ export default function SubscribersTableWrapper({ subscribers, revenue }) {
       pastDue: 0,
       expired: 0,
     };
+    // Every value subProvider() can return needs a bucket here — the loop below
+    // does prov[p].active++ with no guard, so a missing key is a crash, not a
+    // wrong number.
     const prov = {
       stripe: { active: 0, mrr: 0 },
       creem: { active: 0, mrr: 0 },
+      manual: { active: 0, mrr: 0 },
     };
     const planMap = new Map();
     let mrr = 0;
@@ -668,6 +701,7 @@ export default function SubscribersTableWrapper({ subscribers, revenue }) {
       provider: {
         stripe: { active: prov.stripe.active, mrr: round2(prov.stripe.mrr) },
         creem: { active: prov.creem.active, mrr: round2(prov.creem.mrr) },
+        manual: { active: prov.manual.active, mrr: round2(prov.manual.mrr) },
       },
       revenueByPlan,
     };
@@ -999,10 +1033,23 @@ export default function SubscribersTableWrapper({ subscribers, revenue }) {
 
       case 'provider': {
         const p = subProvider(sub);
+        const method = p === 'manual' ? manualMethodLabel(sub) : null;
+        const prior = priorGatewayLabel(sub);
         return (
-          <Chip size='sm' variant='flat' className='capitalize' color='default'>
-            {providerLabel(p)}
-          </Chip>
+          <div className='flex flex-col items-start gap-0.5'>
+            <Chip size='sm' variant='flat' className='capitalize' color='default'>
+              {providerLabel(p)}
+              {method ? ` · ${method}` : ''}
+            </Chip>
+            {prior && (
+              <span
+                className='text-[10px] text-gray-400'
+                title={`This customer previously paid through ${prior}. Their ${prior} history is still on the Invoices tab.`}
+              >
+                was {prior}
+              </span>
+            )}
+          </div>
         );
       }
 
@@ -1310,7 +1357,7 @@ export default function SubscribersTableWrapper({ subscribers, revenue }) {
               By Provider
             </p>
             <div className='grid grid-cols-1 sm:grid-cols-2 gap-3'>
-              {['stripe', 'creem']
+              {['stripe', 'creem', 'manual']
                 .filter((p) => providerFilter === 'all' || providerFilter === p)
                 .map((p) => {
                   const active = view.provider[p].active;
@@ -1445,6 +1492,7 @@ export default function SubscribersTableWrapper({ subscribers, revenue }) {
               <DropdownItem key='all'>All</DropdownItem>
               <DropdownItem key='stripe'>Stripe</DropdownItem>
               <DropdownItem key='creem'>Creem</DropdownItem>
+              <DropdownItem key='manual'>Manual</DropdownItem>
             </DropdownMenu>
           </Dropdown>
           {planOptions.length > 0 && (
@@ -1730,12 +1778,50 @@ export default function SubscribersTableWrapper({ subscribers, revenue }) {
                       <div className='grid grid-cols-1 sm:grid-cols-2 gap-4'>
                         <DetailRow
                           label='Payment Provider'
-                          value={providerLabel(subProvider(vs))}
+                          value={
+                            priorGatewayLabel(vs)
+                              ? `${providerLabel(subProvider(vs))} (was ${priorGatewayLabel(vs)})`
+                              : providerLabel(subProvider(vs))
+                          }
                         />
                         <DetailRow
                           label='Period End'
                           value={fmtDateTime(vs?.periodEndDate)}
                         />
+                        {/* Manual money has no gateway dashboard to look it up
+                            in — this ledger is the only record it exists. */}
+                        {vs?.manualPayment && (
+                          <>
+                            <DetailRow
+                              label='Payment Method'
+                              value={
+                                vs.manualPayment.methodDetail
+                                  ? `${vs.manualPayment.method} · ${vs.manualPayment.methodDetail}`
+                                  : vs.manualPayment.method
+                              }
+                            />
+                            <DetailRow
+                              label='Payment Reference'
+                              value={vs.manualPayment.reference || '—'}
+                            />
+                            <DetailRow
+                              label='Last Manual Payment'
+                              value={`$${vs.manualPayment.lastAmount?.toFixed(2)} on ${fmt(
+                                vs.manualPayment.receivedAt,
+                              )}`}
+                            />
+                            <DetailRow
+                              label='Manual Payments Total'
+                              value={`$${vs.manualPayment.totalPaid?.toFixed(2)} across ${
+                                vs.manualPayment.paymentCount
+                              } payment${vs.manualPayment.paymentCount === 1 ? '' : 's'}`}
+                            />
+                            <DetailRow
+                              label='Latest Invoice'
+                              value={vs.manualPayment.invoiceNumber || '—'}
+                            />
+                          </>
+                        )}
                         <DetailRow
                           label='Cancel at Period End'
                           value={vs?.cancelAtPeriodEnd ? 'Yes' : 'No'}
@@ -2255,9 +2341,13 @@ export default function SubscribersTableWrapper({ subscribers, revenue }) {
                 <div className='space-y-4'>
                   <div className='bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-700 rounded-lg p-3'>
                     <p className='text-xs text-red-700 dark:text-red-300 font-medium'>
-                      This action is synced with{' '}
-                      {providerLabel(subProvider(cancelUser?.subscription))}.
-                      The subscription will be cancelled for real.
+                      {subProvider(cancelUser?.subscription) === 'manual'
+                        ? // No gateway to sync with — cancelling manual access
+                          // just ends the paid-through date on our side.
+                          'This access was granted by hand, so there is no gateway to cancel. This ends their access here; if they have already paid for the period, refund them by the method you were paid by.'
+                        : `This action is synced with ${providerLabel(
+                            subProvider(cancelUser?.subscription),
+                          )}. The subscription will be cancelled for real.`}
                     </p>
                   </div>
 
@@ -2433,70 +2523,131 @@ export default function SubscribersTableWrapper({ subscribers, revenue }) {
         size='md'
       >
         <ModalContent>
-          {(onClose) => (
-            <>
-              <ModalHeader>
-                <div>
-                  <p className='font-bold'>Issue Refund</p>
-                  <p className='text-xs text-gray-400 font-normal mt-0.5'>
-                    {refundUser?.name} · {refundUser?.email}
-                  </p>
-                </div>
-              </ModalHeader>
-              <ModalBody>
-                <div className='space-y-4'>
-                  <div className='bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-700 rounded-lg p-3'>
-                    <p className='text-xs text-blue-700 dark:text-blue-300'>
-                      {subProvider(refundUser?.subscription) === 'creem'
-                        ? 'Refunds the most recent payment via Creem. Creem issues full refunds only — the entire payment is refunded.'
-                        : 'Refunds the most recent invoice payment via Stripe. Leave the amount empty for a full refund.'}
+          {(onClose) => {
+            // Manual access never touched a gateway, so there is no API to
+            // refund it. The backend rejects the attempt with a 422 — offering
+            // the controls anyway just produces a confusing failure.
+            const refundProvider = subProvider(refundUser?.subscription);
+            const isManualRefund = refundProvider === 'manual';
+            const manual = refundUser?.subscription?.manualPayment;
+
+            return (
+              <>
+                <ModalHeader>
+                  <div>
+                    <p className='font-bold'>
+                      {isManualRefund ? 'Refund a manual payment' : 'Issue Refund'}
+                    </p>
+                    <p className='text-xs text-gray-400 font-normal mt-0.5'>
+                      {refundUser?.name} · {refundUser?.email}
                     </p>
                   </div>
+                </ModalHeader>
+                <ModalBody>
+                  {isManualRefund ? (
+                    <div className='space-y-4'>
+                      <div className='bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg p-3'>
+                        <p className='text-xs text-gray-700 dark:text-gray-300'>
+                          This customer paid outside any gateway, so there is
+                          nothing here to refund automatically. Send the money
+                          back the same way you received it, then use{' '}
+                          <strong>Cancel</strong> to end their access.
+                        </p>
+                      </div>
 
-                  {/* Creem supports full refunds only, so the partial-amount
-                      field is Stripe-only (the backend rejects a Creem amount). */}
-                  {subProvider(refundUser?.subscription) !== 'creem' && (
-                    <Input
-                      type='number'
-                      label='Refund Amount (USD)'
-                      placeholder='Leave empty for full refund'
-                      value={refundAmount}
-                      onChange={(e) => setRefundAmount(e.target.value)}
-                      min='0'
-                      step='0.01'
-                      startContent={
-                        <span className='text-gray-400 text-sm'>$</span>
-                      }
-                      description='Partial refund amount in dollars (e.g. 4.99)'
-                    />
+                      {manual && (
+                        <div className='rounded-lg border border-gray-200 dark:border-gray-700 p-3 text-sm space-y-1'>
+                          <p className='text-xs font-semibold text-gray-400 uppercase tracking-wide'>
+                            How they paid
+                          </p>
+                          <p>
+                            <span className='text-gray-500'>Method:</span>{' '}
+                            <strong>
+                              {manual.method}
+                              {manual.methodDetail
+                                ? ` · ${manual.methodDetail}`
+                                : ''}
+                            </strong>
+                          </p>
+                          {manual.reference && (
+                            <p>
+                              <span className='text-gray-500'>Reference:</span>{' '}
+                              <span className='font-mono text-xs'>
+                                {manual.reference}
+                              </span>
+                            </p>
+                          )}
+                          <p>
+                            <span className='text-gray-500'>Last payment:</span>{' '}
+                            <strong>${manual.lastAmount?.toFixed(2)}</strong> on{' '}
+                            {fmt(manual.receivedAt)}
+                          </p>
+                          <p>
+                            <span className='text-gray-500'>Invoice:</span>{' '}
+                            <span className='font-mono text-xs'>
+                              {manual.invoiceNumber}
+                            </span>
+                          </p>
+                        </div>
+                      )}
+                    </div>
+                  ) : (
+                    <div className='space-y-4'>
+                      <div className='bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-700 rounded-lg p-3'>
+                        <p className='text-xs text-blue-700 dark:text-blue-300'>
+                          {refundProvider === 'creem'
+                            ? 'Refunds the most recent payment via Creem. Creem issues full refunds only — the entire payment is refunded.'
+                            : 'Refunds the most recent invoice payment via Stripe. Leave the amount empty for a full refund.'}
+                        </p>
+                      </div>
+
+                      {/* Creem supports full refunds only, so the partial-amount
+                          field is Stripe-only (the backend rejects a Creem amount). */}
+                      {refundProvider !== 'creem' && (
+                        <Input
+                          type='number'
+                          label='Refund Amount (USD)'
+                          placeholder='Leave empty for full refund'
+                          value={refundAmount}
+                          onChange={(e) => setRefundAmount(e.target.value)}
+                          min='0'
+                          step='0.01'
+                          startContent={
+                            <span className='text-gray-400 text-sm'>$</span>
+                          }
+                          description='Partial refund amount in dollars (e.g. 4.99)'
+                        />
+                      )}
+
+                      <Textarea
+                        label='Reason (optional)'
+                        placeholder='e.g. Duplicate charge, service issue, etc.'
+                        value={refundReason}
+                        onChange={(e) => setRefundReason(e.target.value)}
+                        minRows={2}
+                      />
+                    </div>
                   )}
-
-                  <Textarea
-                    label='Reason (optional)'
-                    placeholder='e.g. Duplicate charge, service issue, etc.'
-                    value={refundReason}
-                    onChange={(e) => setRefundReason(e.target.value)}
-                    minRows={2}
-                  />
-                </div>
-              </ModalBody>
-              <ModalFooter>
-                <Button variant='light' onPress={onClose}>
-                  Cancel
-                </Button>
-                <Button
-                  color='primary'
-                  isLoading={isRefunding}
-                  onPress={confirmRefund}
-                >
-                  {subProvider(refundUser?.subscription) !== 'creem' &&
-                  refundAmount
-                    ? `Refund $${refundAmount}`
-                    : 'Full Refund'}
-                </Button>
-              </ModalFooter>
-            </>
-          )}
+                </ModalBody>
+                <ModalFooter>
+                  <Button variant='light' onPress={onClose}>
+                    {isManualRefund ? 'Close' : 'Cancel'}
+                  </Button>
+                  {!isManualRefund && (
+                    <Button
+                      color='primary'
+                      isLoading={isRefunding}
+                      onPress={confirmRefund}
+                    >
+                      {refundProvider !== 'creem' && refundAmount
+                        ? `Refund $${refundAmount}`
+                        : 'Full Refund'}
+                    </Button>
+                  )}
+                </ModalFooter>
+              </>
+            );
+          }}
         </ModalContent>
       </Modal>
     </div>
