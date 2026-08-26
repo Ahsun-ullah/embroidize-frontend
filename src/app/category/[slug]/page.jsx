@@ -3,10 +3,14 @@ import ProductCard from '@/components/Common/ProductCard';
 import Footer from '@/components/user/HomePage/Footer';
 import { Header } from '@/components/user/HomePage/Header';
 import { BreadCrumb } from '@/features/products/components/BreadCrumb';
+import FilterLayout from '@/features/products/components/filters/FilterLayout';
 import {
-  getAllProductsByCategory,
-  getSingleCategory,
-} from '@/lib/apis/public/category';
+  hasGranularFilters,
+  readFilterParams,
+  toApiFilters,
+} from '@/features/products/components/filters/filterConfig';
+import { getSingleCategory } from '@/lib/apis/public/category';
+import { getProductFilters, getProducts } from '@/lib/apis/public/products';
 import {
   capitalize,
   preserveParagraphLineBreaks,
@@ -25,11 +29,16 @@ export async function generateMetadata({ params, searchParams }) {
     const page = parseInt(searchParams?.page) || 1;
     const canonicalUrl = page > 1 ? `${baseUrl}?page=${page}` : baseUrl;
 
+    // Sidebar-filtered views are near-duplicates of the category page, so they
+    // stay out of the index while still being crawlable through to products.
+    const isFiltered = hasGranularFilters(readFilterParams(searchParams));
+
     return {
       title: category?.meta_title || category?.name,
       description:
         category?.meta_description ||
         'Download high-quality embroidery machine designs for free.',
+      ...(isFiltered && { robots: { index: false, follow: true } }),
       alternates: {
         canonical: canonicalUrl,
       },
@@ -66,13 +75,23 @@ export default async function CategoryProducts({ params, searchParams }) {
   const currentPage = parseInt(searchParams?.page) || 1;
   const perPageData = parseInt(searchParams?.limit) || 20;
 
-  const { products: allProducts, totalPages } = await getAllProductsByCategory(
-    params?.slug,
-    currentPage,
-    perPageData,
-  );
+  // The category is fixed by the route, so it is locked into the API call and
+  // hidden from the sidebar — everything else (subcategory, tier, collection,
+  // date, sort) filters within it.
+  const filterState = readFilterParams(searchParams);
+  const apiFilters = toApiFilters({ ...filterState, category: [params?.slug] });
 
-  const singleCategoryData = await getSingleCategory(params?.slug);
+  const [productData, facets, singleCategoryData] = await Promise.all([
+    getProducts('', currentPage, perPageData, apiFilters),
+    getProductFilters('', apiFilters),
+    getSingleCategory(params?.slug),
+  ]);
+
+  const {
+    products: allProducts,
+    totalCount,
+    totalPages,
+  } = productData;
 
   if (params?.slug !== singleCategoryData?.data?.slug) {
     redirect(`/${singleCategoryData?.data?.slug}`);
@@ -123,28 +142,41 @@ export default async function CategoryProducts({ params, searchParams }) {
       <div className='flex flex-col justify-between'>
         <section className='text-black my-8 py-6 border-b-2'>
           <div className='container mx-auto px-4'>
-            {allProducts.length === 0 ? (
-              <p className='text-center text-gray-600'>
-                No products found in this category.
-              </p>
-            ) : (
-              <div className='grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6'>
-                {allProducts.map((item, index) => (
-                  // <ProductCard key={index} item={item} />
-                  <ProductCard key={item._id} item={item} index={index} />
-                ))}
-              </div>
-            )}
+            <FilterLayout
+              facets={facets}
+              total={totalCount}
+              locked={['category']}
+            >
+              {allProducts.length === 0 ? (
+                <div className='rounded-xl border border-gray-200 bg-white py-16 text-center'>
+                  <p className='text-lg font-semibold'>
+                    No designs match these filters
+                  </p>
+                  <p className='mt-2 text-sm text-gray-500'>
+                    Try removing a filter to see more of this category.
+                  </p>
+                  <Link
+                    href={`/category/${singleCategoryData?.data?.slug}`}
+                    prefetch={false}
+                    className='mt-6 inline-block rounded-full bg-black px-6 py-2.5 text-sm font-semibold text-white'
+                  >
+                    Clear all filters
+                  </Link>
+                </div>
+              ) : (
+                <>
+                  <div className='grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 xl:grid-cols-4 gap-6'>
+                    {allProducts.map((item, index) => (
+                      <ProductCard key={item._id} item={item} index={index} />
+                    ))}
+                  </div>
+                  <div className='flex items-center justify-center mt-6'>
+                    <Pagination perPageData={perPageData} totalPages={totalPages} />
+                  </div>
+                </>
+              )}
+            </FilterLayout>
           </div>
-
-          {allProducts.length > 0 && (
-            <div className='flex items-center justify-center mt-6'>
-              <Pagination
-                perPageData={perPageData}
-                totalPages={totalPages}
-              />
-            </div>
-          )}
         </section>
         <div className='container'>
           <div

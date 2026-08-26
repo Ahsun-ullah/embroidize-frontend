@@ -1,5 +1,9 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
+  // Lets a production build run into a scratch directory (NEXT_DIST_DIR=.next-verify)
+  // while `next dev` keeps ownership of .next — building over a running dev
+  // server's .next corrupts it and 500s every route.
+  distDir: process.env.NEXT_DIST_DIR || '.next',
   output: 'standalone',
   reactStrictMode: true,
   compress: true,

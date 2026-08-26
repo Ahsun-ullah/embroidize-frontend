@@ -97,9 +97,11 @@ const ProductCard = React.memo(function ProductCard({ item, index = 0 }) {
             />
           </div>
 
-          {/* SKU flag — just below the heart (admin only) */}
-          {isAdmin && item?.sku_code && (
-            <div className='absolute top-12 right-0 z-20'>
+          {/* SKU flag — just below the heart. Shown to everyone (including
+              logged-out visitors) so a customer can quote the code back to us
+              when reporting a problem with a specific design. */}
+          {item?.sku_code && (
+            <div className='absolute top-12 right-0 z-20 '>
               <div className='relative'>
                 <SkuFlag sku={item.sku_code} />
               </div>

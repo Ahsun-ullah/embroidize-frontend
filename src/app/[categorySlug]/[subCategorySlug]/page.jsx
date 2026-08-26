@@ -3,12 +3,17 @@ import ProductCard from '@/components/Common/ProductCard';
 import Footer from '@/components/user/HomePage/Footer';
 import { Header } from '@/components/user/HomePage/Header';
 import { BreadCrumb } from '@/features/products/components/BreadCrumb';
+import FilterLayout from '@/features/products/components/filters/FilterLayout';
 import {
-  getAllProductsBySubCategory,
-  getSingleSubCategory,
-} from '@/lib/apis/public/subcategory';
+  hasGranularFilters,
+  readFilterParams,
+  toApiFilters,
+} from '@/features/products/components/filters/filterConfig';
+import { getProductFilters, getProducts } from '@/lib/apis/public/products';
+import { getSingleSubCategory } from '@/lib/apis/public/subcategory';
 import { capitalize, preserveParagraphLineBreaks } from '@/utils/functions/page';
 import { marked } from 'marked';
+import Link from 'next/link';
 import { redirect } from 'next/navigation';
 
 export async function generateMetadata({ params, searchParams }) {
@@ -21,9 +26,14 @@ export async function generateMetadata({ params, searchParams }) {
     const page = parseInt(searchParams?.page) || 1;
     const canonicalUrl = page > 1 ? `${baseUrl}?page=${page}` : baseUrl;
 
+    // Sidebar-filtered views are near-duplicates of this page — crawlable
+    // through to the products, but kept out of the index themselves.
+    const isFiltered = hasGranularFilters(readFilterParams(searchParams));
+
     return {
       title: subcategory?.meta_title,
       description: subcategory?.meta_description,
+      ...(isFiltered && { robots: { index: false, follow: true } }),
       alternates: {
         canonical: canonicalUrl,
       },
@@ -61,13 +71,22 @@ export default async function SubCategoryProducts({ params, searchParams }) {
   const currentPage = parseInt(searchParams?.page) || 1;
   const perPageData = parseInt(searchParams?.limit) || 20;
 
-  const { products, totalPages } = await getAllProductsBySubCategory(
-    subCategorySlug,
-    currentPage,
-    perPageData,
-  );
+  // Both category and subcategory are fixed by the route, so both groups are
+  // locked out of the sidebar; tier, collection, date and sort still apply.
+  const filterState = readFilterParams(searchParams);
+  const apiFilters = toApiFilters({
+    ...filterState,
+    category: [categorySlug],
+    sub_category: [subCategorySlug],
+  });
 
-  const subCategoryData = await getSingleSubCategory(subCategorySlug);
+  const [productData, facets, subCategoryData] = await Promise.all([
+    getProducts('', currentPage, perPageData, apiFilters),
+    getProductFilters('', apiFilters),
+    getSingleSubCategory(subCategorySlug),
+  ]);
+
+  const { products, totalCount, totalPages } = productData;
   const subCategory = subCategoryData?.data;
 
   if (
@@ -112,27 +131,38 @@ export default async function SubCategoryProducts({ params, searchParams }) {
           ]}
         />
 
-        <div className='grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6'>
+        <FilterLayout
+          facets={facets}
+          total={totalCount}
+          locked={['category', 'sub_category']}
+        >
           {products.length === 0 ? (
-            <p className='text-center text-gray-600'>
-              No products found in this category.
-            </p>
+            <div className='rounded-xl border border-gray-200 bg-white py-16 text-center'>
+              <p className='text-lg font-semibold'>No designs match these filters</p>
+              <p className='mt-2 text-sm text-gray-500'>
+                Try removing a filter to see more of this subcategory.
+              </p>
+              <Link
+                href={`/${categorySlug}/${subCategorySlug}`}
+                prefetch={false}
+                className='mt-6 inline-block rounded-full bg-black px-6 py-2.5 text-sm font-semibold text-white'
+              >
+                Clear all filters
+              </Link>
+            </div>
           ) : (
-            products.map((item, index) => (
-              // <ProductCard key={index} item={item} />
-              <ProductCard key={item._id} item={item} index={index} />
-            ))
+            <>
+              <div className='grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 xl:grid-cols-4 gap-6'>
+                {products.map((item, index) => (
+                  <ProductCard key={item._id} item={item} index={index} />
+                ))}
+              </div>
+              <div className='flex items-center justify-center mt-6'>
+                <Pagination perPageData={perPageData} totalPages={totalPages} />
+              </div>
+            </>
           )}
-        </div>
-
-        {products.length > 0 && (
-          <div className='flex items-center justify-center mt-6'>
-            <Pagination
-              perPageData={perPageData}
-              totalPages={totalPages}
-            />
-          </div>
-        )}
+        </FilterLayout>
       </div>
 
       <div className='container'>

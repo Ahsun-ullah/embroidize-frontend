@@ -11,6 +11,7 @@ import {
 import { filenameFromContentDisposition } from '@/utils/functions/page';
 import { Tab, Tabs } from '@heroui/react';
 import Cookies from 'js-cookie';
+import Image from 'next/image';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { useEffect, useMemo, useState } from 'react';
@@ -31,6 +32,9 @@ export default function UserDetailsComponent({
   const [activeTab, setActiveTab] = useState(defaultTab);
   const [isPlanNavigating, setIsPlanNavigating] = useState(false);
   const [loadingId, setLoadingId] = useState(null);
+  // Set when a re-download finds the customer's original format no longer
+  // exists, so they can pick a replacement instead of hitting a dead end.
+  const [formatChoice, setFormatChoice] = useState(null);
 
   const [search, setSearch] = useState(defaultSearch || '');
   const [filterType, setFilterType] = useState(
@@ -56,17 +60,41 @@ export default function UserDetailsComponent({
   }, [search, filterType]);
 
   // ✅ Fixed: loadingId now uses downloadId (_id) not product._id
-  const handleSingleZipFileDownload = async ({ id, extension, downloadId }) => {
+  // `substitute` is only sent after the server reports the original format is
+  // gone — it swaps in a format that still exists, still free and quota-exempt.
+  const handleSingleZipFileDownload = async ({
+    id,
+    extension,
+    downloadId,
+    substitute,
+  }) => {
     const token = Cookies.get('token');
     const headers = new Headers();
     if (token) headers.set('Authorization', `Bearer ${token}`);
 
     try {
       setLoadingId(downloadId); // ✅ unique per row
-      const res = await fetch(
-        `${process.env.NEXT_PUBLIC_BASE_API_URL_PROD}/redownload/product/${id}/extension/${extension}`,
-        { method: 'GET', headers },
-      );
+      const endpoint =
+        `${process.env.NEXT_PUBLIC_BASE_API_URL_PROD}/redownload/product/${id}/extension/${extension}` +
+        (substitute ? `?substitute=${encodeURIComponent(substitute)}` : '');
+      const res = await fetch(endpoint, { method: 'GET', headers });
+
+      // The format they own was dropped by a corrected upload. Offer the
+      // formats that do exist rather than failing with a bare error.
+      if (res.status === 409) {
+        const body = await res.json().catch(() => null);
+        if (body?.error?.code === 'format_discontinued') {
+          setFormatChoice({
+            downloadId,
+            productId: id,
+            fileType: extension,
+            availableFormats: body?.error?.availableFormats || [],
+          });
+          setLoadingId(null);
+          return;
+        }
+      }
+
       if (!res.ok) throw new Error(`Download failed with status ${res.status}`);
 
       const blob = await res.blob();
@@ -95,7 +123,10 @@ export default function UserDetailsComponent({
     }
   };
 
-  const allDownloads = downloadHistory?.data ?? [];
+  const allDownloads = useMemo(
+    () => downloadHistory?.data ?? [],
+    [downloadHistory?.data],
+  );
 
   const fileTypes = useMemo(() => {
     const types = [
@@ -241,26 +272,46 @@ export default function UserDetailsComponent({
             {/* Rows */}
             <div className='space-y-2'>
               {paginated.map((design) => {
-                const { _id, downloadedAt, fileType, product } = design;
+                const { _id, downloadedAt, fileType, product, isStale } =
+                  design;
                 const imageUrl = product?.image?.url ?? '/fallback-image.png';
 
-                // ✅ Fixed: check against _id (unique per row) not product._id
+                // ✅ Fixed: check against _id (unique row) not product._id
                 const isDownloading = loadingId === _id;
 
                 return (
                   <div
                     key={_id}
-                    className='bg-white border border-gray-100 rounded-2xl px-4 py-4 hover:border-violet-200 hover:shadow-sm transition-all duration-200'
+                    // Outdated copies get a visible edge: this row is the only
+                    // place a customer who already downloaded a since-corrected
+                    // file will ever find out about it.
+                    className={`rounded-2xl px-4 py-4 transition-all duration-200 hover:shadow-sm ${
+                      isStale
+                        ? 'border-2 border-gray-900 bg-white'
+                        : 'border border-gray-100 bg-white hover:border-violet-200'
+                    }`}
                   >
+                    {isStale && (
+                      <div className='mb-3 flex items-start gap-2 rounded-xl bg-gray-900 px-3 py-2 text-white'>
+                        <i className='ri-refresh-line mt-0.5 text-sm' />
+                        <p className='text-xs font-medium leading-relaxed text-white'>
+                          We updated this design after you downloaded it.
+                          Download it again to get the corrected file — free,
+                          and it won&apos;t use your limit.
+                        </p>
+                      </div>
+                    )}
                     {/* Desktop */}
                     <div className='hidden md:grid grid-cols-12 gap-4 items-center'>
                       <Link
                         href={`/product/${product?.slug}`}
                         className='col-span-1'
                       >
-                        <img
+                        <Image
                           src={imageUrl}
                           alt={product?.name}
+                          width={40}
+                          height={40}
                           className='w-10 h-10 object-cover rounded-lg border border-gray-100'
                         />
                       </Link>
@@ -304,8 +355,10 @@ export default function UserDetailsComponent({
                             disabled={!!loadingId}
                             className='flex items-center gap-1.5 bg-gray-900 hover:bg-violet-600 disabled:bg-gray-200 disabled:text-gray-400 text-white text-xs font-semibold px-3 py-2 rounded-xl transition-all duration-200'
                           >
-                            <i className='ri-download-line text-sm' />
-                            Download
+                            <i
+                              className={`text-sm ${isStale ? 'ri-refresh-line' : 'ri-download-line'}`}
+                            />
+                            {isStale ? 'Get update' : 'Download'}
                           </button>
                         )}
                       </div>
@@ -313,9 +366,11 @@ export default function UserDetailsComponent({
 
                     {/* Mobile */}
                     <div className='flex md:hidden gap-3 items-start'>
-                      <img
+                      <Image
                         src={imageUrl}
                         alt={product?.name}
+                        width={56}
+                        height={56}
                         className='w-14 h-14 object-cover rounded-xl border border-gray-100 flex-shrink-0'
                       />
                       <div className='flex-1 min-w-0'>
@@ -344,9 +399,14 @@ export default function UserDetailsComponent({
                               })
                             }
                             disabled={!!loadingId}
+                            aria-label={
+                              isStale ? 'Get updated file' : 'Download'
+                            }
                             className='w-9 h-9 flex items-center justify-center bg-gray-900 hover:bg-violet-600 disabled:bg-gray-200 text-white rounded-xl transition-all duration-200'
                           >
-                            <i className='ri-download-line text-sm' />
+                            <i
+                              className={`text-sm ${isStale ? 'ri-refresh-line' : 'ri-download-line'}`}
+                            />
                           </button>
                         )}
                       </div>
@@ -424,7 +484,6 @@ export default function UserDetailsComponent({
       </div>
     );
   }, [
-    downloadHistory,
     loadingId,
     search,
     filterType,
@@ -432,6 +491,8 @@ export default function UserDetailsComponent({
     filtered,
     paginated,
     totalPages,
+    fileTypes,
+    isDownloadLoading,
   ]);
 
   return (
@@ -584,6 +645,67 @@ export default function UserDetailsComponent({
           </div>
         )}
       </div>
+
+      {/* Their original format was dropped by a corrected upload. Rather than a
+          dead-end error, offer the formats that exist now — still free and
+          quota-exempt, since losing that format wasn't their doing. */}
+      {formatChoice && (
+        <div
+          className='fixed inset-0 z-50 flex items-center justify-center bg-black/60 p-4 backdrop-blur-sm'
+          onClick={() => setFormatChoice(null)}
+        >
+          <div
+            role='dialog'
+            aria-modal='true'
+            aria-labelledby='format-gone-title'
+            onClick={(e) => e.stopPropagation()}
+            className='w-full max-w-md rounded-3xl bg-white p-7 shadow-2xl'
+          >
+            <h2
+              id='format-gone-title'
+              className='text-center text-xl font-bold text-neutral-900'
+            >
+              That format is no longer available
+            </h2>
+            <p className='mt-2 text-center text-sm leading-relaxed text-neutral-500'>
+              This design no longer ships a{' '}
+              <span className='font-semibold uppercase text-neutral-800'>
+                {formatChoice.fileType}
+              </span>{' '}
+              file. Pick another format below — it&apos;s free and won&apos;t
+              use any of your download limit.
+            </p>
+
+            <div className='mt-6 flex flex-wrap justify-center gap-2'>
+              {formatChoice.availableFormats.map((fmt) => (
+                <button
+                  key={fmt}
+                  onClick={() => {
+                    const choice = formatChoice;
+                    setFormatChoice(null);
+                    handleSingleZipFileDownload({
+                      id: choice.productId,
+                      extension: choice.fileType,
+                      downloadId: choice.downloadId,
+                      substitute: fmt,
+                    });
+                  }}
+                  className='rounded-xl border border-gray-300 px-4 py-2 text-sm font-bold uppercase text-gray-900 transition hover:border-black hover:bg-black hover:text-white'
+                >
+                  {fmt}
+                </button>
+              ))}
+            </div>
+
+            <button
+              onClick={() => setFormatChoice(null)}
+              className='mt-6 w-full rounded-xl py-2.5 text-sm font-semibold text-gray-600 transition hover:bg-gray-50'
+            >
+              Cancel
+            </button>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

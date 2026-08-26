@@ -2,12 +2,13 @@ import Pagination from '@/components/Common/Pagination';
 import ProductCard from '@/components/Common/ProductCard';
 import Footer from '@/components/user/HomePage/Footer';
 import Header from '@/components/user/HomePage/Header';
+import FilterLayout from '@/features/products/components/filters/FilterLayout';
 import {
-  getAdminChoiceProducts,
-  getMostFavoritedProducts,
-  getPopularProducts,
-  getProducts,
-} from '@/lib/apis/public/products';
+  hasGranularFilters,
+  readFilterParams,
+  toApiFilters,
+} from '@/features/products/components/filters/filterConfig';
+import { getProductFilters, getProducts } from '@/lib/apis/public/products';
 import Link from 'next/link';
 import ProductUpdates from './ProductUpdates';
 
@@ -59,9 +60,16 @@ export async function generateMetadata({ searchParams }) {
         ? '/products?filter=most-favourited'
         : '/products';
 
+  // Faceted URLs are combinatorial — thousands of category×tier×sort permutations
+  // would otherwise land in the index as near-duplicates of each other. The four
+  // tab views stay indexable exactly as before; anything the sidebar produces is
+  // noindex,follow so crawlers still walk through to the products themselves.
+  const isFiltered = hasGranularFilters(readFilterParams(searchParams));
+
   return {
     title: pickTitle,
     description: pickDescription,
+    ...(isFiltered && { robots: { index: false, follow: true } }),
     alternates: { canonical: `https://embroidize.com${canonicalPath}` },
     openGraph: {
       title: pickTitle,
@@ -95,19 +103,18 @@ export default async function AllProductsPage({ searchParams }) {
   const isAdminChoice = filter === 'embroidize-choice';
   const isMostFavourited = filter === 'most-favourited';
 
-  const productData = isPopular
-    ? await getPopularProducts('', currentPage, perPageData)
-    : isAdminChoice
-      ? await getAdminChoiceProducts('', currentPage, perPageData)
-      : isMostFavourited
-        ? await getMostFavoritedProducts('', currentPage, perPageData)
-        : await getProducts('', currentPage, perPageData);
+  // The tab views are no longer separate endpoints — they expand into the same
+  // filter vocabulary the sidebar writes, so "Embroidize Choice" and "Free" can
+  // finally be combined instead of being mutually exclusive pages.
+  const filterState = readFilterParams(searchParams);
+  const apiFilters = toApiFilters(filterState);
 
-  const { products, totalCount, totalPages } = {
-    ...productData,
-    totalCount: productData.totalCount,
-    totalPages: productData.totalPages,
-  };
+  const [productData, facets] = await Promise.all([
+    getProducts('', currentPage, perPageData, apiFilters),
+    getProductFilters('', apiFilters),
+  ]);
+
+  const { products, totalCount, totalPages } = productData;
 
   return (
     <div className='bg-[#f4f4f4]'>
@@ -167,23 +174,36 @@ export default async function AllProductsPage({ searchParams }) {
                 Embroidize Choice
               </Link>
             </div>
-
-            {/* Result Count: Stays full width on mobile, auto width on desktop */}
-            <div className='w-full md:w-auto px-4 py-2 border rounded bg-slate-50 text-sm text-center md:text-left text-gray-600 font-medium'>
-              {totalCount} Results Found
-            </div>
           </div>
 
-          <div className='grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6'>
-            {products.map((item, index) => (
-              // <ProductCard key={item._id} item={item} />
-              <ProductCard key={item._id} item={item} index={index} />
-            ))}
-          </div>
-          {/* Pagination Component */}
-          <div className='flex items-center justify-center mt-8'>
-            <Pagination totalPages={totalPages} perPageData={perPageData} />
-          </div>
+          <FilterLayout facets={facets} total={totalCount}>
+            {products.length > 0 ? (
+              <>
+                <div className='grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 xl:grid-cols-4 gap-6'>
+                  {products.map((item, index) => (
+                    <ProductCard key={item._id} item={item} index={index} />
+                  ))}
+                </div>
+                <div className='flex items-center justify-center mt-8'>
+                  <Pagination totalPages={totalPages} perPageData={perPageData} />
+                </div>
+              </>
+            ) : (
+              <div className='rounded-xl border border-gray-200 bg-white py-16 text-center'>
+                <p className='text-lg font-semibold'>No designs match these filters</p>
+                <p className='mt-2 text-sm text-gray-500'>
+                  Try removing a filter, or clear them all to see the full catalogue.
+                </p>
+                <Link
+                  href='/products'
+                  prefetch={false}
+                  className='mt-6 inline-block rounded-full bg-black px-6 py-2.5 text-sm font-semibold text-white'
+                >
+                  Clear all filters
+                </Link>
+              </div>
+            )}
+          </FilterLayout>
         </section>
       </div>
       <Footer />

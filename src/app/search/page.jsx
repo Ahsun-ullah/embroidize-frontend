@@ -3,7 +3,12 @@ import ProductCard from '@/components/Common/ProductCard';
 import Footer from '@/components/user/HomePage/Footer';
 import Header from '@/components/user/HomePage/Header';
 import { BreadCrumb } from '@/features/products/components/BreadCrumb';
-import { getProducts } from '@/lib/apis/public/products';
+import FilterLayout from '@/features/products/components/filters/FilterLayout';
+import {
+  readFilterParams,
+  toApiFilters,
+} from '@/features/products/components/filters/filterConfig';
+import { getProductFilters, getProducts } from '@/lib/apis/public/products';
 import { capitalize } from '@/utils/functions/page';
 import Link from 'next/link';
 
@@ -13,7 +18,7 @@ export async function generateMetadata({ searchParams }) {
   const searchQuery = params.searchQuery || '';
   try {
     return {
-      title: `${searchQuery} - Embroidize`,
+      title: `${searchQuery}`,
       description: `Browse the latest ${searchQuery} designs—perfect for your next sewing project. Each file is tested for machine embroidery design compatibility and comes in DST, PES, EXP, HUS, VP3, JEF, XXX, and CND formats.`,
       robots: 'noindex, follow',
       alternates: {
@@ -21,20 +26,20 @@ export async function generateMetadata({ searchParams }) {
       },
 
       openGraph: {
-        title: `${searchQuery} - Embroidize`,
+        title: `${searchQuery}`,
         description: `Browse the latest ${searchQuery} designs—perfect for your next sewing project. Each file is tested for machine embroidery design compatibility and comes in DST, PES, EXP, HUS, VP3, JEF, XXX, and CND formats.`,
         images: [
           {
             url: 'https://embroidize.com/og-banner.jpg',
             width: 1200,
             height: 630,
-            alt: `${searchQuery} - Embroidize`,
+            alt: `${searchQuery}`,
           },
         ],
       },
       twitter: {
         card: 'summary_large_image',
-        title: `${searchQuery} - Embroidize`,
+        title: `${searchQuery}`,
         description: `Browse the latest ${searchQuery} designs—perfect for your next sewing project. Each file is tested for machine embroidery design compatibility and comes in DST, PES, EXP, HUS, VP3, JEF, XXX, and CND formats.`,
         images: ['https://embroidize.com/home-banner.jpg'],
       },
@@ -51,11 +56,18 @@ export default async function SearchPage({ searchParams }) {
   const currentPage = parseInt(params?.page) || 1;
   const perPageData = parseInt(params?.limit) || 20;
 
-  const { products, totalCount, totalPages } = await getProducts(
-    searchQuery,
-    currentPage || 0,
-    perPageData,
-  );
+  // Filters narrow the search results rather than replacing them, so the
+  // relevance ranking (and the exact title/serial/SKU pin) still applies
+  // inside whatever category or tier is selected.
+  const filterState = readFilterParams(params);
+  const apiFilters = toApiFilters(filterState);
+
+  const [productData, facets] = await Promise.all([
+    getProducts(searchQuery, currentPage || 0, perPageData, apiFilters),
+    getProductFilters(searchQuery, apiFilters),
+  ]);
+
+  const { products, totalCount, totalPages } = productData;
 
   return (
     <div className='bg-[#fafafa]'>
@@ -85,9 +97,9 @@ export default async function SearchPage({ searchParams }) {
 
         <div className=' flex flex-col justify-between'>
           <section className='text-black my-8 border-b-2'>
-            <div>
+            <FilterLayout facets={facets} total={totalCount}>
               {products?.length > 0 ? (
-                <div className='grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6'>
+                <div className='grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 xl:grid-cols-4 gap-6'>
                   {products.map((item, index) => (
                     <ProductCard key={item._id} item={item} index={index} />
                   ))}
@@ -99,7 +111,8 @@ export default async function SearchPage({ searchParams }) {
                   </p>
                   <p className='mt-2 text-sm text-gray-500'>
                     Try a shorter or more general term — small typos are okay,
-                    we handle those automatically.
+                    we handle those automatically. If you have filters on, try
+                    clearing them too.
                   </p>
                   <Link
                     href='/products'
@@ -109,16 +122,16 @@ export default async function SearchPage({ searchParams }) {
                   </Link>
                 </div>
               )}
-            </div>
-            {totalPages > 1 && (
-              <div className='flex items-center justify-center my-6'>
-                <Pagination
-                  currentPage={currentPage}
-                  perPageData={perPageData}
-                  totalPages={totalPages}
-                />
-              </div>
-            )}
+              {totalPages > 1 && (
+                <div className='flex items-center justify-center my-6'>
+                  <Pagination
+                    currentPage={currentPage}
+                    perPageData={perPageData}
+                    totalPages={totalPages}
+                  />
+                </div>
+              )}
+            </FilterLayout>
           </section>
         </div>
       </div>

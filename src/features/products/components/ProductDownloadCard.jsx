@@ -20,7 +20,7 @@ import {
   ModalHeader,
 } from '@heroui/react';
 import Cookies from 'js-cookie';
-import { Check, Download } from 'lucide-react';
+import { Check, Download, RefreshCw } from 'lucide-react';
 import { usePathname, useRouter } from 'next/navigation';
 import { useEffect, useState } from 'react';
 
@@ -217,6 +217,12 @@ export default function ProductDownloadCard({ data }) {
             setAlreadyOwned({
               productName: errorJson?.error?.productName || data?.name || '',
               fileType: errorJson?.error?.fileType || fileData.extension,
+              // The design's files were replaced after this user took them, so
+              // the copy on their machine is the superseded one. Same free
+              // re-download, but the message has to say so — "you already have
+              // this" tells someone holding a broken file not to bother.
+              stale: errorJson?.error?.stale === true,
+              filesUpdatedAt: errorJson?.error?.filesUpdatedAt || null,
             });
             setShowFormatSheet(false);
             setIsLoading(false);
@@ -319,9 +325,9 @@ export default function ProductDownloadCard({ data }) {
   return (
     <>
       <div className='relative flex flex-col p-8 overflow-hidden gap-4 border rounded-3xl bg-white'>
-        {data?.sku_code && userInfoData?.role === 'admin' && (
-          <SkuFlag sku={data.sku_code} />
-        )}
+        {/* Shown to everyone, not just admins — customers quote this code to
+            support when reporting an issue with a design. */}
+        {data?.sku_code && <SkuFlag sku={data.sku_code} />}
 
         <div className='flex items-start justify-between gap-3'>
           <h1 className='text-black font-bold text-2xl'>{data?.name}</h1>
@@ -578,35 +584,62 @@ export default function ProductDownloadCard({ data }) {
             className='w-full max-w-md rounded-3xl bg-white p-7 shadow-2xl dark:bg-neutral-900'
           >
             <div className='mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded-full bg-gray-100 text-gray-700 dark:bg-neutral-800 dark:text-neutral-200'>
-              <Check className='h-7 w-7' strokeWidth={2.5} aria-hidden />
+              {alreadyOwned.stale ? (
+                <RefreshCw className='h-7 w-7' strokeWidth={2.5} aria-hidden />
+              ) : (
+                <Check className='h-7 w-7' strokeWidth={2.5} aria-hidden />
+              )}
             </div>
 
             <h2
               id='already-owned-title'
               className='text-center text-xl font-bold text-neutral-900 dark:text-white'
             >
-              You already have this design
+              {alreadyOwned.stale
+                ? 'This design has been updated'
+                : 'You already have this design'}
             </h2>
 
-            <p className='mx-auto mt-2 text-center text-sm leading-relaxed text-neutral-500 dark:text-neutral-400'>
-              You downloaded{' '}
-              <span className='font-semibold text-neutral-800 dark:text-neutral-200'>
-                {alreadyOwned.productName || 'this design'}
-              </span>{' '}
-              in{' '}
-              <span className='font-semibold uppercase text-neutral-800 dark:text-neutral-200'>
-                {alreadyOwned.fileType}
-              </span>{' '}
-              before. Get it again from your downloads — it&apos;s free and
-              won&apos;t use any of your download limit.
-            </p>
+            {alreadyOwned.stale ? (
+              <p className='mx-auto mt-2 text-center text-sm leading-relaxed text-neutral-500 dark:text-neutral-400'>
+                We updated the files for{' '}
+                <span className='font-semibold text-neutral-800 dark:text-neutral-200'>
+                  {alreadyOwned.productName || 'this design'}
+                </span>{' '}
+                after you downloaded it
+                {alreadyOwned.filesUpdatedAt
+                  ? ` on ${new Date(alreadyOwned.filesUpdatedAt).toLocaleDateString()}`
+                  : ''}
+                , so the copy you have is out of date. Get the corrected{' '}
+                <span className='font-semibold uppercase text-neutral-800 dark:text-neutral-200'>
+                  {alreadyOwned.fileType}
+                </span>{' '}
+                file from your downloads — it&apos;s free and won&apos;t use any
+                of your download limit.
+              </p>
+            ) : (
+              <p className='mx-auto mt-2 text-center text-sm leading-relaxed text-neutral-500 dark:text-neutral-400'>
+                You downloaded{' '}
+                <span className='font-semibold text-neutral-800 dark:text-neutral-200'>
+                  {alreadyOwned.productName || 'this design'}
+                </span>{' '}
+                in{' '}
+                <span className='font-semibold uppercase text-neutral-800 dark:text-neutral-200'>
+                  {alreadyOwned.fileType}
+                </span>{' '}
+                before. Get it again from your downloads — it&apos;s free and
+                won&apos;t use any of your download limit.
+              </p>
+            )}
 
             <Button
               onPress={goToMyDownloads}
               isLoading={isGoingToDownloads}
               className='mt-6 h-12 w-full rounded-xl bg-black text-base font-semibold text-white'
             >
-              Go to my downloads
+              {alreadyOwned.stale
+                ? 'Get the updated file'
+                : 'Go to my downloads'}
             </Button>
 
             <button

@@ -22,11 +22,20 @@ async function getJSON(url) {
   return res.json();
 }
 
-export async function getProducts(searchQuery, currentPage, perPageData) {
+// `filters` carries the sidebar state (category, sub_category, tier, curated,
+// favourited, since, sort). It is optional, so existing callers that only
+// paginate keep working unchanged.
+export async function getProducts(
+  searchQuery,
+  currentPage,
+  perPageData,
+  filters = {},
+) {
   const url = buildURL('/public/product', {
     search: searchQuery || undefined,
     page: currentPage || 1,
     limit: perPageData || 8,
+    ...filters,
   });
 
   const result = await getJSON(url);
@@ -40,6 +49,23 @@ export async function getProducts(searchQuery, currentPage, perPageData) {
     page: meta.page ?? 1,
     totalPages: meta.totalPages ?? 1,
   };
+}
+
+// Option counts for the filter sidebar, computed against the same filter state
+// as the grid so the numbers match what a click actually returns. Never throws:
+// the page must still render if this call fails, just without counts.
+export async function getProductFilters(searchQuery, filters = {}) {
+  try {
+    const url = buildURL('/public/product/filters', {
+      search: searchQuery || undefined,
+      ...filters,
+    });
+    const result = await getJSON(url);
+    return result?.data ?? null;
+  } catch (error) {
+    console.error('Error fetching product filters:', error);
+    return null;
+  }
 }
 
 export async function getAllProductsForDashboard(
