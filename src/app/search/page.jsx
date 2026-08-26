@@ -72,16 +72,10 @@ export default async function SearchPage({ searchParams }) {
   return (
     <div className='bg-[#fafafa]'>
       <Header />
-      <div className='container py-8'>
-        <h1 className='text-2xl font-bold mb-1'>
+      <div className='container pt-4 pb-8'>
+        <h1 className='text-2xl font-bold'>
           Search Results: <span className='font-medium'>{searchQuery}</span>
         </h1>
-        {totalCount > 0 && (
-          <p className='mb-4 text-sm text-gray-500'>
-            {totalCount.toLocaleString()} design{totalCount === 1 ? '' : 's'}{' '}
-            found
-          </p>
-        )}
 
         <div className='font-medium'>
           <BreadCrumb
@@ -96,10 +90,10 @@ export default async function SearchPage({ searchParams }) {
         </div>
 
         <div className=' flex flex-col justify-between'>
-          <section className='text-black my-8 border-b-2'>
+          <section className='text-black border-b-2'>
             <FilterLayout facets={facets} total={totalCount}>
               {products?.length > 0 ? (
-                <div className='grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 xl:grid-cols-4 gap-6'>
+                <div className='grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6'>
                   {products.map((item, index) => (
                     <ProductCard key={item._id} item={item} index={index} />
                   ))}

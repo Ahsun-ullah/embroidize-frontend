@@ -122,11 +122,11 @@ export default async function AllProductsPage({ searchParams }) {
       {/* listens for new-product events and re-runs this SSR page */}
       <ProductUpdates />
       <div className='container flex flex-col justify-between'>
-        <h1 className='text-3xl font-bold my-6 text-gray-900'>
+        <h1 className='text-2xl font-bold my-4 text-gray-900'>
           Browse All Digital Embroidery Designs from Embroidize
         </h1>
-        <section className='text-black mb-8 py-6'>
-          <div className='flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-8'>
+        <section className='text-black mb-8'>
+          <div className='flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-4 '>
             {/* Filter Buttons Container: Scrolls on mobile, wraps on tablet, flex on desktop */}
             <div className='flex items-center gap-2 overflow-x-auto pb-2 md:pb-0 w-full md:w-auto no-scrollbar'>
               <Link
@@ -179,7 +179,7 @@ export default async function AllProductsPage({ searchParams }) {
           <FilterLayout facets={facets} total={totalCount}>
             {products.length > 0 ? (
               <>
-                <div className='grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 xl:grid-cols-4 gap-6'>
+                <div className='grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6'>
                   {products.map((item, index) => (
                     <ProductCard key={item._id} item={item} index={index} />
                   ))}

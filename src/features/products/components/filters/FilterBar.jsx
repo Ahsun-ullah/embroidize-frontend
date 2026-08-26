@@ -3,6 +3,7 @@
 import { ChevronDown, X } from 'lucide-react';
 import { usePathname, useRouter, useSearchParams } from 'next/navigation';
 import { useCallback, useMemo, useTransition } from 'react';
+import ProductFilters from './ProductFilters';
 import {
   SINCE_OPTIONS,
   SORT_OPTIONS,
@@ -108,13 +109,18 @@ export default function FilterBar({ facets, total, locked = [] }) {
 
   return (
     <div className={isPending ? 'opacity-60 transition-opacity' : ''}>
-      <div className='flex flex-col gap-3 rounded-xl border border-gray-200 bg-white px-4 py-3 sm:flex-row sm:items-center sm:justify-between'>
-        <p className='text-sm text-gray-600'>
-          <span className='font-semibold text-gray-900'>
-            {(total ?? 0).toLocaleString()}
-          </span>{' '}
-          design{total === 1 ? '' : 's'}
-        </p>
+      <div className='flex flex-wrap items-center justify-between gap-3 rounded-xl border border-gray-200 bg-white px-4 py-3'>
+        <div className='flex items-center gap-3'>
+          {/* Opens the slide-over. Lives here rather than in a rail so the
+              product grid keeps the full width of the page. */}
+          <ProductFilters facets={facets} locked={locked} />
+          <p className='text-sm text-gray-600'>
+            <span className='font-semibold text-gray-900'>
+              {(total ?? 0).toLocaleString()}
+            </span>{' '}
+            design{total === 1 ? '' : 's'}
+          </p>
+        </div>
 
         <label className='relative flex items-center gap-2 text-sm'>
           <span className='shrink-0 text-gray-500'>Sort</span>

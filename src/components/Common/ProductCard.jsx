@@ -64,12 +64,17 @@ const ProductCard = React.memo(function ProductCard({ item, index = 0 }) {
             className='block group h-full w-full'
             aria-label={`View details for ${productName}`}
           >
+            {/* `sizes` must track the grid: 1 / 2 / 3 / 4 columns. A stale
+                value makes Next download a file narrower than the slot and the
+                design renders soft — the opposite of what a customer judging
+                stitch detail needs. The last entry is a px width because the
+                container is capped at 1320px, so 25vw would overshoot. */}
             <Image
               src={imageUrl}
               alt={productName}
               fill
               quality={78}
-              sizes='(max-width:640px) 100vw, (max-width:1024px) 50vw, 33vw'
+              sizes='(max-width: 639px) 100vw, (max-width: 1023px) 50vw, (max-width: 1279px) 33vw, 340px'
               className='object-cover object-center transition-transform duration-300 group-hover:scale-105'
               priority={isLCP}
               fetchPriority={isLCP ? 'high' : 'auto'}
@@ -97,16 +102,8 @@ const ProductCard = React.memo(function ProductCard({ item, index = 0 }) {
             />
           </div>
 
-          {/* SKU flag — just below the heart. Shown to everyone (including
-              logged-out visitors) so a customer can quote the code back to us
-              when reporting a problem with a specific design. */}
-          {item?.sku_code && (
-            <div className='absolute top-12 right-0 z-20 '>
-              <div className='relative'>
-                <SkuFlag sku={item.sku_code} />
-              </div>
-            </div>
-          )}
+          {/* The SKU used to be a ribbon here, overlaying the artwork. It is
+              now rendered under the title instead — see the note in SkuFlag. */}
         </div>
 
         {/* ── Downloads (left) + reviews (right) ── */}
@@ -146,6 +143,10 @@ const ProductCard = React.memo(function ProductCard({ item, index = 0 }) {
           >
             {categoryName.replace(/embroidery designs/gi, '').trim()}
           </Link>
+
+          {/* Quiet, copyable, and off the artwork. Still visible to logged-out
+              visitors so anyone can quote the code when reporting a problem. */}
+          {item?.sku_code && <SkuFlag sku={item.sku_code} variant='inline' />}
         </div>
 
         {/* Right */}

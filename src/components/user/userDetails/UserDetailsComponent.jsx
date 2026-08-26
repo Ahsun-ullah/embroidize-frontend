@@ -626,7 +626,9 @@ export default function UserDetailsComponent({
             {isFavoritesLoading ? (
               <LoadingSpinner />
             ) : favoritesData?.data?.products?.length > 0 ? (
-              <div className='grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4'>
+              // Same density as every other product grid — five across made the
+              // designs too small to judge.
+              <div className='grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6'>
                 {favoritesData.data.products.map((product, index) => (
                   <ProductCard key={product._id} item={product} index={index} />
                 ))}

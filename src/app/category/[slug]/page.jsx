@@ -111,12 +111,13 @@ export default async function CategoryProducts({ params, searchParams }) {
   return (
     <div className='bg-[#f4f4f4]'>
       <Header />
-      <div className='container mx-auto px-4 py-6 flex flex-col gap-4'>
+      <div className='container mx-auto flex flex-col gap-2 mt-4'>
         <h1 className='capitalize text-3xl'>
           {singleCategoryData?.data?.name}
           {/* Embroidery Designs */}
         </h1>
         <BreadCrumb
+
           items={[
             { label: 'Home', href: '/' },
             { label: 'Product', href: '/products' },
@@ -140,7 +141,7 @@ export default async function CategoryProducts({ params, searchParams }) {
         </div>
       </div>
       <div className='flex flex-col justify-between'>
-        <section className='text-black my-8 py-6 border-b-2'>
+        <section className='text-black mb-8 mt-4 border-b-2'>
           <div className='container mx-auto px-4'>
             <FilterLayout
               facets={facets}
@@ -165,7 +166,7 @@ export default async function CategoryProducts({ params, searchParams }) {
                 </div>
               ) : (
                 <>
-                  <div className='grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 xl:grid-cols-4 gap-6'>
+                  <div className='grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6'>
                     {allProducts.map((item, index) => (
                       <ProductCard key={item._id} item={item} index={index} />
                     ))}

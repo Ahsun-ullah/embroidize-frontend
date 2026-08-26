@@ -441,7 +441,7 @@ export default async function LandingPage() {
         <Suspense fallback={<GridSkeleton />}>
           {allProducts?.length ? (
             <div className='container mx-auto px-4'>
-              <div className='grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6'>
+              <div className='grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6'>
                 <Suspense fallback={<LoadingSpinner />}>
                   {allProducts.map((item, index) => (
                     <ProductCard key={item._id} item={item} index={index} />

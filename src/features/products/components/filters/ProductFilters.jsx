@@ -313,30 +313,16 @@ export default function ProductFilters({ facets, locked = [] }) {
     </div>
   );
 
-  const header = (
-    <div className='flex items-center justify-between px-4 py-3'>
-      <span className='text-sm font-bold uppercase tracking-wide text-gray-900'>
-        Filters
-      </span>
-      {activeCount > 0 && (
-        <button
-          type='button'
-          onClick={clearAll}
-          className='text-xs font-semibold text-gray-500 underline underline-offset-2 hover:text-black'
-        >
-          Clear all
-        </button>
-      )}
-    </div>
-  );
-
   return (
     <>
-      {/* ── Mobile trigger ── */}
+      {/* Trigger only — no desktop rail. A 260px sidebar cost roughly a third
+          of every product image, and on this catalogue the design IS the
+          product, so the filters slide over the page instead of pushing the
+          grid narrower. */}
       <button
         type='button'
         onClick={() => setDrawerOpen(true)}
-        className='flex w-full items-center justify-center gap-2 rounded-lg border border-gray-300 bg-white px-4 py-2.5 text-sm font-semibold text-gray-900 lg:hidden'
+        className='flex shrink-0 items-center justify-center gap-2 rounded-lg border border-gray-300 bg-white px-4 py-2 text-sm font-semibold text-gray-900 transition-colors hover:border-black'
       >
         <SlidersHorizontal size={16} />
         Filters
@@ -347,19 +333,9 @@ export default function ProductFilters({ facets, locked = [] }) {
         )}
       </button>
 
-      {/* ── Desktop rail ── */}
-      <aside
-        className={`hidden lg:block ${isPending ? 'pointer-events-none opacity-60' : ''}`}
-      >
-        <div className='sticky top-4 overflow-hidden rounded-xl border border-gray-200 bg-white'>
-          {header}
-          <div className='border-t border-gray-100'>{panel}</div>
-        </div>
-      </aside>
-
-      {/* ── Mobile drawer ── */}
+      {/* ── Slide-over panel ── */}
       {drawerOpen && (
-        <div className='fixed inset-0 z-50 flex lg:hidden' role='dialog' aria-modal='true'>
+        <div className='fixed inset-0 z-50 flex' role='dialog' aria-modal='true'>
           <button
             type='button'
             aria-label='Close filters'
