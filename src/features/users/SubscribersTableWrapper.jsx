@@ -168,10 +168,61 @@ function fmtDateTime(date) {
   });
 }
 
+function fmtDay(date) {
+  if (!date) return '—';
+  return new Date(date).toLocaleDateString('en-US', {
+    month: 'short',
+    day: 'numeric',
+    year: 'numeric',
+  });
+}
+
 function quotaLabel(used, limit) {
   if (limit == null) return `${used} / ∞`;
   const pct = Math.min(100, Math.round((used / limit) * 100));
   return `${used} / ${limit} (${pct}%)`;
+}
+
+// What this subscriber may ACTUALLY download, which is not always what their
+// plan advertises: an admin can sell one person different numbers, and that
+// deal can carry an end date. The backend resolves both through the same helper
+// the download gate uses, so this panel reports what is enforced rather than
+// the plan's headline figure — it used to read planId.dailyLimit straight, and
+// quietly misreported every subscriber on custom terms.
+//
+// Falls back to the plan so a payload from an older backend still renders.
+function effectiveOf(sub) {
+  const plan = sub?.planId;
+  const eff = sub?.effectiveLimits;
+  return {
+    dailyLimit: eff ? (eff.dailyLimit ?? null) : (plan?.dailyLimit ?? null),
+    downloadLimit: eff
+      ? (eff.downloadLimit ?? null)
+      : (plan?.downloadLimit ?? null),
+    isCustom: !!eff?.isCustom,
+    // Present but past means the deal has already lapsed, in which case
+    // isCustom is false and the numbers above are the plan's again.
+    expiresAt: eff?.expiresAt ?? null,
+  };
+}
+
+// Flags a number that came from an override, and says what it reverts to and
+// when — otherwise a custom limit looks like a plan change to whoever reads it.
+function CustomLimitNote({ eff, planLimit }) {
+  if (!eff?.isCustom) return null;
+  const reverts = planLimit == null ? '∞' : planLimit;
+  return (
+    <span
+      className='mt-0.5 block text-[10px] leading-tight text-gray-500 dark:text-gray-400'
+      title={
+        eff.expiresAt
+          ? `Custom limit for this subscriber. Reverts to the plan's ${reverts} on ${fmtDay(eff.expiresAt)} — automatically, no action needed.`
+          : `Custom limit for this subscriber. Permanent until an admin removes it; the plan's own number is ${reverts}.`
+      }
+    >
+      custom{eff.expiresAt ? ` → ${reverts} on ${fmtDay(eff.expiresAt)}` : ''}
+    </span>
+  );
 }
 
 // Rough lifetime value: what a subscriber has plausibly paid so far. We do NOT
@@ -1070,26 +1121,35 @@ export default function SubscribersTableWrapper({ subscribers, revenue }) {
 
       case 'downloads': {
         const used = sub?.downloadCount ?? 0;
-        const limit = plan?.downloadLimit ?? null;
+        const eff = effectiveOf(sub);
         return (
           <div className='min-w-[120px]'>
             <p className='text-xs font-mono text-gray-700 dark:text-gray-300 mb-1'>
-              {quotaLabel(used, limit)}
+              {quotaLabel(used, eff.downloadLimit)}
             </p>
-            <QuotaBar used={used} limit={limit} />
+            <QuotaBar used={used} limit={eff.downloadLimit} />
+            {eff.downloadLimit !== (plan?.downloadLimit ?? null) && (
+              <CustomLimitNote
+                eff={eff}
+                planLimit={plan?.downloadLimit ?? null}
+              />
+            )}
           </div>
         );
       }
 
       case 'daily': {
         const used = sub?.dailyDownloadCount ?? 0;
-        const limit = plan?.dailyLimit ?? null;
+        const eff = effectiveOf(sub);
         return (
           <div className='min-w-[100px]'>
             <p className='text-xs font-mono text-gray-700 dark:text-gray-300 mb-1'>
-              {quotaLabel(used, limit)}
+              {quotaLabel(used, eff.dailyLimit)}
             </p>
-            <QuotaBar used={used} limit={limit} />
+            <QuotaBar used={used} limit={eff.dailyLimit} />
+            {eff.dailyLimit !== (plan?.dailyLimit ?? null) && (
+              <CustomLimitNote eff={eff} planLimit={plan?.dailyLimit ?? null} />
+            )}
           </div>
         );
       }
@@ -1677,6 +1737,32 @@ export default function SubscribersTableWrapper({ subscribers, revenue }) {
                               : 'Unlimited'
                           }
                         />
+                        {/* The two rows above describe the PLAN. When this
+                            subscriber was sold different numbers, what is
+                            actually enforced belongs next to them — and, if the
+                            deal is dated, when it goes back to the plan. */}
+                        {effectiveOf(vs).isCustom && (
+                          <div className='col-span-2 flex flex-col gap-0.5 rounded border border-gray-200 dark:border-gray-700 p-2'>
+                            <span className='text-xs font-semibold text-gray-400 uppercase tracking-wide'>
+                              In force for this subscriber
+                            </span>
+                            <span className='text-sm text-gray-900 dark:text-gray-100'>
+                              {effectiveOf(vs).dailyLimit == null
+                                ? 'Unlimited'
+                                : effectiveOf(vs).dailyLimit}
+                              /day,{' '}
+                              {effectiveOf(vs).downloadLimit == null
+                                ? 'unlimited'
+                                : effectiveOf(vs).downloadLimit}
+                              /period
+                            </span>
+                            <span className='text-xs text-gray-500 dark:text-gray-400'>
+                              {effectiveOf(vs).expiresAt
+                                ? `Reverts to the plan's numbers on ${fmtDay(effectiveOf(vs).expiresAt)} — automatically.`
+                                : 'No end date — stays until an admin removes it.'}
+                            </span>
+                          </div>
+                        )}
                         {vp?.features?.length > 0 && (
                           <div className='col-span-2 flex flex-col gap-0.5'>
                             <span className='text-xs font-semibold text-gray-400 uppercase tracking-wide'>
@@ -1704,15 +1790,17 @@ export default function SubscribersTableWrapper({ subscribers, revenue }) {
                           <p className='text-xs text-gray-400 mb-1'>
                             Period Downloads
                           </p>
+                          {/* Usage is measured against what is enforced, not
+                              what the plan advertises. */}
                           <p className='text-sm font-mono mb-1'>
                             {quotaLabel(
                               vs?.downloadCount ?? 0,
-                              vp?.downloadLimit ?? null,
+                              effectiveOf(vs).downloadLimit,
                             )}
                           </p>
                           <QuotaBar
                             used={vs?.downloadCount ?? 0}
-                            limit={vp?.downloadLimit ?? null}
+                            limit={effectiveOf(vs).downloadLimit}
                           />
                         </div>
                         <div>
@@ -1722,12 +1810,12 @@ export default function SubscribersTableWrapper({ subscribers, revenue }) {
                           <p className='text-sm font-mono mb-1'>
                             {quotaLabel(
                               vs?.dailyDownloadCount ?? 0,
-                              vp?.dailyLimit ?? null,
+                              effectiveOf(vs).dailyLimit,
                             )}
                           </p>
                           <QuotaBar
                             used={vs?.dailyDownloadCount ?? 0}
-                            limit={vp?.dailyLimit ?? null}
+                            limit={effectiveOf(vs).dailyLimit}
                           />
                         </div>
                         <DetailRow
