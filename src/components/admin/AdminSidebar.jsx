@@ -397,6 +397,11 @@ export default function AdminSidebar({ isCollapsed, setIsCollapsed }) {
                   icon: 'ri-hand-coin-line',
                 },
                 {
+                  href: '/admin/custom-orders',
+                  label: 'Custom Orders',
+                  icon: 'ri-file-list-3-fill',
+                },
+                {
                   href: '/admin/settings/stripe',
                   label: 'Payment Keys',
                   icon: 'ri-bank-card-line',

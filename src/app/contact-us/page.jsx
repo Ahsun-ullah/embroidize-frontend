@@ -1,3 +1,4 @@
+import Link from 'next/link';
 import { ContactUsForm } from '@/components/Common/ContactUsForm';
 import Footer from '@/components/user/HomePage/Footer';
 import Header from '@/components/user/HomePage/Header';
@@ -45,8 +46,8 @@ const ContactUsPage = () => {
           </p>
         </div>
         {/* /* QUICK CONTACT INFO */}
-        <section className='grid md:grid-cols-2 gap-6 mb-14'>
-          <div className='p-6 border rounded-xl text-center shadow-sm hover:shadow-lg hover:border-blue-400 transition-all duration-300 cursor-pointer'>
+        <section className='grid md:grid-cols-3 gap-6 mb-14'>
+          <div className='p-6 border rounded-xl text-center shadow-sm hover:shadow-lg hover:border-zinc-400 transition-all duration-300 cursor-pointer'>
             <h3 className='font-semibold text-lg mb-2'>Email Support</h3>
             <p className='text-gray-600 text-sm mb-2'>
               Reach us directly for any issue
@@ -59,12 +60,22 @@ const ContactUsPage = () => {
             </a>
           </div>
 
-          <div className='p-6 border rounded-xl text-center shadow-sm hover:shadow-lg hover:border-blue-400 transition-all duration-300 cursor-pointer'>
+          <div className='p-6 border rounded-xl text-center shadow-sm hover:shadow-lg hover:border-zinc-400 transition-all duration-300 cursor-pointer'>
             <h3 className='font-semibold text-lg mb-2'>Response Time</h3>
             <p className='text-gray-600 text-sm'>
               We typically respond within 24 hours
             </p>
           </div>
+
+          <Link
+            href='/custom-embroidery-digitizing-service'
+            className='p-6 border rounded-xl text-center shadow-sm hover:shadow-lg hover:border-zinc-400 transition-all duration-300 cursor-pointer'
+          >
+            <h3 className='font-semibold text-lg mb-2'>Custom Orders</h3>
+            <p className='text-gray-600 text-sm'>
+              Need a custom embroidery design? We can help!
+            </p>
+          </Link>
         </section>
         {/* FORM + INFO */}
         <section className='grid md:grid-cols-2 gap-12 items-start'>
