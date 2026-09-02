@@ -2,12 +2,35 @@ import { useCallback, useEffect, useState } from 'react';
 
 export const ZipFileUpload = ({ label, accept, onDrop, error, product }) => {
   const [fileName, setFileName] = useState(null);
+  const [localError, setLocalError] = useState(null);
 
+  // The `accept` attribute only filters the browse dialog — and even there the
+  // user can switch it to "All Files". Dropped files skip it entirely. Without
+  // this check a .rar/.7z/renamed pack looked accepted, then the server's
+  // upload filter discarded it and the product was created with no design
+  // files at all.
   const handleFile = (file) => {
-    if (file) {
-      setFileName(file.name);
-      onDrop(file);
+    if (!file) return;
+
+    if (!file.name.toLowerCase().endsWith('.zip')) {
+      setFileName(null);
+      setLocalError(
+        `"${file.name}" is not a .zip file. Pack the design files into a ZIP archive and upload that.`,
+      );
+      onDrop(null);
+      return;
     }
+
+    if (file.size === 0) {
+      setFileName(null);
+      setLocalError(`"${file.name}" is empty (0 bytes).`);
+      onDrop(null);
+      return;
+    }
+
+    setLocalError(null);
+    setFileName(file.name);
+    onDrop(file);
   };
 
   const handleInputChange = (e) => {
@@ -83,9 +106,9 @@ export const ZipFileUpload = ({ label, accept, onDrop, error, product }) => {
         )}
 
         {/* Error Message */}
-        {error && (
+        {(localError || error) && (
           <p className='text-red-500 font-light mt-2 text-sm md:text-base w-full text-center'>
-            {error}
+            {localError || error}
           </p>
         )}
       </div>

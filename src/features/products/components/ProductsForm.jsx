@@ -136,6 +136,19 @@ export function ProductsForm({ product }) {
 
   const onSubmit = async (data) => {
     try {
+      // The design file is marked required on the label but is optional in the
+      // shared zod schema (edits legitimately omit it). Enforce it here for
+      // creates only — a product published without a ZIP shows an empty format
+      // list to customers and cannot be downloaded at all.
+      if (!product?._id && !(data.file instanceof File)) {
+        ErrorToast(
+          'Design file missing',
+          'Attach the .zip design pack before saving a new product.',
+          4000,
+        );
+        return;
+      }
+
       const formData = new FormData();
       Object.entries(data).forEach(([key, value]) => {
         if (value !== null && value !== undefined) {
@@ -608,7 +621,11 @@ export function ProductsForm({ product }) {
           </label>
           <ZipFileUpload
             label='Upload embroidery files (.zip only)'
-            accept={'application/zip'}
+            // Extension first: Windows reports .zip as application/octet-stream
+            // whenever a third-party archiver owns the file association, and a
+            // mimetype-only accept then hides the design pack in the browse
+            // dialog until the admin switches to "All Files".
+            accept={'.zip,application/zip,application/x-zip-compressed'}
             onDrop={(file) => setValue('file', file, { shouldDirty: true })}
             error={errors.file?.message}
             product={product}
