@@ -47,8 +47,13 @@ export async function fetchOrder(orderId) {
     cache: 'no-store',
   });
   const data = (await parse(res)).data;
-  // Attach the customer's own review (if any) onto the order object.
-  return { ...data.order, myReview: data.myReview || null };
+  // Attach the customer's own review and, while money is owed, where to send
+  // it (admin-managed addresses) onto the order object.
+  return {
+    ...data.order,
+    myReview: data.myReview || null,
+    paymentInstructions: data.paymentInstructions || null,
+  };
 }
 
 export async function submitReview(orderId, rating, comment, imageFile) {
@@ -72,6 +77,20 @@ export async function createCheckoutSession(orderId) {
     { method: 'POST', headers: orderAuthHeaders() },
   );
   return (await parse(res)).data;
+}
+
+// Tells the admin the customer sent money off-platform. Records a claim only —
+// the admin still has to verify and record the payment for anything to happen.
+export async function notifyPaymentSent(orderId, { method, reference } = {}) {
+  const res = await fetch(
+    `${API}/public/orders/custom/${orderId}/payment-sent`,
+    {
+      method: 'POST',
+      headers: { ...orderAuthHeaders(), 'Content-Type': 'application/json' },
+      body: JSON.stringify({ method, reference }),
+    },
+  );
+  return parse(res);
 }
 
 export async function requestAccessLink(email) {

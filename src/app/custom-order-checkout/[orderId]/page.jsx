@@ -9,6 +9,7 @@ import {
   downloadOrderZip,
   fetchOrder,
   hasOrderAccess,
+  notifyPaymentSent,
   requestAccessLink,
   requestRevision,
   saveBlob,
@@ -19,6 +20,7 @@ import OrderTimeline from '@/features/customOrders/OrderTimeline';
 import { openOrderReceipt } from '@/features/customOrders/receipt';
 import {
   Button,
+  Input,
   Modal,
   ModalBody,
   ModalContent,
@@ -30,6 +32,8 @@ import {
 } from '@heroui/react';
 import {
   AlertCircle,
+  Check,
+  Copy,
   CreditCard,
   Download,
   Expand,
@@ -141,6 +145,148 @@ function DesignPanel({ file, caption, onZoom }) {
 }
 
 // Inline "get access" form shown when the visitor has no session for this order.
+// Off-platform payment panel. Shown instead of a card checkout whenever the
+// admin has payment addresses configured (Settings -> Manual Requests), which
+// is the normal state: custom digitizing is a service, and the gateways that
+// clear our subscriptions do not process services. The customer sends money to
+// one of these addresses and tells us; an admin verifies it and records the
+// payment, which is the only thing that actually advances the order.
+function ManualPayment({ instructions, amount, orderId, onClaimed }) {
+  const [copied, setCopied] = useState('');
+  const [method, setMethod] = useState('');
+  const [reference, setReference] = useState('');
+  const [claiming, setClaiming] = useState(false);
+  const [claimed, setClaimed] = useState(false);
+
+  const copy = async (label, value) => {
+    try {
+      await navigator.clipboard.writeText(value);
+      setMethod(label);
+      setCopied(label);
+      setTimeout(() => setCopied(''), 1800);
+    } catch {
+      ErrorToast(
+        'Copy failed',
+        'Select the address and copy it manually.',
+        3000,
+      );
+    }
+  };
+
+  const claim = async () => {
+    setClaiming(true);
+    try {
+      const res = await notifyPaymentSent(orderId, { method, reference });
+      setClaimed(true);
+      SuccessToast(
+        "Thanks — we're on it",
+        res?.message || 'We will confirm once the payment lands.',
+        5000,
+      );
+      onClaimed?.();
+    } catch (err) {
+      ErrorToast('Could not send', err.message, 4000);
+    } finally {
+      setClaiming(false);
+    }
+  };
+
+  if (claimed) {
+    return (
+      <div className='mt-6 rounded-2xl border border-zinc-200 bg-zinc-50 p-6'>
+        <p className='text-sm font-semibold text-zinc-900'>
+          Payment reported — thank you.
+        </p>
+        <p className='mt-2 max-w-prose text-sm leading-relaxed text-zinc-600'>
+          We&apos;ll check the account and confirm by email, usually within a
+          few hours. Your order moves forward as soon as it clears.
+        </p>
+      </div>
+    );
+  }
+
+  return (
+    <div className='mt-6 border-t border-zinc-200 pt-6'>
+      <Eyebrow>
+        Send ${Number(amount || 0).toFixed(2)} to any one of these
+      </Eyebrow>
+
+      <ul className='mt-3 flex flex-col gap-2'>
+        {instructions.methods.map((m) => {
+          const active = method === m.label;
+          return (
+            <li key={m.label}>
+              <button
+                type='button'
+                onClick={() => copy(m.label, m.value)}
+                aria-pressed={active}
+                className={`flex w-full items-center justify-between gap-4 rounded-xl border px-4 py-3 text-left transition ${
+                  active
+                    ? 'border-black bg-zinc-50'
+                    : 'border-zinc-200 hover:border-zinc-400'
+                }`}
+              >
+                <span className='min-w-0'>
+                  <span className='block text-[11px] font-medium uppercase tracking-wider text-zinc-500'>
+                    {m.label}
+                  </span>
+                  <span className='block truncate font-semibold text-zinc-900'>
+                    {m.value}
+                  </span>
+                </span>
+                <span className='flex shrink-0 items-center gap-1.5 text-xs font-medium text-zinc-500'>
+                  {copied === m.label ? (
+                    <>
+                      <Check size={14} /> Copied
+                    </>
+                  ) : (
+                    <>
+                      <Copy size={14} /> Copy
+                    </>
+                  )}
+                </span>
+              </button>
+            </li>
+          );
+        })}
+      </ul>
+
+      {instructions.note && (
+        <p className='mt-4 max-w-prose whitespace-pre-line text-sm leading-relaxed text-zinc-600'>
+          {instructions.note}
+        </p>
+      )}
+
+      <div className='mt-5 flex flex-col gap-3 sm:flex-row sm:items-end'>
+        <Input
+          size='sm'
+          variant='bordered'
+          label='Reference (optional)'
+          placeholder='Transaction ID, or the name you paid under'
+          value={reference}
+          onValueChange={setReference}
+          classNames={{ inputWrapper: 'border-zinc-300' }}
+        />
+        <Button
+          size='lg'
+          radius='full'
+          className='shrink-0 bg-black px-8 font-semibold text-white transition hover:bg-zinc-800'
+          isLoading={claiming}
+          onPress={claim}
+        >
+          I&apos;ve sent the payment
+        </Button>
+      </div>
+
+      <p className='mt-3 flex items-center gap-1.5 text-[11px] text-zinc-500'>
+        <ShieldCheck size={12} />
+        We verify the transfer before work starts — no card details are ever
+        entered on this site.
+      </p>
+    </div>
+  );
+}
+
 function AccessPrompt() {
   const [email, setEmail] = useState('');
   const [sent, setSent] = useState(false);
@@ -391,6 +537,11 @@ function CustomOrderCheckoutInner() {
   // Extra payment requested by the admin (e.g. an optional paid-revision fee).
   // Shown as its own "balance due" panel; the order keeps its current status,
   // so delivered files stay downloadable while it's outstanding.
+  // Admin has payment addresses configured -> money is collected off-platform
+  // instead of through a gateway. Clearing them in admin restores the card
+  // button, so this needs no code change if a processor is ever approved.
+  const manualPay = order.paymentInstructions;
+
   const dueExtra =
     order.status !== 'awaiting_payment' &&
     Number(order.duePayment?.amount) > 0
@@ -401,6 +552,7 @@ function CustomOrderCheckoutInner() {
   // bar so the customer never has to scroll back up to pay or download.
   const showMobilePayBar =
     (order.status === 'awaiting_payment' || Boolean(dueExtra)) &&
+    !manualPay &&
     checkoutResult !== 'success';
   const showMobileDownloadBar =
     (order.status === 'delivered' || order.status === 'completed') &&
@@ -478,25 +630,35 @@ function CustomOrderCheckoutInner() {
                           </p>
                         )}
                       </div>
-                      <div className='flex w-full flex-col items-stretch gap-2 sm:w-auto sm:items-end'>
-                        <Button
-                          size='lg'
-                          radius='full'
-                          className='bg-black px-8 font-semibold text-white transition hover:bg-zinc-800'
-                          isLoading={paying}
-                          startContent={
-                            paying ? null : <CreditCard size={18} />
-                          }
-                          onPress={handlePay}
-                        >
-                          Pay Securely
-                        </Button>
-                        <p className='flex items-center justify-center gap-1.5 text-[11px] text-zinc-500 sm:justify-end'>
-                          <ShieldCheck size={12} />
-                          Work starts once payment is confirmed.
-                        </p>
-                      </div>
+                      {!manualPay && (
+                        <div className='flex w-full flex-col items-stretch gap-2 sm:w-auto sm:items-end'>
+                          <Button
+                            size='lg'
+                            radius='full'
+                            className='bg-black px-8 font-semibold text-white transition hover:bg-zinc-800'
+                            isLoading={paying}
+                            startContent={
+                              paying ? null : <CreditCard size={18} />
+                            }
+                            onPress={handlePay}
+                          >
+                            Pay Securely
+                          </Button>
+                          <p className='flex items-center justify-center gap-1.5 text-[11px] text-zinc-500 sm:justify-end'>
+                            <ShieldCheck size={12} />
+                            Work starts once payment is confirmed.
+                          </p>
+                        </div>
+                      )}
                     </div>
+                    {manualPay && (
+                      <ManualPayment
+                        instructions={manualPay}
+                        amount={order.estimatedPrice}
+                        orderId={orderId}
+                        onClaimed={load}
+                      />
+                    )}
                     {checkoutResult === 'cancelled' && (
                       <p className='mt-5 border-t border-zinc-200 pt-4 text-xs text-zinc-500'>
                         Checkout was cancelled — you can try again whenever
@@ -536,23 +698,33 @@ function CustomOrderCheckoutInner() {
                           </p>
                         )}
                       </div>
-                      <div className='flex w-full flex-col items-stretch gap-2 sm:w-auto sm:items-end'>
-                        <Button
-                          size='lg'
-                          radius='full'
-                          className='bg-black px-8 font-semibold text-white transition hover:bg-zinc-800'
-                          isLoading={paying}
-                          startContent={paying ? null : <CreditCard size={18} />}
-                          onPress={handlePay}
-                        >
-                          Pay Securely
-                        </Button>
-                        <p className='flex items-center justify-center gap-1.5 text-[11px] text-zinc-500 sm:justify-end'>
-                          <ShieldCheck size={12} />
-                          Your files stay available meanwhile.
-                        </p>
-                      </div>
+                      {!manualPay && (
+                        <div className='flex w-full flex-col items-stretch gap-2 sm:w-auto sm:items-end'>
+                          <Button
+                            size='lg'
+                            radius='full'
+                            className='bg-black px-8 font-semibold text-white transition hover:bg-zinc-800'
+                            isLoading={paying}
+                            startContent={paying ? null : <CreditCard size={18} />}
+                            onPress={handlePay}
+                          >
+                            Pay Securely
+                          </Button>
+                          <p className='flex items-center justify-center gap-1.5 text-[11px] text-zinc-500 sm:justify-end'>
+                            <ShieldCheck size={12} />
+                            Your files stay available meanwhile.
+                          </p>
+                        </div>
+                      )}
                     </div>
+                    {manualPay && (
+                      <ManualPayment
+                        instructions={manualPay}
+                        amount={dueExtra.amount}
+                        orderId={orderId}
+                        onClaimed={load}
+                      />
+                    )}
                     {checkoutResult === 'cancelled' && (
                       <p className='mt-5 border-t border-zinc-200 pt-4 text-xs text-zinc-500'>
                         Checkout was cancelled — you can try again whenever
