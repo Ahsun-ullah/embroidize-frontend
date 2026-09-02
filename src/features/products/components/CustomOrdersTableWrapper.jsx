@@ -271,6 +271,21 @@ export default function CustomOrdersTableWrapper({
   const [payReqUrl, setPayReqUrl] = useState('');
   const [isPayRequesting, setIsPayRequesting] = useState(false);
 
+  // Offer payment options modal — tell THIS customer which accounts they can
+  // pay into. Per order, because custom work is negotiated one buyer at a time;
+  // deliberately unrelated to the manual-subscription payment settings.
+  const {
+    isOpen: isOfferOpen,
+    onOpen: onOfferOpen,
+    onOpenChange: onOfferChange,
+  } = useDisclosure();
+  const [offerOrder, setOfferOrder] = useState(null);
+  // Saved accounts with a `on` flag for whether this order gets that one.
+  const [offerRows, setOfferRows] = useState([]);
+  const [offerNote, setOfferNote] = useState('');
+  const [isOffering, setIsOffering] = useState(false);
+  const [loadingAccounts, setLoadingAccounts] = useState(false);
+
   // Record off-platform payment (PayPal/Etsy/bank/…) modal — money that
   // arrived outside Stripe gets logged into the order's payment ledger.
   const {
@@ -623,6 +638,116 @@ export default function CustomOrdersTableWrapper({
       ErrorToast('Error', err.message || 'Failed to record payment', 4000);
     } finally {
       setIsRecordingPay(false);
+    }
+  };
+
+  // Open the offer dialog: start from the admin's saved accounts, tick the ones
+  // this order was already offered (so re-sending is a nudge, not a retype), and
+  // always leave one blank row to add a new account inline.
+  const handleOfferPayment = async (order) => {
+    setOfferOrder(order);
+    setOfferNote(order.paymentOptionsNote || '');
+    setOfferRows([]);
+    onOfferOpen();
+    setLoadingAccounts(true);
+    try {
+      const res = await fetch(
+        `${apiBase()}/admin/orders/custom/payment-accounts`,
+        { headers: adminHeaders() },
+      );
+      const result = await res.json();
+      const saved = res.ok ? result?.data?.accounts || [] : [];
+      const already = order.paymentOptions || [];
+      const key = (m) => `${m.label}|${m.value}`.toLowerCase();
+      const offered = new Set(already.map(key));
+      // Anything already offered but not in the saved list still needs a row.
+      const merged = [...saved];
+      for (const m of already) {
+        if (!saved.some((s) => key(s) === key(m))) merged.push(m);
+      }
+      setOfferRows(
+        merged.map((m) => ({
+          label: m.label,
+          value: m.value,
+          on: offered.size ? offered.has(key(m)) : false,
+        })),
+      );
+    } catch {
+      setOfferRows([]);
+    } finally {
+      setLoadingAccounts(false);
+    }
+  };
+
+  const setOfferRow = (i, patch) =>
+    setOfferRows((rows) =>
+      rows.map((r, idx) => (idx === i ? { ...r, ...patch } : r)),
+    );
+
+  const addOfferRow = () =>
+    setOfferRows((rows) => [...rows, { label: '', value: '', on: true }]);
+
+  const removeOfferRow = (i) =>
+    setOfferRows((rows) => rows.filter((_, idx) => idx !== i));
+
+  const submitOfferPayment = async (onClose) => {
+    const methods = offerRows
+      .filter((r) => r.on && r.label.trim() && r.value.trim())
+      .map((r) => ({ label: r.label.trim(), value: r.value.trim() }));
+
+    if (!offerOrder || !methods.length) {
+      ErrorToast(
+        'Nothing to send',
+        'Tick at least one method, and give it a name and an address.',
+        3500,
+      );
+      return;
+    }
+
+    setIsOffering(true);
+    try {
+      const res = await fetch(
+        `${apiBase()}/admin/orders/custom/${offerOrder._id}/payment-options`,
+        {
+          method: 'POST',
+          headers: adminHeaders(),
+          body: JSON.stringify({ methods, note: offerNote.trim() || undefined }),
+        },
+      );
+      const result = await res.json();
+      if (!res.ok)
+        throw new Error(result.message || 'Failed to send payment options');
+      SuccessToast('Sent', result?.message || 'Payment options sent.', 6000);
+      onClose?.();
+      startTransition(() => {
+        router.refresh();
+      });
+    } catch (err) {
+      ErrorToast('Error', err.message || 'Failed to send payment options', 4000);
+    } finally {
+      setIsOffering(false);
+    }
+  };
+
+  const withdrawOffer = async (onClose) => {
+    if (!offerOrder) return;
+    setIsOffering(true);
+    try {
+      const res = await fetch(
+        `${apiBase()}/admin/orders/custom/${offerOrder._id}/payment-options`,
+        { method: 'DELETE', headers: adminHeaders() },
+      );
+      const result = await res.json();
+      if (!res.ok) throw new Error(result.message || 'Failed to withdraw');
+      SuccessToast('Withdrawn', result?.message || 'Options removed.', 5000);
+      onClose?.();
+      startTransition(() => {
+        router.refresh();
+      });
+    } catch (err) {
+      ErrorToast('Error', err.message || 'Failed to withdraw', 4000);
+    } finally {
+      setIsOffering(false);
     }
   };
 
@@ -1285,7 +1410,9 @@ export default function CustomOrdersTableWrapper({
                   startContent={<Send size={16} />}
                   onClick={() => handlePayRequest(order)}
                 >
-                  Request Payment (Stripe Link)
+                  {order.paymentOptions?.length
+                    ? 'Request Extra Payment'
+                    : 'Request Payment (Stripe Link)'}
                 </DropdownItem>
               ) : null}
               {canRequestPayment ? (
@@ -1295,6 +1422,17 @@ export default function CustomOrdersTableWrapper({
                   onClick={() => handleRecordPayment(order)}
                 >
                   Record Payment (PayPal / Manual)
+                </DropdownItem>
+              ) : null}
+              {canRequestPayment ? (
+                <DropdownItem
+                  key='offer-payment'
+                  startContent={<Send size={16} />}
+                  onClick={() => handleOfferPayment(order)}
+                >
+                  {order.paymentOptions?.length
+                    ? 'Payment Options (sent)'
+                    : 'Offer Payment Options'}
                 </DropdownItem>
               ) : null}
               {Number(order.amountPaid) > 0 ? (
@@ -2422,6 +2560,152 @@ export default function CustomOrdersTableWrapper({
                     Copy Link
                   </Button>
                 )}
+              </ModalFooter>
+            </>
+          )}
+        </ModalContent>
+      </Modal>
+
+      {/* ─── Offer Payment Options Modal ─── */}
+      <Modal
+        isOpen={isOfferOpen}
+        onOpenChange={onOfferChange}
+        backdrop='blur'
+        size='2xl'
+        scrollBehavior='inside'
+      >
+        <ModalContent>
+          {(onClose) => (
+            <>
+              <ModalHeader className='flex flex-col gap-1'>
+                Offer payment options
+                <span className='text-sm font-normal text-gray-500'>
+                  Tell {offerOrder?.name || 'this customer'} where they can send
+                  the money. Posts into the order thread and emails them.
+                </span>
+              </ModalHeader>
+
+              <ModalBody>
+                <div className='rounded-lg bg-gray-50 p-3 dark:bg-gray-800'>
+                  <p className='font-semibold'>{offerOrder?.name}</p>
+                  <p className='text-sm text-gray-600 dark:text-gray-300'>
+                    {offerOrder?.email}
+                  </p>
+                  <p className='mt-1 text-xs text-gray-500'>
+                    Order: {offerOrder?.orderNumber}
+                    {Number(offerOrder?.estimatedPrice) > 0 &&
+                      ` · quoted $${Number(offerOrder.estimatedPrice).toFixed(2)}`}
+                    {offerOrder?.paymentOfferedAt &&
+                      ` · last offered ${new Date(
+                        offerOrder.paymentOfferedAt,
+                      ).toLocaleDateString()}`}
+                  </p>
+                </div>
+
+                {loadingAccounts ? (
+                  <p className='text-sm text-gray-400'>
+                    Loading your saved accounts…
+                  </p>
+                ) : (
+                  <>
+                    {offerRows.length === 0 && (
+                      <p className='text-sm text-gray-500'>
+                        No saved accounts yet — add one below. It will be saved
+                        for next time.
+                      </p>
+                    )}
+
+                    <div className='flex flex-col gap-2'>
+                      {offerRows.map((row, i) => (
+                        <div
+                          key={i}
+                          className='flex items-start gap-2 rounded-lg border border-gray-200 p-2 dark:border-gray-700'
+                        >
+                          <Checkbox
+                            isSelected={row.on}
+                            onValueChange={(on) => setOfferRow(i, { on })}
+                            className='mt-2'
+                            aria-label={`Offer ${row.label || 'this method'}`}
+                          />
+                          <Input
+                            size='sm'
+                            variant='bordered'
+                            label='Method'
+                            placeholder='PayPal'
+                            value={row.label}
+                            onValueChange={(label) => setOfferRow(i, { label })}
+                            className='w-40 shrink-0'
+                          />
+                          <Input
+                            size='sm'
+                            variant='bordered'
+                            label='Address the customer sends to'
+                            placeholder='you@embroidize.com'
+                            value={row.value}
+                            onValueChange={(value) => setOfferRow(i, { value })}
+                          />
+                          <Button
+                            isIconOnly
+                            size='sm'
+                            variant='light'
+                            className='mt-1'
+                            aria-label='Remove this method'
+                            onPress={() => removeOfferRow(i)}
+                          >
+                            <Trash2 size={16} />
+                          </Button>
+                        </div>
+                      ))}
+                    </div>
+
+                    <Button
+                      size='sm'
+                      variant='flat'
+                      className='self-start'
+                      onPress={addOfferRow}
+                    >
+                      + Add another method
+                    </Button>
+
+                    <Textarea
+                      variant='bordered'
+                      label='Note to the customer (optional)'
+                      placeholder='Send the exact amount and reply here once done.'
+                      value={offerNote}
+                      onValueChange={setOfferNote}
+                      minRows={2}
+                    />
+
+                    <p className='text-xs text-gray-500'>
+                      Ticked methods are saved to your account list for next
+                      time. Nothing here has been shown to the customer until you
+                      press Send.
+                    </p>
+                  </>
+                )}
+              </ModalBody>
+
+              <ModalFooter className='flex-wrap gap-2'>
+                {offerOrder?.paymentOptions?.length ? (
+                  <Button
+                    variant='light'
+                    color='danger'
+                    isDisabled={isOffering}
+                    onPress={() => withdrawOffer(onClose)}
+                  >
+                    Withdraw offer
+                  </Button>
+                ) : null}
+                <Button variant='light' onPress={onClose}>
+                  Cancel
+                </Button>
+                <Button
+                  className='bg-black text-white'
+                  isLoading={isOffering}
+                  onPress={() => submitOfferPayment(onClose)}
+                >
+                  Send to customer
+                </Button>
               </ModalFooter>
             </>
           )}
