@@ -132,6 +132,16 @@ export default function UserProfileDropdown() {
               </DropdownItem>
               <DropdownItem>
                 <Link
+                  href='/user/custom-order'
+                  prefetch={false}
+                  className='flex text-base gap-1 font-medium'
+                >
+                  <i className='ri-shopping-bag-3-fill' aria-hidden='true'></i>
+                  My Custom Orders
+                </Link>
+              </DropdownItem>
+              <DropdownItem>
+                <Link
                   href='/user/user-details?tabName=downloads'
                   prefetch={false}
                   className='flex text-base gap-1 font-medium'

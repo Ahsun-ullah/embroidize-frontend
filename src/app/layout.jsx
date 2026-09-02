@@ -121,7 +121,7 @@ export default function RootLayout({ children }) {
               useSearchParams() without their own boundary (e.g. auth pages).
               It must stay OUTSIDE nothing-critical: NProgressProvider isolates
               its own useSearchParams internally, so static pages (about,
-              contact, …) fully server-render. If a page
+              contact, custom-order landing, …) fully server-render. If a page
               ever view-sources as an empty shell again, look for a new
               unwrapped useSearchParams() in its component tree. */}
           <Suspense>
