@@ -209,50 +209,54 @@ export default async function Home() {
             </Link>
           </div>
 
-          {/* RIGHT: Subscription promo */}
+          {/* RIGHT: Custom digitizing promo */}
           <div className='w-full lg:w-1/2 flex justify-center lg:justify-end'>
             <div className='animate-float w-full max-w-md rounded-3xl bg-white p-8 sm:p-12 shadow-md ring-1 ring-black/5'>
               <span className='inline-flex items-center gap-2 rounded-full bg-black px-4 py-1.5 text-sm font-semibold text-white'>
                 <Sparkles className='h-4 w-4' aria-hidden />
-                Go Premium
+                Custom Digitizing
               </span>
 
               <h2 className='mt-5 text-3xl sm:text-4xl font-extrabold leading-[1.1] tracking-tight text-slate-900'>
-                Unlimited Premium Designs
+                Can&apos;t Find The Design You Need?
               </h2>
               <p className='mt-3 text-base text-slate-500'>
-                Subscribe once and download as much as you need — premium,
-                professionally digitized designs in every popular format.
+                Send us your logo or artwork and get it back as a machine-ready
+                embroidery file, digitized by hand — from $5.
               </p>
 
               <div className='mt-7 space-y-4'>
                 <div className='flex items-center gap-3'>
                   <span className='flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-gray-100 text-slate-900'>
-                    <Download className='h-5 w-5' aria-hidden />
-                  </span>
-                  <p className='font-semibold text-slate-900'>Unlimited downloads</p>
-                </div>
-                <div className='flex items-center gap-3'>
-                  <span className='flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-gray-100 text-slate-900'>
-                    <BadgeCheck className='h-5 w-5' aria-hidden />
+                    <Clock className='h-5 w-5' aria-hidden />
                   </span>
                   <p className='font-semibold text-slate-900'>
-                    All machine formats included
+                    1–24 hour delivery
                   </p>
                 </div>
                 <div className='flex items-center gap-3'>
                   <span className='flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-gray-100 text-slate-900'>
-                    <ShieldCheck className='h-5 w-5' aria-hidden />
+                    <FileCheck className='h-5 w-5' aria-hidden />
                   </span>
-                  <p className='font-semibold text-slate-900'>Cancel anytime</p>
+                  <p className='font-semibold text-slate-900'>
+                    DST, PES, JEF &amp; more
+                  </p>
+                </div>
+                <div className='flex items-center gap-3'>
+                  <span className='flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-gray-100 text-slate-900'>
+                    <RefreshCw className='h-5 w-5' aria-hidden />
+                  </span>
+                  <p className='font-semibold text-slate-900'>
+                    Free unlimited revisions
+                  </p>
                 </div>
               </div>
 
               <Link
-                href='/subscriptions'
+                href='/custom-embroidery-digitizing-service'
                 className='group mt-8 inline-flex w-full items-center justify-between gap-4 rounded-full bg-black py-4 px-7 text-base font-bold text-white transition hover:bg-gray-800'
               >
-                View Plans
+                Start a custom order
                 <span className='flex h-9 w-9 items-center justify-center rounded-full bg-white text-gray-500 transition-transform group-hover:translate-x-0.5'>
                   <ArrowRight className='h-5 w-5' aria-hidden />
                 </span>
@@ -292,75 +296,65 @@ export default async function Home() {
         </Suspense>
       </section>
 
-      {/* Custom Digitizing Service — the homepage entry point for the service.
-          Grayscale only: the design imagery elsewhere on the page carries all
-          the colour, and this must not compete with it. */}
+      {/* Subscriptions — moved out of the hero when custom digitizing took that
+          slot. No price here: plan prices live in the database, so the card
+          sends people to /subscriptions rather than repeating a figure that
+          could drift. Grayscale, like everything else on this page. */}
       <section
-        aria-labelledby='custom-digitizing-heading'
+        aria-labelledby='go-premium-heading'
         className='container mx-auto max-w-7xl px-4 py-6'
       >
         <div className='overflow-hidden rounded-3xl bg-white shadow-sm ring-1 ring-black/5'>
           <div className='flex flex-col gap-10 p-8 sm:p-12 lg:flex-row lg:items-center lg:justify-between'>
             <div className='min-w-0'>
-              <span className='inline-flex items-center gap-2 rounded-full bg-gray-300/70 px-4 py-1.5 text-sm font-semibold text-black'>
+              <span className='inline-flex items-center gap-2 rounded-full bg-black px-4 py-1.5 text-sm font-semibold text-white'>
                 <Sparkles className='h-4 w-4' aria-hidden />
-                Custom Digitizing
+                Go Premium
               </span>
 
               <h2
-                id='custom-digitizing-heading'
+                id='go-premium-heading'
                 className='mt-5 text-3xl font-extrabold leading-[1.1] tracking-tight text-slate-900 sm:text-4xl'
               >
-                Can&apos;t find the design you need?
+                Unlimited Premium Designs
               </h2>
               <p className='mt-3 max-w-xl text-base text-slate-500'>
-                Send us your logo or artwork and get it back as a
-                machine-ready embroidery file, digitized by hand.
+                Subscribe once and download as much as you need — premium,
+                professionally digitized designs in every popular format.
               </p>
 
               <ul className='mt-7 flex flex-col gap-4 sm:flex-row sm:flex-wrap sm:gap-x-8'>
                 <li className='flex items-center gap-3'>
                   <span className='flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-gray-100 text-slate-900'>
-                    <Clock className='h-5 w-5' aria-hidden />
+                    <Download className='h-5 w-5' aria-hidden />
                   </span>
                   <p className='font-semibold text-slate-900'>
-                    1–24 hour delivery
+                    Unlimited downloads
                   </p>
                 </li>
                 <li className='flex items-center gap-3'>
                   <span className='flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-gray-100 text-slate-900'>
-                    <FileCheck className='h-5 w-5' aria-hidden />
+                    <BadgeCheck className='h-5 w-5' aria-hidden />
                   </span>
                   <p className='font-semibold text-slate-900'>
-                    DST, PES, JEF &amp; more
+                    All machine formats included
                   </p>
                 </li>
                 <li className='flex items-center gap-3'>
                   <span className='flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-gray-100 text-slate-900'>
-                    <RefreshCw className='h-5 w-5' aria-hidden />
+                    <ShieldCheck className='h-5 w-5' aria-hidden />
                   </span>
-                  <p className='font-semibold text-slate-900'>
-                    Free unlimited revisions
-                  </p>
+                  <p className='font-semibold text-slate-900'>Cancel anytime</p>
                 </li>
               </ul>
             </div>
 
             <div className='flex w-full shrink-0 flex-col items-stretch gap-5 lg:w-auto lg:items-end'>
-              <div className='rounded-2xl bg-black px-10 py-7 text-center text-white'>
-                <p className='text-xs font-medium uppercase tracking-wider text-white/60'>
-                  Starting at
-                </p>
-                <p className='text-5xl font-extrabold leading-none tabular-nums'>
-                  $5
-                </p>
-              </div>
-
               <Link
-                href='/custom-embroidery-digitizing-service'
+                href='/subscriptions'
                 className='group inline-flex items-center justify-between gap-4 rounded-full bg-black py-4 px-7 text-base font-bold text-white transition hover:bg-gray-800'
               >
-                Start a custom order
+                View Plans
                 <span className='flex h-9 w-9 items-center justify-center rounded-full bg-white text-gray-500 transition-transform group-hover:translate-x-0.5'>
                   <ArrowRight className='h-5 w-5' aria-hidden />
                 </span>
