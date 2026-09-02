@@ -2,9 +2,20 @@
 // through `readFilterParams`, client components write it through `buildQuery`,
 // so the two can never drift apart.
 
+// `searchOnly` options are offered only where they mean something. Relevance is
+// the ranking Atlas Search itself produced, so it exists on /search and nowhere
+// else — but it MUST exist there: before it did, picking any sort discarded the
+// ranking permanently and the only route back was to hand-edit the URL.
+//
+// "Most popular" is the rolling window (downloads in the last 15 days, see
+// Product.recentDownloadCount). "Most downloaded" is the lifetime counter, which
+// barely moves — the two are named apart on purpose because they used to be the
+// same word attached to two different result sets.
 export const SORT_OPTIONS = [
+  { value: 'relevance', label: 'Best match', searchOnly: true },
   { value: 'newest', label: 'Newest first' },
-  { value: 'popular', label: 'Most downloaded' },
+  { value: 'popular', label: 'Most popular' },
+  { value: 'most-downloaded', label: 'Most downloaded' },
   { value: 'most-favourited', label: 'Most favourited' },
   { value: 'oldest', label: 'Oldest first' },
   { value: 'name-asc', label: 'Name A–Z' },
@@ -12,6 +23,16 @@ export const SORT_OPTIONS = [
 ];
 
 export const SORT_VALUES = SORT_OPTIONS.map((s) => s.value);
+
+/** The options a given surface should offer, and the one it falls back to. */
+export function sortOptionsFor(context) {
+  return context === 'search'
+    ? SORT_OPTIONS
+    : SORT_OPTIONS.filter((s) => !s.searchOnly);
+}
+
+export const defaultSortFor = (context) =>
+  context === 'search' ? 'relevance' : 'newest';
 
 export const TIER_OPTIONS = [
   { value: 'free', label: 'Free' },

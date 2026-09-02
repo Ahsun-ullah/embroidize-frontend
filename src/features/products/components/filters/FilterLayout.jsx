@@ -16,11 +16,19 @@ function BarSkeleton() {
   );
 }
 
-export default function FilterLayout({ facets, total, locked = [], children }) {
+export default function FilterLayout({
+  facets,
+  total,
+  locked = [],
+  // 'search' unlocks the relevance sort and makes it the default. Every other
+  // surface passes nothing and defaults to newest.
+  context = 'listing',
+  children,
+}) {
   return (
     <div>
       <Suspense fallback={<BarSkeleton />}>
-        <FilterBar facets={facets} total={total} locked={locked} />
+        <FilterBar facets={facets} total={total} locked={locked} context={context} />
       </Suspense>
       <div className='mt-6'>{children}</div>
     </div>

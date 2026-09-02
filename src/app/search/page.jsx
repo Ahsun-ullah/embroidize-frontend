@@ -91,7 +91,7 @@ export default async function SearchPage({ searchParams }) {
 
         <div className=' flex flex-col justify-between'>
           <section className='text-black border-b-2'>
-            <FilterLayout facets={facets} total={totalCount}>
+            <FilterLayout facets={facets} total={totalCount} context='search'>
               {products?.length > 0 ? (
                 <div className='grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6'>
                   {products.map((item, index) => (

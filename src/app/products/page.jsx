@@ -98,16 +98,21 @@ export async function generateMetadata({ searchParams }) {
 export default async function AllProductsPage({ searchParams }) {
   const currentPage = parseInt(searchParams?.page) || 1;
   const perPageData = parseInt(searchParams?.limit) || 20;
-  const filter = searchParams?.filter;
-  const isPopular = filter === 'popular';
-  const isAdminChoice = filter === 'embroidize-choice';
-  const isMostFavourited = filter === 'most-favourited';
-
   // The tab views are no longer separate endpoints — they expand into the same
   // filter vocabulary the sidebar writes, so "Embroidize Choice" and "Free" can
   // finally be combined instead of being mutually exclusive pages.
   const filterState = readFilterParams(searchParams);
   const apiFilters = toApiFilters(filterState);
+
+  // Highlight the tab that matches the filters ACTUALLY in effect, not the one
+  // named in ?filter=. The tabs and the sort dropdown write the same underlying
+  // state, so reading the tab strip off the raw param meant sorting by "Most
+  // popular" from the dropdown left "All" lit up while the grid showed the
+  // Popular view — two controls disagreeing about one result set.
+  const isPopular = filterState.sort === 'popular';
+  const isAdminChoice = filterState.curated === '1';
+  const isMostFavourited = filterState.sort === 'most-favourited';
+  const isAll = !isPopular && !isAdminChoice && !isMostFavourited;
 
   const [productData, facets] = await Promise.all([
     getProducts('', currentPage, perPageData, apiFilters),
@@ -133,7 +138,7 @@ export default async function AllProductsPage({ searchParams }) {
                 href='/products'
                 prefetch={false}
                 className={`px-4 py-2 text-sm whitespace-nowrap rounded transition-colors ${
-                  !isPopular && !isAdminChoice && !isMostFavourited
+                  isAll
                     ? 'bg-black text-white'
                     : 'border border-gray-200 hover:bg-gray-50'
                 }`}
