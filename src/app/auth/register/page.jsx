@@ -6,12 +6,17 @@ import { Suspense, useState } from 'react';
 
 import SocialLoginButtons from '@/components/auth/SocialLoginButtons';
 import EmailOtp from '@/components/Common/EmailOtp';
+import { ErrorToast } from '@/components/Common/ErrorToast';
 import LoadingSpinner from '@/components/Common/LoadingSpinner';
 import { SuccessToast } from '@/components/Common/SuccessToast';
 import { useFingerprint } from '@/lib/hooks/useFingerprint';
-import { useGenerateOtpMutation } from '@/lib/redux/public/auth/authSlice';
-import { handleApiError } from '@/lib/utils/handleError';
+import {
+  useGenerateOtpMutation,
+  useVerifyExistingUserMutation,
+} from '@/lib/redux/public/auth/authSlice';
+import { getApiErrorMessage } from '@/lib/utils/authErrors';
 import { Input } from '@heroui/react';
+import { useRouter } from 'next/navigation';
 
 const mainLogo = '/logo-black.png';
 
@@ -20,6 +25,10 @@ const RegisterContent = () => {
   const [step, setStep] = useState(1);
   const [userDetailsData, setUserDetailsData] = useState(null);
   const [isTransitioning, setIsTransitioning] = useState(false);
+  // { expiresInSeconds, resendInSeconds } — drives the countdowns on step 2.
+  const [otpMeta, setOtpMeta] = useState(null);
+
+  const router = useRouter();
 
   // Dynamic import to avoid SSR issues
   const { useSearchParams } = require('next/navigation');
@@ -29,6 +38,7 @@ const RegisterContent = () => {
   const fingerprint = useFingerprint();
   const [generateOtp, { isLoading: otpGenerateIsLoading }] =
     useGenerateOtpMutation();
+  const [verifyExistingUser] = useVerifyExistingUserMutation();
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -47,33 +57,71 @@ const RegisterContent = () => {
 
     // Validate data before proceeding
     if (!data.name || !data.email || !data.password) {
-      handleApiError(
-        { message: 'All fields are required' },
-        'Validation Error',
-      );
+      ErrorToast('Validation Error', 'All fields are required', 3000);
       return;
     }
 
     // Email validation regex
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     if (!emailRegex.test(data.email)) {
-      handleApiError(
-        { message: 'Please enter a valid email address' },
+      ErrorToast('Validation Error', 'Please enter a valid email address', 3000);
+      return;
+    }
+
+    if (data.password.length < 6) {
+      ErrorToast(
         'Validation Error',
+        'Password must be at least 6 characters',
+        3000,
       );
       return;
     }
 
-    setUserDetailsData(data);
     setIsTransitioning(true);
+
+    // ── Is this address already registered? ───────────────────────────────
+    //
+    // Asked BEFORE a code is sent. Without this a returning customer completed
+    // the entire flow — form, wait for the email, type the code — only to be
+    // met with "Duplicate key error. The data you are trying to insert already
+    // exists." from the unique index. They are now redirected to sign in after
+    // one click, and no pointless code is sent.
+    //
+    // The endpoint answers 200 for "exists" and 404 for "does not", so a 404 is
+    // the happy path. Any OTHER failure (offline, server down) is deliberately
+    // ignored: a check that cannot run must not block a legitimate signup, and
+    // the backend refuses duplicates authoritatively regardless.
+    try {
+      await verifyExistingUser({ email: data.email }).unwrap();
+
+      setIsTransitioning(false);
+      ErrorToast(
+        'Account exists',
+        'You already have an account with this email. Please sign in instead.',
+        6000,
+      );
+      router.push(
+        `/auth/login?pathName=${encodeURIComponent(pathName)}`,
+      );
+      return;
+    } catch (err) {
+      if (err?.status !== 404) {
+        console.warn('Existing-user check unavailable:', getApiErrorMessage(err));
+      }
+      // 404 (or an unavailable check) — carry on and send the code.
+    }
+
+    setUserDetailsData(data);
 
     try {
       const response = await generateOtp({ email: data.email }).unwrap();
 
+      setOtpMeta(response?.data || null);
+
       SuccessToast(
-        'Success',
-        response?.message || 'OTP sent successfully!',
-        10000,
+        'Check your email',
+        response?.message || 'We sent a 6-digit code to your email.',
+        8000,
       );
 
       // Small delay to ensure state is set before switching steps
@@ -83,7 +131,14 @@ const RegisterContent = () => {
       }, 100);
     } catch (err) {
       setIsTransitioning(false);
-      handleApiError(err, 'Failed to send OTP');
+      ErrorToast(
+        'Could not send code',
+        getApiErrorMessage(
+          err,
+          'We could not send your verification code. Please try again.',
+        ),
+        6000,
+      );
     }
   };
 
@@ -232,6 +287,7 @@ const RegisterContent = () => {
             setStep={setStep}
             userDetailsData={userDetailsData}
             pathName={pathName}
+            otpMeta={otpMeta}
           />
         </div>
       )}

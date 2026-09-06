@@ -19,10 +19,22 @@ export function getJwtExpiry(token) {
 // outlived the JWT — leaving a stale token that made every authenticated
 // request fail with "Unauthorized Access" while the user kept browsing.
 // Falls back to a session cookie only if the token carries no `exp`.
+// Sent on every same-site navigation, never on a cross-site request, and (in
+// production) only over HTTPS. `sameSite: 'lax'` is what a session cookie should
+// be: it survives the customer following a link back into the site — including
+// the reset-password link out of their email — while refusing to ride along on
+// a request some other origin makes on their behalf. `secure` is conditional so
+// local development over plain http still works.
+const cookieOptions = () => ({
+  sameSite: 'lax',
+  secure: typeof window !== 'undefined' && window.location.protocol === 'https:',
+});
+
 export function setAuthToken(token) {
   const expires = getJwtExpiry(token);
-  if (expires) Cookies.set('token', token, { expires });
-  else Cookies.set('token', token);
+  const options = cookieOptions();
+  if (expires) Cookies.set('token', token, { ...options, expires });
+  else Cookies.set('token', token, options);
 }
 
 // Drop all auth cookies. Used on explicit logout and whenever the server

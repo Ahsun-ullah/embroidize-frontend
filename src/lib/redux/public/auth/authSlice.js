@@ -23,6 +23,20 @@ export const authSlice = createApi({
         body,
       }),
     }),
+    // Does an account already exist for this address?
+    //
+    // Called before a verification code is sent, so a returning customer is
+    // pointed at the sign-in page immediately instead of filling in the form,
+    // waiting for a code, typing it, and only then being told the address is
+    // taken. Answers 200 when the user exists and 404 when they do not, so
+    // both outcomes are normal and neither is an error worth surfacing.
+    verifyExistingUser: builder.mutation({
+      query: (body) => ({
+        url: '/public/verify-existing-user',
+        method: 'POST',
+        body,
+      }),
+    }),
     generateOtp: builder.mutation({
       query: (body) => ({
         url: '/public/otp',
@@ -90,6 +104,7 @@ export const {
   useResetPasswordMutation,
   useGenerateOtpMutation,
   useVerifyOtpMutation,
+  useVerifyExistingUserMutation,
   useGoogleAuthMutation,
   useAppleAuthMutation,
 } = authSlice;
