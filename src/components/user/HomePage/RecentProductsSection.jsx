@@ -22,7 +22,7 @@ const RecentProductsSection = ({ recentProducts }) => {
 
           <div className='text-center mt-12'>
             <Link
-              href={'/products'}
+              href={'/products?since=30'}
               prefetch={false}
               className='inline-flex items-center justify-center rounded-full bg-black px-8 py-4 text-base font-bold text-white hover:bg-gray-800 transition-all'
             >

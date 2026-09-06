@@ -13,6 +13,7 @@ export async function getAdminReviews(
   page = 1,
   limit = 20,
   rating = '',
+  featured = false,
 ) {
   try {
     const headers = await serverHeaders();
@@ -22,6 +23,7 @@ export async function getAdminReviews(
     url.searchParams.set('limit', String(limit));
     if (search) url.searchParams.set('search', search);
     if (rating) url.searchParams.set('rating', String(rating));
+    if (featured) url.searchParams.set('featured', 'true');
 
     const response = await fetch(url.toString(), {
       headers,
@@ -34,6 +36,10 @@ export async function getAdminReviews(
     return {
       reviews: Array.isArray(payload.reviews) ? payload.reviews : [],
       newCount: payload.newCount || 0,
+      // Curation counters: how many reviews are starred in total, and how many
+      // of them the pricing page actually renders.
+      featuredCount: payload.featuredCount || 0,
+      featuredLimit: payload.featuredLimit || 6,
       pagination: payload.pagination || { page, limit, total: 0, pages: 0 },
     };
   } catch (error) {
@@ -41,6 +47,8 @@ export async function getAdminReviews(
     return {
       reviews: [],
       newCount: 0,
+      featuredCount: 0,
+      featuredLimit: 6,
       pagination: { page, limit, total: 0, pages: 0 },
     };
   }

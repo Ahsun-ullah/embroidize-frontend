@@ -1,4 +1,6 @@
-import { getSiteConfig } from '@/lib/apis/public/siteConfig';
+import { getSiteConfig, windowPhrase } from '@/lib/apis/public/siteConfig';
+import { getFeaturedReviews } from '@/lib/apis/public/featuredReviews';
+import { buildFaqJsonLd, buildSubscriptionFaqs } from './faqs';
 import SubscriptionsPageClient from './SubscriptionsPageClient';
 
 // Metadata must live in a server component — the pricing UI is fully client
@@ -39,7 +41,31 @@ export const metadata = {
 export default async function SubscriptionsPage() {
   // Admin-managed free-tier quota — keeps the static Free plan card's copy in
   // sync with what the backend actually enforces.
-  const siteConfig = await getSiteConfig();
+  const [siteConfig, featured] = await Promise.all([
+    getSiteConfig(),
+    getFeaturedReviews(),
+  ]);
 
-  return <SubscriptionsPageClient siteConfig={siteConfig} />;
+  // FAQ rich-result markup has to be emitted from a server component; the client
+  // page renders the same list from the same builder so the two never drift.
+  const faqs = buildSubscriptionFaqs(
+    siteConfig?.freeDownloadLimit,
+    windowPhrase(siteConfig?.freeDownloadWindow),
+  );
+
+  return (
+    <>
+      <script
+        type='application/ld+json'
+        dangerouslySetInnerHTML={{
+          __html: JSON.stringify(buildFaqJsonLd(faqs)),
+        }}
+      />
+      <SubscriptionsPageClient
+        siteConfig={siteConfig}
+        featuredReviews={featured.reviews}
+        totalReviewCount={featured.totalCount}
+      />
+    </>
+  );
 }

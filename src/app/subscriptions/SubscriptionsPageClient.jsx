@@ -1,22 +1,25 @@
 'use client';
 import { ErrorToast } from '@/components/Common/ErrorToast';
 import PaymentHelpModal from '@/components/Common/PaymentHelpModal';
+import OfferCountdown from '@/components/Common/OfferCountdown';
 import PurchaseButton from '@/components/Common/PurchaseButton';
 import { SuccessToast } from '@/components/Common/SuccessToast';
 import Footer from '@/components/user/HomePage/Footer';
 import Header from '@/components/user/HomePage/Header';
+import FeaturedReviews from '@/features/reviews/FeaturedReviews';
 import { windowPhrase } from '@/lib/apis/public/siteConfig';
 import { useUserInfoQuery } from '@/lib/redux/common/user/userInfoSlice';
 import { Divider } from '@heroui/divider';
 import { GiftIcon } from 'lucide-react';
 import { usePathname, useRouter } from 'next/navigation';
-import { useEffect, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
+import { buildSubscriptionFaqs } from './faqs';
 
 /* One-Time Payment — diamond/gem (premium one-time investment) */
 const OneTimeIcon = () => (
   <svg
-    width='34'
-    height='34'
+    width='26'
+    height='26'
     viewBox='0 0 24 24'
     fill='none'
     stroke='currentColor'
@@ -33,8 +36,8 @@ const OneTimeIcon = () => (
 /* Yearly Premium — crown (best value, top tier) */
 const YearlyIcon = () => (
   <svg
-    width='34'
-    height='34'
+    width='26'
+    height='26'
     viewBox='0 0 24 24'
     fill='none'
     stroke='currentColor'
@@ -53,8 +56,8 @@ const YearlyIcon = () => (
 /* Monthly Pro — refresh cycle (recurring monthly) */
 const MonthlyIcon = () => (
   <svg
-    width='34'
-    height='34'
+    width='26'
+    height='26'
     viewBox='0 0 24 24'
     fill='none'
     stroke='currentColor'
@@ -68,8 +71,8 @@ const MonthlyIcon = () => (
     <polyline points='3 21 3 16 8 16' />
   </svg>
 );
-const CheckCircle = () => (
-  <svg width='18' height='18' viewBox='0 0 24 24'>
+const CheckCircle = ({ size = 18 }) => (
+  <svg width={size} height={size} viewBox='0 0 24 24'>
     <circle cx='12' cy='12' r='11' fill='currentColor' />
     <path
       d='M7 12.5l3 3 7-7'
@@ -78,6 +81,20 @@ const CheckCircle = () => (
       fill='none'
       strokeLinecap='round'
       strokeLinejoin='round'
+    />
+  </svg>
+);
+/* Comparison-table "not included" marker */
+const DashIcon = () => (
+  <svg width='18' height='18' viewBox='0 0 24 24' aria-hidden='true'>
+    <line
+      x1='7'
+      y1='12'
+      x2='17'
+      y2='12'
+      stroke='currentColor'
+      strokeWidth='2.4'
+      strokeLinecap='round'
     />
   </svg>
 );
@@ -115,10 +132,10 @@ const StarFilled = () => (
     <polygon points='12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2' />
   </svg>
 );
-const RefreshIcon = () => (
+const RefreshIcon = ({ size = 22 }) => (
   <svg
-    width='34'
-    height='34'
+    width={size}
+    height={size}
     viewBox='0 0 24 24'
     fill='none'
     stroke='currentColor'
@@ -131,10 +148,10 @@ const RefreshIcon = () => (
     <path d='M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15' />
   </svg>
 );
-const HeadsetIcon = () => (
+const HeadsetIcon = ({ size = 22 }) => (
   <svg
-    width='34'
-    height='34'
+    width={size}
+    height={size}
     viewBox='0 0 24 24'
     fill='none'
     stroke='currentColor'
@@ -146,10 +163,10 @@ const HeadsetIcon = () => (
     <path d='M21 19a2 2 0 0 1-2 2h-1a2 2 0 0 1-2-2v-3a2 2 0 0 1 2-2h3zM3 19a2 2 0 0 0 2 2h1a2 2 0 0 0 2-2v-3a2 2 0 0 0-2-2H3z' />
   </svg>
 );
-const PeopleIcon = () => (
+const PeopleIcon = ({ size = 22 }) => (
   <svg
-    width='34'
-    height='34'
+    width={size}
+    height={size}
     viewBox='0 0 24 24'
     fill='none'
     stroke='currentColor'
@@ -163,39 +180,84 @@ const PeopleIcon = () => (
   </svg>
 );
 
-/* ---------- Derive display info from billingInterval ---------- */
-const getPlanDisplay = (plan) => {
+/* Money with cents only when they exist ($149, $4.99). */
+const money = (n) => {
+  const v = Number(n);
+  if (!Number.isFinite(v)) return '';
+  return Number.isInteger(v) ? `$${v}` : `$${v.toFixed(2)}`;
+};
+
+/* ---------- Derive display info from billingInterval ----------
+   Yearly plans are quoted as a per-month equivalent with the full term total
+   underneath, because "$4.99/mo" beside the monthly plan's "$9.99/mo" is the
+   only presentation that lets someone compare the two at a glance. The
+   strikethrough price is divided by the same term so both stay in one unit.
+
+   renewNote always quotes plan.price, never originalPrice: the gateway charges
+   the same amount on renewal, so a higher "renews at" figure would be a price
+   we never actually bill. */
+const getPlanDisplay = (plan, originalPrice) => {
   const i = (plan.billingInterval || '').toLowerCase();
+  const price = Number(plan.price) || 0;
+  const orig = originalPrice != null ? Number(originalPrice) : null;
+
   if (!i) {
     return {
       icon: <OneTimeIcon />,
-      subtitle: 'Lifetime Access',
-      pill: 'One-Time Payment',
-      priceSuffix: '',
-      priceLabel: 'One-time payment',
+      tagline: 'Pay once, yours forever',
+      pill: 'One-time payment',
+      headlinePrice: price,
+      headlineSuffix: '',
+      strikePrice: orig,
+      termTotalLine: null,
+      renewNote: 'One-time payment — this never renews',
+      renewsCell: 'Never',
+      billingCell: 'One-time',
       ctaTitle: `Get ${plan.name}`,
-      ctaSub: 'One-time payment',
     };
   }
   if (i.startsWith('year')) {
     return {
       icon: <YearlyIcon />,
-      subtitle: 'Best Value',
+      tagline: 'Best value — our lowest monthly rate',
       pill: 'Billed yearly',
-      priceSuffix: '/year',
-      priceLabel: 'Billed yearly',
-      ctaTitle: `Start ${plan.name}`,
-      ctaSub: 'Billed yearly',
+      headlinePrice: price / 12,
+      headlineSuffix: '/mo',
+      strikePrice: orig != null ? orig / 12 : null,
+      termTotalLine: `Get 12 months for ${money(price)}`,
+      renewNote: `Renews at ${money(price)}/year · cancel anytime`,
+      renewsCell: 'Yearly',
+      billingCell: 'Billed yearly',
+      ctaTitle: `Choose ${plan.name}`,
+    };
+  }
+  if (i.startsWith('week')) {
+    return {
+      icon: <MonthlyIcon />,
+      tagline: 'Short commitment, full access',
+      pill: 'Billed weekly',
+      headlinePrice: price,
+      headlineSuffix: '/wk',
+      strikePrice: orig,
+      termTotalLine: null,
+      renewNote: `Renews at ${money(price)}/week · cancel anytime`,
+      renewsCell: 'Weekly',
+      billingCell: 'Billed weekly',
+      ctaTitle: `Choose ${plan.name}`,
     };
   }
   return {
     icon: <MonthlyIcon />,
-    subtitle: 'Flexible Choice',
+    tagline: 'Flexible — stop whenever you like',
     pill: 'Billed monthly',
-    priceSuffix: '/month',
-    priceLabel: 'Billed monthly',
-    ctaTitle: `Start ${plan.name}`,
-    ctaSub: 'Billed monthly',
+    headlinePrice: price,
+    headlineSuffix: '/mo',
+    strikePrice: orig,
+    termTotalLine: null,
+    renewNote: `Renews at ${money(price)}/month · cancel anytime`,
+    renewsCell: 'Monthly',
+    billingCell: 'Billed monthly',
+    ctaTitle: `Choose ${plan.name}`,
   };
 };
 
@@ -218,7 +280,234 @@ const getStaticDefaults = (plan) => {
   };
 };
 
-export default function SubscriptionsPageClient({ siteConfig }) {
+/* ---------- Feature comparison ----------
+   Only rows we can stand behind: read straight off the plan documents, or
+   claims the cards above the table already make. */
+const COMPARISON_ROWS = [
+  { label: 'Price', get: (c) => c.priceCell },
+  { label: 'Billing', get: (c) => c.billingCell },
+  { label: 'Downloads', get: (c) => c.downloadsCell },
+  { label: 'Entire design library', get: () => true },
+  {
+    label: 'All machine formats (PES, DST, JEF, VP3, HUS, EXP, PCS, CND, XXX)',
+    // The full format list is fine across a wide table cell but wraps to four
+    // lines in the stacked mobile row, so that view uses the short form.
+    shortLabel: 'All machine formats',
+    get: () => true,
+  },
+  { label: 'New designs as they are added', get: () => true },
+  { label: 'Commercial use licence', get: (c) => c.commercial },
+  { label: 'Re-download anything you have taken', get: () => true },
+  { label: 'Renews', get: (c) => c.renewsCell },
+];
+
+function ComparisonCell({ value, highlight = false }) {
+  if (value === true)
+    return (
+      <span className='inline-flex text-black'>
+        <CheckCircle size={highlight ? 22 : 20} />
+      </span>
+    );
+  if (value === false)
+    return (
+      <span className='inline-flex text-gray-300'>
+        <DashIcon />
+      </span>
+    );
+  return (
+    <span
+      className={`text-black ${
+        highlight ? 'text-base font-bold' : 'text-sm font-medium'
+      }`}
+    >
+      {value}
+    </span>
+  );
+}
+
+function ComparisonTable({ columns }) {
+  return (
+    <section className='mt-16'>
+      <div className='mb-6 text-center'>
+        <h2 className='text-2xl font-extrabold tracking-tight text-black md:text-3xl'>
+          Compare the plans
+        </h2>
+        <p className='mt-2 text-sm text-gray-600'>
+          Every plan opens the same library. What changes is how much you can
+          take each day, and what you are allowed to do with it.
+        </p>
+      </div>
+
+      {/* Mobile: one card per plan. A five-column table cannot be made readable
+          at 375px — side-scrolling pushes the plan you are comparing against off
+          screen, which is the whole point of the table — so the same rows are
+          restacked as label/value pairs under each plan. */}
+      <div className='space-y-4 md:hidden'>
+        {columns.map((c) => (
+          <div
+            key={c.key}
+            className={`overflow-hidden rounded-2xl bg-white shadow-sm ${
+              c.highlight ? 'ring-2 ring-black' : ''
+            }`}
+          >
+            <div
+              className={`px-5 py-3 ${c.highlight ? 'bg-black' : 'bg-gray-50'}`}
+            >
+              {c.highlight && (
+                <span className='mb-1 inline-flex items-center gap-1 rounded-full bg-white px-2.5 py-0.5 text-[10px] font-bold text-black'>
+                  <StarFilled />
+                  MOST POPULAR
+                </span>
+              )}
+              <div
+                className={
+                  c.highlight
+                    ? 'text-base font-bold text-white'
+                    : 'text-sm font-bold text-black'
+                }
+              >
+                {c.name}
+              </div>
+            </div>
+
+            <dl className='divide-y divide-gray-100'>
+              {COMPARISON_ROWS.map((row) => (
+                <div
+                  key={row.label}
+                  className='flex items-center justify-between gap-4 px-5 py-3'
+                >
+                  <dt className='text-xs leading-snug text-gray-600'>
+                    {row.shortLabel ?? row.label}
+                  </dt>
+                  <dd className='shrink-0 text-right'>
+                    <ComparisonCell
+                      value={row.get(c)}
+                      highlight={c.highlight}
+                    />
+                  </dd>
+                </div>
+              ))}
+            </dl>
+          </div>
+        ))}
+      </div>
+
+      <div className='hidden overflow-hidden rounded-2xl bg-white shadow-md md:block'>
+        <div className='overflow-x-auto'>
+          <table className='w-full min-w-[640px] border-separate border-spacing-0 text-left'>
+            <thead>
+              <tr>
+                <th className='sticky left-0 z-10 border-b border-gray-200 bg-white px-5 py-4 text-xs font-semibold uppercase tracking-wider text-gray-500'>
+                  Features
+                </th>
+                {columns.map((c) => (
+                  <th
+                    key={c.key}
+                    className={`px-5 text-center align-bottom ${
+                      c.highlight
+                        ? 'rounded-t-xl bg-black py-5'
+                        : 'border-b border-gray-200 py-4'
+                    }`}
+                  >
+                    {c.highlight && (
+                      <span className='mb-1.5 inline-flex items-center gap-1 rounded-full bg-white px-2.5 py-0.5 text-[10px] font-bold text-black'>
+                        <StarFilled />
+                        MOST POPULAR
+                      </span>
+                    )}
+                    <div
+                      className={
+                        c.highlight
+                          ? 'text-base font-bold text-white'
+                          : 'text-sm font-bold text-black'
+                      }
+                    >
+                      {c.name}
+                    </div>
+                  </th>
+                ))}
+              </tr>
+            </thead>
+            <tbody>
+              {COMPARISON_ROWS.map((row, ri) => (
+                <tr key={row.label}>
+                  <th
+                    scope='row'
+                    className={`sticky left-0 z-10 px-5 py-3.5 text-sm font-medium text-gray-700 ${
+                      ri % 2 === 1 ? 'bg-gray-50' : 'bg-white'
+                    }`}
+                  >
+                    {row.label}
+                  </th>
+                  {columns.map((c) => {
+                    // The popular column is drawn as a boxed card sitting over
+                    // the table: black cap above, black sides down the rows,
+                    // closed off under the last one.
+                    const isLast = ri === COMPARISON_ROWS.length - 1;
+                    return (
+                      <td
+                        key={c.key}
+                        className={`px-5 py-3.5 text-center ${
+                          c.highlight
+                            ? `border-x-2 border-black bg-gray-100 ${
+                                isLast ? 'rounded-b-xl border-b-2' : ''
+                              }`
+                            : ri % 2 === 1
+                              ? 'bg-gray-50'
+                              : ''
+                        }`}
+                      >
+                        <ComparisonCell
+                          value={row.get(c)}
+                          highlight={c.highlight}
+                        />
+                      </td>
+                    );
+                  })}
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+  );
+}
+
+function FaqSection({ faqs }) {
+  return (
+    <section className='mt-16'>
+      <div className='mb-6 text-center'>
+        <h2 className='text-2xl font-extrabold tracking-tight text-black md:text-3xl'>
+          Frequently asked questions
+        </h2>
+      </div>
+
+      <div className='mx-auto max-w-3xl space-y-3'>
+        {faqs.map(({ q, a }) => (
+          <details
+            key={q}
+            className='group rounded-2xl bg-white px-6 py-4 shadow-sm ring-1 ring-black/5 transition-shadow hover:shadow-md'
+          >
+            <summary className='flex cursor-pointer list-none items-center justify-between gap-4 text-base font-bold text-black'>
+              {q}
+              <span className='shrink-0 text-2xl font-light text-gray-400 transition-transform group-open:rotate-45'>
+                +
+              </span>
+            </summary>
+            <p className='mt-3 text-sm leading-relaxed text-gray-600'>{a}</p>
+          </details>
+        ))}
+      </div>
+    </section>
+  );
+}
+
+export default function SubscriptionsPageClient({
+  siteConfig,
+  featuredReviews = [],
+  totalReviewCount = 0,
+}) {
   // Admin-managed free-tier quota (from /public/site-config via the server
   // page). Fallback matches the backend's hardcoded default.
   const freeLimit = siteConfig?.freeDownloadLimit;
@@ -242,7 +531,12 @@ export default function SubscriptionsPageClient({ siteConfig }) {
   // sub beyond its dunning grace). That showed "✓ Active Plan" on a dead plan
   // AND disabled its button, so the one customer most likely to want to pay
   // again was the one person who couldn't.
-  const HAS_ACCESS_STATES = ['active', 'cancelling', 'lifetime', 'payment_failed'];
+  const HAS_ACCESS_STATES = [
+    'active',
+    'cancelling',
+    'lifetime',
+    'payment_failed',
+  ];
   const sub = userInfoData?.subscription;
   const hasAccess = HAS_ACCESS_STATES.includes(userInfoData?.accessState);
   const activePlanId = hasAccess ? (sub?.planId?._id ?? null) : null;
@@ -254,10 +548,10 @@ export default function SubscriptionsPageClient({ siteConfig }) {
   const isLoggedIn = Boolean(userInfoData?.email || userInfoData?._id);
   const isFreeActive = isLoggedIn && !activePlanId;
 
-  // Define the order you want plans to appear in
-  const PLAN_ORDER = ['one-time', 'year', 'month'];
+  const sortPlans = useCallback((plans) => {
+    // Define the order you want plans to appear in
+    const PLAN_ORDER = ['one-time', 'year', 'month', 'week'];
 
-  const sortPlans = (plans) => {
     return [...plans].sort((a, b) => {
       const getOrderKey = (plan) => {
         if (!plan.billingInterval) return 'one-time';
@@ -267,7 +561,7 @@ export default function SubscriptionsPageClient({ siteConfig }) {
         PLAN_ORDER.indexOf(getOrderKey(a)) - PLAN_ORDER.indexOf(getOrderKey(b))
       );
     });
-  };
+  }, []);
 
   useEffect(() => {
     const searchParams = new URLSearchParams(window.location.search);
@@ -300,7 +594,7 @@ export default function SubscriptionsPageClient({ siteConfig }) {
     if (searchParams.get('pay') === '1') {
       setShowPayHelp(true);
     }
-  }, [pathName]);
+  }, [pathName, router]);
 
   useEffect(() => {
     const fetchPlans = async () => {
@@ -319,7 +613,7 @@ export default function SubscriptionsPageClient({ siteConfig }) {
       }
     };
     fetchPlans();
-  }, []);
+  }, [sortPlans]);
 
   // "Pay another way". Shown ALWAYS, not only after a failure: a card decline
   // happens on the gateway's hosted checkout, so this site is never told it
@@ -329,34 +623,7 @@ export default function SubscriptionsPageClient({ siteConfig }) {
   const [showPayHelp, setShowPayHelp] = useState(false);
   const [checkoutTrouble, setCheckoutTrouble] = useState(false);
 
-  const [dailyResetTime, setDailyResetTime] = useState('Loading...');
-
-  useEffect(() => {
-    const DEADLINE = new Date();
-    DEADLINE.setHours(23, 59, 59, 999);
-
-    const updateCountdown = () => {
-      const now = new Date();
-      const diff = DEADLINE.getTime() - now.getTime();
-
-      if (diff <= 0) {
-        setDailyResetTime('Offer ended');
-        return;
-      }
-
-      const hours = Math.floor((diff % 86400000) / 3600000);
-      const minutes = Math.floor((diff % 3600000) / 60000);
-      const seconds = Math.floor((diff % 60000) / 1000);
-
-      setDailyResetTime(
-        `${String(hours).padStart(2, '0')}:${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}`,
-      );
-    };
-
-    updateCountdown();
-    const interval = setInterval(updateCountdown, 1000);
-    return () => clearInterval(interval);
-  }, []);
+  const faqs = buildSubscriptionFaqs(freeLimit, freeWindow);
 
   if (loading)
     return (
@@ -388,20 +655,104 @@ export default function SubscriptionsPageClient({ siteConfig }) {
       </>
     );
 
+  // Card grid sizing. Four cards (Free + three terms) is the normal case, but
+  // the paid plans come from the DB, so a two- or three-card page has to stay
+  // centred instead of stretching across the full 7xl track.
+  const cardCount = 1 + (plans.length || 1);
+  const gridCols =
+    cardCount >= 4
+      ? 'sm:grid-cols-2 xl:grid-cols-4'
+      : cardCount === 3
+        ? 'sm:grid-cols-2 lg:grid-cols-3'
+        : 'sm:grid-cols-2';
+  const gridMax =
+    cardCount >= 4 ? 'max-w-7xl' : cardCount === 3 ? 'max-w-5xl' : 'max-w-3xl';
+
+  // Columns for the comparison table: the static Free tier plus whatever paid
+  // plans the API returned, in the same order as the cards above it.
+  const comparisonColumns = [
+    {
+      key: 'free',
+      name: 'Free Forever',
+      priceCell: '$0',
+      billingCell: 'No billing',
+      downloadsCell: `${freeLimit} per ${freeWindow}`,
+      commercial: false,
+      renewsCell: 'Never',
+      highlight: false,
+    },
+    ...plans.map((plan) => {
+      const staticVals = getStaticDefaults(plan);
+      const originalPrice = plan.originalPrice ?? staticVals.originalPrice;
+      const d = getPlanDisplay(plan, originalPrice);
+      return {
+        key: plan._id,
+        name: plan.name,
+        priceCell: `${money(d.headlinePrice)}${d.headlineSuffix}`,
+        billingCell: d.billingCell,
+        downloadsCell:
+          plan.dailyLimit != null ? `${plan.dailyLimit} per day` : '—',
+        commercial: true,
+        renewsCell: d.renewsCell,
+        highlight: (plan.billingInterval || '')
+          .toLowerCase()
+          .startsWith('year'),
+      };
+    }),
+  ];
+
   return (
     <>
       <Header />
 
       <div className='min-h-screen bg-[#F5F5F7] py-12 pb-20 px-4 relative overflow-hidden'>
-        {/* Page heading — add above the pricing grid */}
-        <div className='text-center mb-8 max-w-2xl mx-auto'>
-          <h1 className='text-3xl md:text-4xl font-extrabold text-black tracking-tight'>
+        {/* ---------- HERO ---------- */}
+        <div className='mx-auto mb-8 max-w-2xl text-center'>
+          <span className='text-xs font-bold uppercase tracking-[0.2em] text-gray-400'>
+            Pricing
+          </span>
+          <h1 className='mt-3 text-4xl font-extrabold tracking-tight text-black md:text-5xl'>
             Choose Your Plan
           </h1>
-          <p className='mt-3 text-gray-600 text-sm md:text-base'>
+          <p className='mx-auto mt-4 max-w-xl text-sm leading-relaxed text-gray-600 md:text-base'>
             Get instant access to premium embroidery designs in every format.
             Commercial use included, cancel anytime.
           </p>
+        </div>
+
+        {/* ---------- SINGLE OFFER COUNTDOWN ----------
+            Was repeated inside every paid card; one bar above the grid says it
+            once and leaves each card telling a single price story. */}
+        {plans.length > 0 && (
+          <div className='mx-auto mb-8 flex max-w-md items-center justify-center gap-3 rounded-full bg-black px-6 py-3 text-white shadow-md'>
+            <ClockIcon />
+            <p className='text-sm font-semibold text-white'>
+              Limited time offer — ends in{' '}
+              <OfferCountdown className='font-mono' />
+            </p>
+          </div>
+        )}
+
+        {/* Trust chips — only claims this page can stand behind. Rendered as
+            white pills so they read as part of the carded page rather than
+            loose text floating on the grey. */}
+        <div className='mx-auto mb-10 flex max-w-3xl flex-wrap items-center justify-center gap-2'>
+          {[
+            'Cancel anytime',
+            'All machine formats included',
+            'Commercial use on paid plans',
+            'Instant download',
+          ].map((chip) => (
+            <span
+              key={chip}
+              className='flex items-center gap-1.5 rounded-full bg-white px-3.5 py-1.5 text-xs font-medium text-gray-700 shadow-sm ring-1 ring-black/5'
+            >
+              <span className='text-black'>
+                <CheckCircle size={14} />
+              </span>
+              {chip}
+            </span>
+          ))}
         </div>
 
         {/* Loud version — only after we KNOW checkout didn't complete. */}
@@ -411,9 +762,9 @@ export default function SubscriptionsPageClient({ siteConfig }) {
               Payment didn&apos;t go through?
             </p>
             <p className='mx-auto mt-2 max-w-md text-sm leading-relaxed text-gray-600'>
-              Cards are declined for all sorts of reasons that have nothing to do
-              with you. We can take your payment another way and set your account
-              up by hand — usually within a few hours.
+              Cards are declined for all sorts of reasons that have nothing to
+              do with you. We can take your payment another way and set your
+              account up by hand — usually within a few hours.
             </p>
             <button
               onClick={() => setShowPayHelp(true)}
@@ -424,335 +775,310 @@ export default function SubscriptionsPageClient({ siteConfig }) {
           </div>
         )}
 
-        <div className='max-w-7xl mx-auto relative z-10 items-center'>
+        <div className='max-w-7xl mx-auto relative z-10'>
           {/* The Free plan is ALWAYS shown. Paid plans render when available;
               otherwise a "premium coming soon" message sits beside Free. */}
-          <div className='w-full flex flex-wrap justify-center items-stretch gap-6 mb-8'>
-                {/* ---------- STATIC FREE PLAN CARD ---------- */}
-                <div
-                  className={`w-full max-w-sm md:w-[360px] relative bg-white rounded-3xl shadow-lg p-7 pt-8 flex flex-col transition-all duration-300 hover:-translate-y-1 hover:shadow-2xl ${
-                    isFreeActive ? 'ring-2 ring-green-500' : ''
-                  }`}
-                >
-                  {/* Badge: "Active Plan" for registered free users, otherwise a neutral starter badge */}
-                  {isFreeActive ? (
-                    <div className='absolute -top-4 left-1/2 -translate-x-1/2 z-20'>
-                      <span className='bg-green-500 text-white text-xs font-bold px-4 py-1.5 rounded-full shadow-md whitespace-nowrap'>
-                        ✓ Active Plan
-                      </span>
-                    </div>
-                  ) : (
-                    <div className='absolute -top-4 left-1/2 -translate-x-1/2 z-20 flex items-center gap-1.5 bg-black text-white text-xs font-semibold px-4 py-1.5 rounded-full shadow-md whitespace-nowrap'>
-                      <StarFilled />
-                      Best For Starter
-                    </div>
-                  )}
-
-                  {/* Header: icon + title */}
-                  <div className='flex items-start gap-4 mb-5'>
-                    <div className='w-16 h-16 rounded-2xl bg-gray-100 flex items-center justify-center text-black flex-shrink-0'>
-                      <GiftIcon
-                        width='34'
-                        height='34'
-                        viewBox='0 0 24 24'
-                        fill='none'
-                        stroke='currentColor'
-                        strokeWidth='1.6'
-                        strokeLinecap='round'
-                        strokeLinejoin='round'
-                      />
-                    </div>
-                    <div className='pt-1'>
-                      <h2 className='text-xl font-bold text-black '>
-                        Free Forever
-                      </h2>
-                      <p className='text-sm text-gray-600 mt-1'>
-                        For Life Time
-                      </p>
-                    </div>
-                  </div>
-
-                  {/* Price row */}
-                  <div className='flex items-start justify-between mb-5'>
-                    <div>
-                      <div className='flex items-baseline gap-2 flex-wrap'>
-                        <span className='text-4xl font-extrabold text-black tracking-tight'>
-                          $0
-                        </span>
-                        <span className='text-sm text-gray-500'>
-                          / Forever Free
-                        </span>
-                        <span className='inline-block mt-2 bg-gray-100 text-gray-700 text-xs font-medium px-3 py-1 rounded-full'>
-                          No Billing
-                        </span>
-                      </div>
-                    </div>
-                    <div className='bg-gray-100 rounded-xl px-4 py-2 text-center min-w-[80px]'>
-                      <div className='text-2xl font-bold text-black leading-none'>
-                        {freeLimit}
-                      </div>
-                      <div className='text-[10px] text-gray-600 mt-1 leading-tight'>
-                        Downloads
-                        <br />
-                        per {freeWindow}
-                      </div>
-                    </div>
-                  </div>
-
-                  {/* Tagline box */}
-                  <div className='bg-gray-100 rounded-xl px-4 py-4 mb-5 text-center gap-3'>
-                    Perfect for trying out Embroidize!
-                  </div>
-
-                  {/* Features list */}
-                  <ul className='space-y-2.5 mb-6 flex-1'>
-                    {[
-                      `${freeLimit} Downloads per ${freeWindow}`,
-                      'Access For Life Time new designs',
-                      'All Design Formats',
-                      'Personal Use Only',
-                      'On Demand support',
-                      'No Credit Card Required',
-                    ].map((f) => (
-                      <li
-                        key={f}
-                        className='flex items-start gap-2.5 text-sm text-gray-700'
-                      >
-                        <span className='text-black flex-shrink-0 mt-0.5'>
-                          <CheckCircle />
-                        </span>
-                        <span>{f}</span>
-                      </li>
-                    ))}
-                  </ul>
-
-                  {/* CTA — mirrors PurchaseButton's states */}
-                  {isFreeActive ? (
-                    <button
-                      disabled
-                      className='w-full py-3.5 px-4 rounded-xl bg-green-500 text-white cursor-not-allowed flex flex-col items-center justify-center gap-0.5'
-                    >
-                      <span className='font-semibold text-sm flex items-center gap-2'>
-                        <span className='text-white'>✓</span>
-                        Active Plan
-                      </span>
-                      <span className='text-xs text-green-100'>
-                        You are on the free plan
-                      </span>
-                    </button>
-                  ) : isLoggedIn ? (
-                    <button
-                      disabled
-                      className='w-full py-3.5 px-4 rounded-xl bg-gray-200 text-gray-500 cursor-not-allowed flex items-center justify-center'
-                    >
-                      <span className='font-semibold text-sm'>
-                        Included in your plan
-                      </span>
-                    </button>
-                  ) : (
-                    <button
-                      onClick={() => router.push('/auth/register')}
-                      className='w-full py-5 px-4 rounded-xl bg-black text-white hover:bg-gray-900 active:scale-[0.99] transition-all duration-200 flex items-center justify-center'
-                    >
-                      <span className='font-semibold text-base leading-tight'>
-                        Start Free Now
-                      </span>
-                    </button>
-                  )}
-
-                  {/* Footer trust row */}
-                  <div className='flex items-center justify-center gap-6 mt-5 pt-4 border-t border-gray-100'>
-                    <div className='flex items-center gap-1.5 text-xs text-gray-600'>
-                      <ShieldIcon /> No Payment Required
-                    </div>
-                  </div>
+          <div
+            className={`mx-auto grid w-full grid-cols-1 items-stretch gap-6 ${gridCols} ${gridMax}`}
+          >
+            {/* ---------- STATIC FREE PLAN CARD ---------- */}
+            <div
+              className={`relative flex flex-col rounded-3xl bg-white p-6 pt-8 shadow-lg transition-all duration-300 hover:-translate-y-1 hover:shadow-2xl ${
+                isFreeActive ? 'ring-2 ring-green-500' : 'ring-1 ring-black/5'
+              }`}
+            >
+              {isFreeActive && (
+                <div className='absolute -top-3.5 left-1/2 z-20 -translate-x-1/2'>
+                  <span className='whitespace-nowrap rounded-full bg-green-500 px-4 py-1.5 text-xs font-bold text-white shadow-md'>
+                    ✓ Active Plan
+                  </span>
                 </div>
+              )}
 
-                {/* ---------- PAID PLANS (or coming-soon message) ---------- */}
-                {plans.length === 0 ? (
-                  <div className='w-full max-w-sm md:w-[360px] relative bg-white rounded-3xl shadow-lg p-7 pt-8 flex flex-col items-center justify-center text-center'>
-                    <div className='w-16 h-16 rounded-2xl bg-gray-100 flex items-center justify-center text-black mb-4'>
-                      <StarFilled />
-                    </div>
-                    <h2 className='text-xl font-bold text-black'>
-                      Premium plans coming soon
-                    </h2>
-                    <p className='text-sm text-gray-600 mt-2'>
-                      We’re putting the finishing touches on our premium
-                      subscriptions. In the meantime, enjoy the free plan — check
-                      back shortly.
-                    </p>
-                    <a
-                      href='mailto:support@embroidize.com?subject=Notify me about premium plans'
-                      className='w-full mt-6 py-3.5 px-4 rounded-xl bg-black text-white hover:bg-gray-900 transition-all duration-200 font-semibold text-sm'
-                    >
-                      Notify me
-                    </a>
-                  </div>
+              {/* Header: icon + name + one-line tagline */}
+              <div className='mb-5 flex items-center gap-3'>
+                <div className='flex h-11 w-11 flex-shrink-0 items-center justify-center rounded-xl bg-gray-100 text-black'>
+                  <GiftIcon width='26' height='26' strokeWidth='1.6' />
+                </div>
+                <div>
+                  <h2 className='text-lg font-bold leading-tight text-black'>
+                    Free Forever
+                  </h2>
+                  <p className='text-xs text-gray-500'>
+                    Try the whole library first
+                  </p>
+                </div>
+              </div>
+
+              {/* Price block — same fixed-height rows as the paid cards so all
+                  four headline prices land on one line across the grid. */}
+              <div className='mb-1 flex h-6 items-end'>
+                <span className='inline-block rounded-full bg-gray-100 px-2.5 py-0.5 text-[11px] font-semibold text-gray-600'>
+                  No card needed
+                </span>
+              </div>
+              <div className='flex items-baseline gap-1.5'>
+                <span className='text-4xl font-extrabold tracking-tight text-black'>
+                  $0
+                </span>
+                <span className='text-sm font-medium text-gray-500'>
+                  forever
+                </span>
+              </div>
+              <p className='mt-1.5 h-5 text-xs text-gray-500'>
+                {freeLimit} downloads per {freeWindow}
+              </p>
+              <p className='mt-3 border-t border-gray-100 pt-3 text-xs text-gray-500'>
+                Free forever — nothing to cancel
+              </p>
+
+              {/* CTA — mirrors PurchaseButton's states */}
+              <div className='mt-4'>
+                {isFreeActive ? (
+                  <button
+                    disabled
+                    className='flex w-full cursor-not-allowed flex-col items-center justify-center gap-0.5 rounded-xl bg-green-500 px-4 py-3.5 text-white'
+                  >
+                    <span className='flex items-center gap-2 text-sm font-semibold'>
+                      <span className='text-white'>✓</span>
+                      Active Plan
+                    </span>
+                    <span className='text-xs text-green-100'>
+                      You are on the free plan
+                    </span>
+                  </button>
+                ) : isLoggedIn ? (
+                  <button
+                    disabled
+                    className='flex w-full cursor-not-allowed items-center justify-center rounded-xl bg-gray-200 px-4 py-3.5 text-gray-500'
+                  >
+                    <span className='text-sm font-semibold'>
+                      Included in your plan
+                    </span>
+                  </button>
                 ) : (
-                  plans.map((plan) => {
-                  const isActivePlan = activePlanId === plan._id;
-                  const isPopular = (plan.billingInterval || '')
-                    .toLowerCase()
-                    .startsWith('year');
-                  const d = getPlanDisplay(plan);
-                  const staticVals = getStaticDefaults(plan);
-                  const savings = plan.savePercent ?? staticVals.savePercent;
-                  const originalPrice =
-                    plan.originalPrice ?? staticVals.originalPrice;
+                  <button
+                    onClick={() => router.push('/auth/register')}
+                    className='flex w-full items-center justify-center rounded-xl border-2 border-black bg-white px-4 py-4 text-black transition-all duration-200 hover:bg-gray-100 active:scale-[0.99]'
+                  >
+                    <span className='text-base font-semibold leading-tight'>
+                      Start Free Now
+                    </span>
+                  </button>
+                )}
+              </div>
 
-                  return (
-                    <div
-                      key={plan._id}
-                      className={`w-full max-w-sm md:w-[360px] relative bg-white rounded-3xl shadow-lg p-7 pt-8 flex flex-col transition-all duration-300 hover:-translate-y-1 hover:shadow-2xl ${
-                        isPopular ? 'md:scale-[1.02] ring-1 ring-black/5' : ''
-                      } ${isActivePlan ? 'ring-2 ring-green-500' : ''}`}
-                    >
-                      {/* MOST POPULAR badge */}
-                      {isPopular && !isActivePlan && (
-                        <div className='absolute -top-4 left-1/2 -translate-x-1/2 z-20'>
-                          <span className='bg-black text-white text-xs font-semibold px-4 py-1.5 rounded-full flex items-center gap-1.5 shadow-md whitespace-nowrap'>
-                            <StarFilled />
-                            MOST POPULAR
-                          </span>
-                        </div>
-                      )}
-                      {/* Active Plan badge */}
-                      {isActivePlan && (
-                        <div className='absolute -top-4 left-1/2 -translate-x-1/2 z-20'>
-                          <span className='bg-green-500 text-white text-xs font-bold px-4 py-1.5 rounded-full shadow-md whitespace-nowrap'>
-                            ✓ Active Plan
-                          </span>
-                        </div>
-                      )}
+              {/* Features */}
+              <p className='mb-3 mt-6 text-xs font-semibold uppercase tracking-wider text-gray-400'>
+                What you get
+              </p>
+              <ul className='mb-6 flex-1 space-y-2.5'>
+                {[
+                  `${freeLimit} downloads per ${freeWindow}`,
+                  'Access to the whole design library',
+                  'All design formats in one ZIP',
+                  'New designs as they are added',
+                  'Personal use only',
+                  'No credit card required',
+                ].map((f) => (
+                  <li
+                    key={f}
+                    className='flex items-start gap-2.5 text-sm text-gray-700'
+                  >
+                    <span className='mt-0.5 flex-shrink-0 text-black'>
+                      <CheckCircle />
+                    </span>
+                    <span>{f}</span>
+                  </li>
+                ))}
+              </ul>
 
-                      {/* SAVE ribbon */}
-                      {savings && (
-                        <div
-                          className='absolute top-0 right-0 bg-black text-white w-24 h-24 rounded-tr-3xl flex flex-col items-center justify-center text-center'
-                          style={{
-                            clipPath: 'polygon(100% 0, 100% 100%, 0 0)',
-                          }}
-                        >
-                          <div className='absolute top-3 right-2 text-right leading-tight'>
-                            <div className='text-[10px] font-semibold tracking-wider'>
-                              SAVE
-                            </div>
-                            <div className='text-base font-bold'>
-                              {savings}%
-                            </div>
-                          </div>
-                        </div>
-                      )}
+              {/* Footer trust row */}
+              <div className='mt-auto flex items-center justify-center gap-6 border-t border-gray-100 pt-4'>
+                <div className='flex items-center gap-1.5 text-xs text-gray-600'>
+                  <ShieldIcon /> No payment required
+                </div>
+              </div>
+            </div>
 
-                      {/* Header: icon + title */}
-                      <div className='flex items-start gap-4 mb-5'>
-                        <div className='w-16 h-16 rounded-2xl bg-gray-100 flex items-center justify-center text-black flex-shrink-0'>
-                          {d.icon}
-                        </div>
-                        <div className='pt-1'>
-                          <h2 className='text-xl font-bold text-black leading-tight'>
-                            {plan.name}
-                          </h2>
-                          <p className='text-sm text-gray-600 mt-1'>
-                            {d.subtitle}
-                          </p>
-                        </div>
+            {/* ---------- PAID PLANS (or coming-soon message) ---------- */}
+            {plans.length === 0 ? (
+              <div className='relative flex flex-col items-center justify-center rounded-3xl bg-white p-7 pt-8 text-center shadow-lg'>
+                <div className='mb-4 flex h-16 w-16 items-center justify-center rounded-2xl bg-gray-100 text-black'>
+                  <StarFilled />
+                </div>
+                <h2 className='text-xl font-bold text-black'>
+                  Premium plans coming soon
+                </h2>
+                <p className='mt-2 text-sm text-gray-600'>
+                  We&rsquo;re putting the finishing touches on our premium
+                  subscriptions. In the meantime, enjoy the free plan — check
+                  back shortly.
+                </p>
+                <a
+                  href='mailto:support@embroidize.com?subject=Notify me about premium plans'
+                  className='mt-6 w-full rounded-xl bg-black px-4 py-3.5 text-sm font-semibold text-white transition-all duration-200 hover:bg-gray-900'
+                >
+                  Notify me
+                </a>
+              </div>
+            ) : (
+              plans.map((plan) => {
+                const isActivePlan = activePlanId === plan._id;
+                const isPopular = (plan.billingInterval || '')
+                  .toLowerCase()
+                  .startsWith('year');
+                const staticVals = getStaticDefaults(plan);
+                const savings = plan.savePercent ?? staticVals.savePercent;
+                const originalPrice =
+                  plan.originalPrice ?? staticVals.originalPrice;
+                const d = getPlanDisplay(plan, originalPrice);
+                // Only strike a price that is actually higher than the one we
+                // charge. savePercent of 0 makes originalPrice === price, which
+                // used to render "$9.99 $9.99" with the second one crossed out.
+                const showStrike =
+                  Number(savings) > 0 &&
+                  d.strikePrice != null &&
+                  d.strikePrice > d.headlinePrice;
+
+                return (
+                  <div
+                    key={plan._id}
+                    className={`relative flex flex-col rounded-3xl bg-white p-6 pt-8 shadow-lg transition-all duration-300 hover:-translate-y-1 hover:shadow-2xl ${
+                      // One chain, not two appended rings: ring-1 and ring-2 both
+                      // set the same Tailwind ring-width variable, so emitting
+                      // both leaves the winner down to stylesheet order.
+                      isActivePlan
+                        ? 'ring-2 ring-green-500'
+                        : isPopular
+                          ? 'shadow-2xl ring-2 ring-black xl:-mt-5 xl:mb-5'
+                          : 'ring-1 ring-black/5'
+                    }`}
+                  >
+                    {/* MOST POPULAR header band. A solid bar bled to the card
+                        edges (-mx-6 -mt-8 cancels the card's p-6 pt-8) reads far
+                        harder than a floating pill, and needs no overflow-hidden
+                        that would clip the ring. */}
+                    {isPopular && !isActivePlan && (
+                      <div className='-mx-6 -mt-8 mb-6 flex items-center justify-center gap-1.5 rounded-t-3xl bg-black px-6 py-2.5 text-xs font-bold uppercase tracking-wider text-white'>
+                        <StarFilled />
+                        Most Popular
                       </div>
-
-                      {/* Price row */}
-                      <div className='flex items-start justify-between mb-5'>
-                        <div>
-                          <div className='flex items-baseline gap-2 flex-wrap'>
-                            <span className='text-4xl font-extrabold text-black tracking-tight'>
-                              {plan.price != null ? `$${plan.price}` : 'Free'}
-                            </span>
-                            {d.priceSuffix && (
-                              <span className='text-sm text-gray-500'>
-                                {d.priceSuffix}
-                              </span>
-                            )}
-                            {plan.savePercent != null && (
-                              <span className='text-sm text-gray-400 line-through'>
-                                ${originalPrice}
-                              </span>
-                            )}
-                            <span className='inline-block mt-2 bg-gray-100 text-gray-700 text-xs font-medium px-3 py-1 rounded-full'>
-                              {d.pill}
-                            </span>
-                          </div>
-                        </div>
-                        {plan.dailyLimit != null && (
-                          <div className='bg-gray-100 rounded-xl px-4 py-2 text-center min-w-[80px]'>
-                            <div className='text-2xl font-bold text-black leading-none'>
-                              {plan.dailyLimit}
-                            </div>
-                            <div className='text-[10px] text-gray-600 mt-1 leading-tight'>
-                              Downloads
-                              <br />
-                              per day
-                            </div>
-                          </div>
-                        )}
+                    )}
+                    {/* Active Plan badge */}
+                    {isActivePlan && (
+                      <div className='absolute -top-3.5 left-1/2 z-20 -translate-x-1/2'>
+                        <span className='whitespace-nowrap rounded-full bg-green-500 px-4 py-1.5 text-xs font-bold text-white shadow-md'>
+                          ✓ Active Plan
+                        </span>
                       </div>
+                    )}
 
-                      {/* Limited time offer banner */}
-                      <div className='bg-gray-100 rounded-xl px-4 py-3 mb-5 flex items-center gap-3'>
-                        <div className='text-gray-700'>
-                          <ClockIcon />
-                        </div>
-                        <div className='leading-tight flex-1'>
-                          <p className='text-sm font-semibold text-black'>
-                            Limited time offer!
-                          </p>
-                          <p className='text-xs text-gray-600'>
-                            Offer ends in{' '}
-                            <span className='font-mono font-semibold text-black'>
-                              {dailyResetTime || '--:--:--'}
-                            </span>
-                          </p>
-                        </div>
+                    {/* Header: icon + name + one-line tagline */}
+                    <div className='mb-5 flex items-center gap-3'>
+                      <div className='flex h-11 w-11 flex-shrink-0 items-center justify-center rounded-xl bg-gray-100 text-black'>
+                        {d.icon}
                       </div>
+                      <div>
+                        <h2 className='text-lg font-bold leading-tight text-black'>
+                          {plan.name}
+                        </h2>
+                        <p className='text-xs text-gray-500'>{d.tagline}</p>
+                      </div>
+                    </div>
 
-                      {/* Features list */}
-                      <ul className='space-y-2.5 mb-6 flex-1'>
-                        {plan.features?.map((feature, idx) => (
-                          <li
-                            key={idx}
-                            className='flex items-start gap-2.5 text-sm text-gray-700'
-                          >
-                            <span className='text-black flex-shrink-0 mt-0.5'>
-                              <CheckCircle />
-                            </span>
-                            <span>{feature}</span>
-                          </li>
-                        ))}
-                      </ul>
+                    {/* Price block — discount badge, strikethrough, headline,
+                        term total, renewal note. */}
+                    <div className='mb-1 flex h-6 items-end gap-2'>
+                      {savings ? (
+                        <span className='inline-block rounded-full bg-black px-2.5 py-0.5 text-[11px] font-bold text-white'>
+                          {savings}% OFF
+                        </span>
+                      ) : null}
+                      {showStrike && (
+                        <span className='text-sm text-gray-400 line-through'>
+                          {money(d.strikePrice)}
+                          {d.headlineSuffix}
+                        </span>
+                      )}
+                    </div>
+                    <div className='flex items-baseline gap-1.5'>
+                      <span
+                        className={`font-extrabold tracking-tight text-black ${
+                          isPopular ? 'text-5xl' : 'text-4xl'
+                        }`}
+                      >
+                        {money(d.headlinePrice)}
+                      </span>
+                      {d.headlineSuffix && (
+                        <span className='text-sm font-medium text-gray-500'>
+                          {d.headlineSuffix}
+                        </span>
+                      )}
+                    </div>
+                    <p className='mt-1.5 h-5 text-xs text-gray-500'>
+                      {d.termTotalLine ??
+                        (plan.dailyLimit != null
+                          ? `${plan.dailyLimit} downloads per day`
+                          : '')}
+                    </p>
+                    <p className='mt-3 border-t border-gray-100 pt-3 text-xs text-gray-500'>
+                      {d.renewNote}
+                    </p>
 
-                      {/* CTA button */}
+                    {/* CTA button */}
+                    <div className='mt-4'>
                       <PurchaseButton
                         plan={plan}
                         isPopular={isPopular}
                         isActivePlan={isActivePlan}
                         ctaTitle={d.ctaTitle}
-                        ctaSubtitle={d.ctaSub}
+                        ctaSubtitle={d.pill}
                         checkoutMessage={checkoutMessage}
                       />
+                    </div>
 
-                      {/* Footer trust row */}
-                      <div className='flex items-center justify-center gap-6 mt-5 pt-4 border-t border-gray-100'>
-                        <div className='flex items-center gap-1.5 text-xs text-gray-600'>
-                          <ShieldIcon /> 100% Safe, Secure & Encrypted Payment
-                        </div>
+                    {/* Features */}
+                    <p className='mb-3 mt-6 text-xs font-semibold uppercase tracking-wider text-gray-400'>
+                      What you get
+                    </p>
+                    <ul className='mb-6 flex-1 space-y-2.5'>
+                      {plan.dailyLimit != null && (
+                        <li className='flex items-start gap-2.5 text-sm font-semibold text-black'>
+                          <span className='mt-0.5 flex-shrink-0 text-black'>
+                            <CheckCircle />
+                          </span>
+                          <span>{plan.dailyLimit} downloads per day</span>
+                        </li>
+                      )}
+                      {plan.features?.map((feature, idx) => (
+                        <li
+                          key={idx}
+                          className='flex items-start gap-2.5 text-sm text-gray-700'
+                        >
+                          <span className='mt-0.5 flex-shrink-0 text-black'>
+                            <CheckCircle />
+                          </span>
+                          <span>{feature}</span>
+                        </li>
+                      ))}
+                    </ul>
+
+                    {/* Footer trust row */}
+                    <div className='mt-auto flex items-center justify-center gap-6 border-t border-gray-100 pt-4'>
+                      <div className='flex items-center gap-1.5 text-xs text-gray-600'>
+                        <ShieldIcon /> Secure, encrypted payment
                       </div>
                     </div>
-                  );
-                  })
-                )}
-              </div>
+                  </div>
+                );
+              })
+            )}
+          </div>
+
           {/* Quiet, permanent entry point. This is the one that actually
               catches most people — see the note where showPayHelp is declared. */}
-          <div className='mb-8 text-center'>
+          <div className='mt-8 text-center'>
             <button
               onClick={() => setShowPayHelp(true)}
               className='text-sm text-gray-600 underline underline-offset-4 transition hover:text-black'
@@ -761,12 +1087,21 @@ export default function SubscriptionsPageClient({ siteConfig }) {
             </button>
           </div>
 
+          {/* ---------- COMPARISON TABLE ---------- */}
+          {plans.length > 0 && <ComparisonTable columns={comparisonColumns} />}
+
+          {/* ---------- CUSTOMER TESTIMONIALS ---------- */}
+          <FeaturedReviews
+            reviews={featuredReviews}
+            totalCount={totalReviewCount}
+          />
+
           {/* ---------- TRUST BAR ---------- */}
-          <div className='bg-white rounded-2xl shadow-md p-6 md:p-8'>
-            <div className='grid grid-cols-2 md:grid-cols-4 gap-6'>
+          <div className='mt-16 rounded-2xl bg-white p-6 shadow-sm ring-1 ring-black/5 md:p-8'>
+            <div className='grid grid-cols-2 gap-6 md:grid-cols-4'>
               {[
                 {
-                  icon: <ShieldIcon size={34} />,
+                  icon: <ShieldIcon size={22} />,
                   title: '100% Secure Payment',
                   body: 'Your payment information is always protected.',
                 },
@@ -787,14 +1122,16 @@ export default function SubscriptionsPageClient({ siteConfig }) {
                 },
               ].map((item, i) => (
                 <div key={i} className='flex items-start gap-3'>
-                  <div className='text-black flex-shrink-0 mt-1'>
+                  {/* Badged icon, matching the plan cards' icon treatment —
+                      a bare 34px stroke icon read as unfinished beside them. */}
+                  <div className='flex h-11 w-11 flex-shrink-0 items-center justify-center rounded-xl bg-gray-100 text-black'>
                     {item.icon}
                   </div>
-                  <div>
+                  <div className='pt-0.5'>
                     <p className='text-sm font-semibold text-black'>
                       {item.title}
                     </p>
-                    <p className='text-xs text-gray-500 mt-0.5 leading-snug'>
+                    <p className='mt-0.5 text-xs leading-snug text-gray-500'>
                       {item.body}
                     </p>
                   </div>
@@ -802,14 +1139,14 @@ export default function SubscriptionsPageClient({ siteConfig }) {
               ))}
             </div>
           </div>
+
+          {/* ---------- FAQ ---------- */}
+          <FaqSection faqs={faqs} />
         </div>
       </div>
 
       {showPayHelp && (
-        <PaymentHelpModal
-          plans={plans}
-          onClose={() => setShowPayHelp(false)}
-        />
+        <PaymentHelpModal plans={plans} onClose={() => setShowPayHelp(false)} />
       )}
 
       <Divider className='bg-gray-200' />

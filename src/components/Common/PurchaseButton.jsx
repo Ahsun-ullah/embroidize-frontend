@@ -5,6 +5,7 @@ import { useState } from 'react';
 
 export default function PurchaseButton({
   plan,
+  isPopular,
   isActivePlan,
   ctaTitle,
   checkoutMessage,
@@ -105,17 +106,27 @@ export default function PurchaseButton({
     );
   }
 
-  // Normal subscribe button
+  // Normal subscribe button. Only the popular plan gets the filled button —
+  // every other CTA on the page is outlined, so there is exactly one solid
+  // black target and the eye lands on the plan we want chosen.
   return (
     <div>
       <button
         onClick={handlePurchase}
         disabled={isLoading}
-        className='w-full py-5 px-4 rounded-xl bg-black text-white hover:bg-gray-900 active:scale-[0.99] transition-all duration-200 disabled:bg-gray-400 disabled:cursor-not-allowed flex flex-col items-center justify-center gap-0.5'
+        className={`w-full py-5 px-4 rounded-xl active:scale-[0.99] transition-all duration-200 disabled:cursor-not-allowed flex flex-col items-center justify-center gap-0.5 ${
+          isPopular
+            ? 'bg-black text-white hover:bg-gray-900 disabled:bg-gray-400'
+            : 'bg-white text-black border-2 border-black hover:bg-gray-100 disabled:border-gray-300 disabled:text-gray-400'
+        }`}
       >
         {isLoading ? (
           <span className='flex items-center justify-center gap-2 py-1'>
-            <span className='w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin' />
+            <span
+              className={`w-4 h-4 border-2 rounded-full animate-spin border-t-transparent ${
+                isPopular ? 'border-white' : 'border-black'
+              }`}
+            />
             <span className='text-sm font-medium'>Processing...</span>
           </span>
         ) : (
