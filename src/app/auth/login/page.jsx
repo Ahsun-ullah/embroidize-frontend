@@ -7,6 +7,7 @@ import LoadingSpinner from '@/components/Common/LoadingSpinner';
 import { SuccessToast } from '@/components/Common/SuccessToast';
 import { setAuthToken } from '@/lib/auth';
 import { useLogInMutation } from '@/lib/redux/public/auth/authSlice';
+import { getApiErrorMessage } from '@/lib/utils/authErrors';
 import { Input } from '@heroui/react';
 import Image from 'next/image';
 import Link from 'next/link';
@@ -38,10 +39,22 @@ const Login = () => {
     try {
       const response = await logIn(data);
       if (response.error) {
+        // Read through the envelope safely.
+        //
+        // `response.error.data.message` throws whenever the request never
+        // reached the server — offline, CORS, a cold container — because there
+        // is no `data` on those. The throw landed in the catch below and was
+        // reported as the useless `err.message` ("Cannot read properties of
+        // undefined"), so the one failure a customer most needs explained was
+        // the one they could never understand.
+        //
+        // It also surfaces the specific server messages: "this account was
+        // created with Google sign-in", "too many failed attempts", "this
+        // account has been disabled".
         ErrorToast(
-          'Error',
-          response.error.data.message || 'Login failed',
-          3000,
+          'Sign-in failed',
+          getApiErrorMessage(response.error, 'Login failed'),
+          6000,
         );
       } else {
         SuccessToast(
