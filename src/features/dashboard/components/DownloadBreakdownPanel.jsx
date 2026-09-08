@@ -9,10 +9,22 @@ import { useRouter, useSearchParams } from 'next/navigation';
 // (see src/scripts/backfillDownloadTiers.ts in the backend).
 const USER_TIER_LABELS = {
   subscription: 'Subscribers',
+  subscription_est: 'Subscribers (est.)',
   credit: 'Credit packs',
   free: 'Free tier',
+  free_est: 'Free tier (est.)',
   admin: 'Admin (staff)',
   legacy: 'Before tracking',
+};
+
+// The _est tiers were inferred from subscription dates after the fact, not
+// recorded as the download happened. They are shown as their own rows so an
+// estimate is never mistaken for a measurement, and paired with their real twin
+// in the headline figures so the tiles still answer "how many in total".
+const ESTIMATED_TIERS = new Set(['subscription_est', 'free_est']);
+const TIER_TWINS = {
+  subscription: ['subscription', 'subscription_est'],
+  free: ['free', 'free_est'],
 };
 
 const PRODUCT_TIER_LABELS = {
@@ -21,7 +33,15 @@ const PRODUCT_TIER_LABELS = {
   legacy: 'Before tracking',
 };
 
-const USER_TIER_ORDER = ['subscription', 'credit', 'free', 'admin', 'legacy'];
+const USER_TIER_ORDER = [
+  'subscription',
+  'subscription_est',
+  'credit',
+  'free',
+  'free_est',
+  'admin',
+  'legacy',
+];
 const PRODUCT_TIER_ORDER = ['premium', 'free', 'legacy'];
 
 const pct = (part, whole) =>
@@ -44,6 +64,24 @@ export default function DownloadBreakdownPanel({ breakdown }) {
   const matrix = breakdown?.matrix || [];
 
   const userTierRow = (tier) => byUserTier.find((r) => r.tier === tier) || {};
+
+  // A headline figure covers a tier AND its estimated twin, so "By subscribers"
+  // is the whole answer rather than only the part recorded since stamping began.
+  const tierGroup = (tier) => {
+    const members = TIER_TWINS[tier] || [tier];
+    const downloads = members.reduce(
+      (sum, t) => sum + (userTierRow(t).downloads || 0),
+      0,
+    );
+    const users = members.reduce(
+      (sum, t) => sum + (userTierRow(t).uniqueUsers || 0),
+      0,
+    );
+    const estimated = members
+      .filter((t) => ESTIMATED_TIERS.has(t))
+      .reduce((sum, t) => sum + (userTierRow(t).downloads || 0), 0);
+    return { downloads, users, estimated, param: members.join(',') };
+  };
   const productTierRow = (tier) =>
     byProductTier.find((r) => r.tier === tier) || {};
   const cell = (userTier, productTier) =>
@@ -68,6 +106,11 @@ export default function DownloadBreakdownPanel({ breakdown }) {
   // as the "off" switch, so there is no dead-end state.
   const toggleUserTier = (tier) =>
     setFilters({ userTier: activeUserTier === tier ? '' : tier });
+  // Headline figures filter to the whole group they totalled (real + estimated).
+  const toggleUserTierGroup = (tier) => {
+    const { param } = tierGroup(tier);
+    setFilters({ userTier: activeUserTier === param ? '' : param });
+  };
   const toggleProductTier = (tier) =>
     setFilters({ productTier: activeProductTier === tier ? '' : tier });
   const toggleCell = (userTier, productTier) =>
@@ -98,27 +141,35 @@ export default function DownloadBreakdownPanel({ breakdown }) {
       onClick: hasTierFilter ? () => setFilters({ userTier: '', productTier: '' }) : null,
       active: !hasTierFilter,
     },
-    {
+{
       key: 'subscription',
       label: 'By subscribers',
-      value: userTierRow('subscription').downloads || 0,
-      sub: `${pct(userTierRow('subscription').downloads || 0, totals.downloads)} · ${
-        userTierRow('subscription').uniqueUsers || 0
-      } subscribers`,
+      value: tierGroup('subscription').downloads,
+      sub: `${pct(tierGroup('subscription').downloads, totals.downloads)} · ${
+        tierGroup('subscription').users
+      } subscribers${
+        tierGroup('subscription').estimated
+          ? ` · ${tierGroup('subscription').estimated.toLocaleString()} est.`
+          : ''
+      }`,
       icon: Crown,
-      onClick: () => toggleUserTier('subscription'),
-      active: activeUserTier === 'subscription',
+      onClick: () => toggleUserTierGroup('subscription'),
+      active: activeUserTier === tierGroup('subscription').param,
     },
     {
       key: 'free',
       label: 'By free users',
-      value: userTierRow('free').downloads || 0,
-      sub: `${pct(userTierRow('free').downloads || 0, totals.downloads)} · ${
-        userTierRow('free').uniqueUsers || 0
-      } users`,
+      value: tierGroup('free').downloads,
+      sub: `${pct(tierGroup('free').downloads, totals.downloads)} · ${
+        tierGroup('free').users
+      } users${
+        tierGroup('free').estimated
+          ? ` · ${tierGroup('free').estimated.toLocaleString()} est.`
+          : ''
+      }`,
       icon: Users,
-      onClick: () => toggleUserTier('free'),
-      active: activeUserTier === 'free',
+      onClick: () => toggleUserTierGroup('free'),
+      active: activeUserTier === tierGroup('free').param,
     },
     {
       key: 'credit',
@@ -155,6 +206,9 @@ export default function DownloadBreakdownPanel({ breakdown }) {
     },
   ];
 
+  const hasEstimated = [...ESTIMATED_TIERS].some(
+    (t) => (userTierRow(t).downloads || 0) > 0,
+  );
   const legacyUsers = userTierRow('legacy').downloads || 0;
   const legacyProducts = productTierRow('legacy').downloads || 0;
 
@@ -256,7 +310,12 @@ export default function DownloadBreakdownPanel({ breakdown }) {
                       onClick={() => toggleUserTier(ut)}
                       className={`hover:underline ${
                         activeUserTier === ut ? 'font-bold' : ''
-                      }`}
+                      } ${ESTIMATED_TIERS.has(ut) ? 'italic text-gray-600' : ''}`}
+                      title={
+                        ESTIMATED_TIERS.has(ut)
+                          ? 'Inferred from subscription dates after the fact, not recorded at download time'
+                          : undefined
+                      }
                     >
                       {USER_TIER_LABELS[ut]}
                     </button>
@@ -308,6 +367,17 @@ export default function DownloadBreakdownPanel({ breakdown }) {
             </tbody>
           </table>
         </div>
+      )}
+
+      {hasEstimated && (
+        <p className='mt-3 text-[11px] text-gray-500 leading-relaxed'>
+          <span className='font-semibold'>(est.) rows are inferred,</span> not
+          measured: those downloads predate tier tracking, so each was matched
+          against whether the downloader held a subscription covering that date.
+          It is wrong for anyone who lapsed and resubscribed, and blind to
+          anything before the oldest surviving subscription record. Rows stamped
+          as they happened carry no “(est.)”.
+        </p>
       )}
 
       {(legacyUsers > 0 || legacyProducts > 0) && (
