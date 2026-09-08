@@ -33,10 +33,14 @@ function DownloadLimitModal({ limitModalData = {}, onClose, formatDuration }) {
 
   // "1d" (the default) keeps the original "24 hours" phrasing — it's a rolling
   // window, not a calendar day. Other windows read naturally: "2 days", "week".
+  //
+  // windowPhrase now returns null for a missing or unparseable window instead
+  // of assuming "day". Here that lands on the same "24 hours" wording, because
+  // this modal only ever opens once the API has told us the window — and a
+  // null slipping through to windowAdj below would throw on .includes().
+  const windowLabel = windowPhrase(downloadWindow);
   const windowEvery =
-    windowPhrase(downloadWindow) === 'day'
-      ? '24 hours'
-      : windowPhrase(downloadWindow);
+    !windowLabel || windowLabel === 'day' ? '24 hours' : windowLabel;
   // Adjective form for "this … window": "24-hour", "2-day", "week-long".
   const windowAdj = windowEvery.includes(' ')
     ? windowEvery.replace(' ', '-').replace(/s$/, '')

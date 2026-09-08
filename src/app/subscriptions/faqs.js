@@ -7,7 +7,11 @@
 export const buildSubscriptionFaqs = (freeLimit, freeWindow) => [
   {
     q: 'What do I get with a subscription that the free plan does not give me?',
-    a: `The free plan lets you download ${freeLimit} designs per ${freeWindow} for personal use. A subscription raises that daily allowance, and every design you download comes with a commercial use licence, so you can sell what you stitch.`,
+    a: `The free plan lets you download ${
+      freeLimit && freeWindow
+        ? `${freeLimit} designs per ${freeWindow}`
+        : 'a set number of designs'
+    } for personal use. A subscription raises that allowance, and every design you download comes with a commercial use licence, so you can sell what you stitch.`,
   },
   {
     q: 'Which embroidery file formats are included?',

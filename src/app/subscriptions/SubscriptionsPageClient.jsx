@@ -1,7 +1,7 @@
 'use client';
 import { ErrorToast } from '@/components/Common/ErrorToast';
-import PaymentHelpModal from '@/components/Common/PaymentHelpModal';
 import OfferCountdown from '@/components/Common/OfferCountdown';
+import PaymentHelpModal from '@/components/Common/PaymentHelpModal';
 import PurchaseButton from '@/components/Common/PurchaseButton';
 import { SuccessToast } from '@/components/Common/SuccessToast';
 import Footer from '@/components/user/HomePage/Footer';
@@ -509,9 +509,12 @@ export default function SubscriptionsPageClient({
   totalReviewCount = 0,
 }) {
   // Admin-managed free-tier quota (from /public/site-config via the server
-  // page). Fallback matches the backend's hardcoded default.
+  // page). Either value can be null when the config could not be read — the
+  // copy then drops the figure instead of quoting a stale one.
   const freeLimit = siteConfig?.freeDownloadLimit;
   const freeWindow = windowPhrase(siteConfig?.freeDownloadWindow);
+  const freeAllowance =
+    freeLimit && freeWindow ? `${freeLimit} downloads per ${freeWindow}` : null;
   const [plans, setPlans] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -676,7 +679,8 @@ export default function SubscriptionsPageClient({
       name: 'Free Forever',
       priceCell: '$0',
       billingCell: 'No billing',
-      downloadsCell: `${freeLimit} per ${freeWindow}`,
+      downloadsCell:
+        freeLimit && freeWindow ? `${freeLimit} per ${freeWindow}` : 'Limited',
       commercial: false,
       renewsCell: 'Never',
       highlight: false,
@@ -826,7 +830,7 @@ export default function SubscriptionsPageClient({
                 </span>
               </div>
               <p className='mt-1.5 h-5 text-xs text-gray-500'>
-                {freeLimit} downloads per {freeWindow}
+                {freeAllowance || 'Free downloads included'}
               </p>
               <p className='mt-3 border-t border-gray-100 pt-3 text-xs text-gray-500'>
                 Free forever — nothing to cancel
@@ -874,7 +878,7 @@ export default function SubscriptionsPageClient({
               </p>
               <ul className='mb-6 flex-1 space-y-2.5'>
                 {[
-                  `${freeLimit} downloads per ${freeWindow}`,
+                  freeAllowance || 'A set number of free downloads',
                   'Access to the whole design library',
                   'All design formats in one ZIP',
                   'New designs as they are added',
@@ -1043,14 +1047,6 @@ export default function SubscriptionsPageClient({
                       What you get
                     </p>
                     <ul className='mb-6 flex-1 space-y-2.5'>
-                      {plan.dailyLimit != null && (
-                        <li className='flex items-start gap-2.5 text-sm font-semibold text-black'>
-                          <span className='mt-0.5 flex-shrink-0 text-black'>
-                            <CheckCircle />
-                          </span>
-                          <span>{plan.dailyLimit} downloads per day</span>
-                        </li>
-                      )}
                       {plan.features?.map((feature, idx) => (
                         <li
                           key={idx}

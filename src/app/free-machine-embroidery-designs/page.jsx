@@ -74,7 +74,11 @@ const MACHINE_BRANDS = [
 const buildFaqs = (freeLimit, freeWindow) => [
   {
     q: 'Are the machine embroidery designs on Embroidize really free?',
-    a: `Yes. Every design in our free collection is 100% free to download — no hidden fees and no credit card required. Create a free account and download up to ${freeLimit} free designs per ${freeWindow}; your allowance resets automatically.`,
+    a: `Yes. Every design in our free collection is 100% free to download — no hidden fees and no credit card required. Create a free account and ${
+      freeLimit && freeWindow
+        ? `download up to ${freeLimit} free designs per ${freeWindow}`
+        : 'start downloading'
+    }; your allowance resets automatically.`,
   },
   {
     q: 'Can I use Embroidize designs to sell embroidered products?',
