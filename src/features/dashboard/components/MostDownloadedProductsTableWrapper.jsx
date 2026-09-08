@@ -24,8 +24,15 @@ export default function MostDownloadedProductsTableWrapper({
     searchParams.get('startDate') ? 'custom' : 'all',
   );
 
+  // Whether the numbers on the cards are range-scoped counts rather than each
+  // design's lifetime total. The tier params count too: filtered to premium
+  // downloads by subscribers, a lifetime download count would silently include
+  // every other tier.
   const hasFilter = !!(
-    searchParams.get('startDate') || searchParams.get('endDate')
+    searchParams.get('startDate') ||
+    searchParams.get('endDate') ||
+    searchParams.get('userTier') ||
+    searchParams.get('productTier')
   );
 
   // --- Filter Logic (URL Based) ---
@@ -51,7 +58,14 @@ export default function MostDownloadedProductsTableWrapper({
     if (value === 'all') {
       setDateInputs({ startDate: '', endDate: '' });
       setActivePreset('ALL');
-      router.push(window.location.pathname);
+      // Clear the dates only — an active tier filter is a separate control with
+      // its own clear button, and wiping it here would fight the cards above.
+      const params = new URLSearchParams(searchParams.toString());
+      params.delete('startDate');
+      params.delete('endDate');
+      params.delete('page');
+      const qs = params.toString();
+      router.push(qs ? `?${qs}` : window.location.pathname);
       return;
     }
 
