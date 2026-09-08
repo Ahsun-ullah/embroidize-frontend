@@ -7,6 +7,7 @@ import { SuccessToast } from '@/components/Common/SuccessToast';
 import Footer from '@/components/user/HomePage/Footer';
 import Header from '@/components/user/HomePage/Header';
 import FeaturedReviews from '@/features/reviews/FeaturedReviews';
+import { trackSubscriptionPurchase } from '@/lib/analytics/subscriptionPurchase';
 import { windowPhrase } from '@/lib/apis/public/siteConfig';
 import { useUserInfoQuery } from '@/lib/redux/common/user/userInfoSlice';
 import { Divider } from '@heroui/divider';
@@ -580,6 +581,13 @@ export default function SubscriptionsPageClient({
 
     if (status === 'success') {
       SuccessToast('Success', 'Payment completed successfully!', 10000);
+
+      // Report the conversion. Deliberately NOT awaited: it polls for the
+      // webhook to land, and the customer must not be held on this screen
+      // waiting for analytics. It resolves to false and stays silent when
+      // there is nothing confirmed to report.
+      trackSubscriptionPurchase();
+
       const returnTo = sessionStorage.getItem('postSubscribeRedirect');
       sessionStorage.removeItem('postSubscribeRedirect');
       router.push(returnTo || '/subscriptions');
