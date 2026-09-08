@@ -1,10 +1,21 @@
 import { ProductsForm } from '@/features/products/components/ProductsForm';
+import { cookies } from 'next/headers';
 
+// Sends the admin's session token. The product endpoint now answers 404 for an
+// unpublished product unless the caller proves it is staff — without this, the
+// edit form would 404 on exactly the products that most need editing.
 async function singleProductFetch(productId) {
+  const cookieStore = await cookies();
+  const token = cookieStore.get('token')?.value;
+
+  const headers = {};
+  if (token) headers.Authorization = `Bearer ${token}`;
+
   const res = await fetch(
     `${process.env.NEXT_PUBLIC_BASE_API_URL_PROD}/public/product/${productId}`,
     {
       method: 'GET',
+      headers,
       cache: 'no-store',
       next: { revalidate: 0 },
     },

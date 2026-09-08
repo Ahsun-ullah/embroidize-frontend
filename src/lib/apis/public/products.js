@@ -1,4 +1,5 @@
 import 'server-only';
+import { cookies } from 'next/headers';
 
 const BASE = process.env.NEXT_PUBLIC_BASE_API_URL_PROD;
 const AUTH = 'Bearer some-static-token';
@@ -12,12 +13,27 @@ function buildURL(path, params) {
   return url.toString();
 }
 
-async function getJSON(url) {
+async function getJSON(url, { authenticated = false, allow404 = false } = {}) {
+  // AUTH is a placeholder string that proves nothing; it is kept only because
+  // the public endpoints ignore it. Anything asking to see unpublished
+  // products has to send the caller's real session token instead.
+  let authorization = AUTH;
+  if (authenticated) {
+    const cookieStore = await cookies();
+    const token = cookieStore.get('token')?.value;
+    if (token) authorization = `Bearer ${token}`;
+  }
+
   const res = await fetch(url, {
-    headers: { Authorization: AUTH },
+    headers: { Authorization: authorization },
     cache: 'no-store',
     next: { revalidate: 0 },
   });
+  // For a single resource, 404 is an answer rather than a failure. Callers that
+  // opt in get null and can render a proper not-found page; throwing sends them
+  // into the error boundary instead, which is a different page AND a different
+  // status code.
+  if (allow404 && res.status === 404) return null;
   if (!res.ok) throw new Error(`API ${url} failed: ${res.status}`);
   return res.json();
 }
@@ -87,11 +103,12 @@ export async function getAllProductsForDashboard(
     // from a public URL.
     status: status || undefined,
     // Admin dashboard sees ALL products, including unpublished (inactive) ones;
-    // public listings only ever show active products.
+    // public listings only ever show active products. The API grants this only
+    // to a live admin session, hence the authenticated call below.
     includeHidden: 1,
   });
 
-  const result = await getJSON(url);
+  const result = await getJSON(url, { authenticated: true });
 
   const data = result?.data?.data ?? [];
   const meta = result?.data?.meta ?? {};
@@ -204,7 +221,15 @@ export async function getAdminChoiceProducts(
 
 export async function getSingleProduct(productId) {
   const url = buildURL(`/public/product/${productId}`);
-  return getJSON(url);
+  // A 404 here means the design does not exist, or is unpublished and
+  // therefore invisible to the public. Both must reach notFound() so Next
+  // answers with a real 404 status.
+  //
+  // Before this, the throw was caught by the error boundary, which renders an
+  // error page under HTTP 200 — a soft 404. Search engines treat that as a
+  // live page and keep it indexed, which is precisely the wrong outcome for a
+  // design that was taken down.
+  return getJSON(url, { allow404: true });
 }
 
 // get all products in sitemap
