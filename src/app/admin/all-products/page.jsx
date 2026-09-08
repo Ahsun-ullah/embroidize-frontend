@@ -8,6 +8,8 @@ export default async function AllProductsListPage({ searchParams }) {
   const search = params?.search || '';
   const categoryId = params?.category || '';
   const subCategoryId = params?.sub_category || '';
+  // '' = both. Anything else is passed through and validated server-side.
+  const status = params?.status || '';
   const perPage = 10;
 
   // 2. Fetch Data on the Server
@@ -17,6 +19,7 @@ export default async function AllProductsListPage({ searchParams }) {
     perPage,
     categoryId,
     subCategoryId,
+    status,
   );
 
 

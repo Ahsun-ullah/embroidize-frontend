@@ -4,6 +4,7 @@ import SocialLoginButtons from '@/components/auth/SocialLoginButtons';
 import { ErrorToast } from '@/components/Common/ErrorToast';
 import ForgotPasswordModal from '@/components/Common/ForgotPasswordForm';
 import LoadingSpinner from '@/components/Common/LoadingSpinner';
+import PasswordInput from '@/components/Common/PasswordInput';
 import { SuccessToast } from '@/components/Common/SuccessToast';
 import { setAuthToken } from '@/lib/auth';
 import { useLogInMutation } from '@/lib/redux/public/auth/authSlice';
@@ -139,11 +140,12 @@ const Login = () => {
                     Forgot Password?
                   </button>
                 </div>
-                <Input
-                  type='password'
+                <PasswordInput
                   name='password'
+                  id='password-input'
                   className='form-control password-input mt-2'
                   placeholder='Enter password'
+                  autoComplete='current-password'
                   required
                 />
               </div>

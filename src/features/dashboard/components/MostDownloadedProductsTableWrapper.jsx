@@ -3,7 +3,7 @@ import { Button, Chip, Input, Pagination } from '@heroui/react';
 import { Download, ExternalLink, Heart, ImageOff } from 'lucide-react';
 import Link from 'next/link';
 import { useRouter, useSearchParams } from 'next/navigation';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 
 export default function MostDownloadedProductsTableWrapper({
   initialData,
@@ -17,6 +17,20 @@ export default function MostDownloadedProductsTableWrapper({
     startDate: searchParams.get('startDate') || '',
     endDate: searchParams.get('endDate') || '',
   });
+
+  // Search box state. Held locally so typing stays responsive, and pushed to
+  // the URL on submit rather than per keystroke — every change here refetches
+  // on the server, and the download aggregation is not cheap enough to run on
+  // each letter.
+  const [searchValue, setSearchValue] = useState(
+    searchParams.get('search') || '',
+  );
+
+  // Keep the box in step with the URL when the param changes from elsewhere:
+  // the Clear-all button, a pasted link, or the browser's back button.
+  useEffect(() => {
+    setSearchValue(searchParams.get('search') || '');
+  }, [searchParams]);
 
   // Track active preset for UI highlighting
   // 'all' is default unless URL has dates, then it's 'custom'
@@ -101,6 +115,13 @@ export default function MostDownloadedProductsTableWrapper({
     updateURL({ [key]: val });
   };
 
+  const submitSearch = () => updateURL({ search: searchValue.trim() });
+
+  const clearSearch = () => {
+    setSearchValue('');
+    updateURL({ search: '' });
+  };
+
   const onPageChange = (newPage) => {
     const params = new URLSearchParams(searchParams.toString());
     params.set('page', newPage.toString());
@@ -142,6 +163,25 @@ export default function MostDownloadedProductsTableWrapper({
               {btn.label}
             </button>
           ))}
+        </div>
+
+        {/* Search by design name, SKU or slug */}
+        <div className='flex gap-2 items-center'>
+          <Input
+            aria-label='Search downloaded designs'
+            className='w-60'
+            placeholder='Search name, SKU or slug...'
+            value={searchValue}
+            onValueChange={setSearchValue}
+            onKeyDown={(e) => {
+              if (e.key === 'Enter') submitSearch();
+            }}
+            isClearable
+            onClear={clearSearch}
+          />
+          <Button size='sm' variant='flat' onPress={submitSearch}>
+            Search
+          </Button>
         </div>
 
         <div className='flex gap-2 items-center'>
@@ -190,7 +230,11 @@ export default function MostDownloadedProductsTableWrapper({
       {topContent}
 
       {data.length === 0 ? (
-        <div className='py-16 text-center text-gray-400'>No data found</div>
+        <div className='py-16 text-center text-gray-400'>
+          {searchParams.get('search')
+            ? `No downloaded designs match "${searchParams.get('search')}" in this date range.`
+            : 'No data found'}
+        </div>
       ) : (
         <div className='grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4'>
           {data.map((item) => {

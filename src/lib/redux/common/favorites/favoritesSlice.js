@@ -10,8 +10,25 @@ export const favoritesSlice = createApi({
       query: () => '/favorites/ids',
       providesTags: ['Favorites'],
     }),
+    // Paged and filtered server-side. This used to fetch the entire list; the
+    // largest account holds 9,846 favourites and rendered every one as a card.
     getUserFavorites: builder.query({
-      query: () => '/favorites',
+      query: (args = {}) => {
+        const {
+          page = 1,
+          limit = 24,
+          search = '',
+          tier = '',
+          sort = 'recent',
+        } = args;
+        const params = new URLSearchParams();
+        params.set('page', String(page));
+        params.set('limit', String(limit));
+        if (search) params.set('search', search);
+        if (tier) params.set('tier', tier);
+        if (sort && sort !== 'recent') params.set('sort', sort);
+        return `/favorites?${params.toString()}`;
+      },
       providesTags: ['Favorites'],
     }),
     toggleFavorite: builder.mutation({

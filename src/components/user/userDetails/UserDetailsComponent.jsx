@@ -18,7 +18,8 @@ import { useEffect, useMemo, useState } from 'react';
 import ChangePasswordForm from './UserChangePasswordForm';
 import UserProfile from './UserProfile';
 
-const ITEMS_PER_PAGE = 5;
+const PAGE_SIZE_OPTIONS = [10, 20, 50];
+const DEFAULT_PAGE_SIZE = 20;
 
 export default function UserDetailsComponent({
   defaultTab = 'account',
@@ -37,19 +38,78 @@ export default function UserDetailsComponent({
   const [formatChoice, setFormatChoice] = useState(null);
 
   const [search, setSearch] = useState(defaultSearch || '');
+  // Search now costs a round trip, so the typed value and the value we query
+  // with are separate — the box stays responsive while the server sees one
+  // request per pause, not one per keystroke.
+  const [debouncedSearch, setDebouncedSearch] = useState(defaultSearch || '');
   const [filterType, setFilterType] = useState(
     defaultFileType ? defaultFileType.toLowerCase() : 'all',
   );
+  // Narrows to designs corrected since the customer downloaded them. The whole
+  // re-download mechanism was previously reachable only by scrolling to the
+  // row it applied to.
+  const [staleOnly, setStaleOnly] = useState(false);
+  const [pageSize, setPageSize] = useState(DEFAULT_PAGE_SIZE);
   const [currentPage, setCurrentPage] = useState(1);
+
+  useEffect(() => {
+    const t = setTimeout(() => setDebouncedSearch(search.trim()), 400);
+    return () => clearTimeout(t);
+  }, [search]);
 
   const { data: userInfo } = useUserInfoQuery();
   const userId = userInfo?._id;
 
-  const { data: downloadHistory, isLoading: isDownloadLoading } =
-    useUserDownloadHistoryQuery(userId, { skip: !userId });
+  const {
+    data: downloadHistory,
+    isLoading: isDownloadLoading,
+    isFetching: isDownloadFetching,
+  } = useUserDownloadHistoryQuery(
+    {
+      id: userId,
+      page: currentPage,
+      limit: pageSize,
+      search: debouncedSearch,
+      fileType: filterType,
+      stale: staleOnly,
+    },
+    { skip: !userId },
+  );
 
-  const { data: favoritesData, isLoading: isFavoritesLoading } =
-    useGetUserFavoritesQuery(undefined, { skip: activeTab !== 'favourites' });
+  // --- Favourites tab state (server-driven, same shape as downloads) ---
+  const [favSearch, setFavSearch] = useState('');
+  const [favDebouncedSearch, setFavDebouncedSearch] = useState('');
+  const [favTier, setFavTier] = useState('');
+  const [favSort, setFavSort] = useState('recent');
+  const [favPage, setFavPage] = useState(1);
+
+  useEffect(() => {
+    const t = setTimeout(() => setFavDebouncedSearch(favSearch.trim()), 400);
+    return () => clearTimeout(t);
+  }, [favSearch]);
+
+  useEffect(() => {
+    setFavPage(1);
+  }, [favDebouncedSearch, favTier, favSort]);
+
+  const {
+    data: favoritesData,
+    isLoading: isFavoritesLoading,
+    isFetching: isFavoritesFetching,
+  } = useGetUserFavoritesQuery(
+    {
+      page: favPage,
+      limit: 24,
+      search: favDebouncedSearch,
+      tier: favTier,
+      sort: favSort,
+    },
+    { skip: activeTab !== 'favourites' },
+  );
+
+  const favMeta = favoritesData?.data?.meta ?? {};
+  const favProducts = favoritesData?.data?.products ?? [];
+  const favTotalPages = favMeta.totalPages ?? 1;
 
   useEffect(() => {
     if (defaultTab) setActiveTab(defaultTab);
@@ -57,7 +117,7 @@ export default function UserDetailsComponent({
 
   useEffect(() => {
     setCurrentPage(1);
-  }, [search, filterType]);
+  }, [debouncedSearch, filterType, staleOnly, pageSize]);
 
   // ✅ Fixed: loadingId now uses downloadId (_id) not product._id
   // `substitute` is only sent after the server reports the original format is
@@ -123,35 +183,27 @@ export default function UserDetailsComponent({
     }
   };
 
-  const allDownloads = useMemo(
-    () => downloadHistory?.data ?? [],
-    [downloadHistory?.data],
+  // Rows are already the current page, already filtered. meta carries the
+  // counts that must survive filtering: staleCount and the format list are
+  // computed over the whole history, so the chip that reveals the filter
+  // cannot vanish once you use it.
+  const paginated = useMemo(
+    () => downloadHistory?.data?.data ?? [],
+    [downloadHistory?.data?.data],
+  );
+  const meta = useMemo(
+    () => downloadHistory?.data?.meta ?? {},
+    [downloadHistory?.data?.meta],
   );
 
-  const fileTypes = useMemo(() => {
-    const types = [
-      ...new Set(allDownloads.map((d) => d.fileType?.toLowerCase())),
-    ];
-    return types.sort();
-  }, [allDownloads]);
-
-  const filtered = useMemo(() => {
-    return allDownloads.filter((d) => {
-      const matchesSearch =
-        search === '' ||
-        d.product?.name?.toLowerCase().includes(search.toLowerCase()) ||
-        d.fileType?.toLowerCase().includes(search.toLowerCase());
-      const matchesType =
-        filterType === 'all' || d.fileType?.toLowerCase() === filterType;
-      return matchesSearch && matchesType;
-    });
-  }, [allDownloads, search, filterType]);
-
-  const totalPages = Math.ceil(filtered.length / ITEMS_PER_PAGE);
-  const paginated = filtered.slice(
-    (currentPage - 1) * ITEMS_PER_PAGE,
-    currentPage * ITEMS_PER_PAGE,
+  const fileTypes = useMemo(
+    () => (meta.fileTypes ?? []).map((t) => String(t).toLowerCase()),
+    [meta.fileTypes],
   );
+
+  const totalRows = meta.filteredTotal ?? 0;
+  const staleCount = meta.staleCount ?? 0;
+  const totalPages = meta.totalPages ?? 1;
 
   const formatDate = (dateStr) => {
     const d = new Date(dateStr);
@@ -210,27 +262,74 @@ export default function UserDetailsComponent({
           </select>
         </div>
 
+        {/* Needs-update filter + page size.
+            The chip only appears when there is something to find: a permanent
+            "Needs update (0)" would be noise on every account with nothing
+            outstanding. */}
+        <div className='flex flex-wrap items-center gap-3 mb-4'>
+          {staleCount > 0 && (
+            <button
+              onClick={() => setStaleOnly((v) => !v)}
+              aria-pressed={staleOnly}
+              className={`inline-flex items-center gap-2 rounded-xl border px-3 py-2 text-xs font-semibold transition-colors ${
+                staleOnly
+                  ? 'border-gray-900 bg-gray-900 text-white'
+                  : 'border-gray-900 bg-white text-gray-900 hover:bg-gray-50'
+              }`}
+            >
+              <i className='ri-refresh-line text-sm' />
+              Needs update ({staleCount})
+            </button>
+          )}
+          {staleOnly && (
+            <span className='text-xs text-gray-500'>
+              These designs were corrected after you downloaded them.
+              Re-downloading is free and won&apos;t use your limit.
+            </span>
+          )}
+
+          <div className='ml-auto flex items-center gap-2'>
+            <label
+              htmlFor='downloads-page-size'
+              className='text-xs text-gray-400'
+            >
+              Per page
+            </label>
+            <select
+              id='downloads-page-size'
+              value={pageSize}
+              onChange={(e) => setPageSize(Number(e.target.value))}
+              className='px-2 py-1.5 text-xs border border-gray-200 rounded-lg bg-white text-gray-600 cursor-pointer focus:outline-none focus:ring-2 focus:ring-gray-900'
+            >
+              {PAGE_SIZE_OPTIONS.map((n) => (
+                <option key={n} value={n}>
+                  {n}
+                </option>
+              ))}
+            </select>
+          </div>
+        </div>
+
         {/* Stats bar */}
         <div className='flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 mb-4'>
           <p className='text-xs text-gray-400'>
             Showing{' '}
             <span className='font-semibold text-gray-700'>
-              {filtered.length === 0
-                ? 0
-                : (currentPage - 1) * ITEMS_PER_PAGE + 1}
-              –{Math.min(currentPage * ITEMS_PER_PAGE, filtered.length)}
+              {totalRows === 0 ? 0 : (currentPage - 1) * pageSize + 1}
+              –{Math.min(currentPage * pageSize, totalRows)}
             </span>{' '}
             of{' '}
             <span className='font-semibold text-gray-700'>
-              {filtered.length}
+              {totalRows}
             </span>{' '}
             downloads
           </p>
-          {(search || filterType !== 'all') && (
+          {(search || filterType !== 'all' || staleOnly) && (
             <button
               onClick={() => {
                 setSearch('');
                 setFilterType('all');
+                setStaleOnly(false);
               }}
               className='self-start sm:self-auto text-xs text-violet-600 hover:text-violet-700 font-medium underline underline-offset-2'
             >
@@ -240,14 +339,16 @@ export default function UserDetailsComponent({
         </div>
 
         {/* Empty state */}
-        {filtered.length === 0 ? (
+        {totalRows === 0 ? (
           <div className='text-center py-16 bg-white border border-gray-100 rounded-2xl'>
             <p className='text-4xl mb-3'>📭</p>
             <p className='text-gray-500 font-medium'>No downloads found</p>
             <p className='text-gray-400 text-sm mt-1'>
-              {search || filterType !== 'all'
-                ? 'Try adjusting your filters'
-                : 'Your download history will appear here'}
+              {staleOnly
+                ? 'None of your designs have been updated since you downloaded them.'
+                : search || filterType !== 'all'
+                  ? 'Try adjusting your filters'
+                  : 'Your download history will appear here'}
             </p>
           </div>
         ) : (
@@ -270,7 +371,11 @@ export default function UserDetailsComponent({
             </div>
 
             {/* Rows */}
-            <div className='space-y-2'>
+            <div
+              className={`space-y-2 ${
+                isDownloadFetching ? 'opacity-50 transition-opacity' : ''
+              }`}
+            >
               {paginated.map((design) => {
                 const { _id, downloadedAt, fileType, product, isStale } =
                   design;
@@ -487,12 +592,16 @@ export default function UserDetailsComponent({
     loadingId,
     search,
     filterType,
+    staleOnly,
+    staleCount,
+    pageSize,
     currentPage,
-    filtered,
+    totalRows,
     paginated,
     totalPages,
     fileTypes,
     isDownloadLoading,
+    isDownloadFetching,
   ]);
 
   return (
@@ -623,24 +732,134 @@ export default function UserDetailsComponent({
         {activeTab === 'password' && <ChangePasswordForm />}
         {activeTab === 'favourites' && (
           <div>
+            {/* Toolbar: search, tier chips, sort. The chip counts come from the
+                whole list rather than the current filter, so picking one does
+                not rewrite the numbers you picked it from. */}
+            {(favMeta.total ?? 0) > 0 && (
+              <div className='flex flex-col gap-3 mb-5'>
+                <div className='flex flex-col sm:flex-row gap-3'>
+                  <div className='relative flex-1'>
+                    <i className='ri-search-line absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 text-sm' />
+                    <input
+                      type='text'
+                      placeholder='Search your favourites...'
+                      value={favSearch}
+                      onChange={(e) => setFavSearch(e.target.value)}
+                      className='w-full pl-9 pr-4 py-2.5 text-sm border border-gray-200 rounded-xl bg-white focus:outline-none focus:ring-2 focus:ring-gray-900 focus:border-transparent placeholder-gray-400'
+                    />
+                    {favSearch && (
+                      <button
+                        onClick={() => setFavSearch('')}
+                        className='absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600'
+                      >
+                        <i className='ri-close-line text-sm' />
+                      </button>
+                    )}
+                  </div>
+
+                  <select
+                    value={favSort}
+                    onChange={(e) => setFavSort(e.target.value)}
+                    aria-label='Sort favourites'
+                    className='px-4 py-2.5 text-sm border border-gray-200 rounded-xl bg-white focus:outline-none focus:ring-2 focus:ring-gray-900 text-gray-600 cursor-pointer'
+                  >
+                    <option value='recent'>Recently added</option>
+                    <option value='oldest'>Oldest first</option>
+                    <option value='name'>Name (A–Z)</option>
+                    <option value='name_desc'>Name (Z–A)</option>
+                  </select>
+                </div>
+
+                <div className='flex flex-wrap items-center gap-2'>
+                  {[
+                    { value: '', label: `All (${favMeta.total ?? 0})` },
+                    { value: 'free', label: `Free (${favMeta.freeCount ?? 0})` },
+                    {
+                      value: 'premium',
+                      label: `Premium (${favMeta.premiumCount ?? 0})`,
+                    },
+                  ].map((chip) => (
+                    <button
+                      key={chip.value || 'all'}
+                      onClick={() => setFavTier(chip.value)}
+                      aria-pressed={favTier === chip.value}
+                      className={`rounded-xl border px-3 py-1.5 text-xs font-semibold transition-colors ${
+                        favTier === chip.value
+                          ? 'border-gray-900 bg-gray-900 text-white'
+                          : 'border-gray-200 bg-white text-gray-600 hover:border-gray-400'
+                      }`}
+                    >
+                      {chip.label}
+                    </button>
+                  ))}
+
+                  <span className='ml-auto text-xs text-gray-400'>
+                    {favMeta.filteredTotal ?? 0} shown
+                  </span>
+                </div>
+              </div>
+            )}
+
             {isFavoritesLoading ? (
               <LoadingSpinner />
-            ) : favoritesData?.data?.products?.length > 0 ? (
+            ) : favProducts.length > 0 ? (
               // Same density as every other product grid — five across made the
               // designs too small to judge.
-              <div className='grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6'>
-                {favoritesData.data.products.map((product, index) => (
-                  <ProductCard key={product._id} item={product} index={index} />
-                ))}
-              </div>
+              <>
+                <div
+                  className={`grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 ${
+                    isFavoritesFetching ? 'opacity-50 transition-opacity' : ''
+                  }`}
+                >
+                  {favProducts.map((product, index) => (
+                    <ProductCard
+                      key={product._id}
+                      item={product}
+                      index={index}
+                    />
+                  ))}
+                </div>
+
+                {favTotalPages > 1 && (
+                  <div className='flex items-center justify-center gap-2 mt-8'>
+                    <button
+                      onClick={() => setFavPage((p) => Math.max(1, p - 1))}
+                      disabled={favPage === 1}
+                      className='px-3 py-2 text-sm rounded-xl border border-gray-200 bg-white text-gray-600 disabled:opacity-40 hover:border-gray-400'
+                    >
+                      <i className='ri-arrow-left-s-line' />
+                    </button>
+                    <span className='text-sm text-gray-500'>
+                      Page{' '}
+                      <span className='font-semibold text-gray-800'>
+                        {favPage}
+                      </span>{' '}
+                      of {favTotalPages}
+                    </span>
+                    <button
+                      onClick={() =>
+                        setFavPage((p) => Math.min(favTotalPages, p + 1))
+                      }
+                      disabled={favPage === favTotalPages}
+                      className='px-3 py-2 text-sm rounded-xl border border-gray-200 bg-white text-gray-600 disabled:opacity-40 hover:border-gray-400'
+                    >
+                      <i className='ri-arrow-right-s-line' />
+                    </button>
+                  </div>
+                )}
+              </>
             ) : (
               <div className='flex flex-col items-center justify-center py-20 text-center'>
                 <div className='text-5xl mb-4'>🤍</div>
                 <p className='text-gray-700 font-semibold text-lg'>
-                  No favourites yet
+                  {favDebouncedSearch || favTier
+                    ? 'No matching favourites'
+                    : 'No favourites yet'}
                 </p>
                 <p className='text-gray-400 text-sm mt-1'>
-                  Tap the heart on any design to save it here.
+                  {favDebouncedSearch || favTier
+                    ? 'Try a different search or filter.'
+                    : 'Tap the heart on any design to save it here.'}
                 </p>
               </div>
             )}

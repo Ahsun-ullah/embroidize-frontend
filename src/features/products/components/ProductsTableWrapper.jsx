@@ -46,6 +46,13 @@ import {
 import { useDeleteProductMutation } from '@/lib/redux/admin/protectedProducts/protectedProductSlice';
 import { slugify } from '@/utils/functions/page';
 
+// Publish state. Kept out of the component so the option objects keep their
+// identity across renders — react-select compares by reference.
+const STATUS_OPTIONS = [
+  { value: 'active', label: 'Active' },
+  { value: 'inactive', label: 'Inactive' },
+];
+
 // React-Select Custom Styles
 const customSelectStyles = {
   control: (base) => ({
@@ -109,6 +116,9 @@ export default function ProductsTableWrapper({
 
   const selectedCategoryId = searchParams.get('category');
   const selectedSubCategoryId = searchParams.get('sub_category');
+  const selectedStatus = searchParams.get('status') || '';
+  const activeStatusOption =
+    STATUS_OPTIONS.find((o) => o.value === selectedStatus) || null;
 
   const subCategoryOptions = useMemo(() => {
     if (!selectedCategoryId) return [];
@@ -197,6 +207,15 @@ export default function ProductsTableWrapper({
   const onSubCategoryChange = useCallback(
     (option) => {
       updateURL({ sub_category: option?.value || '' });
+    },
+    [updateURL],
+  );
+
+  // Clearing the select (the × in react-select) drops the param entirely, which
+  // is what shows active and inactive together again.
+  const onStatusChange = useCallback(
+    (option) => {
+      updateURL({ status: option?.value || '' });
     },
     [updateURL],
   );
@@ -590,8 +609,24 @@ export default function ProductsTableWrapper({
             />
           </div>
 
+          {/* Status (publish state) */}
+          <div className='w-full sm:max-w-[15%]'>
+            <Select
+              instanceId='status-select'
+              placeholder='Status'
+              isClearable
+              options={STATUS_OPTIONS}
+              value={activeStatusOption}
+              onChange={onStatusChange}
+              styles={customSelectStyles}
+            />
+          </div>
+
           {/* Clear All Button */}
-          {(searchValue || selectedCategoryId || selectedSubCategoryId) && (
+          {(searchValue ||
+            selectedCategoryId ||
+            selectedSubCategoryId ||
+            selectedStatus) && (
             <button
               className='text-red-500 hover:text-red-700 font-bold ml-2 self-center'
               onClick={handleClearAllFilters}
@@ -655,11 +690,14 @@ export default function ProductsTableWrapper({
       activeSubCategoryOption,
       selectedCategoryId,
       selectedSubCategoryId,
+      selectedStatus,
+      activeStatusOption,
       selectedIds.length,
       onSearchChange,
       onSearchClear,
       onCategoryChange,
       onSubCategoryChange,
+      onStatusChange,
       handleClearAllFilters,
       handleOpenBundleModal,
     ],

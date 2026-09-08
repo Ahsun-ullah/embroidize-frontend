@@ -74,6 +74,7 @@ export async function getAllProductsForDashboard(
   perPageData,
   categoryId,
   subCategoryId,
+  status,
 ) {
   const url = buildURL('/public/product', {
     search: searchQuery || undefined,
@@ -81,6 +82,10 @@ export async function getAllProductsForDashboard(
     limit: perPageData || 8,
     category: categoryId || undefined,
     sub_category: subCategoryId || undefined,
+    // 'active' | 'inactive'; omitted means both. The backend only reads this
+    // alongside includeHidden, so it cannot be used to browse hidden products
+    // from a public URL.
+    status: status || undefined,
     // Admin dashboard sees ALL products, including unpublished (inactive) ones;
     // public listings only ever show active products.
     includeHidden: 1,

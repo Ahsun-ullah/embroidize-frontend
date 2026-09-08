@@ -39,11 +39,29 @@ export const userInfoSlice = createApi({
         body,
       }),
     }),
+    // Paged and filtered server-side. The endpoint used to return the whole
+    // history in one response; customers with a thousand-plus downloads were
+    // shipping all of it to look at one screen.
     UserDownloadHistory: builder.query({
-      query: (id) => ({
-        url: `/downloads/user/${id}`,
-        method: 'GET',
-      }),
+      query: ({
+        id,
+        page = 1,
+        limit = 20,
+        search = '',
+        fileType = 'all',
+        stale = false,
+      }) => {
+        const params = new URLSearchParams();
+        params.set('page', String(page));
+        params.set('limit', String(limit));
+        if (search) params.set('search', search);
+        if (fileType && fileType !== 'all') params.set('fileType', fileType);
+        if (stale) params.set('stale', '1');
+        return {
+          url: `/downloads/user/${id}?${params.toString()}`,
+          method: 'GET',
+        };
+      },
     }),
   }),
 });

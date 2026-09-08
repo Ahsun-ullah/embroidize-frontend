@@ -8,6 +8,7 @@ import SocialLoginButtons from '@/components/auth/SocialLoginButtons';
 import EmailOtp from '@/components/Common/EmailOtp';
 import { ErrorToast } from '@/components/Common/ErrorToast';
 import LoadingSpinner from '@/components/Common/LoadingSpinner';
+import PasswordInput from '@/components/Common/PasswordInput';
 import { SuccessToast } from '@/components/Common/SuccessToast';
 import { useFingerprint } from '@/lib/hooks/useFingerprint';
 import {
@@ -215,8 +216,7 @@ const RegisterContent = () => {
                 <label htmlFor='password' className='form-label'>
                   Password
                 </label>
-                <Input
-                  type='password'
+                <PasswordInput
                   name='password'
                   id='password'
                   placeholder='Enter password'
@@ -225,6 +225,7 @@ const RegisterContent = () => {
                   className='form-control mt-2'
                   disabled={otpGenerateIsLoading}
                   minLength={6}
+                  autoComplete='new-password'
                 />
               </div>
 
