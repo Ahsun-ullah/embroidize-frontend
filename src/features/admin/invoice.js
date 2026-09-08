@@ -87,27 +87,42 @@ function invoiceHtml({ invoice, customer }) {
   // an issued invoice whenever a plan is renamed or its limits change, which
   // would make the document worthless as a record.
   const plan = isManual ? invoice.manualPlan || null : customer.plan || null;
+  // A credit pack is a prepaid quantity, not a subscription: no billing cycle,
+  // and its downloadLimit is a credit count rather than a per-period allowance.
+  const isCredits = plan?.accessType === 'credits';
   const planBilling = plan
-    ? plan.type === 'one-time'
+    ? isCredits || plan.type === 'one-time'
       ? 'One-time purchase (no recurring charges)'
       : `Recurring — billed ${plan.billingInterval || 'month'}ly`
     : null;
   const planSection = plan
     ? `
-    <h2>Subscription Package Details</h2>
+    <h2>${isCredits ? 'Package Details' : 'Subscription Package Details'}</h2>
     <div class="refs">
       ${planRow('Package', plan.name)}
       ${planRow('Billing', planBilling)}
-      ${planRow('Package price', money(plan.price, currency) + (plan.type === 'recurring' ? ` / ${plan.billingInterval || 'month'}` : ''))}
+      ${
+        // A manual snapshot carries no plan price — the money actually received
+        // is already printed above, and "$0.00" here would contradict it.
+        plan.price != null
+          ? planRow('Package price', money(plan.price, currency) + (plan.type === 'recurring' ? ` / ${plan.billingInterval || 'month'}` : ''))
+          : ''
+      }
       ${planRow(
         'Download allowance',
-        plan.downloadLimit != null
-          ? `${plan.downloadLimit} designs per billing period`
-          : 'Unlimited designs during the service period'
+        isCredits
+          ? `${plan.downloadLimit} prepaid premium download${plan.downloadLimit === 1 ? '' : 's'}`
+          : plan.downloadLimit != null
+            ? `${plan.downloadLimit} designs per billing period`
+            : 'Unlimited designs during the service period'
       )}
       ${planRow(
         'Daily download limit',
-        plan.dailyLimit != null ? `${plan.dailyLimit} designs per day` : 'Unlimited'
+        isCredits
+          ? null
+          : plan.dailyLimit != null
+            ? `${plan.dailyLimit} designs per day`
+            : 'Unlimited'
       )}
       ${
         plan.features && plan.features.length

@@ -48,3 +48,27 @@ export async function getRevenueStats() {
     return null;
   }
 }
+
+// Everyone who has ever held download credits. They own no UserSubscription
+// row, so getSubscribedUsers() can never return them — this is a separate call
+// against a separate list, not a filter over the subscribers.
+export async function getCreditCustomers() {
+  'use server';
+  try {
+    const headers = await serverHeaders();
+    const response = await fetch(`${apiUrl()}/admin/credit-customers`, {
+      headers,
+      cache: 'no-store',
+      next: { revalidate: 0 },
+    });
+    if (!response.ok) throw new Error(`API request failed: ${response.status}`);
+    const data = await response.json();
+    return {
+      customers: data?.data?.customers || [],
+      totals: data?.data?.totals || null,
+    };
+  } catch (error) {
+    console.error('Error fetching credit customers:', error);
+    return { customers: [], totals: null };
+  }
+}

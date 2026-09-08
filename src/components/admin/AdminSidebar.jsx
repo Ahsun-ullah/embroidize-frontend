@@ -392,6 +392,13 @@ export default function AdminSidebar({ isCollapsed, setIsCollapsed }) {
                   icon: 'ri-vip-crown-2-fill',
                 },
                 {
+                  // Credit buyers own no subscription row, so Subscribers can
+                  // never list them. They get their own entry, next to it.
+                  href: '/admin/credit-customers',
+                  label: 'Credit Customers',
+                  icon: 'ri-coin-line',
+                },
+                {
                   href: '/admin/settings/manual-requests',
                   label: 'Manual Requests',
                   icon: 'ri-hand-coin-line',

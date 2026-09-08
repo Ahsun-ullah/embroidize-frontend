@@ -131,12 +131,16 @@ export default function GrantAccessModal({ user, plans = [], onClose, onGranted 
   };
 
   const submit = async (force = false) => {
-    if (!planId) {
+    // Only a time grant sells a plan. A credit pack has no plan, no period and
+    // no limits, so it deliberately sends no planId — the invoice is then
+    // labelled with the credits themselves.
+    if (grantType === 'time' && !planId) {
       ErrorToast('Plan required', 'Choose a plan for this grant.', 3000);
       return;
     }
 
-    const body = { planId, note, force, grantType };
+    const body = { note, force, grantType };
+    if (grantType === 'time') body.planId = planId;
 
     if (grantType === 'credits') {
       const n = parseInt(creditAmount, 10);
@@ -302,7 +306,7 @@ export default function GrantAccessModal({ user, plans = [], onClose, onGranted 
         </div>
 
         {grantType === 'credits' && (
-          <p className='mb-4 rounded-lg bg-blue-50 px-3 py-2 text-xs leading-relaxed text-blue-900'>
+          <p className='mb-4 rounded-lg bg-gray-100 px-3 py-2 text-xs leading-relaxed text-gray-700'>
             Credits are prepaid premium downloads and are kept separately from
             subscriptions — this will not touch any plan this user has. They are
             only spent on premium designs while there is no active subscription.
@@ -312,24 +316,28 @@ export default function GrantAccessModal({ user, plans = [], onClose, onGranted 
           </p>
         )}
 
-        {/* Plan */}
-        <label className='mb-1 block text-xs font-bold uppercase tracking-wide text-gray-500'>
-          {grantType === 'credits' ? 'Credit pack (for the invoice)' : 'Plan'}
-        </label>
-        <select
-          value={planId}
-          onChange={(e) => setPlanId(e.target.value)}
-          className='mb-4 w-full rounded-lg border border-gray-300 px-3 py-2 text-sm'
-        >
-          {plans.map((p) => (
-            <option key={p._id} value={p._id}>
-              {p.name}
-              {p.isActive === false ? ' (hidden)' : ''} — $
-              {p.price}
-              {p.billingInterval ? `/${p.billingInterval}` : ' one-time'}
-            </option>
-          ))}
-        </select>
+        {/* Plan — a time grant sells one; a credit pack is not a plan at all. */}
+        {grantType === 'time' && (
+          <>
+            <label className='mb-1 block text-xs font-bold uppercase tracking-wide text-gray-500'>
+              Plan
+            </label>
+            <select
+              value={planId}
+              onChange={(e) => setPlanId(e.target.value)}
+              className='mb-4 w-full rounded-lg border border-gray-300 px-3 py-2 text-sm'
+            >
+              {plans.map((p) => (
+                <option key={p._id} value={p._id}>
+                  {p.name}
+                  {p.isActive === false ? ' (hidden)' : ''} — $
+                  {p.price}
+                  {p.billingInterval ? `/${p.billingInterval}` : ' one-time'}
+                </option>
+              ))}
+            </select>
+          </>
+        )}
 
         {/* ── CREDIT FIELDS ── */}
         {grantType === 'credits' && (
