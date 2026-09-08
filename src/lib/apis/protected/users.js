@@ -89,6 +89,8 @@ export async function getDownloadStats(
   search = '',
   startDate = '',
   endDate = '',
+  userTier = '',
+  productTier = '',
 ) {
   'use server';
 
@@ -112,6 +114,8 @@ export async function getDownloadStats(
     if (search) url.searchParams.set('search', search);
     if (startDate) url.searchParams.set('startDate', startDate);
     if (endDate) url.searchParams.set('endDate', endDate);
+    if (userTier) url.searchParams.set('userTier', userTier);
+    if (productTier) url.searchParams.set('productTier', productTier);
 
     const response = await fetch(url.toString(), {
       method: 'GET',
@@ -137,5 +141,54 @@ export async function getDownloadStats(
   } catch (error) {
     console.error('Error fetching paginated stats:', error);
     return { data: [], pagination: { total: 0, totalPages: 0 } };
+  }
+}
+
+// Download breakdown: subscriber vs free downloader, premium vs free design.
+// Takes the same date range as getDownloadStats so both halves of the Downloads
+// page always describe the same window.
+export async function getDownloadBreakdown(startDate = '', endDate = '') {
+  'use server';
+
+  const empty = {
+    totals: { downloads: 0, uniqueUsers: 0, uniqueProducts: 0 },
+    byUserTier: [],
+    byProductTier: [],
+    matrix: [],
+  };
+
+  try {
+    const cookieStore = await cookies();
+    const token = cookieStore.get('token')?.value;
+
+    const headers = new Headers();
+    if (token) {
+      headers.set('Authorization', `Bearer ${token}`);
+    }
+
+    const apiUrl =
+      process.env.NEXT_PUBLIC_BASE_API_URL_PROD ||
+      process.env.NEXT_PUBLIC_BASE_API_URL;
+
+    const url = new URL(`${apiUrl}/stats/downloads/breakdown`);
+    if (startDate) url.searchParams.set('startDate', startDate);
+    if (endDate) url.searchParams.set('endDate', endDate);
+
+    const response = await fetch(url.toString(), {
+      method: 'GET',
+      headers,
+      cache: 'no-store',
+    });
+
+    if (!response.ok) {
+      console.error(`API Error: ${response.status}`);
+      return empty;
+    }
+
+    const responseData = await response.json();
+    return responseData?.data || empty;
+  } catch (error) {
+    console.error('Error fetching download breakdown:', error);
+    return empty;
   }
 }
