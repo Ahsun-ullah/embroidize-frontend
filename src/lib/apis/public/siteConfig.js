@@ -30,6 +30,13 @@ export async function getSiteConfig() {
       freeDownloadWindow: result?.data?.freeDownloadWindow ?? null,
     };
   } catch (error) {
+    // Next signals "this route cannot be static" by THROWING out of the fetch.
+    // Swallowing that would be catching the framework's own control flow: the
+    // build log fills with a scary error, and the route's bail-out to dynamic
+    // rendering rests on Next noticing by other means. Re-throw it and let the
+    // bail-out happen the way it is meant to — the no-store fetch above is
+    // deliberate, so this page is meant to be dynamic.
+    if (error?.digest === 'DYNAMIC_SERVER_USAGE') throw error;
     console.error('Error fetching site config:', error);
     return UNKNOWN;
   }

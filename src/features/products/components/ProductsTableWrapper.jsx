@@ -4,11 +4,11 @@ import MDEditor from '@uiw/react-md-editor';
 import Link from 'next/link';
 import { useRouter, useSearchParams } from 'next/navigation';
 import {
-  startTransition,
   useCallback,
   useEffect,
   useMemo,
   useState,
+  useTransition,
 } from 'react';
 import Select from 'react-select';
 
@@ -74,6 +74,8 @@ export default function ProductsTableWrapper({
   const router = useRouter();
   const searchParams = useSearchParams();
   const [selectedKeys, setSelectedKeys] = useState(new Set([]));
+  // Drives the pending state for every filter navigation on this page.
+  const [isPending, startTransition] = useTransition();
   const [isCreatingBundle, setIsCreatingBundle] = useState(false);
   const [isUpdatingChoice, setIsUpdatingChoice] = useState(false);
 
@@ -161,6 +163,15 @@ export default function ProductsTableWrapper({
   const clearSelection = useCallback(() => setSelectedKeys(new Set()), []);
 
   // --- URL Update Logic ---
+  // Every filter here is a URL parameter read by a server component, so each
+  // change is a server round-trip. Wrapped in a transition so React reports it
+  // as pending: without that the page shows the OLD results, unchanged and
+  // undimmed, for the whole second-plus it takes — indistinguishable from a
+  // click that did nothing.
+  //
+  // The app's NProgress bar cannot cover this: it starts on anchor clicks only,
+  // and its pushState proxy calls NProgress.done() — so a router.push like this
+  // one actively FINISHES the bar instead of starting it.
   const updateURL = useCallback(
     (updates) => {
       const params = new URLSearchParams(searchParams.toString());
@@ -178,19 +189,29 @@ export default function ProductsTableWrapper({
       }
 
       params.set('page', '1');
-      router.push(`?${params.toString()}`);
+      startTransition(() => {
+        router.push(`?${params.toString()}`);
+      });
     },
     [searchParams, router],
   );
 
   // --- Handlers ---
-  const onSearchChange = useCallback(
-    (val) => {
-      setSearchValue(val);
-      updateURL({ search: val });
-    },
-    [updateURL],
-  );
+  // Typing only updates local state. Pushing per keystroke meant "flower" cost
+  // six navigations and six product queries, each landing out of order — the
+  // single biggest reason this page felt slow.
+  const onSearchChange = useCallback((val) => setSearchValue(val), []);
+
+  // One navigation per pause in typing. The guard matters: without it this
+  // fires on mount and on every arrival from the URL-sync effect below,
+  // re-pushing the search that is already in the address bar.
+  useEffect(() => {
+    const current = searchParams.get('search') || '';
+    const next = searchValue.trim();
+    if (next === current) return;
+    const t = setTimeout(() => updateURL({ search: next }), 400);
+    return () => clearTimeout(t);
+  }, [searchValue, searchParams, updateURL]);
 
   const onSearchClear = useCallback(() => {
     setSearchValue('');
@@ -222,14 +243,18 @@ export default function ProductsTableWrapper({
 
   const handleClearAllFilters = useCallback(() => {
     setSearchValue('');
-    router.push('?page=1');
+    startTransition(() => {
+      router.push('?page=1');
+    });
   }, [router]);
 
   const onPageChange = useCallback(
     (newPage) => {
       const params = new URLSearchParams(searchParams.toString());
       params.set('page', newPage.toString());
-      router.push(`?${params.toString()}`);
+      startTransition(() => {
+        router.push(`?${params.toString()}`);
+      });
     },
     [searchParams, router],
   );
@@ -622,6 +647,19 @@ export default function ProductsTableWrapper({
             />
           </div>
 
+          {/* Pending marker. Each filter is a server round-trip, so without a
+              visible sign the page looks like it ignored the click. */}
+          {isPending && (
+            <div
+              className='flex items-center gap-2 self-center text-xs font-medium text-gray-500'
+              role='status'
+              aria-live='polite'
+            >
+              <span className='h-3.5 w-3.5 animate-spin rounded-full border-2 border-gray-300 border-t-gray-900' />
+              Updating…
+            </div>
+          )}
+
           {/* Clear All Button */}
           {(searchValue ||
             selectedCategoryId ||
@@ -692,6 +730,7 @@ export default function ProductsTableWrapper({
       selectedSubCategoryId,
       selectedStatus,
       activeStatusOption,
+      isPending,
       selectedIds.length,
       onSearchChange,
       onSearchClear,
@@ -760,7 +799,12 @@ export default function ProductsTableWrapper({
       {initialData.length === 0 ? (
         <div className='py-16 text-center text-gray-400'>No products found</div>
       ) : (
-        <div className='grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5'>
+        <div
+          className={`grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 transition-opacity duration-150 ${
+            isPending ? 'opacity-50' : ''
+          }`}
+          aria-busy={isPending}
+        >
           {initialData.map((product) =>
             renderProductCard(product, selectedSet.has(product._id)),
           )}
