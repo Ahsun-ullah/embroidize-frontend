@@ -4,11 +4,13 @@ import Footer from '@/components/user/HomePage/Footer';
 import Header from '@/components/user/HomePage/Header';
 import FilterLayout from '@/features/products/components/filters/FilterLayout';
 import {
+  RECENT_TAB_DAYS,
   hasGranularFilters,
   readFilterParams,
   toApiFilters,
 } from '@/features/products/components/filters/filterConfig';
 import { getProductFilters, getProducts } from '@/lib/apis/public/products';
+import { getSiteConfig } from '@/lib/apis/public/siteConfig';
 import Link from 'next/link';
 import ProductUpdates from './ProductUpdates';
 
@@ -19,6 +21,7 @@ export async function generateMetadata({ searchParams }) {
   const isPopular = filter === 'popular';
   const isAdminChoice = filter === 'embroidize-choice';
   const isMostFavourited = filter === 'most-favourited';
+  const isRecent = filter === 'recent';
 
   const baseTitle = 'Machine Embroidery Designs';
   const baseDescription =
@@ -36,13 +39,19 @@ export async function generateMetadata({ searchParams }) {
   const mostFavouritedDescription =
     'Browse the embroidery designs our community favourites the most. Saved by thousands and ready for instant download.';
 
+  const recentTitle = 'New Embroidery Designs - Added in the Last 30 Days';
+  const recentDescription =
+    'The newest machine embroidery designs on Embroidize, added in the last 30 days. Instant download in DST, PES, JEF, EXP and more.';
+
   const pickTitle = isPopular
     ? popularTitle
     : isAdminChoice
       ? adminChoiceTitle
       : isMostFavourited
         ? mostFavouritedTitle
-        : baseTitle;
+        : isRecent
+          ? recentTitle
+          : baseTitle;
 
   const pickDescription = isPopular
     ? popularDescription
@@ -50,7 +59,9 @@ export async function generateMetadata({ searchParams }) {
       ? adminChoiceDescription
       : isMostFavourited
         ? mostFavouritedDescription
-        : baseDescription;
+        : isRecent
+          ? recentDescription
+          : baseDescription;
 
   const canonicalPath = isPopular
     ? '/products?filter=popular'
@@ -58,11 +69,13 @@ export async function generateMetadata({ searchParams }) {
       ? '/products?filter=embroidize-choice'
       : isMostFavourited
         ? '/products?filter=most-favourited'
-        : '/products';
+        : isRecent
+          ? '/products?filter=recent'
+          : '/products';
 
   // Faceted URLs are combinatorial — thousands of category×tier×sort permutations
-  // would otherwise land in the index as near-duplicates of each other. The four
-  // tab views stay indexable exactly as before; anything the sidebar produces is
+  // would otherwise land in the index as near-duplicates of each other. The tab
+  // views stay indexable, each on its own canonical; anything the sidebar makes is
   // noindex,follow so crawlers still walk through to the products themselves.
   const isFiltered = hasGranularFilters(readFilterParams(searchParams));
 
@@ -101,7 +114,13 @@ export default async function AllProductsPage({ searchParams }) {
   // The tab views are no longer separate endpoints — they expand into the same
   // filter vocabulary the sidebar writes, so "Embroidize Choice" and "Free" can
   // finally be combined instead of being mutually exclusive pages.
-  const filterState = readFilterParams(searchParams);
+  // The Recent tab's window is admin-tunable (Settings → Discovery), so it is
+  // read live rather than compiled in. Falls back to the shared constant when
+  // the config cannot be read — the tab still works, just at its default reach.
+  const siteConfig = await getSiteConfig();
+  const recentDays = String(siteConfig?.recentTabDays || RECENT_TAB_DAYS);
+
+  const filterState = readFilterParams(searchParams, { recentDays });
   const apiFilters = toApiFilters(filterState);
 
   // Highlight the tab that matches the filters ACTUALLY in effect, not the one
@@ -112,7 +131,11 @@ export default async function AllProductsPage({ searchParams }) {
   const isPopular = filterState.sort === 'popular';
   const isAdminChoice = filterState.curated === '1';
   const isMostFavourited = filterState.sort === 'most-favourited';
-  const isAll = !isPopular && !isAdminChoice && !isMostFavourited;
+  // Recent is the only tab defined by a date window rather than an ordering, so
+  // it is read off `since` — picking "Newest first" from the sort dropdown is
+  // not the same view and must not light this tab up.
+  const isRecent = filterState.since === recentDays;
+  const isAll = !isPopular && !isAdminChoice && !isMostFavourited && !isRecent;
 
   const [productData, facets] = await Promise.all([
     getProducts('', currentPage, perPageData, apiFilters),
@@ -144,6 +167,17 @@ export default async function AllProductsPage({ searchParams }) {
                 }`}
               >
                 All
+              </Link>
+              <Link
+                href='/products?filter=recent'
+                prefetch={false}
+                className={`px-4 py-2 text-sm whitespace-nowrap rounded transition-colors ${
+                  isRecent
+                    ? 'bg-black text-white'
+                    : 'border border-gray-200 hover:bg-gray-50'
+                }`}
+              >
+                Recent
               </Link>
               <Link
                 href='/products?filter=popular'

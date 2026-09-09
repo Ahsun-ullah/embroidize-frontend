@@ -34,6 +34,16 @@ export default function DiscoveryWrapper({ settings }) {
       ? String(stored.adminChoiceRotationDays)
       : String(effective.adminChoiceRotationDays ?? 7),
   );
+  const [recentDays, setRecentDays] = useState(
+    stored.recentTabDays != null
+      ? String(stored.recentTabDays)
+      : String(effective.recentTabDays ?? 30),
+  );
+  const [badgeDays, setBadgeDays] = useState(
+    stored.newBadgeDays != null
+      ? String(stored.newBadgeDays)
+      : String(effective.newBadgeDays ?? 7),
+  );
   const [isSaving, setIsSaving] = useState(false);
 
   const handleSave = async () => {
@@ -57,6 +67,26 @@ export default function DiscoveryWrapper({ settings }) {
       return;
     }
 
+    const rt = Number(recentDays);
+    if (!Number.isInteger(rt) || rt < 1 || rt > 365) {
+      ErrorToast(
+        'Invalid window',
+        'The Recent tab window must be a whole number of days between 1 and 365.',
+        3000,
+      );
+      return;
+    }
+
+    const nb = Number(badgeDays);
+    if (!Number.isInteger(nb) || nb < 1 || nb > 365) {
+      ErrorToast(
+        'Invalid window',
+        'The New badge window must be a whole number of days between 1 and 365.',
+        3000,
+      );
+      return;
+    }
+
     setIsSaving(true);
     try {
       const token = Cookies.get('token');
@@ -69,6 +99,8 @@ export default function DiscoveryWrapper({ settings }) {
         body: JSON.stringify({
           popularWindowDays: p,
           adminChoiceRotationDays: r,
+          recentTabDays: rt,
+          newBadgeDays: nb,
         }),
       });
       const result = await res.json();
@@ -113,6 +145,12 @@ export default function DiscoveryWrapper({ settings }) {
             <Chip size='sm' variant='flat' className='bg-gray-900 text-white'>
               Choice reshuffles every {effective.adminChoiceRotationDays ?? 7}{' '}
               days
+            </Chip>{' '}
+            <Chip size='sm' variant='flat' className='bg-gray-900 text-white'>
+              Recent = last {effective.recentTabDays ?? 30} days
+            </Chip>{' '}
+            <Chip size='sm' variant='flat' className='bg-gray-900 text-white'>
+              New badge = {effective.newBadgeDays ?? 7} days
             </Chip>
           </p>
         </div>
@@ -173,6 +211,63 @@ export default function DiscoveryWrapper({ settings }) {
             }
             description='Everyone sees the same order within a period, so the row stays consistent between page loads and across pagination.'
           />
+        </CardBody>
+      </Card>
+
+      <Card className='border border-gray-200 shadow-none'>
+        <CardHeader className='font-semibold'>
+          New designs — tab and badge
+        </CardHeader>
+        <CardBody className='gap-4'>
+          <div>
+            <p className='mb-2 text-xs text-gray-500'>
+              How far back the <strong>Recent</strong> tab on the products page
+              reaches. It both sorts newest-first and hides anything older, so
+              page 3 of the tab is still recent work rather than the back
+              catalogue.
+            </p>
+            <Input
+              type='number'
+              min={1}
+              max={365}
+              value={recentDays}
+              onValueChange={setRecentDays}
+              endContent={
+                <span className='text-sm text-gray-400'>
+                  day{recentDays === '1' ? '' : 's'}
+                </span>
+              }
+              description='Changing this takes effect on the next page load.'
+            />
+          </div>
+
+          <div>
+            <p className='mb-2 text-xs text-gray-500'>
+              How long a design wears the <strong>New</strong> badge on its
+              card, everywhere cards appear. Keep this shorter than the tab
+              window above: if every design on the Recent tab carries a badge,
+              the badge stops telling anyone anything.
+            </p>
+            <Input
+              type='number'
+              min={1}
+              max={365}
+              value={badgeDays}
+              onValueChange={setBadgeDays}
+              endContent={
+                <span className='text-sm text-gray-400'>
+                  day{badgeDays === '1' ? '' : 's'}
+                </span>
+              }
+              description='Measured from when the design was added, not when its files were last updated.'
+            />
+            {Number(badgeDays) > Number(recentDays) && (
+              <p className='mt-2 text-xs text-amber-700'>
+                The badge currently lasts longer than the Recent tab reaches, so
+                designs will show a &quot;New&quot; badge outside that tab.
+              </p>
+            )}
+          </div>
         </CardBody>
       </Card>
 

@@ -60,6 +60,11 @@ export default function DownloadBreakdownPanel({ breakdown }) {
     uniqueProducts: 0,
   };
   const byUserTier = breakdown?.byUserTier || [];
+  // Distinct people per tier GROUP, counted in the database. Summing the two
+  // buckets' unique users here counted anyone with rows on both sides of the
+  // stamping cutover twice — enough to report more free users than there were
+  // downloaders in total.
+  const byUserTierGroup = breakdown?.byUserTierGroup || [];
   const byProductTier = breakdown?.byProductTier || [];
   const matrix = breakdown?.matrix || [];
 
@@ -73,10 +78,10 @@ export default function DownloadBreakdownPanel({ breakdown }) {
       (sum, t) => sum + (userTierRow(t).downloads || 0),
       0,
     );
-    const users = members.reduce(
-      (sum, t) => sum + (userTierRow(t).uniqueUsers || 0),
-      0,
-    );
+    const users =
+      byUserTierGroup.find((r) => r.tier === tier)?.uniqueUsers ??
+      // Older API responses have no grouped counts; one bucket is still exact.
+      (members.length === 1 ? userTierRow(tier).uniqueUsers || 0 : null);
     const estimated = members
       .filter((t) => ESTIMATED_TIERS.has(t))
       .reduce((sum, t) => sum + (userTierRow(t).downloads || 0), 0);
@@ -145,9 +150,13 @@ export default function DownloadBreakdownPanel({ breakdown }) {
       key: 'subscription',
       label: 'By subscribers',
       value: tierGroup('subscription').downloads,
-      sub: `${pct(tierGroup('subscription').downloads, totals.downloads)} · ${
-        tierGroup('subscription').users
-      } subscribers${
+      sub: `${pct(tierGroup('subscription').downloads, totals.downloads)}${
+        // Omitted rather than guessed when the API cannot count the group
+        // distinctly — a wrong headcount reads as authoritative as a right one.
+        tierGroup('subscription').users != null
+          ? ` · ${tierGroup('subscription').users} subscribers`
+          : ''
+      }${
         tierGroup('subscription').estimated
           ? ` · ${tierGroup('subscription').estimated.toLocaleString()} est.`
           : ''
@@ -160,9 +169,11 @@ export default function DownloadBreakdownPanel({ breakdown }) {
       key: 'free',
       label: 'By free users',
       value: tierGroup('free').downloads,
-      sub: `${pct(tierGroup('free').downloads, totals.downloads)} · ${
-        tierGroup('free').users
-      } users${
+      sub: `${pct(tierGroup('free').downloads, totals.downloads)}${
+        tierGroup('free').users != null
+          ? ` · ${tierGroup('free').users} users`
+          : ''
+      }${
         tierGroup('free').estimated
           ? ` · ${tierGroup('free').estimated.toLocaleString()} est.`
           : ''

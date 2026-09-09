@@ -1,5 +1,7 @@
 'use client';
 
+import { isNewProduct } from '@/features/products/components/filters/filterConfig';
+import { useSiteConfig } from '@/lib/providers/SiteConfigProvider';
 import { useUserInfoQuery } from '@/lib/redux/common/user/userInfoSlice';
 import { blurDataURL } from '@/utils/blur';
 import { Crown } from 'lucide-react';
@@ -24,9 +26,22 @@ function DownloadIcon(props) {
   );
 }
 
+function addedAgoLabel(createdAt) {
+  if (!createdAt) return '';
+  const added = new Date(createdAt).getTime();
+  if (Number.isNaN(added)) return '';
+  const days = Math.floor((Date.now() - added) / (24 * 60 * 60 * 1000));
+  if (days <= 0) return 'Added today';
+  if (days === 1) return 'Added 1 day ago';
+  return `Added ${days} days ago`;
+}
+
 // pass `index` from parent map so the first visible image becomes the LCP image
 const ProductCard = React.memo(function ProductCard({ item, index = 0 }) {
   const { data: userInfoData } = useUserInfoQuery();
+  // Admin-tunable (Settings → Discovery), with the same default the backend
+  // falls back to, so a card rendered before the config arrives is still right.
+  const { newBadgeDays } = useSiteConfig();
 
   if (!item?._id || !item?.name) return null;
 
@@ -42,6 +57,9 @@ const ProductCard = React.memo(function ProductCard({ item, index = 0 }) {
   // Pricing tier flag. Missing field counts as premium, matching the backend's
   // isFree!==true gating.
   const isFreeTier = item?.isFree === true;
+  // Added within the badge window. Shared with the Recent tab's vocabulary so
+  // "new" means one thing across the site.
+  const isNew = isNewProduct(item?.createdAt, newBadgeDays);
 
   const isLCP = index === 0;
   const isAdmin = userInfoData?.role === 'admin';
@@ -126,6 +144,23 @@ const ProductCard = React.memo(function ProductCard({ item, index = 0 }) {
       <div className='flex items-center justify-between gap-4 p-4'>
         {/* Left */}
         <div className='min-w-0 flex-1 gap-0.5 flex flex-col'>
+          {/* Deliberately NOT a ribbon on the image: the artwork is the product
+              and nothing overlays it — the same reason the SKU moved down here.
+              Plain text, no chip: the weight and the colour do the work, so it
+              reads as part of the card rather than a sticker stuck on it. */}
+          {isNew && (
+            <span className='mb-1 flex items-center gap-3'>
+              <span className='inline-flex w-fit shrink-0 items-center rounded-md bg-amber-400 px-2.5 py-0.5 text-[11px] font-bold text-neutral-900'>
+                New
+              </span>
+              {/* The chip says "pay attention", this says how much — one day
+                  old and six days old are not the same news. Amber ties it to
+                  the chip so the pair reads as one signal. */}
+              <span className='truncate text-[11px] font-medium text-neutral-500'>
+                {addedAgoLabel(item?.createdAt)}
+              </span>
+            </span>
+          )}
           <Link
             href={productLink}
             className='block truncate text-sm font-semibold text-neutral-900 hover:text-black'
@@ -156,7 +191,7 @@ const ProductCard = React.memo(function ProductCard({ item, index = 0 }) {
               Free
             </span>
           ) : (
-            <span className='inline-flex items-center gap-1 rounded-md bg-black px-2.5 py-1 text-xs font-semibold text-white'>
+            <span className='inline-flex items-center gap-1 rounded-md bg-black px-2.5 py-1.5 text-xs font-semibold text-white'>
               <Crown size={11} className='fill-amber-400 text-amber-400' />
               Pro
             </span>

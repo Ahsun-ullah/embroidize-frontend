@@ -109,7 +109,6 @@ export default function UserProfileDropdown() {
                   </div>
                 </div>
               </DropdownItem>
-
               <DropdownItem>
                 <Link
                   href='/user/user-details?tabName=account'
@@ -130,6 +129,21 @@ export default function UserProfileDropdown() {
                   My Plan
                 </Link>
               </DropdownItem>
+
+
+
+                <DropdownItem key='credits'>
+                  <Link
+                    href='/user/credits'
+                    prefetch={false}
+                    className='flex text-base gap-1 font-medium'
+                  >
+                    <i className='ri-coin-fill' aria-hidden='true'></i>
+                    My Credits
+                  </Link>
+                </DropdownItem>
+
+
               <DropdownItem>
                 <Link
                   href='/user/custom-order'

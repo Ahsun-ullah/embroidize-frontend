@@ -15,7 +15,13 @@ import { useEffect, useRef } from 'react';
 // checkout, so this site is never told it occurred. Most declined customers just
 // close the tab, and a purely conditional link would never reach them.
 // ─────────────────────────────────────────────────────────────────────────────
-export default function PaymentHelpModal({ plans = [], onClose }) {
+export default function PaymentHelpModal({
+  plans = [],
+  onClose,
+  // Which ask to open on: the credits offer links here already in credit mode
+  // rather than dropping people on a plan picker they didn't want.
+  initialType = 'subscription',
+}) {
   const dialogRef = useRef(null);
 
   useEffect(() => {
@@ -46,11 +52,12 @@ export default function PaymentHelpModal({ plans = [], onClose }) {
         <div className='mb-5 flex items-start justify-between gap-4'>
           <div>
             <h2 id='pay-help-title' className='text-xl font-bold text-black'>
-              Other ways to pay
+              {initialType === 'credits' ? 'Request download credits' : 'Other ways to pay'}
             </h2>
             <p className='mt-1 text-sm leading-relaxed text-gray-600'>
-              Card not working, or you&apos;d rather not use one? We can take
-              your payment directly and set your account up by hand.
+              {initialType === 'credits'
+                ? "Tell us how many credits you need and how you'd like to pay. We'll send you payment details and add them as soon as it arrives."
+                : "Card not working, or you'd rather not use one? We can take your payment directly and set your account up by hand."}
             </p>
           </div>
           <button
@@ -62,7 +69,7 @@ export default function PaymentHelpModal({ plans = [], onClose }) {
           </button>
         </div>
 
-        <PaymentHelpForm plans={plans} />
+        <PaymentHelpForm plans={plans} initialType={initialType} />
       </div>
     </div>
   );

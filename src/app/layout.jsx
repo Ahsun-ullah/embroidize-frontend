@@ -1,8 +1,10 @@
 import ScrollToTopBottom from '@/components/Common/ScrollToTopBottom';
+import WhatsAppButton from '@/components/Common/WhatsAppButton';
 import SubscriptionStatusBanner from '@/components/Common/SubscriptionStatusBanner';
 import ChatIdentify from '@/components/Common/TawkIdentify';
 import { NProgressProvider } from '@/components/providers/NProgressProvider';
 import ClientProviders from '@/lib/providers/ClientProviders';
+import SiteConfigProvider from '@/lib/providers/SiteConfigProvider';
 import { GoogleTagManager } from '@next/third-parties/google';
 import Script from 'next/script';
 import { Suspense } from 'react';
@@ -116,6 +118,9 @@ export default function RootLayout({ children }) {
         />
 
         <ClientProviders>
+          {/* One fetch of the public settings for the whole page: the card
+              badge window and the WhatsApp number both read it. */}
+          <SiteConfigProvider>
           <ChatIdentify />
           {/* This Suspense is a SAFETY NET for pages that call
               useSearchParams() without their own boundary (e.g. auth pages).
@@ -137,8 +142,13 @@ export default function RootLayout({ children }) {
                 {children}
               </main>
               <ScrollToTopBottom />
+              {/* Bottom-left: the right corner already holds the Crisp bubble
+                  and the scroll control. Renders nothing until a number is
+                  configured in Settings → WhatsApp. */}
+              <WhatsAppButton />
             </NProgressProvider>
           </Suspense>
+          </SiteConfigProvider>
         </ClientProviders>
       </body>
     </html>

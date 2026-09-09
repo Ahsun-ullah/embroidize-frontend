@@ -602,7 +602,12 @@ export default function SubscriptionsPageClient({
     // "Renew my access" button on My Plan, so a manual subscriber lands on the
     // plans (to see what they're renewing) with the request form already open
     // rather than having to hunt for the link.
-    if (searchParams.get('pay') === '1') {
+    // ?pay=credits does the same from the credits side — My Plan's credits card
+    // and the "My credits" page both link here, and landing on a plan picker
+    // when you asked about credits is a small betrayal of the click.
+    const payParam = searchParams.get('pay');
+    if (payParam === '1' || payParam === 'credits') {
+      if (payParam === 'credits') setPayHelpType('credits');
       setShowPayHelp(true);
     }
   }, [pathName, router]);
@@ -632,6 +637,10 @@ export default function SubscriptionsPageClient({
   // ever get is ?status=cancelled (they clicked back), which we use to make the
   // same entry point louder rather than to decide whether to show it at all.
   const [showPayHelp, setShowPayHelp] = useState(false);
+  // Which ask the "other ways to pay" modal opens on. The credits section sends
+  // people straight into credit mode instead of making them find the toggle.
+  const [payHelpType, setPayHelpType] = useState('subscription');
+  const creditPacks = siteConfig?.creditPacks || [];
   const [checkoutTrouble, setCheckoutTrouble] = useState(false);
 
   const faqs = buildSubscriptionFaqs(freeLimit, freeWindow);
@@ -1080,11 +1089,99 @@ export default function SubscriptionsPageClient({
             )}
           </div>
 
+          {/* ---------- PAY PER DOWNLOAD (CREDITS) ---------- */}
+          {/*
+            Not a fourth plan card: credits are a different shape of product —
+            a prepaid quantity with no period, no renewal and no card on file —
+            and putting them in the plan grid would invite a like-for-like
+            comparison that misleads. They sit under the grid as their own
+            offer, for the customer who only wants a handful of designs.
+
+            There is no "buy" button because there is no checkout for this: a
+            person quotes it, takes the payment and adds the credits by hand.
+            Saying so plainly is the honest version of the offer.
+          */}
+          <div className='mt-10 rounded-2xl bg-white p-6 shadow-sm ring-1 ring-black/5 md:p-8'>
+            <div className='flex flex-col gap-6 md:flex-row md:items-start md:justify-between'>
+              <div className='max-w-xl'>
+                <div className='mb-2 inline-flex items-center gap-2 rounded-full bg-gray-100 px-3 py-1 text-xs font-bold uppercase tracking-wide text-gray-700'>
+                  No subscription
+                </div>
+                <h2 className='text-2xl font-bold text-black'>
+                  Only need a few designs? Pay per download.
+                </h2>
+                <p className='mt-2 text-sm leading-relaxed text-gray-600'>
+                  Buy download credits instead of a plan. One credit takes one
+                  premium design, in every format we have. Nothing renews, there
+                  is no card on file, and free designs never use a credit.
+                </p>
+
+                <ul className='mt-4 space-y-2 text-sm text-gray-700'>
+                  {[
+                    'Credits stay on your account until you use them',
+                    'Anything you download is yours to keep and re-download free',
+                    'Pay by PayPal, Payoneer, bank transfer or another method',
+                  ].map((line) => (
+                    <li key={line} className='flex items-start gap-2'>
+                      <span className='mt-1.5 h-1.5 w-1.5 flex-shrink-0 rounded-full bg-black' />
+                      {line}
+                    </li>
+                  ))}
+                </ul>
+              </div>
+
+              <div className='w-full md:w-auto md:min-w-[280px]'>
+                {creditPacks.length > 0 && (
+                  <div className='mb-4 space-y-2'>
+                    {creditPacks.map((p) => (
+                      <div
+                        key={`${p.credits}-${p.priceCents}`}
+                        className='flex items-baseline justify-between rounded-xl bg-gray-50 px-4 py-3'
+                      >
+                        <span className='text-sm font-semibold text-black'>
+                          {p.credits} credits
+                        </span>
+                        <span className='text-sm font-bold text-black'>
+                          {(p.currency || 'USD') === 'USD'
+                            ? `$${((p.priceCents || 0) / 100).toFixed(2)}`
+                            : `${p.currency} ${((p.priceCents || 0) / 100).toFixed(2)}`}
+                        </span>
+                      </div>
+                    ))}
+                    {siteConfig?.creditPacksNote && (
+                      <p className='px-1 text-xs text-gray-500'>
+                        {siteConfig.creditPacksNote}
+                      </p>
+                    )}
+                  </div>
+                )}
+
+                <button
+                  onClick={() => {
+                    setPayHelpType('credits');
+                    setShowPayHelp(true);
+                  }}
+                  className='w-full rounded-xl bg-black py-3.5 text-sm font-semibold text-white transition hover:bg-gray-900'
+                >
+                  {creditPacks.length > 0
+                    ? 'Request credits'
+                    : 'Ask us about credits'}
+                </button>
+                <p className='mt-2 text-center text-xs text-gray-500'>
+                  Tell us how many you need and we&apos;ll send payment details.
+                </p>
+              </div>
+            </div>
+          </div>
+
           {/* Quiet, permanent entry point. This is the one that actually
               catches most people — see the note where showPayHelp is declared. */}
           <div className='mt-8 text-center'>
             <button
-              onClick={() => setShowPayHelp(true)}
+              onClick={() => {
+                setPayHelpType('subscription');
+                setShowPayHelp(true);
+              }}
               className='text-sm text-gray-600 underline underline-offset-4 transition hover:text-black'
             >
               Having trouble paying? Other payment methods →
@@ -1150,7 +1247,11 @@ export default function SubscriptionsPageClient({
       </div>
 
       {showPayHelp && (
-        <PaymentHelpModal plans={plans} onClose={() => setShowPayHelp(false)} />
+        <PaymentHelpModal
+          plans={plans}
+          initialType={payHelpType}
+          onClose={() => setShowPayHelp(false)}
+        />
       )}
 
       <Divider className='bg-gray-200' />

@@ -383,6 +383,11 @@ export default function AdminSidebar({ isCollapsed, setIsCollapsed }) {
               icon: 'ri-pinterest-line',
             },
             {
+              href: '/admin/settings/whatsapp',
+              label: 'WhatsApp',
+              icon: 'ri-whatsapp-line',
+            },
+            {
               label: 'Financial',
               icon: 'ri-lock-2-fill',
               items: [

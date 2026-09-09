@@ -44,6 +44,27 @@ export const SINCE_OPTIONS = [
   { value: '90', label: 'Added in last 90 days' },
 ];
 
+// How recently a design has to have been added to be worth pointing at.
+//
+// Two different promises, so two different numbers: the Recent TAB is a place
+// to browse a month's uploads, while the card BADGE is a "this is new" claim
+// that has to expire fast enough to stay true.
+//
+// Both are admin-tunable (Settings → Discovery) and arrive from
+// /public/site-config. These are only the FALLBACKS, matching the backend's own
+// defaults, so a card rendered before the config resolves is still correct.
+export const RECENT_TAB_DAYS = '30';
+export const NEW_BADGE_DAYS = 7;
+
+/** True when a product was added inside the badge window. */
+export function isNewProduct(createdAt, days = NEW_BADGE_DAYS, now = Date.now()) {
+  if (!createdAt) return false;
+  const added = new Date(createdAt).getTime();
+  if (Number.isNaN(added)) return false;
+  const window = Number(days) > 0 ? Number(days) : NEW_BADGE_DAYS;
+  return now - added < window * 24 * 60 * 60 * 1000;
+}
+
 // The three tab views that already exist as indexed URLs (/products?filter=…).
 // They are kept as short-hands rather than replaced, so old links, internal
 // links and their canonicals keep resolving to the same content. Each expands
@@ -52,6 +73,10 @@ export const LEGACY_FILTERS = {
   popular: { sort: 'popular' },
   'most-favourited': { sort: 'most-favourited', favourited: '1' },
   'embroidize-choice': { curated: '1' },
+  // Newest first AND narrowed to the last 30 days: sorting alone would still
+  // walk the whole catalogue, so page 3 would be showing designs from years ago
+  // under a tab that says "Recent".
+  recent: { sort: 'newest', since: RECENT_TAB_DAYS },
 };
 
 const csv = (value) =>
@@ -64,13 +89,19 @@ const csv = (value) =>
  * Unknown values are dropped rather than passed through, so a hand-edited URL
  * can't inject arbitrary query params into the API call.
  */
-export function readFilterParams(searchParams = {}) {
+// `recentDays` is the admin-configured window for the Recent tab. Passed in
+// rather than imported, because this module is shared by server pages that read
+// the live setting and by client code that has only the fallback.
+export function readFilterParams(searchParams = {}, { recentDays } = {}) {
   const raw = searchParams || {};
-  const legacy = LEGACY_FILTERS[raw.filter] || {};
+  const legacy = { ...(LEGACY_FILTERS[raw.filter] || {}) };
+  if (legacy.since && recentDays) legacy.since = String(recentDays);
 
   const sort = SORT_VALUES.includes(raw.sort) ? raw.sort : legacy.sort || '';
   const tier = TIER_OPTIONS.some((t) => t.value === raw.tier) ? raw.tier : '';
-  const since = SINCE_OPTIONS.some((s) => s.value === raw.since) ? raw.since : '';
+  const since = SINCE_OPTIONS.some((s) => s.value === raw.since)
+    ? raw.since
+    : legacy.since || '';
   const curated = raw.curated === '1' || legacy.curated === '1' ? '1' : '';
   const favourited = raw.favourited === '1' || legacy.favourited === '1' ? '1' : '';
 
@@ -106,7 +137,10 @@ export function hasGranularFilters(state) {
     state.category?.length ||
       state.sub_category?.length ||
       state.tier ||
-      state.since ||
+      // `since` guarded like curated/sort: the Recent TAB expands into it, and
+      // an unguarded check would mark that tab noindex while the other three
+      // stay indexable.
+      (state.since && !state.legacyFilter) ||
       (state.curated && !state.legacyFilter) ||
       (state.sort && !state.legacyFilter),
   );

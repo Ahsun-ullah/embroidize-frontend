@@ -15,7 +15,22 @@
 // to visitors whose accounts would be cut off at two. Callers render
 // number-free wording when it is null — saying less is always recoverable,
 // promising the wrong allowance is not.
-const UNKNOWN = { freeDownloadLimit: null, freeDownloadWindow: null };
+// creditPacks defaults to an EMPTY LIST for the same reason the limit defaults
+// to null: an unreadable config must never invent an offer. Empty means the
+// pricing page hides the credits section entirely — no price shown is
+// recoverable, a wrong price is not.
+const UNKNOWN = {
+  freeDownloadLimit: null,
+  freeDownloadWindow: null,
+  creditPacks: [],
+  creditPacksNote: '',
+  whatsappNumber: '',
+  whatsappMessage: '',
+  // Null, not a number: a caller that cannot read the config must fall back to
+  // its own default rather than be handed one that looks authoritative.
+  recentTabDays: null,
+  newBadgeDays: null,
+};
 
 export async function getSiteConfig() {
   try {
@@ -28,6 +43,12 @@ export async function getSiteConfig() {
     return {
       freeDownloadLimit: result?.data?.freeDownloadLimit ?? null,
       freeDownloadWindow: result?.data?.freeDownloadWindow ?? null,
+      creditPacks: result?.data?.creditPacks ?? [],
+      creditPacksNote: result?.data?.creditPacksNote ?? '',
+      whatsappNumber: result?.data?.whatsappNumber ?? '',
+      whatsappMessage: result?.data?.whatsappMessage ?? '',
+      recentTabDays: result?.data?.recentTabDays ?? null,
+      newBadgeDays: result?.data?.newBadgeDays ?? null,
     };
   } catch (error) {
     // Next signals "this route cannot be static" by THROWING out of the fetch.

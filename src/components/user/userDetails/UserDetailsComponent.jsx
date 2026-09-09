@@ -377,8 +377,13 @@ export default function UserDetailsComponent({
               }`}
             >
               {paginated.map((design) => {
-                const { _id, downloadedAt, fileType, product, isStale } =
+                const { _id, downloadedAt, fileType, product, isStale, userTier } =
                   design;
+                // What paid for this download, stamped when it happened. Only
+                // the credit case is surfaced: it is the one a customer cannot
+                // work out for themselves, because a credit spend leaves no
+                // other trace they can see.
+                const paidWithCredit = userTier === 'credit';
                 const imageUrl = product?.image?.url ?? '/fallback-image.png';
 
                 // ✅ Fixed: check against _id (unique row) not product._id
@@ -437,6 +442,14 @@ export default function UserDetailsComponent({
                         <span className='inline-block bg-violet-50 text-violet-700 text-xs font-bold px-2.5 py-1 rounded-lg uppercase tracking-wider'>
                           {fileType}
                         </span>
+                        {paidWithCredit && (
+                          <span
+                            title='This download used one of your credits'
+                            className='mt-1 block text-[11px] font-semibold text-gray-500'
+                          >
+                            Used 1 credit
+                          </span>
+                        )}
                       </div>
 
                       <div className='col-span-2'>

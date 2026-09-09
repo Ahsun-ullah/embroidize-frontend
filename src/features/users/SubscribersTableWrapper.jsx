@@ -1416,6 +1416,14 @@ export default function SubscribersTableWrapper({ subscribers, revenue }) {
             <p className='text-xs font-semibold text-gray-400 uppercase tracking-wide mb-2'>
               By Provider
             </p>
+            {/* Said out loud because the number would otherwise look like it
+                should reconcile with the bank and quietly not. Credit packs are
+                a separate product with no subscription behind them; their money
+                is reported on Financial → Credit Customers. */}
+            <p className='mb-2 text-[11px] text-gray-400'>
+              Subscription payments only — credit-pack sales are counted on the
+              Credit Customers page.
+            </p>
             <div className='grid grid-cols-1 sm:grid-cols-2 gap-3'>
               {['stripe', 'creem', 'manual']
                 .filter((p) => providerFilter === 'all' || providerFilter === p)

@@ -61,14 +61,11 @@ function fmtDate(d) {
   });
 }
 
+// Subscriptions only. Credits are a separate product with their own modal
+// (AddCreditsModal) and their own endpoint — they were briefly a mode of this
+// form, which meant selling a credit pack started with plan and billing-period
+// questions that had nothing to do with it.
 export default function GrantAccessModal({ user, plans = [], onClose, onGranted }) {
-  // 'time' grants a subscription period; 'credits' tops up the download-credit
-  // wallet and leaves any subscription completely untouched (they can coexist).
-  const [grantType, setGrantType] = useState('time');
-  const [creditAmount, setCreditAmount] = useState('100');
-  const [creditsExpire, setCreditsExpire] = useState('');
-  const [addToBalance, setAddToBalance] = useState(true);
-
   const [planId, setPlanId] = useState('');
   const [durationIdx, setDurationIdx] = useState(0);
   const [customDate, setCustomDate] = useState('');
@@ -131,45 +128,29 @@ export default function GrantAccessModal({ user, plans = [], onClose, onGranted 
   };
 
   const submit = async (force = false) => {
-    // Only a time grant sells a plan. A credit pack has no plan, no period and
-    // no limits, so it deliberately sends no planId — the invoice is then
-    // labelled with the credits themselves.
-    if (grantType === 'time' && !planId) {
+    if (!planId) {
       ErrorToast('Plan required', 'Choose a plan for this grant.', 3000);
       return;
     }
-
-    const body = { note, force, grantType };
-    if (grantType === 'time') body.planId = planId;
-
-    if (grantType === 'credits') {
-      const n = parseInt(creditAmount, 10);
-      if (!Number.isFinite(n) || n <= 0) {
-        ErrorToast('Credits required', 'Enter how many credits to add.', 3000);
-        return;
-      }
-      body.creditAmount = n;
-      body.addToBalance = addToBalance;
-      if (creditsExpire) body.creditsExpireAt = new Date(creditsExpire).toISOString();
-    } else {
-      if (duration?.months === null && !customDate) {
-        ErrorToast('Date required', 'Pick the date this access should end.', 3000);
-        return;
-      }
-      body.extend = extend;
-      if (duration?.months === 'lifetime') {
-        // Neither duration nor endDate → backend stores null = never expires.
-      } else if (duration?.months === null) {
-        body.endDate = new Date(customDate).toISOString();
-      } else {
-        body.durationMonths = duration.months;
-      }
-
-      const daily = limitPayload(dailyMode, dailyValue);
-      if (daily !== undefined) body.dailyLimit = daily;
-      const total = limitPayload(totalMode, totalValue);
-      if (total !== undefined) body.downloadLimit = total;
+    if (duration?.months === null && !customDate) {
+      ErrorToast('Date required', 'Pick the date this access should end.', 3000);
+      return;
     }
+
+    const body = { planId, note, force };
+    body.extend = extend;
+    if (duration?.months === 'lifetime') {
+      // Neither duration nor endDate → backend stores null = never expires.
+    } else if (duration?.months === null) {
+      body.endDate = new Date(customDate).toISOString();
+    } else {
+      body.durationMonths = duration.months;
+    }
+
+    const daily = limitPayload(dailyMode, dailyValue);
+    if (daily !== undefined) body.dailyLimit = daily;
+    const total = limitPayload(totalMode, totalValue);
+    if (total !== undefined) body.downloadLimit = total;
 
     if (recordPayment) {
       const parsed = Number(amount);
@@ -284,109 +265,25 @@ export default function GrantAccessModal({ user, plans = [], onClose, onGranted 
           </div>
         )}
 
-        {/* What kind of grant */}
-        <div className='mb-4 flex gap-1 rounded-xl bg-gray-100 p-1'>
-          {[
-            { key: 'time', label: 'Time-based access' },
-            { key: 'credits', label: 'Download credits' },
-          ].map((t) => (
-            <button
-              key={t.key}
-              type='button'
-              onClick={() => setGrantType(t.key)}
-              className={`flex-1 rounded-lg px-3 py-2 text-sm font-semibold transition ${
-                grantType === t.key
-                  ? 'bg-white text-gray-900 shadow-sm'
-                  : 'text-gray-500 hover:text-gray-800'
-              }`}
-            >
-              {t.label}
-            </button>
+        {/* Plan */}
+        <label className='mb-1 block text-xs font-bold uppercase tracking-wide text-gray-500'>
+          Plan
+        </label>
+        <select
+          value={planId}
+          onChange={(e) => setPlanId(e.target.value)}
+          className='mb-4 w-full rounded-lg border border-gray-300 px-3 py-2 text-sm'
+        >
+          {plans.map((p) => (
+            <option key={p._id} value={p._id}>
+              {p.name}
+              {p.isActive === false ? ' (hidden)' : ''} — $
+              {p.price}
+              {p.billingInterval ? `/${p.billingInterval}` : ' one-time'}
+            </option>
           ))}
-        </div>
+        </select>
 
-        {grantType === 'credits' && (
-          <p className='mb-4 rounded-lg bg-gray-100 px-3 py-2 text-xs leading-relaxed text-gray-700'>
-            Credits are prepaid premium downloads and are kept separately from
-            subscriptions — this will not touch any plan this user has. They are
-            only spent on premium designs while there is no active subscription.
-            {user?.availableCredits != null && (
-              <> Current balance: <strong>{user.availableCredits}</strong>.</>
-            )}
-          </p>
-        )}
-
-        {/* Plan — a time grant sells one; a credit pack is not a plan at all. */}
-        {grantType === 'time' && (
-          <>
-            <label className='mb-1 block text-xs font-bold uppercase tracking-wide text-gray-500'>
-              Plan
-            </label>
-            <select
-              value={planId}
-              onChange={(e) => setPlanId(e.target.value)}
-              className='mb-4 w-full rounded-lg border border-gray-300 px-3 py-2 text-sm'
-            >
-              {plans.map((p) => (
-                <option key={p._id} value={p._id}>
-                  {p.name}
-                  {p.isActive === false ? ' (hidden)' : ''} — $
-                  {p.price}
-                  {p.billingInterval ? `/${p.billingInterval}` : ' one-time'}
-                </option>
-              ))}
-            </select>
-          </>
-        )}
-
-        {/* ── CREDIT FIELDS ── */}
-        {grantType === 'credits' && (
-          <div className='grid gap-3 sm:grid-cols-2'>
-            <div>
-              <label className='mb-1 block text-xs font-bold uppercase tracking-wide text-gray-500'>
-                Credits to add
-              </label>
-              <input
-                type='number'
-                min='1'
-                value={creditAmount}
-                onChange={(e) => setCreditAmount(e.target.value)}
-                className='w-full rounded-lg border border-gray-300 px-3 py-2 text-sm'
-              />
-              <label className='mt-2 flex items-center gap-2 text-xs text-gray-700'>
-                <input
-                  type='checkbox'
-                  checked={addToBalance}
-                  onChange={(e) => setAddToBalance(e.target.checked)}
-                />
-                Add to their existing balance
-              </label>
-              {!addToBalance && (
-                <p className='mt-1 text-xs text-red-600'>
-                  Their balance will be REPLACED with this number.
-                </p>
-              )}
-            </div>
-            <div>
-              <label className='mb-1 block text-xs font-bold uppercase tracking-wide text-gray-500'>
-                Expires <span className='font-normal normal-case'>(optional)</span>
-              </label>
-              <input
-                type='date'
-                value={creditsExpire}
-                onChange={(e) => setCreditsExpire(e.target.value)}
-                className='w-full rounded-lg border border-gray-300 px-3 py-2 text-sm'
-              />
-              <p className='mt-1 text-xs text-gray-500'>
-                Leave empty and the credits never expire.
-              </p>
-            </div>
-          </div>
-        )}
-
-        {/* ── TIME FIELDS ── */}
-        {grantType === 'time' && (
-        <>
         <label className='mb-1 block text-xs font-bold uppercase tracking-wide text-gray-500'>
           Access period
         </label>
@@ -490,8 +387,6 @@ export default function GrantAccessModal({ user, plans = [], onClose, onGranted 
             </div>
           ))}
         </div>
-        </>
-        )}
 
         {/* Payment received */}
         <div className='mt-6 rounded-xl border border-gray-200 p-4'>

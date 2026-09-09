@@ -2,6 +2,7 @@
 
 import { ErrorToast } from '@/components/Common/ErrorToast';
 import { SuccessToast } from '@/components/Common/SuccessToast';
+import AddCreditsModal from '@/features/admin/AddCreditsModal';
 import GrantAccessModal from '@/features/admin/GrantAccessModal';
 import { financeHeaders } from '@/lib/financeLock';
 import Cookies from 'js-cookie';
@@ -395,6 +396,11 @@ export default function ManualRequestsWrapper() {
                       >
                         {labelFor(r.status)}
                       </span>
+                      {r.requestType === 'credits' && (
+                        <span className='rounded-full bg-gray-100 px-2.5 py-0.5 text-[11px] font-bold uppercase tracking-wide text-gray-700'>
+                          Credits
+                        </span>
+                      )}
                       {/* Returning customers only. On a first-time request this
                           badge would be noise on every single row. */}
                       {r.history?.total > 1 && (
@@ -410,7 +416,17 @@ export default function ManualRequestsWrapper() {
                     </div>
                     <p className='mt-0.5 text-sm text-gray-600'>{r.email}</p>
                     <p className='mt-2 text-sm text-gray-800'>
-                      Wants: <strong>{r.planName || 'not specified'}</strong>
+                      {/* A credit request has no plan — printing "not
+                          specified" for one would report a blank answer to a
+                          question the customer was never asked. */}
+                      Wants:{' '}
+                      <strong>
+                        {r.requestType === 'credits'
+                          ? r.creditQuantity
+                            ? `${r.creditQuantity} download credits`
+                            : 'download credits — quantity to be agreed'
+                          : r.planName || 'not specified'}
+                      </strong>
                       {r.preferredMethod ? ` · prefers ${r.preferredMethod}` : ''}
                     </p>
                     {r.message && (
@@ -456,7 +472,7 @@ export default function ManualRequestsWrapper() {
                       }}
                       className='rounded-lg bg-black px-4 py-2 text-xs font-bold text-white hover:bg-gray-900'
                     >
-                      Grant access →
+                      {r.requestType === 'credits' ? 'Add credits →' : 'Grant access →'}
                     </button>
                     <a
                       href={`mailto:${r.email}?subject=${encodeURIComponent('Your Embroidize subscription')}`}
@@ -558,15 +574,26 @@ export default function ManualRequestsWrapper() {
       )}
 
       {grantFor && (
-        <GrantAccessModal
-          user={{ _id: grantFor.userId, name: grantFor.name, email: grantFor.email }}
-          plans={plans}
-          onClose={() => setGrantFor(null)}
-          // Closing the loop: granting is what this queue exists for, so the
-          // request is marked done automatically rather than relying on the
-          // admin to remember a second step.
-          onGranted={() => update(grantFor._id, { status: 'granted' })}
-        />
+        // Two products, two forms. The row says which one was asked for, so the
+        // admin never opens a plan picker for a credit sale or vice versa.
+        // Either way, granting marks the request done — that is what this queue
+        // exists for, and relying on the admin to remember a second step is how
+        // a paid request sits in "awaiting payment" forever.
+        grantFor.requestType === 'credits' ? (
+          <AddCreditsModal
+            user={{ _id: grantFor.userId, name: grantFor.name, email: grantFor.email }}
+            initialCreditAmount={grantFor.creditQuantity || undefined}
+            onClose={() => setGrantFor(null)}
+            onAdded={() => update(grantFor._id, { status: 'granted' })}
+          />
+        ) : (
+          <GrantAccessModal
+            user={{ _id: grantFor.userId, name: grantFor.name, email: grantFor.email }}
+            plans={plans}
+            onClose={() => setGrantFor(null)}
+            onGranted={() => update(grantFor._id, { status: 'granted' })}
+          />
+        )
       )}
     </div>
   );

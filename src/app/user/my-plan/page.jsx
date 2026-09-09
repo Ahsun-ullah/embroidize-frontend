@@ -63,14 +63,6 @@ export default function MyPlanPage({ onClose }) {
     downloadLimit: plan?.downloadLimit ?? null,
   };
 
-  // Prepaid premium downloads. Someone can hold these with OR without a plan —
-  // while a subscription is active it covers their downloads and the credits sit
-  // untouched, then take over when the plan ends. Shown either way so they can
-  // see the balance is still there.
-  const credits = userInfoData?.availableCredits ?? 0;
-  const creditsExpired = userInfoData?.creditsExpired === true;
-  const creditsExpireOn = userInfoData?.creditsExpireAt ?? null;
-
   const {
     usedDownloads,
     limit,
@@ -230,43 +222,10 @@ export default function MyPlanPage({ onClose }) {
       {/* ── FREE USER BLOCK ─────────────────────────────────────────────────── */}
       {isFreeUser && (
         <div className='max-w-5xl mx-auto px-6 mt-6 space-y-6'>
-          {/* Download credits. Sits ABOVE the free-plan usage block on purpose:
-              someone holding credits is a paying customer, and their credits —
-              not the 5-a-day free allowance — are what actually get them premium
-              designs. Showing free usage first would bury what they paid for. */}
-          {(credits > 0 || creditsExpired) && (
-            <div
-              className={`rounded-2xl border p-6 shadow-sm ${
-                creditsExpired
-                  ? 'border-amber-200 bg-amber-50'
-                  : 'border-slate-200 bg-white'
-              }`}
-            >
-              <div className='flex items-start justify-between gap-4'>
-                <div>
-                  <p className='text-xs font-bold uppercase tracking-widest text-slate-500'>
-                    Download credits
-                  </p>
-                  <p className='mt-2 text-4xl font-extrabold text-slate-900'>
-                    {creditsExpired ? 0 : credits}
-                    <span className='ml-2 text-sm font-medium text-slate-400'>
-                      premium download{credits === 1 ? '' : 's'} left
-                    </span>
-                  </p>
-                  <p className='mt-2 text-sm leading-relaxed text-slate-600'>
-                    {creditsExpired
-                      ? 'Your credits have expired. Get in touch and we can extend them for you.'
-                      : creditsExpireOn
-                        ? `Use them any time before ${formatDate(creditsExpireOn)}.`
-                        : "These never expire — use them whenever you like."}
-                  </p>
-                </div>
-                <span className='flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-slate-900 text-white'>
-                  <Download className='h-5 w-5' aria-hidden />
-                </span>
-              </div>
-            </div>
-          )}
+          {/* Credits deliberately do NOT appear on this page. A plan and a
+              credit wallet are different products with different rules, and
+              mixing them here muddled both. Credits live at /user/credits,
+              reachable from the account menu whenever someone holds them. */}
 
           {/* A lapsed subscriber lands here too. Without this they'd simply see
               the free-plan view with no explanation of where their plan went. */}

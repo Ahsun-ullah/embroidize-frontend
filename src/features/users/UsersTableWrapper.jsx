@@ -17,6 +17,7 @@ import {
   ModalHeader,
   User,
 } from '@heroui/react';
+import AddCreditsModal from '@/features/admin/AddCreditsModal';
 import GrantAccessModal from '@/features/admin/GrantAccessModal';
 import Cookies from 'js-cookie';
 import { useRouter, useSearchParams } from 'next/navigation';
@@ -104,6 +105,10 @@ export default function UsersTableWrapper({
   // Plans are fetched lazily on first open (including inactive ones, since a
   // hidden "Custom Access" plan is the usual target for a manual grant).
   const [grantUser, setGrantUser] = useState(null);
+  // Credits are sold separately from subscriptions, but the FIRST credit sale
+  // to someone is made here: they are not on the Credit Customers page yet,
+  // because that page lists people who already hold or held credits.
+  const [creditUser, setCreditUser] = useState(null);
   const [grantPlans, setGrantPlans] = useState([]);
 
   const handleGrantClick = useCallback(
@@ -249,6 +254,14 @@ export default function UsersTableWrapper({
                   onPress={() => handleGrantClick(user)}
                 >
                   Grant / Extend Access
+                </DropdownItem>
+                {/* A different product, not a variant of the one above: a
+                    quantity of downloads with no plan and no renewal. */}
+                <DropdownItem
+                  key='add-credits'
+                  onPress={() => setCreditUser(user)}
+                >
+                  Add Download Credits
                 </DropdownItem>
                 <DropdownItem
                   key='block'
@@ -483,6 +496,14 @@ export default function UsersTableWrapper({
         onPageChange={onPageChange}
         topContent={topContent}
       />
+
+      {creditUser && (
+        <AddCreditsModal
+          user={creditUser}
+          onClose={() => setCreditUser(null)}
+          onAdded={() => router.refresh()}
+        />
+      )}
 
       {/* Grant / Extend Access — manual payments */}
       {grantUser && (
