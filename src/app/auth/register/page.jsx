@@ -93,13 +93,23 @@ const RegisterContent = () => {
     // ignored: a check that cannot run must not block a legitimate signup, and
     // the backend refuses duplicates authoritatively regardless.
     try {
-      await verifyExistingUser({ email: data.email }).unwrap();
+      const existing = await verifyExistingUser({ email: data.email }).unwrap();
+
+      // An alias of an address that is already registered — john+2@gmail.com
+      // when john@gmail.com has the account. Both land in the same inbox, so
+      // this IS their account; the only thing they need is the address that
+      // actually signs in. Naming it is the difference between guidance and the
+      // dead end where they try the alias, fail, and ask for a reset link that
+      // can never arrive.
+      const registeredEmail = existing?.data?.registeredEmail;
 
       setIsTransitioning(false);
       ErrorToast(
         'Account exists',
-        'You already have an account with this email. Please sign in instead.',
-        6000,
+        registeredEmail && registeredEmail !== data.email
+          ? `This email already has an account. Please sign in with ${registeredEmail}.`
+          : 'You already have an account with this email. Please sign in instead.',
+        7000,
       );
       router.push(
         `/auth/login?pathName=${encodeURIComponent(pathName)}`,
