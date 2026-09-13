@@ -7,6 +7,14 @@ export const authSlice = createApi({
   reducerPath: 'authSlice',
   baseQuery: fetchBaseQuery({
     baseUrl: `${BASE_API_URL}`,
+    // Send and store the device cookie the API issues.
+    //
+    // Without this the browser silently discards the Set-Cookie on a
+    // cross-origin response and never sends it back, so every signup would look
+    // like a brand-new device and the one-account-per-device rule would never
+    // fire. The API already runs cors({ credentials: true }) against a fixed
+    // origin allowlist, which is what makes this legal.
+    credentials: 'include',
     prepareHeaders: (headers) => {
       const token = Cookies.get('token');
       if (token) {
