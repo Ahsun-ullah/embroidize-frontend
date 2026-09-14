@@ -3,7 +3,7 @@
 import { ErrorToast } from '@/components/Common/ErrorToast';
 import { SuccessToast } from '@/components/Common/SuccessToast';
 import Cookies from 'js-cookie';
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 
 // ─────────────────────────────────────────────────────────────────────────────
 // "Pay another way" request form.
@@ -56,6 +56,14 @@ export default function PaymentHelpForm({
   const [packs, setPacks] = useState([]);
   const [packsNote, setPacksNote] = useState('');
   const [credits, setCredits] = useState('');
+  // What they'd pay for a quantity no pack prices. Nobody has a figure for
+  // "300 credits" until someone names one, and an ask with no number attached
+  // takes an email round trip before it can even be answered.
+  const [offerAmount, setOfferAmount] = useState('');
+  // One-shot: with a single pack on offer, that pack IS the choice, so it
+  // starts selected. Guarded by a ref so clearing the field doesn't refill it —
+  // a default that won't stay deleted is a broken input, not a convenience.
+  const defaultedPack = useRef(false);
 
   const [method, setMethod] = useState('');
   const [message, setMessage] = useState('');
@@ -108,7 +116,49 @@ export default function PaymentHelpForm({
 
   const wantsCredits = requestType === 'credits';
 
+  // A single pack is not a choice — it's the offer. Pre-select it so the
+  // customer isn't asked to pick from a list of one.
+  useEffect(() => {
+    if (defaultedPack.current) return;
+    if (packs.length === 1 && credits === '') {
+      setCredits(String(packs[0].credits));
+      defaultedPack.current = true;
+    }
+  }, [packs, credits]);
+
+  // The pack their quantity matches, if any. Everything below branches on this:
+  // a pack has a published price, anything else has to be priced by hand.
+  const matchedPack = packs.find((p) => Number(p.credits) === Number(credits));
+  const customQuantity = !!Number(credits) && !matchedPack;
+
   const submit = async () => {
+    if (wantsCredits) {
+      // With packs published, "how many?" has an answer on screen — so it must
+      // be answered, by picking one or typing a number. Without any packs
+      // there is nothing to pick from, and a blank quantity stays a legitimate
+      // "what would X buy me?" enquiry.
+      if (packs.length > 0 && !Number(credits)) {
+        ErrorToast(
+          'How many credits?',
+          packs.length === 1
+            ? 'Choose the pack, or type how many credits you want.'
+            : 'Pick one of the packs, or type how many credits you want.',
+          4000,
+        );
+        return;
+      }
+      // A quantity nobody published a price for needs a figure from them,
+      // otherwise the request cannot be answered without asking first.
+      if (customQuantity && !(Number(offerAmount) > 0)) {
+        ErrorToast(
+          'What would you like to pay?',
+          `Tell us what you'd pay for ${Number(credits)} credits — we'll confirm before anything is due.`,
+          5000,
+        );
+        return;
+      }
+    }
+
     const token = Cookies.get('token');
     if (!token) {
       // We need to know WHICH account to set up, so the request is tied to a
@@ -132,6 +182,11 @@ export default function PaymentHelpForm({
             planId: wantsCredits ? undefined : planId || undefined,
             // Blank is allowed and meaningful: "how many can I get for $20?"
             creditQuantity: wantsCredits ? Number(credits) || undefined : undefined,
+            // Sent for a custom quantity only — where a pack matched, the
+            // published price is the price, and echoing it back as an "offer"
+            // would invite a haggle over a number we already set.
+            offeredAmount:
+              wantsCredits && customQuantity ? Number(offerAmount) : undefined,
             preferredMethod: method,
             message,
           }),
@@ -254,10 +309,53 @@ export default function PaymentHelpForm({
             }
             className='mb-2 w-full rounded-xl border border-gray-300 px-3 py-2.5 text-sm focus:border-black focus:outline-none'
           />
-          <p className='mb-5 text-xs text-gray-500'>
-            {packsNote ||
-              "Not sure how many you need? Leave it blank and tell us your budget below — we'll quote you."}
-          </p>
+
+          {/* A matched pack already has a price, so it is stated rather than
+              asked for. Only a quantity nobody published needs their figure. */}
+          {matchedPack && (
+            <p className='mb-5 rounded-xl bg-gray-100 px-3 py-2.5 text-xs font-semibold text-gray-800'>
+              {matchedPack.credits} credits —{' '}
+              {money(matchedPack.priceCents, matchedPack.currency)}. We&apos;ll
+              send you payment details for exactly this.
+            </p>
+          )}
+
+          {customQuantity && (
+            <div className='mb-5 rounded-xl border border-gray-300 p-3'>
+              <label className='mb-2 block text-xs font-bold uppercase tracking-wide text-gray-500'>
+                What would you like to pay for {Number(credits)} credits?
+              </label>
+              <div className='flex items-center gap-2'>
+                <span className='text-sm font-semibold text-gray-500'>$</span>
+                <input
+                  type='number'
+                  min='1'
+                  step='0.01'
+                  value={offerAmount}
+                  onChange={(e) => setOfferAmount(e.target.value)}
+                  placeholder='e.g. 20.00'
+                  className='w-full rounded-xl border border-gray-300 px-3 py-2.5 text-sm focus:border-black focus:outline-none'
+                />
+              </div>
+              <p className='mt-2 text-xs text-gray-500'>
+                {Number(credits) > 0 && Number(offerAmount) > 0
+                  ? `That's about $${(Number(offerAmount) / Number(credits)).toFixed(2)} per design. `
+                  : ''}
+                Nothing is charged now — we&apos;ll reply with the final price
+                and payment details, and you decide then.
+              </p>
+            </div>
+          )}
+
+          {!matchedPack && !customQuantity && (
+            <p className='mb-5 text-xs text-gray-500'>
+              {packsNote ||
+                "Not sure how many you need? Leave it blank and tell us your budget below — we'll quote you."}
+            </p>
+          )}
+          {(matchedPack || customQuantity) && packsNote && (
+            <p className='-mt-3 mb-5 text-xs text-gray-500'>{packsNote}</p>
+          )}
         </>
       ) : (
         <>

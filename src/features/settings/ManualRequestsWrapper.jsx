@@ -2,10 +2,10 @@
 
 import { ErrorToast } from '@/components/Common/ErrorToast';
 import { SuccessToast } from '@/components/Common/SuccessToast';
-import AddCreditsModal from '@/features/admin/AddCreditsModal';
 import GrantAccessModal from '@/features/admin/GrantAccessModal';
 import { financeHeaders } from '@/lib/financeLock';
 import Cookies from 'js-cookie';
+import Link from 'next/link';
 import { useCallback, useEffect, useState } from 'react';
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -15,6 +15,11 @@ import { useCallback, useEffect, useState } from 'react';
 // a status that moves, not a mailbox. Each row carries the plan the customer
 // asked for and the account to attach it to, so granting access is one click
 // from here rather than a hunt through All Users.
+//
+// SUBSCRIPTIONS ONLY. Requests to buy download credits are a different product
+// — a quantity, no plan, no renewal, granted through a different endpoint — and
+// they are worked on Credit Customers → Requests. The list is filtered server
+// side (type=subscription), so a credit request can never surface here.
 // ─────────────────────────────────────────────────────────────────────────────
 
 const STATUSES = [
@@ -42,6 +47,30 @@ const fmt = (d) =>
         minute: '2-digit',
       })
     : '—';
+
+const fmtDay = (d) =>
+  d
+    ? new Date(d).toLocaleDateString('en-US', {
+        year: 'numeric',
+        month: 'short',
+        day: 'numeric',
+      })
+    : '—';
+
+const money = (cents, currency = 'USD') => {
+  const v = (Number(cents) || 0) / 100;
+  return currency === 'USD' || !currency
+    ? `$${v.toFixed(2)}`
+    : `${currency} ${v.toFixed(2)}`;
+};
+
+// A customer may have paid in more than one currency; adding those together
+// would invent a number, so each is printed on its own.
+const moneyMap = (byCurrency) => {
+  const entries = Object.entries(byCurrency || {}).filter(([, v]) => v);
+  if (!entries.length) return '—';
+  return entries.map(([cur, cents]) => money(cents, cur)).join(' + ');
+};
 
 // 1 → "1st", 2 → "2nd", 3 → "3rd", 11-13 → "11th"… (the teens are the reason
 // this isn't just a lookup on the last digit).
@@ -102,7 +131,7 @@ export default function ManualRequestsWrapper() {
     setError('');
     try {
       const res = await fetch(
-        `${process.env.NEXT_PUBLIC_BASE_API_URL_PROD}/admin/manual-requests?status=${filter}`,
+        `${process.env.NEXT_PUBLIC_BASE_API_URL_PROD}/admin/manual-requests?status=${filter}&type=subscription`,
         { headers: authHeaders(), cache: 'no-store' },
       );
       const data = await res.json();
@@ -249,8 +278,16 @@ export default function ManualRequestsWrapper() {
         <div className='mb-6'>
           <h1 className='text-2xl font-bold text-black'>Manual Requests</h1>
           <p className='mt-1 text-sm text-gray-600'>
-            Customers asking to pay outside the card gateways. Work each one down
-            the pipeline, then grant their access from here.
+            Customers asking to pay for a <strong>subscription</strong> outside
+            the card gateways. Work each one down the pipeline, then grant their
+            access from here. Asking for download credits instead?{' '}
+            <Link
+              href='/admin/credit-customers?tab=requests'
+              className='font-semibold text-gray-900 underline'
+            >
+              Credit Customers → Requests
+            </Link>
+            .
           </p>
         </div>
 
@@ -396,11 +433,6 @@ export default function ManualRequestsWrapper() {
                       >
                         {labelFor(r.status)}
                       </span>
-                      {r.requestType === 'credits' && (
-                        <span className='rounded-full bg-gray-100 px-2.5 py-0.5 text-[11px] font-bold uppercase tracking-wide text-gray-700'>
-                          Credits
-                        </span>
-                      )}
                       {/* Returning customers only. On a first-time request this
                           badge would be noise on every single row. */}
                       {r.history?.total > 1 && (
@@ -413,25 +445,96 @@ export default function ManualRequestsWrapper() {
                             ` · ${r.history.granted} granted`}
                         </span>
                       )}
+                      {/* Only the facts that change what you do next: can this
+                          person actually use what you are about to sell them. */}
+                      {r.customer?.blocked && (
+                        <span className='rounded-full bg-red-100 px-2.5 py-0.5 text-[11px] font-bold text-red-700'>
+                          Blocked
+                        </span>
+                      )}
+                      {r.customer?.emailVerified === false && (
+                        <span className='rounded-full bg-amber-100 px-2.5 py-0.5 text-[11px] font-bold text-amber-800'>
+                          Email unverified
+                        </span>
+                      )}
                     </div>
-                    <p className='mt-0.5 text-sm text-gray-600'>{r.email}</p>
+                    <div className='mt-0.5 flex flex-wrap items-center gap-x-3 gap-y-1 text-sm text-gray-600'>
+                      <span>{r.email}</span>
+                      {r.customer?.country && (
+                        <span
+                          className='text-xs text-gray-500'
+                          title={
+                            r.customer.countryFromIp
+                              ? 'From their IP — not entered by the customer'
+                              : 'From their account details'
+                          }
+                        >
+                          {r.customer.country}
+                          {r.customer.countryFromIp ? ' (IP)' : ''}
+                        </span>
+                      )}
+                      {r.customer?.joinedAt && (
+                        <span className='text-xs text-gray-500'>
+                          joined {fmtDay(r.customer.joinedAt)}
+                        </span>
+                      )}
+                      {r.customer?.creditBalance ? (
+                        <span className='text-xs text-gray-500'>
+                          {r.customer.creditBalance} credits held
+                        </span>
+                      ) : null}
+                    </div>
                     <p className='mt-2 text-sm text-gray-800'>
-                      {/* A credit request has no plan — printing "not
-                          specified" for one would report a blank answer to a
-                          question the customer was never asked. */}
-                      Wants:{' '}
-                      <strong>
-                        {r.requestType === 'credits'
-                          ? r.creditQuantity
-                            ? `${r.creditQuantity} download credits`
-                            : 'download credits — quantity to be agreed'
-                          : r.planName || 'not specified'}
-                      </strong>
+                      Wants: <strong>{r.planName || 'not specified'}</strong>
+                      {/* The plan's own price, so quoting doesn't start with a
+                          trip to the plans page. */}
+                      {r.quote?.source === 'plan' && r.quote.amountCents != null
+                        ? ` · ${money(r.quote.amountCents)}${
+                            r.quote.interval ? `/${r.quote.interval}` : ''
+                          }`
+                        : ''}
                       {r.preferredMethod ? ` · prefers ${r.preferredMethod}` : ''}
                     </p>
+                    {r.payments?.count ? (
+                      <p className='mt-1 text-xs text-gray-500'>
+                        Paid before: {moneyMap(r.payments.paidByCurrency)} over{' '}
+                        {r.payments.count} payment
+                        {r.payments.count === 1 ? '' : 's'}
+                        {r.payments.lastMethod
+                          ? ` · last by ${r.payments.lastMethod}`
+                          : ''}
+                      </p>
+                    ) : null}
                     {r.message && (
                       <p className='mt-2 rounded-lg bg-gray-50 px-3 py-2 text-sm text-gray-700'>
                         {r.message}
+                      </p>
+                    )}
+                    {/* What was actually granted, recorded by the server at the
+                        moment of the grant — not re-derived from the plan,
+                        which may since have been renamed or repriced. */}
+                    {r.fulfillment && (
+                      <p className='mt-2 rounded-lg bg-gray-900 px-3 py-2 text-xs text-gray-200'>
+                        <span className='font-bold uppercase tracking-wide text-white'>
+                          Given
+                        </span>
+                        {' · '}
+                        {[
+                          r.fulfillment.planName,
+                          r.fulfillment.periodEndDate
+                            ? `until ${fmtDay(r.fulfillment.periodEndDate)}`
+                            : 'lifetime',
+                          r.fulfillment.amountCents != null
+                            ? `${money(r.fulfillment.amountCents, r.fulfillment.currency)}${
+                                r.fulfillment.method
+                                  ? ` by ${r.fulfillment.method}`
+                                  : ''
+                              }`
+                            : 'no payment recorded',
+                          r.fulfillment.invoiceNumber,
+                        ]
+                          .filter(Boolean)
+                          .join(' · ')}
                       </p>
                     )}
                     <p className='mt-2 text-xs text-gray-400'>
@@ -472,7 +575,7 @@ export default function ManualRequestsWrapper() {
                       }}
                       className='rounded-lg bg-black px-4 py-2 text-xs font-bold text-white hover:bg-gray-900'
                     >
-                      {r.requestType === 'credits' ? 'Add credits →' : 'Grant access →'}
+                      Grant access →
                     </button>
                     <a
                       href={`mailto:${r.email}?subject=${encodeURIComponent('Your Embroidize subscription')}`}
@@ -574,26 +677,21 @@ export default function ManualRequestsWrapper() {
       )}
 
       {grantFor && (
-        // Two products, two forms. The row says which one was asked for, so the
-        // admin never opens a plan picker for a credit sale or vice versa.
-        // Either way, granting marks the request done — that is what this queue
-        // exists for, and relying on the admin to remember a second step is how
-        // a paid request sits in "awaiting payment" forever.
-        grantFor.requestType === 'credits' ? (
-          <AddCreditsModal
-            user={{ _id: grantFor.userId, name: grantFor.name, email: grantFor.email }}
-            initialCreditAmount={grantFor.creditQuantity || undefined}
-            onClose={() => setGrantFor(null)}
-            onAdded={() => update(grantFor._id, { status: 'granted' })}
-          />
-        ) : (
-          <GrantAccessModal
-            user={{ _id: grantFor.userId, name: grantFor.name, email: grantFor.email }}
-            plans={plans}
-            onClose={() => setGrantFor(null)}
-            onGranted={() => update(grantFor._id, { status: 'granted' })}
-          />
-        )
+        // Granting marks the request done from here — relying on the admin to
+        // remember a second step is how a paid request sits in "awaiting
+        // payment" forever.
+        <GrantAccessModal
+          user={{ _id: grantFor.userId, name: grantFor.name, email: grantFor.email }}
+          plans={plans}
+          requestId={grantFor._id}
+          onClose={() => setGrantFor(null)}
+          onGranted={(result) => {
+            // The server closes the request and records what it granted. This
+            // PATCH is the fallback for the one case it couldn't.
+            if (!result?.requestClosed) update(grantFor._id, { status: 'granted' });
+            else load();
+          }}
+        />
       )}
     </div>
   );

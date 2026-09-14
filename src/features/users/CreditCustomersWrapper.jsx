@@ -4,6 +4,7 @@ import { ErrorToast } from '@/components/Common/ErrorToast';
 import { SuccessToast } from '@/components/Common/SuccessToast';
 import AddCreditsModal from '@/features/admin/AddCreditsModal';
 import { openInvoice } from '@/features/admin/invoice';
+import CreditRequestsPanel, { useCreditRequests } from '@/features/users/CreditRequestsPanel';
 import { financeHeaders } from '@/lib/financeLock';
 import Cookies from 'js-cookie';
 import { useRouter } from 'next/navigation';
@@ -90,6 +91,24 @@ const toInvoice = (purchase) => ({
 
 export default function CreditCustomersWrapper({ customers = [], totals }) {
   const router = useRouter();
+
+  // Two things live on this page: who holds credits, and who is asking to buy
+  // them. The request queue used to sit in Manual Requests alongside
+  // subscription requests — a different product, worked a different way.
+  const [tab, setTab] = useState('customers');
+  const queue = useCreditRequests();
+
+
+  // Deep link from the alert email (?tab=requests). Read off the location
+  // rather than useSearchParams: this component is not inside a Suspense
+  // boundary, and useSearchParams there opts the whole page out of static
+  // rendering at build time.
+  useEffect(() => {
+    if (typeof window === 'undefined') return;
+    const t = new URLSearchParams(window.location.search).get('tab');
+    if (t === 'requests') setTab('requests');
+  }, []);
+
   const [filter, setFilter] = useState('all');
   const [query, setQuery] = useState('');
 
@@ -205,6 +224,8 @@ export default function CreditCustomersWrapper({ customers = [], totals }) {
     const head = [
       'Name',
       'Email',
+      'Country',
+      'Joined',
       'Balance',
       'Expires',
       'Credits bought',
@@ -217,6 +238,8 @@ export default function CreditCustomersWrapper({ customers = [], totals }) {
     const rows = filtered.map((c) => [
       c.name || '',
       c.email || '',
+      c.country || '',
+      c.joinedAt ? fmtDate(c.joinedAt) : '',
       c.creditsExpired ? 0 : c.balance,
       c.creditsExpireAt ? fmtDate(c.creditsExpireAt) : '',
       c.creditsBought,
@@ -366,6 +389,33 @@ export default function CreditCustomersWrapper({ customers = [], totals }) {
             </button>
           </div>
         )}
+
+        {/* Two lists, two jobs: customers is a ledger you look things up in,
+            requests is a queue you work. Credit requests used to sit in Manual
+            Requests next to subscription requests — a different product sold a
+            different way, and the mix made both harder to work. */}
+        <div className='mt-6 flex flex-wrap gap-2 border-t border-gray-100 pt-4'>
+          {[
+            { key: 'customers', label: 'Customers', count: customers.length },
+            { key: 'requests', label: 'Requests', count: queue.open },
+          ].map((t) => (
+            <button
+              key={t.key}
+              type='button'
+              onClick={() => setTab(t.key)}
+              className={`rounded-lg px-4 py-2 text-sm font-semibold transition ${
+                tab === t.key
+                  ? 'bg-gray-900 text-white'
+                  : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
+              }`}
+            >
+              {t.label}
+              {t.count ? (
+                <span className='ml-1.5 opacity-60'>{t.count}</span>
+              ) : null}
+            </button>
+          ))}
+        </div>
       </div>
 
       <div className='grid gap-4 sm:grid-cols-2 lg:grid-cols-4'>
@@ -396,187 +446,203 @@ export default function CreditCustomersWrapper({ customers = [], totals }) {
         ))}
       </div>
 
-      <div className='rounded-2xl bg-white p-6 shadow-sm'>
-        <div className='mb-4 flex flex-wrap items-center gap-2'>
-          {FILTERS.map((f) => (
-            <button
-              key={f.key}
-              type='button'
-              onClick={() => setFilter(f.key)}
-              className={`rounded-full px-3 py-1.5 text-xs font-semibold transition ${
-                filter === f.key
-                  ? 'bg-gray-900 text-white'
-                  : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
-              }`}
-            >
-              {f.label}
-              <span className='ml-1.5 opacity-60'>{counts[f.key]}</span>
-            </button>
-          ))}
+      {tab === 'customers' ? (
+        <div className='rounded-2xl bg-white p-6 shadow-sm'>
+          <div className='mb-4 flex flex-wrap items-center gap-2'>
+            {FILTERS.map((f) => (
+              <button
+                key={f.key}
+                type='button'
+                onClick={() => setFilter(f.key)}
+                className={`rounded-full px-3 py-1.5 text-xs font-semibold transition ${
+                  filter === f.key
+                    ? 'bg-gray-900 text-white'
+                    : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
+                }`}
+              >
+                {f.label}
+                <span className='ml-1.5 opacity-60'>{counts[f.key]}</span>
+              </button>
+            ))}
 
-          <div className='ml-auto flex items-center gap-2'>
-            <input
-              value={query}
-              onChange={(e) => setQuery(e.target.value)}
-              placeholder='Search name, email or invoice…'
-              className='w-64 rounded-lg border border-gray-300 px-3 py-2 text-sm'
-            />
-            <button
-              type='button'
-              onClick={exportCsv}
-              disabled={filtered.length === 0}
-              className='rounded-lg border border-gray-300 px-3 py-2 text-sm font-semibold text-gray-700 hover:bg-gray-50 disabled:opacity-40'
-            >
-              Export CSV
-            </button>
+            <div className='ml-auto flex items-center gap-2'>
+              <input
+                value={query}
+                onChange={(e) => setQuery(e.target.value)}
+                placeholder='Search name, email or invoice…'
+                className='w-64 rounded-lg border border-gray-300 px-3 py-2 text-sm'
+              />
+              <button
+                type='button'
+                onClick={exportCsv}
+                disabled={filtered.length === 0}
+                className='rounded-lg border border-gray-300 px-3 py-2 text-sm font-semibold text-gray-700 hover:bg-gray-50 disabled:opacity-40'
+              >
+                Export CSV
+              </button>
+            </div>
           </div>
-        </div>
 
-        {filtered.length === 0 ? (
-          <p className='py-12 text-center text-sm text-gray-500'>
-            {customers.length === 0
-              ? 'Nobody has been given download credits yet.'
-              : 'No customers match this filter.'}
-          </p>
-        ) : (
-          <div className='overflow-x-auto'>
-            <table className='w-full min-w-[900px] text-left text-sm'>
-              <thead>
-                <tr className='border-b border-gray-200 text-xs uppercase tracking-wide text-gray-500'>
-                  <th className='py-3 pr-4 font-bold'>Customer</th>
-                  <th className='py-3 pr-4 font-bold'>Balance</th>
-                  <th className='py-3 pr-4 font-bold'>Bought</th>
-                  <th className='py-3 pr-4 font-bold'>Paid</th>
-                  <th className='py-3 pr-4 font-bold'>Last payment</th>
-                  <th className='py-3 pr-4 font-bold'>Also subscribed</th>
-                  <th className='py-3 font-bold' />
-                </tr>
-              </thead>
-              <tbody>
-                {filtered.map((c) => (
-                  <tr key={c._id} className='border-b border-gray-100 align-top'>
-                    <td className='py-4 pr-4'>
-                      <button
-                        type='button'
-                        onClick={() => openDetail(c)}
-                        className='text-left font-semibold text-gray-900 hover:underline'
-                      >
-                        {c.name || '—'}
-                      </button>
-                      <p className='text-xs text-gray-500'>{c.email}</p>
-                      {c.status === 'blocked' && (
-                        <span className='mt-1 inline-block rounded bg-red-50 px-1.5 py-0.5 text-[11px] font-semibold text-red-700'>
-                          Blocked
-                        </span>
-                      )}
-                    </td>
-
-                    <td className='py-4 pr-4'>
-                      <span
-                        className={`text-lg font-bold ${
-                          c.creditsExpired
-                            ? 'text-gray-400 line-through'
-                            : 'text-gray-900'
-                        }`}
-                      >
-                        {c.balance}
-                      </span>
-                      {c.creditsExpireAt && (
-                        <p
-                          className={`text-xs ${
-                            c.creditsExpired ? 'text-red-600' : 'text-gray-500'
-                          }`}
-                        >
-                          {c.creditsExpired ? 'Expired ' : 'Expires '}
-                          {fmtDate(c.creditsExpireAt)}
-                        </p>
-                      )}
-                    </td>
-
-                    <td className='py-4 pr-4 text-gray-700'>
-                      {c.creditsBought || c.creditsGranted || 0}
-                      <p className='text-xs text-gray-500'>
-                        {c.purchaseCount > 0
-                          ? `${c.purchaseCount} purchase${c.purchaseCount === 1 ? '' : 's'}`
-                          : `${c.grantCount} grant${c.grantCount === 1 ? '' : 's'}`}
-                      </p>
-                    </td>
-
-                    <td className='py-4 pr-4 text-gray-700'>
-                      {c.comped ? (
-                        <span
-                          className='rounded bg-gray-100 px-2 py-0.5 text-xs font-semibold text-gray-600'
-                          title='Credits were granted with no payment recorded'
-                        >
-                          Comped
-                        </span>
-                      ) : (
-                        moneyMap(c.paidByCurrency)
-                      )}
-                    </td>
-
-                    <td className='py-4 pr-4 text-gray-700'>
-                      {c.lastPurchaseAt ? (
-                        <>
-                          {fmtDate(c.lastPurchaseAt)}
-                          <p className='text-xs text-gray-500'>{c.lastMethod}</p>
-                          {c.lastInvoice && (
-                            <p className='text-xs text-gray-400'>{c.lastInvoice}</p>
-                          )}
-                        </>
-                      ) : (
-                        <span className='text-gray-400'>
-                          {c.lastGrantAt ? fmtDate(c.lastGrantAt) : '—'}
-                        </span>
-                      )}
-                    </td>
-
-                    <td className='py-4 pr-4'>
-                      {c.subscription ? (
-                        <span
-                          className='rounded bg-gray-900 px-2 py-0.5 text-xs font-semibold text-white'
-                          title={`${c.subscription.gateway} · ${c.subscription.status}`}
-                        >
-                          {c.subscription.active ? 'Active plan' : 'Past plan'}
-                        </span>
-                      ) : (
-                        <span className='text-xs text-gray-400'>Credits only</span>
-                      )}
-                    </td>
-
-                    <td className='py-4 text-right'>
-                      <div className='flex justify-end gap-2'>
+          {filtered.length === 0 ? (
+            <p className='py-12 text-center text-sm text-gray-500'>
+              {customers.length === 0
+                ? 'Nobody has been given download credits yet.'
+                : 'No customers match this filter.'}
+            </p>
+          ) : (
+            <div className='overflow-x-auto'>
+              <table className='w-full min-w-[900px] text-left text-sm'>
+                <thead>
+                  <tr className='border-b border-gray-200 text-xs uppercase tracking-wide text-gray-500'>
+                    <th className='py-3 pr-4 font-bold'>Customer</th>
+                    <th className='py-3 pr-4 font-bold'>Balance</th>
+                    <th className='py-3 pr-4 font-bold'>Bought</th>
+                    <th className='py-3 pr-4 font-bold'>Paid</th>
+                    <th className='py-3 pr-4 font-bold'>Last payment</th>
+                    <th className='py-3 pr-4 font-bold'>Also subscribed</th>
+                    <th className='py-3 font-bold' />
+                  </tr>
+                </thead>
+                <tbody>
+                  {filtered.map((c) => (
+                    <tr key={c._id} className='border-b border-gray-100 align-top'>
+                      <td className='py-4 pr-4'>
                         <button
                           type='button'
                           onClick={() => openDetail(c)}
-                          className='rounded-lg border border-gray-300 px-3 py-1.5 text-xs font-semibold text-gray-700 hover:bg-gray-50'
+                          className='text-left font-semibold text-gray-900 hover:underline'
                         >
-                          History
+                          {c.name || '—'}
                         </button>
-                        <button
-                          type='button'
-                          // The modal shows "Current balance: N" from
-                          // availableCredits — the same name /userinfo uses, and
-                          // an expired balance counts as 0 there.
-                          onClick={() =>
-                            setGrantUser({
-                              ...c,
-                              availableCredits: c.creditsExpired ? 0 : c.balance,
-                            })
-                          }
-                          className='rounded-lg bg-gray-900 px-3 py-1.5 text-xs font-semibold text-white hover:bg-black'
+                        <p className='text-xs text-gray-500'>{c.email}</p>
+                        {/* Where they are and how long they've been here — the
+                            two things you otherwise open the user record for. */}
+                        <p className='text-xs text-gray-400'>
+                          {[
+                            c.country
+                              ? `${c.country}${c.countryFromIp ? ' (IP)' : ''}`
+                              : null,
+                            c.joinedAt ? `joined ${fmtDate(c.joinedAt)}` : null,
+                          ]
+                            .filter(Boolean)
+                            .join(' · ')}
+                        </p>
+                        {c.status === 'blocked' && (
+                          <span className='mt-1 inline-block rounded bg-red-50 px-1.5 py-0.5 text-[11px] font-semibold text-red-700'>
+                            Blocked
+                          </span>
+                        )}
+                      </td>
+
+                      <td className='py-4 pr-4'>
+                        <span
+                          className={`text-lg font-bold ${
+                            c.creditsExpired
+                              ? 'text-gray-400 line-through'
+                              : 'text-gray-900'
+                          }`}
                         >
-                          Add credits
-                        </button>
-                      </div>
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
-        )}
-      </div>
+                          {c.balance}
+                        </span>
+                        {c.creditsExpireAt && (
+                          <p
+                            className={`text-xs ${
+                              c.creditsExpired ? 'text-red-600' : 'text-gray-500'
+                            }`}
+                          >
+                            {c.creditsExpired ? 'Expired ' : 'Expires '}
+                            {fmtDate(c.creditsExpireAt)}
+                          </p>
+                        )}
+                      </td>
+
+                      <td className='py-4 pr-4 text-gray-700'>
+                        {c.creditsBought || c.creditsGranted || 0}
+                        <p className='text-xs text-gray-500'>
+                          {c.purchaseCount > 0
+                            ? `${c.purchaseCount} purchase${c.purchaseCount === 1 ? '' : 's'}`
+                            : `${c.grantCount} grant${c.grantCount === 1 ? '' : 's'}`}
+                        </p>
+                      </td>
+
+                      <td className='py-4 pr-4 text-gray-700'>
+                        {c.comped ? (
+                          <span
+                            className='rounded bg-gray-100 px-2 py-0.5 text-xs font-semibold text-gray-600'
+                            title='Credits were granted with no payment recorded'
+                          >
+                            Comped
+                          </span>
+                        ) : (
+                          moneyMap(c.paidByCurrency)
+                        )}
+                      </td>
+
+                      <td className='py-4 pr-4 text-gray-700'>
+                        {c.lastPurchaseAt ? (
+                          <>
+                            {fmtDate(c.lastPurchaseAt)}
+                            <p className='text-xs text-gray-500'>{c.lastMethod}</p>
+                            {c.lastInvoice && (
+                              <p className='text-xs text-gray-400'>{c.lastInvoice}</p>
+                            )}
+                          </>
+                        ) : (
+                          <span className='text-gray-400'>
+                            {c.lastGrantAt ? fmtDate(c.lastGrantAt) : '—'}
+                          </span>
+                        )}
+                      </td>
+
+                      <td className='py-4 pr-4'>
+                        {c.subscription ? (
+                          <span
+                            className='rounded bg-gray-900 px-2 py-0.5 text-xs font-semibold text-white'
+                            title={`${c.subscription.gateway} · ${c.subscription.status}`}
+                          >
+                            {c.subscription.active ? 'Active plan' : 'Past plan'}
+                          </span>
+                        ) : (
+                          <span className='text-xs text-gray-400'>Credits only</span>
+                        )}
+                      </td>
+
+                      <td className='py-4 text-right'>
+                        <div className='flex justify-end gap-2'>
+                          <button
+                            type='button'
+                            onClick={() => openDetail(c)}
+                            className='rounded-lg border border-gray-300 px-3 py-1.5 text-xs font-semibold text-gray-700 hover:bg-gray-50'
+                          >
+                            History
+                          </button>
+                          <button
+                            type='button'
+                            // The modal shows "Current balance: N" from
+                            // availableCredits — the same name /userinfo uses, and
+                            // an expired balance counts as 0 there.
+                            onClick={() =>
+                              setGrantUser({
+                                ...c,
+                                availableCredits: c.creditsExpired ? 0 : c.balance,
+                              })
+                            }
+                            className='rounded-lg bg-gray-900 px-3 py-1.5 text-xs font-semibold text-white hover:bg-black'
+                          >
+                            Add credits
+                          </button>
+                        </div>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          )}
+        </div>
+      ) : (
+        <CreditRequestsPanel queue={queue} onGranted={() => router.refresh()} />
+      )}
 
       {/* ── One customer's ledger ── */}
       {detailFor && (

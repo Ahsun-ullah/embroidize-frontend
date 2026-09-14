@@ -90,9 +90,8 @@ export default function DownloadBreakdownPanel({ breakdown }) {
   const productTierRow = (tier) =>
     byProductTier.find((r) => r.tier === tier) || {};
   const cell = (userTier, productTier) =>
-    matrix.find(
-      (m) => m.userTier === userTier && m.productTier === productTier,
-    )?.downloads || 0;
+    matrix.find((m) => m.userTier === userTier && m.productTier === productTier)
+      ?.downloads || 0;
 
   // Every tier control writes to the same URL params the table below reads, so
   // one click narrows the cards and the product grid together.
@@ -143,10 +142,12 @@ export default function DownloadBreakdownPanel({ breakdown }) {
       value: totals.downloads,
       sub: `${totals.uniqueUsers} users · ${totals.uniqueProducts} designs`,
       icon: HardDriveDownload,
-      onClick: hasTierFilter ? () => setFilters({ userTier: '', productTier: '' }) : null,
+      onClick: hasTierFilter
+        ? () => setFilters({ userTier: '', productTier: '' })
+        : null,
       active: !hasTierFilter,
     },
-{
+    {
       key: 'subscription',
       label: 'By subscribers',
       value: tierGroup('subscription').downloads,
@@ -217,11 +218,11 @@ export default function DownloadBreakdownPanel({ breakdown }) {
     },
   ];
 
-  const hasEstimated = [...ESTIMATED_TIERS].some(
-    (t) => (userTierRow(t).downloads || 0) > 0,
-  );
-  const legacyUsers = userTierRow('legacy').downloads || 0;
-  const legacyProducts = productTierRow('legacy').downloads || 0;
+  // const hasEstimated = [...ESTIMATED_TIERS].some(
+  //   (t) => (userTierRow(t).downloads || 0) > 0,
+  // );
+  // const legacyUsers = userTierRow('legacy').downloads || 0;
+  // const legacyProducts = productTierRow('legacy').downloads || 0;
 
   return (
     <div className='bg-white rounded-xl shadow-sm border border-gray-100 p-5 mb-6'>
@@ -250,43 +251,45 @@ export default function DownloadBreakdownPanel({ breakdown }) {
 
       {/* Headline figures */}
       <div className='grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-3'>
-        {tiles.map(({ key, label, value, sub, icon: Icon, onClick, active }) => (
-          <button
-            key={key}
-            type='button'
-            onClick={onClick || undefined}
-            disabled={!onClick}
-            className={`text-left rounded-lg border p-3 transition-all ${
-              active
-                ? 'border-gray-900 bg-gray-900 text-white shadow-sm'
-                : 'border-gray-200 bg-gray-50 hover:border-gray-400'
-            } ${onClick ? 'cursor-pointer' : 'cursor-default'}`}
-          >
-            <div className='flex items-center gap-1.5 mb-1'>
-              <Icon
-                size={13}
-                className={active ? 'text-gray-300' : 'text-gray-400'}
-              />
-              <span
-                className={`text-[11px] font-semibold uppercase tracking-wide ${
-                  active ? 'text-gray-300' : 'text-gray-500'
+        {tiles.map(
+          ({ key, label, value, sub, icon: Icon, onClick, active }) => (
+            <button
+              key={key}
+              type='button'
+              onClick={onClick || undefined}
+              disabled={!onClick}
+              className={`text-left rounded-lg border p-3 transition-all ${
+                active
+                  ? 'border-gray-900 bg-gray-900 text-white shadow-sm'
+                  : 'border-gray-200 bg-gray-50 hover:border-gray-400'
+              } ${onClick ? 'cursor-pointer' : 'cursor-default'}`}
+            >
+              <div className='flex items-center gap-1.5 mb-1'>
+                <Icon
+                  size={13}
+                  className={active ? 'text-gray-300' : 'text-gray-400'}
+                />
+                <span
+                  className={`text-[11px] font-semibold uppercase tracking-wide ${
+                    active ? 'text-gray-300' : 'text-gray-500'
+                  }`}
+                >
+                  {label}
+                </span>
+              </div>
+              <div className='text-2xl font-bold leading-none'>
+                {(value || 0).toLocaleString()}
+              </div>
+              <div
+                className={`text-[11px] mt-1 ${
+                  active ? 'text-gray-400' : 'text-gray-500'
                 }`}
               >
-                {label}
-              </span>
-            </div>
-            <div className='text-2xl font-bold leading-none'>
-              {(value || 0).toLocaleString()}
-            </div>
-            <div
-              className={`text-[11px] mt-1 ${
-                active ? 'text-gray-400' : 'text-gray-500'
-              }`}
-            >
-              {sub}
-            </div>
-          </button>
-        ))}
+                {sub}
+              </div>
+            </button>
+          ),
+        )}
       </div>
 
       {/* Cross-tab: the two questions answered together, because "free-tier user
@@ -339,7 +342,10 @@ export default function DownloadBreakdownPanel({ breakdown }) {
                     const isActive =
                       activeUserTier === ut && activeProductTier === pt;
                     return (
-                      <td key={pt} className='py-2 px-3 text-right tabular-nums'>
+                      <td
+                        key={pt}
+                        className='py-2 px-3 text-right tabular-nums'
+                      >
                         <button
                           type='button'
                           onClick={() => toggleCell(ut, pt)}
@@ -380,7 +386,7 @@ export default function DownloadBreakdownPanel({ breakdown }) {
         </div>
       )}
 
-      {hasEstimated && (
+      {/* {hasEstimated && (
         <p className='mt-3 text-[11px] text-gray-500 leading-relaxed'>
           <span className='font-semibold'>(est.) rows are inferred,</span> not
           measured: those downloads predate tier tracking, so each was matched
@@ -389,9 +395,9 @@ export default function DownloadBreakdownPanel({ breakdown }) {
           anything before the oldest surviving subscription record. Rows stamped
           as they happened carry no “(est.)”.
         </p>
-      )}
+      )} */}
 
-      {(legacyUsers > 0 || legacyProducts > 0) && (
+      {/* {(legacyUsers > 0 || legacyProducts > 0) && (
         <p className='mt-3 text-[11px] text-gray-500 leading-relaxed'>
           <span className='font-semibold'>Before tracking:</span> downloads
           recorded before this breakdown existed did not store who took them.
@@ -405,7 +411,7 @@ export default function DownloadBreakdownPanel({ breakdown }) {
           . They are shown separately rather than guessed into a bucket. Narrow
           the date range to a period after tracking started for a clean split.
         </p>
-      )}
+      )} */}
 
       {totals.downloads === 0 && (
         <p className='mt-4 text-sm text-gray-400'>
