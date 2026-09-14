@@ -65,7 +65,15 @@ function fmtDate(d) {
 // (AddCreditsModal) and their own endpoint — they were briefly a mode of this
 // form, which meant selling a credit pack started with plan and billing-period
 // questions that had nothing to do with it.
-export default function GrantAccessModal({ user, plans = [], onClose, onGranted }) {
+export default function GrantAccessModal({
+  user,
+  plans = [],
+  onClose,
+  onGranted,
+  // The queue row this grant answers, when it came from one. The server closes
+  // the request and records what was actually granted.
+  requestId,
+}) {
   const [planId, setPlanId] = useState('');
   const [durationIdx, setDurationIdx] = useState(0);
   const [customDate, setCustomDate] = useState('');
@@ -138,6 +146,7 @@ export default function GrantAccessModal({ user, plans = [], onClose, onGranted 
     }
 
     const body = { planId, note, force };
+    if (requestId) body.requestId = requestId;
     body.extend = extend;
     if (duration?.months === 'lifetime') {
       // Neither duration nor endDate → backend stores null = never expires.
@@ -198,7 +207,7 @@ export default function GrantAccessModal({ user, plans = [], onClose, onGranted 
       if (!res.ok) throw new Error(data?.error?.message || data?.message || 'Grant failed');
 
       SuccessToast('Access granted', data?.message || 'Subscriber updated.', 5000);
-      onGranted?.();
+      onGranted?.(data?.data);
       onClose?.();
     } catch (err) {
       ErrorToast('Could not grant access', err.message, 5000);

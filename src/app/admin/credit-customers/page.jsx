@@ -13,6 +13,7 @@ export default async function CreditCustomersPage() {
 
   const { customers, totals } = await getCreditCustomers();
 
+
   return (
     <div className='space-y-6'>
       <FinanceUnlockedBar />

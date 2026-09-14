@@ -8,6 +8,11 @@ import { useEffect, useState } from 'react';
 export default function MostDownloadedProductsTableWrapper({
   initialData,
   pagination,
+  // 'downloads' (default) or 'favorites'. Only the ranking metric changes —
+  // the date presets, the range and the search box are shared, so an admin can
+  // flip between "most downloaded" and "most favourited" for the same window
+  // without re-picking anything.
+  metric = 'downloads',
 }) {
   const router = useRouter();
   const searchParams = useSearchParams();
@@ -38,15 +43,21 @@ export default function MostDownloadedProductsTableWrapper({
     searchParams.get('startDate') ? 'custom' : 'all',
   );
 
+  const isFavorites = metric === 'favorites';
+
+  const hasDateRange = !!(
+    searchParams.get('startDate') || searchParams.get('endDate')
+  );
+
   // Whether the numbers on the cards are range-scoped counts rather than each
   // design's lifetime total. The tier params count too: filtered to premium
   // downloads by subscribers, a lifetime download count would silently include
-  // every other tier.
+  // every other tier. They are ignored in favourites mode, which never sends
+  // them.
   const hasFilter = !!(
-    searchParams.get('startDate') ||
-    searchParams.get('endDate') ||
-    searchParams.get('userTier') ||
-    searchParams.get('productTier')
+    hasDateRange ||
+    (!isFavorites &&
+      (searchParams.get('userTier') || searchParams.get('productTier')))
   );
 
   // --- Filter Logic (URL Based) ---
@@ -62,6 +73,26 @@ export default function MostDownloadedProductsTableWrapper({
     // Reset to page 1 on filter change
     params.delete('page');
     router.push(`?${params.toString()}`);
+  };
+
+  // Switch the ranking metric, keeping the date range and search term.
+  // The tier params are dropped on the way into favourites: a favourite row has
+  // no userTier/productTier, so carrying them would leave two dead filters in
+  // the URL that the favourites endpoint silently ignores — and they would come
+  // back to life on the way out, narrowing a table the admin thought was whole.
+  const switchMetric = (next) => {
+    if (next === metric) return;
+    const params = new URLSearchParams(searchParams.toString());
+    if (next === 'favorites') {
+      params.set('metric', 'favorites');
+      params.delete('userTier');
+      params.delete('productTier');
+    } else {
+      params.delete('metric');
+    }
+    params.delete('page');
+    const qs = params.toString();
+    router.push(qs ? `?${qs}` : window.location.pathname);
   };
 
   const applyPreset = (value, unit, label) => {
@@ -135,6 +166,40 @@ export default function MostDownloadedProductsTableWrapper({
   // --- Filter Bar UI ---
   const topContent = (
     <div className='flex flex-col gap-4 mb-6'>
+      {/* Metric switch — what the grid is ranked by, for the range below */}
+      <div className='flex flex-wrap gap-3 items-center justify-between'>
+        <div className='inline-flex gap-1 bg-gray-100 dark:bg-neutral-800 rounded-lg p-1'>
+          {[
+            { label: 'Most Downloaded', value: 'downloads', Icon: Download },
+            { label: 'Most Favourited', value: 'favorites', Icon: Heart },
+          ].map(({ label, value, Icon }) => (
+            <button
+              key={value}
+              onClick={() => switchMetric(value)}
+              className={`flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium rounded-md transition-all
+                ${
+                  metric === value
+                    ? 'bg-white dark:bg-neutral-600 text-black dark:text-white shadow-sm font-bold'
+                    : 'text-gray-500 hover:text-gray-900 dark:text-gray-400 hover:bg-gray-200 dark:hover:bg-neutral-700'
+                }`}
+            >
+              <Icon size={13} />
+              {label}
+            </button>
+          ))}
+        </div>
+
+        <p className='text-xs text-gray-500'>
+          {isFavorites
+            ? hasDateRange
+              ? 'Ranked by favourites added in the selected range.'
+              : 'Ranked by all-time favourites.'
+            : hasDateRange
+              ? 'Ranked by downloads in the selected range.'
+              : 'Ranked by all-time downloads.'}
+        </p>
+      </div>
+
       <div className='flex flex-wrap gap-3 items-end justify-between'>
         {/* Preset Buttons */}
         <div className='flex flex-wrap gap-1 bg-gray-100 dark:bg-neutral-800 rounded-lg p-1'>
@@ -185,11 +250,17 @@ export default function MostDownloadedProductsTableWrapper({
         </div>
 
         <div className='flex gap-2 items-center'>
-          {pagination?.totalDownloads !== undefined && (
-            <div className='mb-0 font-semibold text-lg'>
-              Total {pagination?.totalDownloads || 0} File Downloads
-            </div>
-          )}
+          {isFavorites
+            ? pagination?.totalFavorites !== undefined && (
+                <div className='mb-0 font-semibold text-lg'>
+                  Total {pagination?.totalFavorites || 0} Favourites
+                </div>
+              )
+            : pagination?.totalDownloads !== undefined && (
+                <div className='mb-0 font-semibold text-lg'>
+                  Total {pagination?.totalDownloads || 0} File Downloads
+                </div>
+              )}
         </div>
 
         {/* Date Inputs */}
@@ -232,8 +303,10 @@ export default function MostDownloadedProductsTableWrapper({
       {data.length === 0 ? (
         <div className='py-16 text-center text-gray-400'>
           {searchParams.get('search')
-            ? `No downloaded designs match "${searchParams.get('search')}" in this date range.`
-            : 'No data found'}
+            ? `No ${isFavorites ? 'favourited' : 'downloaded'} designs match "${searchParams.get('search')}" in this date range.`
+            : isFavorites
+              ? 'No designs were favourited in this date range'
+              : 'No data found'}
         </div>
       ) : (
         <div className='grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4'>
@@ -241,10 +314,24 @@ export default function MostDownloadedProductsTableWrapper({
             const product = item.product || {};
             const slug = product.slug;
             const imageUrl = product.image?.url;
-            const downloadCount = hasFilter
-              ? (item.downloadCount ?? 0)
-              : (product.downloadCount ?? 0);
-            const favoriteCount = product.favoriteCount ?? 0;
+            // Each tile shows the range count for the metric being ranked (the
+            // row carries it) and the design's lifetime total for the other,
+            // which the range pipeline never computes. Unfiltered, the two are
+            // the same thing, so the lifetime figure is used throughout.
+            const downloadCount =
+              hasFilter && !isFavorites
+                ? (item.downloadCount ?? 0)
+                : (product.downloadCount ?? 0);
+            const favoriteCount =
+              hasFilter && isFavorites
+                ? (item.favoriteCount ?? 0)
+                : (product.favoriteCount ?? 0);
+            const downloadLabel = `${downloadCount} downloads${
+              hasFilter && !isFavorites ? ' in range' : ' (all time)'
+            }`;
+            const favoriteLabel = `${favoriteCount} favourites${
+              hasFilter && isFavorites ? ' in range' : ' (all time)'
+            }`;
 
             return (
               <div
@@ -299,11 +386,17 @@ export default function MostDownloadedProductsTableWrapper({
                     </p>
                   </div>
 
-                  {/* Stats row: downloads + favourites (compact) */}
+                  {/* Stats row: downloads + favourites (compact).
+                      The metric the grid is sorted by leads and is filled, so
+                      the number the ranking came from is never the faint one. */}
                   <div className='grid grid-cols-2 gap-1.5'>
                     <div
-                      className='flex items-center justify-center gap-1 rounded-md bg-gradient-to-br from-gray-900 to-gray-700 text-white py-1'
-                      title={`${downloadCount} downloads`}
+                      className={`flex items-center justify-center gap-1 rounded-md py-1 ${
+                        isFavorites
+                          ? 'order-2 border border-gray-300'
+                          : 'order-1 bg-gradient-to-br from-gray-900 to-gray-700 text-white'
+                      }`}
+                      title={downloadLabel}
                     >
                       <Download size={12} />
                       <span className='text-xs font-bold leading-none'>
@@ -311,10 +404,21 @@ export default function MostDownloadedProductsTableWrapper({
                       </span>
                     </div>
                     <div
-                      className='flex items-center justify-center gap-1 rounded-md border border-gray-300 py-1'
-                      title={`${favoriteCount} favourites`}
+                      className={`flex items-center justify-center gap-1 rounded-md py-1 ${
+                        isFavorites
+                          ? 'order-1 bg-gradient-to-br from-gray-900 to-gray-700 text-white'
+                          : 'order-2 border border-gray-300'
+                      }`}
+                      title={favoriteLabel}
                     >
-                      <Heart size={12} className='fill-gray-900 text-gray-900' />
+                      <Heart
+                        size={12}
+                        className={
+                          isFavorites
+                            ? 'fill-white text-white'
+                            : 'fill-gray-900 text-gray-900'
+                        }
+                      />
                       <span className='text-xs font-bold leading-none'>
                         {favoriteCount}
                       </span>

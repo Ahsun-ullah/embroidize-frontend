@@ -37,6 +37,10 @@ export default function AddCreditsModal({
   // Prefilled from a credit request in the queue, so the number the customer
   // asked for is never retyped from memory.
   initialCreditAmount,
+  // The queue row this grant answers. Sent to the server so IT closes the
+  // request and records what was actually given — the page never posts those
+  // numbers back itself.
+  requestId,
 }) {
   const [creditAmount, setCreditAmount] = useState(
     initialCreditAmount ? String(initialCreditAmount) : '100',
@@ -69,6 +73,7 @@ export default function AddCreditsModal({
     }
 
     const body = { creditAmount: n, addToBalance, note };
+    if (requestId) body.requestId = requestId;
     if (expiresOn) body.creditsExpireAt = new Date(expiresOn).toISOString();
 
     if (recordPayment) {
