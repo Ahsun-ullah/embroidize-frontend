@@ -374,7 +374,7 @@ export default function SubscribersTableWrapper({ subscribers, revenue }) {
 
   const [search, setSearch] = useState('');
   const [statusFilter, setStatusFilter] = useState('all');
-  const [providerFilter, setProviderFilter] = useState('all'); // all | stripe | creem | manual
+  const [providerFilter, setProviderFilter] = useState('creem'); // all | stripe | creem | manual
   const [planFilter, setPlanFilter] = useState('all'); // all | planId
   const [cancelingOnly, setCancelingOnly] = useState(false); // cancels at period end
   const [page, setPage] = useState(1);
