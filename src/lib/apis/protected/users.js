@@ -144,6 +144,66 @@ export async function getDownloadStats(
   }
 }
 
+// Most-favourited designs for a date range — the favourites metric of the admin
+// Downloads page. Same row shape as getDownloadStats, so the same card grid
+// renders both; no tier params, because favourite rows carry no tier stamp.
+export async function getFavoriteStats(
+  page = 1,
+  perPage = 10,
+  search = '',
+  startDate = '',
+  endDate = '',
+) {
+  'use server';
+
+  try {
+    const cookieStore = await cookies();
+    const token = cookieStore.get('token')?.value;
+
+    const headers = new Headers();
+    if (token) {
+      headers.set('Authorization', `Bearer ${token}`);
+    }
+
+    const apiUrl =
+      process.env.NEXT_PUBLIC_BASE_API_URL_PROD ||
+      process.env.NEXT_PUBLIC_BASE_API_URL;
+
+    const url = new URL(`${apiUrl}/stats/favorites/products`);
+
+    url.searchParams.set('page', String(page));
+    url.searchParams.set('perPage', String(perPage));
+    if (search) url.searchParams.set('search', search);
+    if (startDate) url.searchParams.set('startDate', startDate);
+    if (endDate) url.searchParams.set('endDate', endDate);
+
+    const response = await fetch(url.toString(), {
+      method: 'GET',
+      headers,
+      cache: 'no-store',
+    });
+
+    if (!response.ok) {
+      console.error(`API Error: ${response.status}`);
+      return {
+        data: [],
+        pagination: { total: 0, page, perPage, totalPages: 0 },
+      };
+    }
+
+    const responseData = await response.json();
+
+    return {
+      data: responseData?.data?.data || [],
+      pagination: responseData?.data?.pagination || { total: 0, totalPages: 0 },
+      filter: responseData?.data?.filter,
+    };
+  } catch (error) {
+    console.error('Error fetching favourite stats:', error);
+    return { data: [], pagination: { total: 0, totalPages: 0 } };
+  }
+}
+
 // Download breakdown: subscriber vs free downloader, premium vs free design.
 // Takes the same date range as getDownloadStats so both halves of the Downloads
 // page always describe the same window.
