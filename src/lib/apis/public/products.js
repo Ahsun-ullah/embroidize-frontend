@@ -221,6 +221,11 @@ export async function getAdminChoiceProducts(
 
 export async function getSingleProduct(productId) {
   const url = buildURL(`/public/product/${productId}`);
+  // Sent authenticated so staff see what only staff may see: an unpublished
+  // design stays reachable for the admin who is editing it, and the EMB format
+  // appears in the format list for them alone. Every one of these fetches is
+  // already `cache: 'no-store'`, so reading the caller's cookie costs no
+  // caching — and an anonymous visitor simply gets the public view.
   // A 404 here means the design does not exist, or is unpublished and
   // therefore invisible to the public. Both must reach notFound() so Next
   // answers with a real 404 status.
@@ -229,7 +234,7 @@ export async function getSingleProduct(productId) {
   // error page under HTTP 200 — a soft 404. Search engines treat that as a
   // live page and keep it indexed, which is precisely the wrong outcome for a
   // design that was taken down.
-  return getJSON(url, { allow404: true });
+  return getJSON(url, { allow404: true, authenticated: true });
 }
 
 // get all products in sitemap

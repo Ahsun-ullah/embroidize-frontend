@@ -14,16 +14,67 @@ import {
 import { useAllProductsQuery } from '@/lib/redux/public/products/productSlice';
 import { productSchema } from '@/lib/zodValidation/productValidation';
 import { slugify } from '@/utils/functions/page';
-import { Card } from '@heroui/react';
 import { zodResolver } from '@hookform/resolvers/zod';
 import MDEditor from '@uiw/react-md-editor';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { useEffect, useState } from 'react';
 import { Controller, useForm } from 'react-hook-form';
 import Select from 'react-select';
-import { EmbFileUpload, ZipFileUpload } from './FileDragAndDropInput';
-import { ImageFileUpload } from './ImageDragAndDropInput';
-import { CreatableTagsInput } from './TagsInput';
+import {
+  FileDropTile,
+  FilesDropZone,
+  matchFileToSlot,
+} from './FileDragAndDropInput';
+// import { CreatableTagsInput } from './TagsInput';
+
+// Field chrome shared by every input below, so a compact form does not mean a
+// dozen repeated utility classes per element.
+const SECTION = 'rounded-lg border border-gray-200 bg-white p-4';
+const SECTION_TITLE =
+  'mb-3 text-xs font-semibold uppercase tracking-wide text-gray-500';
+const LABEL = 'mb-1 block text-sm font-medium text-gray-700';
+const INPUT =
+  'w-full rounded-md border border-gray-300 px-3 py-2 text-sm outline-none transition-colors focus:border-gray-900';
+const ERROR = 'mt-1 text-xs font-light text-red-500';
+
+// react-select ships at 16px with a 38px+ control; bring it in line with the
+// plain inputs beside it.
+const SELECT_STYLES = {
+  control: (base, state) => ({
+    ...base,
+    minHeight: 38,
+    borderRadius: 6,
+    fontSize: 14,
+    boxShadow: 'none',
+    borderColor: state.isFocused ? '#111827' : '#d1d5db',
+    ':hover': { borderColor: state.isFocused ? '#111827' : '#d1d5db' },
+  }),
+  menu: (base) => ({ ...base, fontSize: 14, zIndex: 30 }),
+  placeholder: (base) => ({ ...base, fontSize: 14 }),
+};
+
+// Status and pricing tier are one click each, so they get a click-sized
+// control rather than a labelled block apiece.
+const Segmented = ({ value, onChange, options }) => (
+  <div className='inline-flex shrink-0 overflow-hidden rounded-md border border-gray-300'>
+    {options.map((option) => (
+      <button
+        key={String(option.value)}
+        type='button'
+        onClick={() => onChange(option.value)}
+        className={`px-3 py-1 text-[11px] font-semibold transition-colors ${
+          value === option.value
+            ? option.tone === 'danger'
+              ? 'bg-red-600 text-white'
+              : 'bg-gray-900 text-white'
+            : 'bg-white text-gray-600 hover:bg-gray-100'
+        }`}
+      >
+        {option.label}
+      </button>
+    ))}
+  </div>
+);
 
 export function ProductsForm({ product }) {
   const router = useRouter();
@@ -40,6 +91,10 @@ export function ProductsForm({ product }) {
   const [updateProduct] = useUpdateProductMutation();
   const { refetch: allProductRefetch } = useAllProductsQuery();
 
+  // `dropError` reports files dropped on the Files section that belong in no
+  // slot — a per-tile error has nowhere to appear for those.
+  const [dropError, setDropError] = useState(null);
+
   const {
     control,
     register,
@@ -47,6 +102,9 @@ export function ProductsForm({ product }) {
     formState: { errors, isSubmitting },
     reset,
     setValue,
+    // The file tiles render from the form value, so a file routed by a section
+    // drop shows up on the right tile without any local state to keep in sync.
+    watch,
   } = useForm({
     mode: 'onSubmit',
     resolver: zodResolver(productSchema),
@@ -221,464 +279,63 @@ export function ProductsForm({ product }) {
     }
   };
 
+  // The EMB slot replaces an existing .emb rather than adding a second one, so
+  // the hint under it has to say which of the two is about to happen.
+  const hasEmb =
+    Array.isArray(product?.available_file_types) &&
+    product.available_file_types.some((t) => String(t).toLowerCase() === 'emb');
+
+  // A drop on the Files section as a whole: sort each file into its slot by
+  // what it is, so the admin can drag the cover, the pack, the EMB and the PDF
+  // over in one go instead of aiming at four separate targets.
+  const handleDroppedFiles = (files) => {
+    const rejected = [];
+
+    files.forEach((file) => {
+      const field = matchFileToSlot(file);
+      if (!field || file.size === 0) {
+        rejected.push(file.name);
+        return;
+      }
+      setValue(field, file, { shouldDirty: true });
+    });
+
+    setDropError(
+      rejected.length
+        ? `Not accepted: ${rejected.join(', ')} — drop a .zip, .emb, .pdf or an image.`
+        : null,
+    );
+  };
+
   return (
-    <Card className='w-full p-6'>
-      <form
-        onSubmit={handleSubmit(onSubmit)}
-        className='grid grid-cols-3 gap-4'
-      >
-        {/* Product Name */}
-        <div className='col-span-3'>
-          <label
-            className='text-lg font-medium tracking-tight leading-5'
-            htmlFor='name'
-          >
-            Product Name <span className='text-red-600'>*</span>
-          </label>
-          <input
-            id='name'
-            placeholder='Product Name'
-            {...register('name')}
-            onChange={handleNameChange}
-            className='flex w-full flex-wrap md:flex-nowrap gap-4 border-[1.8px] rounded-[4px] p-2'
-          />
-          {errors.name && (
-            <p className='text-red-500 font-light'>{errors.name.message}</p>
+    <form onSubmit={handleSubmit(onSubmit)} className='w-full'>
+      {/* Action bar — stays in view so saving never means scrolling back up */}
+      <div className='sticky top-0 z-20 mb-4 flex items-center justify-between gap-3 rounded-lg border border-gray-200 bg-white px-4 py-3'>
+        <div className='min-w-0'>
+          <h2 className='text-base font-semibold text-gray-900'>
+            {product ? 'Edit product' : 'New product'}
+          </h2>
+          {product?.name && (
+            <p className='truncate text-xs text-gray-500'>{product.name}</p>
           )}
         </div>
 
-        {/* Product slug */}
-        <div className='col-span-2'>
-          <label
-            className='text-lg font-medium tracking-tight leading-5'
-            htmlFor='slug'
-          >
-            Product Slug <span className='text-red-600'>*</span>
-          </label>
-          <input
-            id='slug'
-            placeholder='Product Slug'
-            {...register('slug')}
-            value={slug}
-            onChange={(e) => setSlug(slugify(e.target.value))}
-            className='flex w-full flex-wrap md:flex-nowrap gap-4 border-[1.8px] rounded-[4px] p-2'
-          />
-          {errors.slug && (
-            <p className='text-red-500 font-light'>{errors.slug.message}</p>
-          )}
-        </div>
-
-        {/* sku_code */}
-        <div className='col-span-1'>
-          <label
-            className='text-lg font-medium tracking-tight leading-5'
-            htmlFor='sku_code'
-          >
-            SKU Code <span className='text-red-600'>*</span>
-          </label>
-          <input
-            id='sku_code'
-            placeholder='SKU Code'
-            {...register('sku_code')}
-            className='flex w-full flex-wrap md:flex-nowrap gap-4 border-[1.8px] rounded-[4px] p-2'
-          />
-          {errors.sku_code && (
-            <p className='text-red-500 font-light'>{errors.sku_code.message}</p>
-          )}
-        </div>
-
-        {/* Category */}
-        <div>
-          <label
-            className='text-lg font-medium tracking-tight leading-5'
-            htmlFor='category'
-          >
-            Category <span className='text-red-600'>*</span>
-          </label>
-
-          <Controller
-            name='category'
-            control={control}
-            render={({ field }) => (
-              <Select
-                options={categoryOption}
-                onChange={(selected) => {
-                  const value = selected ? selected.value : '';
-                  setSelectedCategory(value);
-                  field.onChange(value);
-                  setValue('sub_category', '');
-                }}
-                value={
-                  categoryOption.find(
-                    (option) => option.value === field.value,
-                  ) || null
-                }
-                placeholder='Select a category'
-              />
-            )}
-          />
-
-          {errors.category && (
-            <p className='text-red-500 font-light'>{errors.category.message}</p>
-          )}
-        </div>
-
-        {/* sub_category */}
-        <div>
-          <label
-            className='text-lg font-medium tracking-tight leading-5'
-            htmlFor='sub_category'
-          >
-            Sub Category <span className='text-red-600'>*</span>
-          </label>
-
-          <Controller
-            name='sub_category'
-            control={control}
-            render={({ field }) => {
-              const filteredSubCategories = subCategoryOption.filter(
-                (sub) => sub?.categoryId?._id === selectedCategory,
-              );
-
-              return (
-                <Select
-                  options={filteredSubCategories}
-                  onChange={(selected) =>
-                    field.onChange(selected ? selected.value : '')
-                  }
-                  value={
-                    filteredSubCategories.find(
-                      (option) => option.value === field.value,
-                    ) || null
-                  }
-                  placeholder={
-                    selectedCategory
-                      ? 'Select a subcategory'
-                      : 'Please select a category first'
-                  }
-                  isDisabled={!selectedCategory}
-                />
-              );
-            }}
-          />
-
-          {errors.sub_category && (
-            <p className='text-red-500 font-light'>
-              {errors.sub_category.message}
-            </p>
-          )}
-        </div>
-
-        {/* Price */}
-        <div>
-          <label
-            className='text-lg font-medium tracking-tight leading-5'
-            htmlFor='price'
-          >
-            Price <span className='text-red-600'>*</span>
-          </label>
-          <input
-            id='price'
-            type='number'
-            step='0.01'
-            placeholder='Price'
-            {...register('price', { valueAsNumber: true })}
-            className='flex w-full flex-wrap md:flex-nowrap gap-4 border-[1.8px] rounded-[4px] p-2'
-          />
-          {errors.price && (
-            <p className='text-red-500 font-light'>{errors.price.message}</p>
-          )}
-        </div>
-
-        {/* Pricing Tier (free / premium) */}
-        <div>
-          <label className='text-lg font-medium tracking-tight leading-5'>
-            Pricing Tier <span className='text-red-600'>*</span>
-          </label>
-          <Controller
-            name='isFree'
-            control={control}
-            render={({ field }) => (
-              <div className='mt-1 inline-flex w-full overflow-hidden rounded-[4px] border-[1.8px]'>
-                <button
-                  type='button'
-                  onClick={() => field.onChange(false)}
-                  className={`flex-1 px-4 py-2 text-sm font-semibold transition-colors ${
-                    !field.value
-                      ? 'bg-gray-900 text-white'
-                      : 'bg-white text-gray-600 hover:bg-gray-100'
-                  }`}
-                >
-                  Premium
-                </button>
-                <button
-                  type='button'
-                  onClick={() => field.onChange(true)}
-                  className={`flex-1 px-4 py-2 text-sm font-semibold transition-colors ${
-                    field.value
-                      ? 'bg-gray-900 text-white'
-                      : 'bg-white text-gray-600 hover:bg-gray-100'
-                  }`}
-                >
-                  Free
-                </button>
-              </div>
-            )}
-          />
-          <p className='mt-1 text-xs text-gray-400'>
-            Premium designs need an active subscription. Free designs count
-            toward the free daily quota.
-          </p>
-        </div>
-
-        {/* Publish Status (active / inactive) */}
-        <div>
-          <label className='text-lg font-medium tracking-tight leading-5'>
-            Status <span className='text-red-600'>*</span>
-          </label>
-          <Controller
-            name='isActive'
-            control={control}
-            render={({ field }) => (
-              <div className='mt-1 inline-flex w-full overflow-hidden rounded-[4px] border-[1.8px]'>
-                <button
-                  type='button'
-                  onClick={() => field.onChange(true)}
-                  className={`flex-1 px-4 py-2 text-sm font-semibold transition-colors ${
-                    field.value
-                      ? 'bg-emerald-600 text-white'
-                      : 'bg-white text-gray-600 hover:bg-gray-100'
-                  }`}
-                >
-                  Active
-                </button>
-                <button
-                  type='button'
-                  onClick={() => field.onChange(false)}
-                  className={`flex-1 px-4 py-2 text-sm font-semibold transition-colors ${
-                    !field.value
-                      ? 'bg-red-600 text-white'
-                      : 'bg-white text-gray-600 hover:bg-gray-100'
-                  }`}
-                >
-                  Inactive
-                </button>
-              </div>
-            )}
-          />
-          <p className='mt-1 text-xs text-gray-400'>
-            Inactive products are hidden from the store and can&apos;t be
-            downloaded.
-          </p>
-        </div>
-
-        {/* Description */}
-        <div data-color-mode='light' className='col-span-3'>
-          <label
-            className='text-lg font-medium tracking-tight leading-5'
-            htmlFor='description'
-          >
-            Product Description <span className='text-red-600'>*</span>
-          </label>
-          <Controller
-            name='description'
-            control={control}
-            render={({ field }) => (
-              <MDEditor
-                {...field}
-                value={description}
-                onChange={(value) => {
-                  setDescription(value);
-                  field.onChange(value);
-                }}
-                preview='edit'
-                height={300}
-                textareaProps={{
-                  placeholder: 'Enter Product Description',
-                }}
-                previewOptions={{
-                  disallowedElements: ['style'],
-                }}
-                className='rounded-[4px] p-2 overflow-hidden'
-              />
-            )}
-          />
-          {errors.description && (
-            <p className='text-red-500 font-light'>
-              {errors.description.message}
-            </p>
-          )}
-        </div>
-
-        {/* meta_title  */}
-        <div className='col-span-3'>
-          <label
-            className='text-lg font-medium tracking-tight leading-5'
-            htmlFor='meta_title'
-          >
-            Meta Title <span className='text-red-600'>*</span>
-          </label>
-          <input
-            id='meta_title'
-            placeholder='Category Name'
-            {...register('meta_title')}
-            className='flex w-full flex-wrap md:flex-nowrap gap-4 border-[1.8px] rounded-[4px] p-2'
-          />
-          {errors.meta_title && (
-            <p className='text-red-500 font-light'>
-              {errors.meta_title.message}
-            </p>
-          )}
-        </div>
-
-        {/* Meta Description */}
-        <div className='col-span-3'>
-          <label
-            className='text-lg font-medium tracking-tight leading-5'
-            htmlFor='meta_description'
-          >
-            Meta Description <span className='text-red-600'>*</span>
-          </label>
-          <textarea
-            rows={8}
-            id='meta_description'
-            placeholder='Meta description'
-            {...register('meta_description')}
-            className='flex w-full flex-wrap md:flex-nowrap gap-4 border-[1.8px] rounded-[4px] p-2'
-          />
-          {errors.meta_description && (
-            <p className='text-red-500 font-light'>
-              {errors.meta_description.message}
-            </p>
-          )}
-        </div>
-
-        {/* Product Tags */}
-        <div className='col-span-2'>
-          <label
-            className='text-lg font-medium tracking-tight leading-5'
-            htmlFor='meta_keywords'
-          >
-            Product Tags <span className='text-red-600'>*</span>
-          </label>
-
-          <Controller
-            name='meta_keywords'
-            control={control}
-            render={({ field }) => (
-              <CreatableTagsInput
-                value={field.value || []}
-                onChange={(tags) => field.onChange(tags)}
-              />
-            )}
-          />
-
-          {errors.meta_keywords && (
-            <p className='text-red-500 font-light'>
-              {errors.meta_keywords.message}
-            </p>
-          )}
-        </div>
-
-        <div className='col-span-1'>
-          <label
-            className='text-lg font-medium tracking-tight leading-5'
-            htmlFor='meta_keywords'
-          >
-            PDF File <span className='text-red-600'>*</span>
-          </label>
-          <input
-            type='file'
-            accept='application/pdf'
-            onChange={(e) =>
-              setValue('product_pdf', e.target.files?.[0], {
-                shouldDirty: true,
-              })
+        <div className='flex shrink-0 items-center gap-2'>
+          <button
+            type='button'
+            onClick={() =>
+              router.push(`/admin/all-products?page=${pageNumber}`)
             }
-            className='
-    block w-full border-[1.8px] rounded-[4px] p-8 file:mr-4 file:py-2 file:px-4 file:rounded-full
-    file:border-0 file:text-sm file:font-semibold file:bg-slate-100 file:text-slate-700
-    hover:file:bg-slate-200 transition
-  '
-          />
-
-          {errors.product_pdf && (
-            <p className='text-red-500 font-light'>
-              {errors.product_pdf.message}
-            </p>
-          )}
-        </div>
-
-        {/* Product Image Upload */}
-        <div className='col-span-3'>
-          <label className='text-lg font-medium tracking-tight leading-5'>
-            Product Image <span className='text-red-600'>*</span>
-          </label>
-          <ImageFileUpload
-            label='Upload product image (.jpg, .png, .webp). Min: 580px × 386px, Max: 5000px × 5000px'
-            accept={('image/png', 'image/jpg', 'image/webp', 'image/jpeg')}
-            onDrop={(file) => setValue('image', file, { shouldDirty: true })}
-            error={errors.image?.message}
-            itemData={product}
-          />
-        </div>
-
-        {/* Design File Upload */}
-        <div className='col-span-3'>
-          <label className='text-lg font-medium tracking-tight leading-5'>
-            Design File (Zip only) <span className='text-red-600'>*</span>
-          </label>
-          <ZipFileUpload
-            label='Upload embroidery files (.zip only)'
-            // Extension first: Windows reports .zip as application/octet-stream
-            // whenever a third-party archiver owns the file association, and a
-            // mimetype-only accept then hides the design pack in the browse
-            // dialog until the admin switches to "All Files".
-            accept={'.zip,application/zip,application/x-zip-compressed'}
-            onDrop={(file) => setValue('file', file, { shouldDirty: true })}
-            error={errors.file?.message}
-            product={product}
-          />
-          {product && (
-            <p className='mt-2 text-sm text-gray-500'>
-              Uploading a new ZIP replaces every file on this design — including
-              an EMB added below. Re-attach the EMB in the same save if you
-              still need it.
-            </p>
-          )}
-        </div>
-
-        {/* Optional EMB Upload — merged into the pack above, not a replacement */}
-        <div className='col-span-3'>
-          <label className='text-lg font-medium tracking-tight leading-5'>
-            EMB File (optional)
-          </label>
-          <EmbFileUpload
-            label='Add a single .emb to this design’s formats'
-            accept={'.emb'}
-            onDrop={(file) => setValue('emb_file', file, { shouldDirty: true })}
-            error={errors.emb_file?.message}
-            product={product}
-          />
-          {product?.available_file_types?.length > 0 && (
-            <p className='mt-2 text-sm text-gray-500'>
-              Current formats:{' '}
-              {product.available_file_types.join(', ').toUpperCase()}
-            </p>
-          )}
-        </div>
-
-        {/* Submit Button */}
-        <div className='col-span-3 flex justify-center w-full my-20'>
+            className='rounded-md border border-gray-300 px-4 py-2 text-sm font-medium text-gray-700 transition-colors hover:bg-gray-50'
+          >
+            Cancel
+          </button>
           <button
             type='submit'
             disabled={isSubmitting}
-            className={`w-full md:w-auto px-6 py-3 rounded-md font-medium text-white
-             bg-slate-800
-              hover:bg-black  hover:shadow-lg
-              disabled:from-gray-400 disabled:to-gray-500 disabled:cursor-not-allowed
-              transition-all duration-300 ease-in-out
-              ${isSubmitting ? 'cursor-wait' : ''}`}
+            className={`rounded-md bg-slate-800 px-5 py-2 text-sm font-medium text-white transition-colors hover:bg-black disabled:cursor-not-allowed disabled:bg-gray-400 ${
+              isSubmitting ? 'cursor-wait' : ''
+            }`}
           >
             {isSubmitting ? (
               <LoadingSpinner />
@@ -689,7 +346,401 @@ export function ProductsForm({ product }) {
             )}
           </button>
         </div>
-      </form>
-    </Card>
+      </div>
+
+      <div className='grid grid-cols-1 gap-4 lg:grid-cols-3'>
+        {/* ---------------- Main column ---------------- */}
+        <div className='flex flex-col gap-4 lg:col-span-2'>
+          <section className={SECTION}>
+            <h3 className={SECTION_TITLE}>Product details</h3>
+
+            <div className='mb-3'>
+              <label className={LABEL} htmlFor='name'>
+                Product Name <span className='text-red-600'>*</span>
+              </label>
+              <input
+                id='name'
+                placeholder='Product Name'
+                {...register('name')}
+                onChange={handleNameChange}
+                className={INPUT}
+              />
+              {errors.name && <p className={ERROR}>{errors.name.message}</p>}
+            </div>
+
+            <div className='mb-3'>
+              <label className={LABEL} htmlFor='slug'>
+                Slug <span className='text-red-600'>*</span>
+              </label>
+              <input
+                id='slug'
+                placeholder='product-slug'
+                {...register('slug')}
+                value={slug}
+                onChange={(e) => setSlug(slugify(e.target.value))}
+                className={INPUT}
+              />
+              {errors.slug && <p className={ERROR}>{errors.slug.message}</p>}
+            </div>
+
+            <div data-color-mode='light'>
+              <label className={LABEL} htmlFor='description'>
+                Description <span className='text-red-600'>*</span>
+              </label>
+              <Controller
+                name='description'
+                control={control}
+                render={({ field }) => (
+                  <MDEditor
+                    {...field}
+                    value={description}
+                    onChange={(value) => {
+                      setDescription(value);
+                      field.onChange(value);
+                    }}
+                    preview='edit'
+                    height={220}
+                    textareaProps={{
+                      placeholder: 'Enter Product Description',
+                    }}
+                    previewOptions={{
+                      disallowedElements: ['style'],
+                    }}
+                    className='overflow-hidden rounded-md'
+                  />
+                )}
+              />
+              {errors.description && (
+                <p className={ERROR}>{errors.description.message}</p>
+              )}
+            </div>
+          </section>
+
+          <section className={SECTION}>
+            <h3 className={SECTION_TITLE}>Search engine listing</h3>
+
+            <div className='mb-3'>
+              <label className={LABEL} htmlFor='meta_title'>
+                Meta Title <span className='text-red-600'>*</span>
+              </label>
+              <input
+                id='meta_title'
+                placeholder='Meta title'
+                {...register('meta_title')}
+                className={INPUT}
+              />
+              {errors.meta_title && (
+                <p className={ERROR}>{errors.meta_title.message}</p>
+              )}
+            </div>
+
+            <div className='mb-3'>
+              <label className={LABEL} htmlFor='meta_description'>
+                Meta Description <span className='text-red-600'>*</span>
+              </label>
+              <textarea
+                rows={3}
+                id='meta_description'
+                placeholder='Meta description'
+                {...register('meta_description')}
+                className={INPUT}
+              />
+              {errors.meta_description && (
+                <p className={ERROR}>{errors.meta_description.message}</p>
+              )}
+            </div>
+            {/*
+            <div>
+              <label className={LABEL} htmlFor='meta_keywords'>
+                Product Tags <span className='text-red-600'>*</span>
+              </label>
+              <Controller
+                name='meta_keywords'
+                control={control}
+                render={({ field }) => (
+                  <CreatableTagsInput
+                    value={field.value || []}
+                    onChange={(tags) => field.onChange(tags)}
+                  />
+                )}
+              />
+              {errors.meta_keywords && (
+                <p className={ERROR}>{errors.meta_keywords.message}</p>
+              )}
+            </div> */}
+          </section>
+        </div>
+
+        {/* ---------------- Sidebar ---------------- */}
+        <div className='flex flex-col gap-4'>
+          <section className={SECTION}>
+            <h3 className={SECTION_TITLE}>Visibility</h3>
+
+            <div className='flex items-center justify-between gap-3'>
+              <span className='text-sm text-gray-700'>Status</span>
+              <Controller
+                name='isActive'
+                control={control}
+                render={({ field }) => (
+                  <Segmented
+                    value={field.value}
+                    onChange={field.onChange}
+                    options={[
+                      { label: 'Active', value: true },
+                      { label: 'Inactive', value: false, tone: 'danger' },
+                    ]}
+                  />
+                )}
+              />
+            </div>
+
+            <div className='mt-2 flex items-center justify-between gap-3'>
+              <span className='text-sm text-gray-700'>Pricing</span>
+              <Controller
+                name='isFree'
+                control={control}
+                render={({ field }) => (
+                  <Segmented
+                    value={field.value}
+                    onChange={field.onChange}
+                    options={[
+                      { label: 'Premium', value: false },
+                      { label: 'Free', value: true },
+                    ]}
+                  />
+                )}
+              />
+            </div>
+          </section>
+
+          <section className={SECTION}>
+            <h3 className={SECTION_TITLE}>Organisation</h3>
+
+            <div className='mb-3'>
+              <label className={LABEL} htmlFor='category'>
+                Category <span className='text-red-600'>*</span>
+              </label>
+              <Controller
+                name='category'
+                control={control}
+                render={({ field }) => (
+                  <Select
+                    options={categoryOption}
+                    styles={SELECT_STYLES}
+                    onChange={(selected) => {
+                      const value = selected ? selected.value : '';
+                      setSelectedCategory(value);
+                      field.onChange(value);
+                      setValue('sub_category', '');
+                    }}
+                    value={
+                      categoryOption.find(
+                        (option) => option.value === field.value,
+                      ) || null
+                    }
+                    placeholder='Select a category'
+                  />
+                )}
+              />
+              {errors.category && (
+                <p className={ERROR}>{errors.category.message}</p>
+              )}
+            </div>
+
+            <div className='mb-3'>
+              <label className={LABEL} htmlFor='sub_category'>
+                Sub Category <span className='text-red-600'>*</span>
+              </label>
+              <Controller
+                name='sub_category'
+                control={control}
+                render={({ field }) => {
+                  const filteredSubCategories = subCategoryOption.filter(
+                    (sub) => sub?.categoryId?._id === selectedCategory,
+                  );
+
+                  return (
+                    <Select
+                      options={filteredSubCategories}
+                      styles={SELECT_STYLES}
+                      onChange={(selected) =>
+                        field.onChange(selected ? selected.value : '')
+                      }
+                      value={
+                        filteredSubCategories.find(
+                          (option) => option.value === field.value,
+                        ) || null
+                      }
+                      placeholder={
+                        selectedCategory
+                          ? 'Select a subcategory'
+                          : 'Select a category first'
+                      }
+                      isDisabled={!selectedCategory}
+                    />
+                  );
+                }}
+              />
+              {errors.sub_category && (
+                <p className={ERROR}>{errors.sub_category.message}</p>
+              )}
+            </div>
+
+            <div className='mb-3'>
+              <label className={LABEL} htmlFor='price'>
+                Price <span className='text-red-600'>*</span>
+              </label>
+              <input
+                id='price'
+                type='number'
+                step='0.01'
+                placeholder='0.00'
+                {...register('price', { valueAsNumber: true })}
+                className={INPUT}
+              />
+              {errors.price && <p className={ERROR}>{errors.price.message}</p>}
+            </div>
+
+            <div>
+              <label className={LABEL} htmlFor='sku_code'>
+                SKU Code <span className='text-red-600'>*</span>
+              </label>
+              <input
+                id='sku_code'
+                placeholder='SKU'
+                {...register('sku_code')}
+                className={INPUT}
+              />
+              {errors.sku_code && (
+                <p className={ERROR}>{errors.sku_code.message}</p>
+              )}
+            </div>
+          </section>
+        </div>
+      </div>
+
+      {/* Files — full width so the four slots sit in one row and the whole
+          block is a single drop target. */}
+      <section className={`${SECTION} mt-4`}>
+        <div className='mb-3 flex flex-wrap items-baseline justify-between gap-2'>
+          <h3 className='text-xs font-semibold uppercase tracking-wide text-gray-500'>
+            Files
+          </h3>
+          <p className='text-xs text-gray-400'>
+            Drag files anywhere in this box — each one lands in its own slot.
+          </p>
+        </div>
+
+        <FilesDropZone onFiles={handleDroppedFiles}>
+          <div className='grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-4'>
+            <FileDropTile
+              id='image-upload'
+              title='Product Image'
+              badge='IMG'
+              required
+              isImage
+              accept='image/png,image/jpeg,image/jpg,image/webp'
+              hint='.jpg, .png, .webp'
+              error={errors.image?.message}
+              file={watch('image')}
+              existingPreview={product?.image?.url}
+              existingName={product?.image?.url ? 'Current image' : null}
+              onSelect={(file) =>
+                setValue('image', file, { shouldDirty: true })
+              }
+            />
+
+            <FileDropTile
+              id='zip-upload'
+              title='Design Pack'
+              badge='ZIP'
+              required
+              extension='zip'
+              accept='.zip,application/zip,application/x-zip-compressed'
+              hint={
+                product
+                  ? 'A new ZIP replaces every file on this design, including the EMB.'
+                  : 'All embroidery formats in one .zip'
+              }
+              error={errors.file?.message}
+              file={watch('file')}
+              onSelect={(file) => setValue('file', file, { shouldDirty: true })}
+            />
+
+            <FileDropTile
+              id='emb-upload'
+              title='EMB File'
+              badge='EMB'
+              extension='emb'
+              accept='.emb'
+              hint={
+                product
+                  ? hasEmb
+                    ? 'Optional. Replaces the EMB on this design; other formats stay.'
+                    : 'Optional. Added to the existing formats; nothing is removed.'
+                  : 'Optional. Added alongside the formats inside the ZIP.'
+              }
+              error={errors.emb_file?.message}
+              file={watch('emb_file')}
+              onSelect={(file) =>
+                setValue('emb_file', file, { shouldDirty: true })
+              }
+            />
+
+            <FileDropTile
+              id='pdf-upload'
+              title='PDF Guide'
+              badge='PDF'
+              extension='pdf'
+              accept='application/pdf'
+              hint='Optional instruction sheet.'
+              error={errors.product_pdf?.message}
+              file={watch('product_pdf')}
+              existingName={product?.product_pdf?.url ? 'Current PDF' : null}
+              onSelect={(file) =>
+                setValue('product_pdf', file, { shouldDirty: true })
+              }
+            />
+          </div>
+        </FilesDropZone>
+
+        <div className='mt-3 flex flex-wrap items-center justify-between gap-2'>
+          {product?.available_file_types?.length > 0 ? (
+            <p className='text-xs text-gray-500'>
+              Current formats:{' '}
+              <span className='font-medium text-gray-700'>
+                {product.available_file_types.join(', ').toUpperCase()}
+              </span>
+            </p>
+          ) : (
+            <span />
+          )}
+
+          {dropError && (
+            <p className='text-xs font-light text-red-500'>{dropError}</p>
+          )}
+        </div>
+      </section>
+
+      {/* The sticky bar above is the primary action; this is its small-screen
+          counterpart, where a long form makes scrolling back up expensive. */}
+      <div className='mt-4 lg:hidden'>
+        <button
+          type='submit'
+          disabled={isSubmitting}
+          className={`w-full rounded-md bg-slate-800 px-5 py-3 text-sm font-medium text-white transition-colors hover:bg-black disabled:cursor-not-allowed disabled:bg-gray-400 ${
+            isSubmitting ? 'cursor-wait' : ''
+          }`}
+        >
+          {isSubmitting ? (
+            <LoadingSpinner />
+          ) : product ? (
+            'Update Product'
+          ) : (
+            'Create Product'
+          )}
+        </button>
+      </div>
+    </form>
   );
 }

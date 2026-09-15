@@ -1,6 +1,7 @@
 'use client';
 
 import DownloadLimitModal from '@/components/Common/DownloadLimitModal';
+import { isAdminOnlyFormat } from '@/utils/adminOnlyFormats';
 import { ErrorToast } from '@/components/Common/ErrorToast';
 import FavoriteButton from '@/components/Common/FavoriteButton';
 import LoadingSpinner from '@/components/Common/LoadingSpinner';
@@ -549,9 +550,21 @@ export default function ProductDownloadCard({ data }) {
                     }
                     isDisabled={downloadingType && downloadingType !== type}
                   >
-                    {downloadingType === type
-                      ? 'Downloading...'
-                      : type.toUpperCase()}
+                    {downloadingType === type ? (
+                      'Downloading...'
+                    ) : (
+                      <span className='flex items-center justify-center gap-2'>
+                        {type.toUpperCase()}
+                        {/* The API only sends this format to staff, so seeing
+                            it at all means the viewer is an admin — label it so
+                            it is never mistaken for a customer-facing format. */}
+                        {isAdminOnlyFormat(type) && (
+                          <span className='rounded bg-gray-900 px-1.5 py-0.5 text-[10px] font-semibold uppercase tracking-wide text-white'>
+                            Admin only
+                          </span>
+                        )}
+                      </span>
+                    )}
                   </Button>
                 ))}
               </ModalBody>

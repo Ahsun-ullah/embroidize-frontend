@@ -38,10 +38,9 @@ export default async function ContactsPage({ searchParams }) {
     : null;
 
   return (
-    <div className='w-full flex flex-col gap-4'>
-      <h1 className='text-lg font-medium tracking-tight leading-5'>
-        Product Form
-      </h1>
+    // The form renders its own header ("New product" / "Edit product") in the
+    // sticky action bar, so a page title here would just repeat it.
+    <div className='w-full'>
       <ProductsForm product={singleProductData?.data} />
     </div>
   );
