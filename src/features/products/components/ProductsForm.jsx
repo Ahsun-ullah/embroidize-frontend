@@ -21,7 +21,7 @@ import { useRouter, useSearchParams } from 'next/navigation';
 import { useEffect, useState } from 'react';
 import { Controller, useForm } from 'react-hook-form';
 import Select from 'react-select';
-import { ZipFileUpload } from './FileDragAndDropInput';
+import { EmbFileUpload, ZipFileUpload } from './FileDragAndDropInput';
 import { ImageFileUpload } from './ImageDragAndDropInput';
 import { CreatableTagsInput } from './TagsInput';
 
@@ -63,6 +63,7 @@ export function ProductsForm({ product }) {
       meta_keywords: [],
       image: null,
       file: null,
+      emb_file: null,
       product_pdf: null,
       // New products default to premium + active.
       isFree: false,
@@ -85,6 +86,9 @@ export function ProductsForm({ product }) {
         meta_keywords: product.meta_keywords ?? [],
         image: product.image ?? null,
         file: product.file ?? null,
+        // Always blank on load: the EMB slot is an action ("merge this file
+        // in"), not a stored value, so it must not look pre-filled on an edit.
+        emb_file: null,
         product_pdf: product.product_pdf ?? null,
         // Missing flags fall back to premium + active (matches the backend).
         isFree: product.isFree ?? false,
@@ -152,7 +156,12 @@ export function ProductsForm({ product }) {
       const formData = new FormData();
       Object.entries(data).forEach(([key, value]) => {
         if (value !== null && value !== undefined) {
-          if (key === 'image' || key === 'file' || key === 'product_pdf') {
+          if (
+            key === 'image' ||
+            key === 'file' ||
+            key === 'emb_file' ||
+            key === 'product_pdf'
+          ) {
             if (value instanceof File) {
               formData.append(key, value);
             }
@@ -630,6 +639,33 @@ export function ProductsForm({ product }) {
             error={errors.file?.message}
             product={product}
           />
+          {product && (
+            <p className='mt-2 text-sm text-gray-500'>
+              Uploading a new ZIP replaces every file on this design — including
+              an EMB added below. Re-attach the EMB in the same save if you
+              still need it.
+            </p>
+          )}
+        </div>
+
+        {/* Optional EMB Upload — merged into the pack above, not a replacement */}
+        <div className='col-span-3'>
+          <label className='text-lg font-medium tracking-tight leading-5'>
+            EMB File (optional)
+          </label>
+          <EmbFileUpload
+            label='Add a single .emb to this design’s formats'
+            accept={'.emb'}
+            onDrop={(file) => setValue('emb_file', file, { shouldDirty: true })}
+            error={errors.emb_file?.message}
+            product={product}
+          />
+          {product?.available_file_types?.length > 0 && (
+            <p className='mt-2 text-sm text-gray-500'>
+              Current formats:{' '}
+              {product.available_file_types.join(', ').toUpperCase()}
+            </p>
+          )}
         </div>
 
         {/* Submit Button */}

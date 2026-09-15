@@ -1,6 +1,20 @@
 import { useCallback, useEffect, useState } from 'react';
 
-export const ZipFileUpload = ({ label, accept, onDrop, error, product }) => {
+// Shared drag-and-drop file field. Two products use it: the required design
+// pack (.zip) and the optional single-format slot (.emb).
+const DragAndDropFileUpload = ({
+  label,
+  accept,
+  onDrop,
+  error,
+  extension,
+  inputId,
+  buttonText,
+  buttonClassName,
+  icon,
+  note,
+  existingFileName,
+}) => {
   const [fileName, setFileName] = useState(null);
   const [localError, setLocalError] = useState(null);
 
@@ -12,10 +26,12 @@ export const ZipFileUpload = ({ label, accept, onDrop, error, product }) => {
   const handleFile = (file) => {
     if (!file) return;
 
-    if (!file.name.toLowerCase().endsWith('.zip')) {
+    if (!file.name.toLowerCase().endsWith(`.${extension}`)) {
       setFileName(null);
       setLocalError(
-        `"${file.name}" is not a .zip file. Pack the design files into a ZIP archive and upload that.`,
+        extension === 'zip'
+          ? `"${file.name}" is not a .zip file. Pack the design files into a ZIP archive and upload that.`
+          : `"${file.name}" is not a .${extension} file. This slot accepts .${extension} only.`,
       );
       onDrop(null);
       return;
@@ -54,10 +70,10 @@ export const ZipFileUpload = ({ label, accept, onDrop, error, product }) => {
   };
 
   useEffect(() => {
-    if (product?.designFile?.name) {
-      setFileName(product.designFile.name);
+    if (existingFileName) {
+      setFileName(existingFileName);
     }
-  }, [product]);
+  }, [existingFileName]);
 
   return (
     <div
@@ -77,28 +93,34 @@ export const ZipFileUpload = ({ label, accept, onDrop, error, product }) => {
           <p className='text-gray-600 text-sm md:text-base mb-2'>{label}</p>
 
           <label
-            htmlFor='zip-upload'
-            className='mt-2 bg-gradient-to-r from-blue-500 to-purple-500
+            htmlFor={inputId}
+            className={`mt-2 ${buttonClassName}
                text-white px-4 py-2 rounded-md text-sm md:text-base
-               w-full md:w-auto text-center cursor-pointer'
+               w-full md:w-auto text-center cursor-pointer`}
           >
-            Drag and Drop Zip File or Browse Files
+            {buttonText}
           </label>
 
           <input
-            id='zip-upload'
+            id={inputId}
             type='file'
             accept={accept}
             onChange={handleInputChange}
             className='hidden'
           />
+
+          {note && (
+            <p className='mt-3 text-gray-500 text-xs md:text-sm max-w-xl'>
+              {note}
+            </p>
+          )}
         </div>
 
-        {/* Zip File Info */}
+        {/* Selected File Info */}
         {fileName && (
           <div className='mt-1 flex flex-col items-center'>
             <p className='text-gray-700 text-sm md:text-base'>Uploaded File:</p>
-            <i className='ri-folder-zip-fill mt-2 text-4xl text-gray-600'></i>
+            <i className={`${icon} mt-2 text-4xl text-gray-600`}></i>
             <p className='mt-2 text-gray-800 text-sm md:text-base break-all'>
               {fileName}
             </p>
@@ -113,5 +135,50 @@ export const ZipFileUpload = ({ label, accept, onDrop, error, product }) => {
         )}
       </div>
     </div>
+  );
+};
+
+export const ZipFileUpload = ({ label, accept, onDrop, error, product }) => (
+  <DragAndDropFileUpload
+    label={label}
+    accept={accept}
+    onDrop={onDrop}
+    error={error}
+    extension='zip'
+    inputId='zip-upload'
+    buttonText='Drag and Drop Zip File or Browse Files'
+    buttonClassName='bg-gradient-to-r from-blue-500 to-purple-500'
+    icon='ri-folder-zip-fill'
+    existingFileName={product?.designFile?.name}
+  />
+);
+
+// Optional slot: one .emb that is merged INTO the design's existing formats.
+// Uploading it never touches the pes/dst/cnd/... that came out of the ZIP; an
+// .emb already on the design is replaced by the new one.
+export const EmbFileUpload = ({ label, accept, onDrop, error, product }) => {
+  const hasEmb = Array.isArray(product?.available_file_types)
+    ? product.available_file_types.some((t) => String(t).toLowerCase() === 'emb')
+    : false;
+
+  return (
+    <DragAndDropFileUpload
+      label={label}
+      accept={accept}
+      onDrop={onDrop}
+      error={error}
+      extension='emb'
+      inputId='emb-upload'
+      buttonText='Drag and Drop EMB File or Browse Files'
+      buttonClassName='bg-slate-800 hover:bg-black transition'
+      icon='ri-file-3-fill'
+      note={
+        product
+          ? hasEmb
+            ? 'This design already has an EMB file — uploading one replaces it. Every other format stays as it is.'
+            : 'Optional. The EMB is added to this design’s existing formats; nothing already uploaded is removed.'
+          : 'Optional. Added alongside the formats inside the ZIP.'
+      }
+    />
   );
 };

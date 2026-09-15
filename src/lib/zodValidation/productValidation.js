@@ -13,6 +13,8 @@ export const productSchema = z.object({
   meta_keywords: z.array(z.string()).optional(),
   image: z.any().optional(),
   file: z.any().optional(),
+  // Optional single .emb, merged into the design pack instead of replacing it.
+  emb_file: z.any().optional(),
   product_pdf: z.any().optional(),
   // Pricing tier (false = premium/subscription-only) + publish state.
   isFree: z.boolean().default(false),
