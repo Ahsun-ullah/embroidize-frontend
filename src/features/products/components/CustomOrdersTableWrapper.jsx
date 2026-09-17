@@ -7,6 +7,15 @@
 // one 3.1k-line client component whose twelve modals shipped on first paint.
 
 import {
+  STATUS_BADGE,
+  STATUS_LABELS,
+  STATUS_ORDER,
+  agingInfo,
+  isOptimizableImage,
+  money,
+  quoteExpiryDays,
+} from '@/features/customOrders/admin/shared';
+import {
   Button,
   Dropdown,
   DropdownItem,
@@ -27,6 +36,7 @@ import {
   Download,
   Eye,
   FileText,
+  Globe,
   Link as LinkIcon,
   Mail,
   MessageSquare,
@@ -38,15 +48,6 @@ import {
   Undo2,
   Upload,
 } from 'lucide-react';
-import {
-  STATUS_BADGE,
-  STATUS_LABELS,
-  STATUS_ORDER,
-  agingInfo,
-  isOptimizableImage,
-  money,
-  quoteExpiryDays,
-} from '@/features/customOrders/admin/shared';
 import dynamic from 'next/dynamic';
 import Image from 'next/image';
 import { useRouter, useSearchParams } from 'next/navigation';
@@ -61,13 +62,14 @@ const OrderDialogs = dynamic(
 // specs, the money and the dates are grouped into the cell they belong to, so
 // the table stops scrolling sideways and starts being scannable.
 const COLUMNS = [
-  { uid: 'design', name: '' },
+  { uid: 'design', name: 'Image' },
   { uid: 'order', name: 'Order' },
   { uid: 'customer', name: 'Customer' },
+  { uid: 'country', name: 'Country' },
   { uid: 'spec', name: 'Specification' },
   { uid: 'money', name: 'Money' },
   { uid: 'status', name: 'Status' },
-  { uid: 'actions', name: '' },
+  { uid: 'actions', name: 'Actions' },
 ];
 
 const PAYMENT_TAG_LABELS = {
@@ -99,6 +101,8 @@ function Pill({ children, tone = 'light', title }) {
 // of the multi-megabyte originals the old table put straight in an <img>.
 function DesignThumb({ order, onOpen }) {
   const ref = order.designReference;
+
+  // console.log(order);
 
   if (!ref?.url) {
     return (
@@ -225,7 +229,12 @@ export default function CustomOrdersTableWrapper({
   const renderCell = (order, columnKey) => {
     switch (columnKey) {
       case 'design':
-        return <DesignThumb order={order} onOpen={(u) => act('lightbox', order, u)} />;
+        return (
+          <DesignThumb
+            order={order}
+            onOpen={(u) => act('lightbox', order, u)}
+          />
+        );
 
       case 'order':
         return (
@@ -267,6 +276,38 @@ export default function CustomOrdersTableWrapper({
             <div className='truncate text-[11px] text-gray-400'>
               {order.email}
             </div>
+          </div>
+        );
+      }
+
+      case 'country': {
+        // There is no order.country — the origin is resolved from the client IP
+        // at order creation and stored on ipInfo, with the two-letter code
+        // already expanded to a full country name. City is the secondary line,
+        // and a bare IP is the last resort for rows whose lookup failed.
+        const country = order.ipInfo?.country;
+        const city = order.ipInfo?.city;
+        if (!country && !city && !order.ip) {
+          return <span className='text-xs text-gray-300'>—</span>;
+        }
+        return (
+          <div className='min-w-[110px]'>
+            {country ? (
+              <div className='flex items-center gap-1'>
+                <Globe size={11} className='shrink-0 text-gray-400' />
+                <span className='truncate text-[12px] font-medium text-gray-900'>
+                  {country}
+                </span>
+              </div>
+            ) : null}
+            {city ? (
+              <div className='truncate text-[11px] text-gray-400'>{city}</div>
+            ) : null}
+            {!country && !city ? (
+              <span className='font-mono text-[11px] text-gray-400'>
+                {order.ip}
+              </span>
+            ) : null}
           </div>
         );
       }
@@ -327,7 +368,8 @@ export default function CustomOrdersTableWrapper({
           Number(order.estimatedPrice) > 0 &&
           !(order.paymentChannel || '').trim();
         const revisionCount = order.revisions?.length || 0;
-        const paidRevision = order.status === 'in_revision' && revisionCount > 2;
+        const paidRevision =
+          order.status === 'in_revision' && revisionCount > 2;
         const unread = Number(order.unreadCount) || 0;
         const overdue = agingInfo(order);
         const expiresIn = quoteExpiryDays(order);
@@ -360,9 +402,7 @@ export default function CustomOrdersTableWrapper({
               {revisionCount > 0 &&
                 ['delivered', 'in_revision', 'completed'].includes(
                   order.status,
-                ) && (
-                  <Pill>{Math.min(revisionCount, 2)}/2 revisions</Pill>
-                )}
+                ) && <Pill>{Math.min(revisionCount, 2)}/2 revisions</Pill>}
               {untagged && <Pill tone='outline'>Untagged</Pill>}
               {order.estimatedDelivery && (
                 <Pill title='Promised delivery'>
@@ -384,9 +424,11 @@ export default function CustomOrdersTableWrapper({
           'expired',
           'cancelled',
         ].includes(order.status);
-        const canRequestPayment = !['pending_review', 'cancelled', 'expired'].includes(
-          order.status,
-        );
+        const canRequestPayment = ![
+          'pending_review',
+          'cancelled',
+          'expired',
+        ].includes(order.status);
         const canDeliver = [
           'paid',
           'in_progress',
@@ -398,7 +440,12 @@ export default function CustomOrdersTableWrapper({
         return (
           <Dropdown placement='bottom-end'>
             <DropdownTrigger>
-              <Button isIconOnly size='sm' variant='light' aria-label='Order actions'>
+              <Button
+                isIconOnly
+                size='sm'
+                variant='light'
+                aria-label='Order actions'
+              >
                 <MoreVertical size={16} className='text-gray-500' />
               </Button>
             </DropdownTrigger>
@@ -416,7 +463,10 @@ export default function CustomOrdersTableWrapper({
                 Messages
               </DropdownItem>
               {canQuote ? (
-                <DropdownItem key='quote' startContent={<CreditCard size={15} />}>
+                <DropdownItem
+                  key='quote'
+                  startContent={<CreditCard size={15} />}
+                >
                   {['awaiting_payment', 'expired', 'cancelled'].includes(
                     order.status,
                   )
@@ -482,7 +532,10 @@ export default function CustomOrdersTableWrapper({
                 </DropdownItem>
               ) : null}
               {hasPrice ? (
-                <DropdownItem key='email-invoice' startContent={<Mail size={15} />}>
+                <DropdownItem
+                  key='email-invoice'
+                  startContent={<Mail size={15} />}
+                >
                   Email Invoice
                 </DropdownItem>
               ) : null}
@@ -520,6 +573,9 @@ export default function CustomOrdersTableWrapper({
     <div className='rounded-2xl border border-gray-200 bg-white'>
       {/* ─── Toolbar ─── */}
       <div className='flex flex-wrap items-center gap-2 border-b border-gray-100 p-3'>
+      <span className='ml-auto text-xs text-gray-400'>
+        {pagination.total} order{pagination.total === 1 ? '' : 's'}
+      </span>
         <Input
           isClearable
           size='sm'
@@ -622,10 +678,6 @@ export default function CustomOrdersTableWrapper({
             Clear
           </Button>
         )}
-
-        <span className='ml-auto text-xs text-gray-400'>
-          {pagination.total} order{pagination.total === 1 ? '' : 's'}
-        </span>
       </div>
 
       {/* ─── Rows ─── */}

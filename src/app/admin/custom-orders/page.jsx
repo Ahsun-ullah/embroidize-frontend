@@ -3,12 +3,12 @@ import { FinanceUnlockedBar } from '@/features/admin/FinanceUnlockedBar';
 import CustomOrdersTableWrapper from '@/features/products/components/CustomOrdersTableWrapper';
 import { CustomOrderStatsClient } from '@/features/products/components/CustomOrderStatsClient';
 import { PaypalSummaryClient } from '@/features/products/components/PaypalSummaryClient';
-import { checkFinanceUnlocked } from '@/lib/apis/protected/financeAuth';
 import {
   getAllCustomOrdersForDashboard,
   getCustomOrderStats,
   getPaypalSummary,
 } from '@/lib/apis/protected/customOrders';
+import { checkFinanceUnlocked } from '@/lib/apis/protected/financeAuth';
 import { Suspense } from 'react';
 
 export const dynamic = 'force-dynamic';
