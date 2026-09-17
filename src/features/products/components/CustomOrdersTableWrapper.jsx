@@ -27,6 +27,7 @@ import {
   Download,
   Eye,
   FileText,
+  Globe,
   Link as LinkIcon,
   Mail,
   MessageSquare,
@@ -64,6 +65,7 @@ const COLUMNS = [
   { uid: 'design', name: '' },
   { uid: 'order', name: 'Order' },
   { uid: 'customer', name: 'Customer' },
+  { uid: 'country', name: 'Country' },
   { uid: 'spec', name: 'Specification' },
   { uid: 'money', name: 'Money' },
   { uid: 'status', name: 'Status' },
@@ -99,6 +101,8 @@ function Pill({ children, tone = 'light', title }) {
 // of the multi-megabyte originals the old table put straight in an <img>.
 function DesignThumb({ order, onOpen }) {
   const ref = order.designReference;
+
+  // console.log(order);
 
   if (!ref?.url) {
     return (
@@ -267,6 +271,38 @@ export default function CustomOrdersTableWrapper({
             <div className='truncate text-[11px] text-gray-400'>
               {order.email}
             </div>
+          </div>
+        );
+      }
+
+      case 'country': {
+        // There is no order.country — the origin is resolved from the client IP
+        // at order creation and stored on ipInfo, with the two-letter code
+        // already expanded to a full country name. City is the secondary line,
+        // and a bare IP is the last resort for rows whose lookup failed.
+        const country = order.ipInfo?.country;
+        const city = order.ipInfo?.city;
+        if (!country && !city && !order.ip) {
+          return <span className='text-xs text-gray-300'>—</span>;
+        }
+        return (
+          <div className='min-w-[110px]'>
+            {country ? (
+              <div className='flex items-center gap-1'>
+                <Globe size={11} className='shrink-0 text-gray-400' />
+                <span className='truncate text-[12px] font-medium text-gray-900'>
+                  {country}
+                </span>
+              </div>
+            ) : null}
+            {city ? (
+              <div className='truncate text-[11px] text-gray-400'>{city}</div>
+            ) : null}
+            {!country && !city ? (
+              <span className='font-mono text-[11px] text-gray-400'>
+                {order.ip}
+              </span>
+            ) : null}
           </div>
         );
       }
