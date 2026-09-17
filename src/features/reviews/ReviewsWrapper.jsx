@@ -29,13 +29,22 @@ import {
   ArrowUp,
   ExternalLink,
   Mail,
+  Plus,
   Search,
   Star,
   Trash2,
 } from 'lucide-react';
+import dynamic from 'next/dynamic';
 import Link from 'next/link';
 import { usePathname, useRouter, useSearchParams } from 'next/navigation';
 import { useEffect, useRef, useState } from 'react';
+
+// Only needed once the admin actually writes a review, so it stays out of the
+// table's bundle.
+const AddReviewDialog = dynamic(
+  () => import('@/features/reviews/AddReviewDialog'),
+  { ssr: false },
+);
 
 function getToken() {
   const row = document.cookie.split('; ').find((r) => r.startsWith('token='));
@@ -115,6 +124,18 @@ export default function ReviewsWrapper({
   const { isOpen, onOpen, onOpenChange } = useDisclosure();
   const [deleteTarget, setDeleteTarget] = useState(null);
   const [isDeleting, setIsDeleting] = useState(false);
+
+  // Admin-written review composer (customer-attributed or anonymous).
+  const {
+    isOpen: isAddOpen,
+    onOpen: onAddOpen,
+    onOpenChange: onAddOpenChange,
+  } = useDisclosure();
+  const [addMounted, setAddMounted] = useState(false);
+  const openAddReview = () => {
+    setAddMounted(true);
+    onAddOpen();
+  };
 
   // "Ask customer to update their review" email composer
   const {
@@ -475,8 +496,20 @@ export default function ReviewsWrapper({
       case 'customer':
         return (
           <div className='text-xs'>
-            <p className='font-medium'>{user.name || 'User'}</p>
-            {user.email && <p className='text-gray-500'>{user.email}</p>}
+            {item.userId ? (
+              <>
+                <p className='font-medium'>{user.name || 'User'}</p>
+                {user.email && <p className='text-gray-500'>{user.email}</p>}
+              </>
+            ) : (
+              // No account attached — this is how the product page shows it too.
+              <p className='font-medium text-gray-400'>Anonymous</p>
+            )}
+            {item.postedByAdmin && (
+              <span className='mt-0.5 inline-block rounded bg-gray-100 px-1.5 py-0.5 text-[10px] font-medium text-gray-500'>
+                posted by admin
+              </span>
+            )}
           </div>
         );
       case 'rating':
@@ -566,12 +599,21 @@ export default function ReviewsWrapper({
 
   return (
     <div className='space-y-6'>
-      <div>
-        <h1 className='text-2xl font-bold'>Manage Reviews</h1>
-        <p className='text-sm text-gray-500 mt-0.5'>
-          {pagination?.total ?? reviews.length} review
-          {(pagination?.total ?? reviews.length) !== 1 ? 's' : ''} total
-        </p>
+      <div className='flex flex-wrap items-start justify-between gap-3'>
+        <div>
+          <h1 className='text-2xl font-bold'>Manage Reviews</h1>
+          <p className='text-sm text-gray-500 mt-0.5'>
+            {pagination?.total ?? reviews.length} review
+            {(pagination?.total ?? reviews.length) !== 1 ? 's' : ''} total
+          </p>
+        </div>
+        <Button
+          className='bg-gray-900 text-white'
+          startContent={<Plus size={16} />}
+          onPress={openAddReview}
+        >
+          Post a review
+        </Button>
       </div>
 
       <div className='flex items-end gap-3 flex-wrap'>
@@ -796,6 +838,14 @@ export default function ReviewsWrapper({
           )}
         </ModalContent>
       </Modal>
+
+      {addMounted && (
+        <AddReviewDialog
+          isOpen={isAddOpen}
+          onOpenChange={onAddOpenChange}
+          onPosted={() => router.refresh()}
+        />
+      )}
     </div>
   );
 }
