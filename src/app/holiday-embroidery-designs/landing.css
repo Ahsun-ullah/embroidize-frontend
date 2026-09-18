@@ -1,0 +1,1531 @@
+/* Poppins / Inter / Caveat. The app loads no webfonts of its own (globals.css
+   names ABCDiatype and Poppins but nothing ever fetches them), so this page has
+   to bring the three families the design is drawn in. @import instead of a
+   <link> keeps them tied to this route's stylesheet. */
+@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@500;600;700&family=Inter:wght@400;500;600;700&family=Caveat:wght@600;700&display=swap');
+
+/* ===========================================================================
+   Q4 SUBSCRIPTION LANDING PAGE
+   ---------------------------------------------------------------------------
+   Lifted verbatim from the approved standalone design, with one mechanical
+   change: every rule is scoped to the page's `.slp` wrapper so none of these
+   very generic names (.btn, .wrap, .grid, .head, .nav, .center …) can reach
+   the rest of the app. Scoping raises every selector by the same one class,
+   so the cascade inside the page is unchanged.
+
+   Host-stylesheet reconciliation lives at the bottom of the file.
+   =========================================================================== */
+
+/* ===========================================================================
+   TOKENS — sampled from the approved Q4 reference design
+   ---------------------------------------------------------------------------
+   Primary pink here is #E8276F, taken from the reference hero button.
+   The subscription page mockup measures #F03070 — same hue family, slightly
+   lighter. To force exact parity with the subscription page, change
+   --brand-500 only; every other value is derived from it.
+   =========================================================================== */
+:root {
+  color-scheme: light;
+
+  --brand-700: #c41c5c;
+  --brand-600: #dd2168;
+  --brand-500: #e8276f; /* PRIMARY */
+  --brand-400: #f45e93;
+  --brand-300: #f78fb5;
+  --brand-200: #fbc5d9;
+  --brand-100: #ffe4ef;
+  --brand-50: #fff1f6;
+
+  --wash: #fff7fb; /* very light pink band */
+  --surface: #ffffff;
+
+  --ink-900: #0b1636; /* headings — deep navy */
+  --ink-700: #3a4258;
+  --ink-600: #6b7180; /* body copy */
+  --ink-400: #9aa0ae;
+  --line: #efe6ec;
+  --line-soft: #f5eff3;
+
+  /* Accents used by the reference design outside the brand pink */
+  --gold: #f2b33c; /* review stars */
+  --violet-a: #8b5cf6; /* Best Value badge */
+  --violet-b: #a78bfa;
+  --yes: #1fa45a; /* comparison tick */
+  --no: #e5443a; /* comparison cross */
+  --ic-blue: #4c6ef5;
+  --ic-orange: #f08c2e;
+  --ic-indigo: #3b6fe0;
+  --ic-green: #1fa45a;
+  --ic-violet: #9b5de5;
+  --ic-red: #e5443a;
+
+  --container: 1180px;
+  --band-y: 72px;
+  --r-card: 14px;
+  --r-pill: 999px;
+}
+
+/* =============================== BASE ==================================== */
+.slp *,
+.slp *::before,
+.slp *::after {
+  box-sizing: border-box;
+}
+html {
+  scroll-behavior: smooth;
+  scroll-padding-top: 80px;
+  -webkit-text-size-adjust: 100%;
+}
+.slp {
+  margin: 0;
+  overflow-x: hidden;
+  background: var(--surface);
+  color: var(--ink-600);
+  font-family:
+    Inter,
+    system-ui,
+    -apple-system,
+    'Segoe UI',
+    Roboto,
+    sans-serif;
+  font-size: 15.5px;
+  line-height: 1.62;
+  -webkit-font-smoothing: antialiased;
+}
+.slp h1,
+.slp h2,
+.slp h3,
+.slp h4 {
+  font-family: Poppins, Inter, sans-serif;
+  color: var(--ink-900);
+  margin: 0 0 0.5em;
+  line-height: 1.18;
+  letter-spacing: -0.018em;
+}
+.slp h1 {
+  font-size: clamp(2.05rem, 4.3vw, 3.25rem);
+  font-weight: 700;
+  line-height: 1.1;
+}
+.slp h2 {
+  font-size: clamp(1.5rem, 2.8vw, 2.1rem);
+  font-weight: 700;
+}
+.slp h3 {
+  font-size: 1rem;
+  font-weight: 600;
+  line-height: 1.35;
+  letter-spacing: -0.004em;
+}
+.slp p {
+  margin: 0 0 1rem;
+}
+.slp p:last-child {
+  margin-bottom: 0;
+}
+.slp a {
+  color: var(--brand-600);
+  text-decoration: none;
+}
+.slp a:hover {
+  text-decoration: underline;
+}
+.slp img {
+  max-width: 100%;
+  display: block;
+}
+.slp ul {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.slp :focus-visible {
+  outline: 3px solid var(--brand-500);
+  outline-offset: 3px;
+  border-radius: 6px;
+}
+.slp .skip {
+  position: absolute;
+  left: -9999px;
+  top: 0;
+  z-index: 200;
+  background: var(--brand-500);
+  color: #fff;
+  padding: 12px 18px;
+}
+.slp .skip:focus {
+  left: 0;
+}
+
+/* ============================== LAYOUT =================================== */
+.slp .band {
+  padding-block: var(--band-y);
+  background: var(--surface);
+  position: relative;
+}
+.slp .band--wash {
+  background: var(--wash);
+}
+.slp .wrap {
+  width: 100%;
+  max-width: var(--container);
+  margin-inline: auto;
+  padding-inline: 24px;
+}
+.slp .head {
+  text-align: center;
+  max-width: 760px;
+  margin: 0 auto 34px;
+}
+.slp .head p {
+  color: var(--ink-600);
+  font-size: 0.95rem;
+  margin: 0;
+}
+.slp .grid {
+  display: grid;
+  gap: 20px;
+}
+.slp .g2 {
+  grid-template-columns: repeat(2, 1fr);
+}
+.slp .g3 {
+  grid-template-columns: repeat(3, 1fr);
+}
+.slp .g4 {
+  grid-template-columns: repeat(4, 1fr);
+}
+.slp .g5 {
+  grid-template-columns: repeat(5, 1fr);
+}
+.slp .g6 {
+  grid-template-columns: repeat(6, 1fr);
+}
+.slp .center {
+  text-align: center;
+}
+.slp .cta-row {
+  display: flex;
+  justify-content: center;
+  margin-top: 30px;
+}
+
+/* Two-column rows, exactly as in the approved design.
+   ------------------------------------------------------------------------
+   Nahid's 13/09 1:45am note asked for these stacked one per row. The approved
+   design keeps them side by side, so that is what is built here.
+   TO STACK THEM: add class="stacked" to <body>. Nothing else changes. */
+.slp .row2 {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 56px;
+  align-items: start;
+}
+.slp.stacked .row2 {
+  grid-template-columns: 1fr;
+  gap: 64px;
+}
+
+/* ============================== BUTTONS ================================== */
+.slp .btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 9px;
+  font-family: Poppins, Inter, sans-serif;
+  font-weight: 600;
+  font-size: 0.875rem;
+  padding: 13px 28px;
+  border-radius: var(--r-pill);
+  border: 1.5px solid transparent;
+  cursor: pointer;
+  text-decoration: none;
+  white-space: nowrap;
+  transition:
+    background-color 0.18s,
+    border-color 0.18s,
+    color 0.18s,
+    transform 0.18s,
+    box-shadow 0.18s;
+}
+.slp .btn:hover {
+  text-decoration: none;
+}
+.slp .btn--primary {
+  background: var(--brand-500);
+  color: #fff;
+  box-shadow: 0 5px 16px rgba(232, 39, 111, 0.26);
+}
+.slp .btn--primary:hover {
+  background: var(--brand-600);
+  transform: translateY(-1px);
+  box-shadow: 0 9px 22px rgba(232, 39, 111, 0.32);
+}
+.slp .btn--primary:active {
+  background: var(--brand-700);
+  transform: none;
+}
+.slp .btn--ghost {
+  background: #fff;
+  color: var(--brand-500);
+  border-color: var(--brand-200);
+}
+.slp .btn--ghost:hover {
+  border-color: var(--brand-500);
+  background: var(--brand-50);
+}
+.slp .btn--sm {
+  padding: 9px 20px;
+  font-size: 0.8125rem;
+}
+.slp .btn--block {
+  width: 100%;
+}
+.slp .btn .arw {
+  transition: transform 0.18s;
+}
+.slp .btn:hover .arw {
+  transform: translateX(3px);
+}
+
+/* ============================== HEADER =================================== */
+.slp .site-header {
+  position: sticky;
+  top: 0;
+  z-index: 60;
+  background: rgba(255, 255, 255, 0.95);
+  backdrop-filter: saturate(140%) blur(10px);
+  border-bottom: 1px solid var(--line-soft);
+}
+.slp .site-header .wrap {
+  display: flex;
+  align-items: center;
+  gap: 24px;
+  min-height: 64px;
+}
+.slp .logo {
+  display: inline-flex;
+  align-items: center;
+  gap: 9px;
+  color: var(--ink-900);
+  font-family: Poppins, sans-serif;
+  font-weight: 700;
+  font-size: 1.15rem;
+  letter-spacing: -0.02em;
+  flex: none;
+}
+.slp .logo:hover {
+  text-decoration: none;
+}
+.slp .nav {
+  display: flex;
+  gap: 26px;
+  margin-inline: auto;
+}
+.slp .nav a {
+  color: var(--ink-700);
+  font-size: 0.875rem;
+  font-weight: 500;
+}
+.slp .nav a:hover {
+  color: var(--brand-500);
+  text-decoration: none;
+}
+
+/* =============================== HERO ==================================== */
+.slp .hero {
+  padding: 0;
+  background: linear-gradient(115deg, #fff6fa 0%, #fff9fc 42%, #fff4f8 100%);
+  overflow: hidden;
+}
+.slp .hero__grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  align-items: center;
+  min-height: 520px;
+}
+.slp .hero__copy {
+  width: 100%;
+  max-width: calc(var(--container) / 2);
+  justify-self: end;
+  padding: 60px 44px 60px 24px;
+}
+.slp .eyebrow {
+  display: inline-block;
+  background: var(--brand-50);
+  color: var(--brand-500);
+  font-size: 0.625rem;
+  font-weight: 700;
+  letter-spacing: 0.09em;
+  text-transform: uppercase;
+  padding: 6px 14px;
+  border-radius: 5px;
+  margin-bottom: 18px;
+}
+.slp .hero h1 .pink {
+  color: var(--brand-500);
+}
+.slp .hero .lede {
+  font-size: 1rem;
+  max-width: 33rem;
+  margin-bottom: 26px;
+  color: var(--ink-600);
+}
+.slp .hero__actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  margin-bottom: 28px;
+}
+.slp .hero__trust {
+  display: flex;
+  flex-wrap: nowrap;
+  gap: 14px;
+}
+.slp .hero__trust li {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+}
+.slp .hero__trust .ic {
+  width: 22px;
+  height: 22px;
+  flex: none;
+  color: var(--brand-500);
+  display: grid;
+  place-items: center;
+}
+.slp .hero__trust b {
+  display: block;
+  font-family: Poppins, sans-serif;
+  font-size: 0.7rem;
+  font-weight: 600;
+  color: var(--ink-900);
+  line-height: 1.25;
+  white-space: nowrap;
+}
+.slp .hero__trust span {
+  display: block;
+  font-size: 0.65rem;
+  color: var(--ink-600);
+  line-height: 1.25;
+  white-space: nowrap;
+}
+.slp .hero__media {
+  position: relative;
+  align-self: stretch;
+  min-height: 440px;
+}
+.slp .hero__media .ph {
+  position: absolute;
+  inset: 0;
+  border-radius: 0;
+}
+/* The real photograph replaced that placeholder: next/image with `fill` sets
+   its own position/inset/size inline, so all it needs here is the crop rule —
+   the media area's proportions change with the copy beside it. */
+.slp .hero__media img {
+  object-fit: cover;
+}
+.slp .script {
+  font-family: Caveat, cursive;
+  color: var(--brand-500);
+  font-size: 1.35rem;
+  line-height: 1.05;
+  pointer-events: none;
+}
+.slp .hero__script {
+  position: absolute;
+  right: 18px;
+  bottom: 26px;
+  text-align: center;
+  transform: rotate(-8deg);
+  z-index: 2;
+}
+
+/* =========================== IMAGE PLACEHOLDERS ==========================
+   Every .ph is a slot for a real photograph. Replace with
+   <img src="…" alt="…"> keeping the same aspect ratio.
+   ========================================================================= */
+.slp .ph {
+  position: relative;
+  display: grid;
+  place-items: center;
+  overflow: hidden;
+  background:
+    repeating-linear-gradient(
+      135deg,
+      rgba(255, 255, 255, 0.55) 0 9px,
+      rgba(255, 255, 255, 0) 9px 18px
+    ),
+    linear-gradient(
+      150deg,
+      var(--brand-200) 0%,
+      var(--brand-100) 55%,
+      #fff3f8 100%
+    );
+  color: var(--brand-400);
+}
+.slp .ph--sq {
+  aspect-ratio: 1/1;
+  border-radius: 9px;
+}
+.slp .ph--43 {
+  aspect-ratio: 4/3;
+  border-radius: 10px 10px 0 0;
+}
+.slp .ph__tag {
+  position: absolute;
+  left: 8px;
+  bottom: 8px;
+  font-size: 0.625rem;
+  font-weight: 600;
+  color: var(--brand-600);
+  background: rgba(255, 255, 255, 0.9);
+  padding: 3px 8px;
+  border-radius: var(--r-pill);
+  box-shadow: 0 1px 3px rgba(11, 22, 54, 0.07);
+  max-width: calc(100% - 16px);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* ========================= S2 FEATURE STRIP ============================== */
+.slp .feats {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+}
+.slp .feat {
+  text-align: center;
+  padding: 26px 22px;
+  background: linear-gradient(180deg, #fffafc 0%, #ffffff 100%);
+  border-right: 1px solid var(--line-soft);
+}
+.slp .feat:last-child {
+  border-right: 0;
+}
+.slp .feat__ic {
+  width: 46px;
+  height: 46px;
+  border-radius: 50%;
+  background: var(--brand-50);
+  color: var(--brand-500);
+  display: grid;
+  place-items: center;
+  margin: 0 auto 14px;
+}
+.slp .feat h3 {
+  margin-bottom: 7px;
+}
+.slp .feat p {
+  font-size: 0.8125rem;
+  color: var(--ink-600);
+  margin: 0;
+}
+
+/* ========================= CATEGORY CARDS ================================ */
+.slp .cat {
+  background: #fff;
+  border: 1px solid var(--line);
+  border-radius: var(--r-card);
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  text-align: center;
+}
+.slp .cat__body {
+  padding: 16px 16px 18px;
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+}
+.slp .cat h3 {
+  margin-bottom: 8px;
+}
+.slp .cat p {
+  font-size: 0.8125rem;
+  margin: 0 0 16px;
+  flex: 1;
+}
+.slp .cat .btn {
+  align-self: stretch;
+}
+
+/* ============================== GALLERY ================================== */
+.slp .gallery {
+  display: grid;
+  grid-template-columns: repeat(6, 1fr);
+  gap: 10px;
+}
+.slp .gallery .ph {
+  border-radius: 9px;
+}
+/* Real design images replaced the gallery placeholders.
+
+   The tile is 3:2, not the .ph--sq square it inherits: all twelve sources are
+   2400×1600 (one is 1280×853 — same ratio), so a square tile cropped a third
+   off every one of them. Each design lost a different third, which is what made
+   a grid of identically-sized boxes read as twelve different sizes. Matching
+   the tile to the source ratio means every image lands the same size AND
+   nothing is cut off.
+
+   width:100% + height:auto is what applies that ratio at all: next/image writes
+   the declared 340×340 onto the tag, and .slp img only caps max-width, so the
+   browser would otherwise hold a 340px height against a ~180px cell.
+
+   The white background matters too: these are RGBA PNGs, and .ph paints the
+   pink placeholder stripes that would otherwise show through any transparency. */
+.slp .gallery img {
+  width: 100%;
+  height: auto;
+  aspect-ratio: 3 / 2;
+  object-fit: cover;
+  background: #fff;
+}
+.slp .deco {
+  position: absolute;
+  pointer-events: none;
+  opacity: 0.95;
+  z-index: 1;
+}
+.slp .deco--tl {
+  top: 14px;
+  left: 14px;
+}
+.slp .deco--tr {
+  top: 14px;
+  right: 14px;
+  transform: scaleX(-1);
+  transform-origin: center;
+}
+.slp .deco--bl {
+  bottom: 14px;
+  left: 14px;
+}
+.slp .deco--br {
+  bottom: 14px;
+  right: 14px;
+  transform: scaleX(-1);
+  transform-origin: center;
+}
+
+/* ============================ AUDIENCE =================================== */
+.slp .aud {
+  display: flex;
+  gap: 14px;
+  background: var(--brand-50);
+  border-radius: var(--r-card);
+  padding: 20px 22px;
+}
+.slp .aud__ic {
+  flex: none;
+  color: var(--brand-500);
+}
+.slp .aud h3 {
+  margin-bottom: 5px;
+}
+.slp .aud p {
+  font-size: 0.8125rem;
+  margin: 0;
+}
+
+/* =========================== COMPARISON ================================== */
+.slp .cmp {
+  border-radius: 10px;
+  overflow: hidden;
+  background: #fff;
+  margin-top: 6px;
+}
+.slp .cmp__h {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+}
+.slp .cmp__h > div {
+  padding: 9px 14px;
+  font-family: Poppins, sans-serif;
+  font-weight: 600;
+  font-size: 0.8125rem;
+  text-align: center;
+}
+.slp .cmp__h .a {
+  color: var(--ink-900);
+  background: #fff;
+}
+.slp .cmp__h .b {
+  color: #fff;
+  background: linear-gradient(
+    90deg,
+    var(--brand-400) 0%,
+    var(--brand-500) 100%
+  );
+  border-radius: 7px 7px 0 0;
+}
+.slp .cmp__r {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+}
+.slp .cmp__r > div {
+  padding: 7px 10px;
+  font-size: 0.78rem;
+  display: flex;
+  gap: 8px;
+  align-items: flex-start;
+}
+.slp .cmp__r .a {
+  color: var(--ink-600);
+  border-right: 1px solid var(--line-soft);
+}
+.slp .cmp__r .b {
+  color: var(--ink-700);
+}
+.slp .cmp svg {
+  flex: none;
+  margin-top: 3px;
+}
+.slp .cmp .no {
+  color: var(--no);
+}
+.slp .cmp .yes {
+  color: var(--yes);
+}
+
+/* ============================== STEPS ==================================== */
+.slp .steps {
+  display: grid;
+  grid-template-columns: 1fr auto 1fr auto 1fr;
+  gap: 10px;
+  align-items: start;
+  margin-bottom: 26px;
+}
+.slp .step {
+  text-align: center;
+}
+.slp .step__ic {
+  width: 66px;
+  height: 66px;
+  border-radius: 50%;
+  background: radial-gradient(
+    circle at 50% 45%,
+    var(--brand-100) 0%,
+    var(--brand-50) 70%,
+    rgba(255, 255, 255, 0) 100%
+  );
+  color: var(--brand-500);
+  display: grid;
+  place-items: center;
+  margin: 0 auto 12px;
+}
+.slp .step h3 {
+  font-size: 0.875rem;
+  margin-bottom: 5px;
+}
+.slp .step p {
+  font-size: 0.8125rem;
+  margin: 0;
+}
+.slp .steps__arw {
+  color: var(--brand-400);
+  margin-top: 24px;
+}
+
+/* =========================== USE CASES (6) =============================== */
+.slp .uc {
+  text-align: center;
+  background: linear-gradient(180deg, #fcfcfd 0%, #ffffff 100%);
+  border: 1px solid var(--line-soft);
+  border-radius: var(--r-card);
+  padding: 20px 14px;
+}
+.slp .uc__ic {
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  display: grid;
+  place-items: center;
+  margin: 0 auto 12px;
+}
+.slp .uc h3 {
+  font-size: 0.8125rem;
+  margin-bottom: 6px;
+}
+.slp .uc p {
+  font-size: 0.75rem;
+  margin: 0;
+}
+
+/* ============================== PLANS ==================================== */
+.slp .plans {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 18px;
+  align-items: start;
+}
+.slp .plan {
+  background: #fff;
+  border: 1.5px solid var(--line);
+  border-radius: 14px;
+  padding: 22px 18px;
+  position: relative;
+}
+.slp .plan--best {
+  border-color: var(--brand-500);
+}
+.slp .plan__badge {
+  position: absolute;
+  top: -11px;
+  left: 50%;
+  transform: translateX(-50%);
+  background: linear-gradient(90deg, var(--violet-a), var(--violet-b));
+  color: #fff;
+  font-family: Poppins, sans-serif;
+  font-size: 0.625rem;
+  font-weight: 700;
+  padding: 4px 13px;
+  border-radius: var(--r-pill);
+  white-space: nowrap;
+}
+.slp .plan__name {
+  font-family: Poppins, sans-serif;
+  font-weight: 600;
+  font-size: 0.9375rem;
+  color: var(--ink-900);
+  text-align: center;
+  margin: 0 0 4px;
+}
+.slp .plan__price {
+  text-align: center;
+  font-family: Poppins, sans-serif;
+  font-weight: 700;
+  font-size: 1.85rem;
+  color: var(--brand-500);
+  line-height: 1.1;
+  margin: 0 0 16px;
+  letter-spacing: -0.02em;
+}
+.slp .plan__price span {
+  font-size: 0.8125rem;
+  font-weight: 500;
+  color: var(--brand-300);
+}
+.slp .plan__feats {
+  display: grid;
+  gap: 7px;
+  margin-bottom: 18px;
+}
+.slp .plan__feats li {
+  display: flex;
+  gap: 9px;
+  font-size: 0.8125rem;
+  color: var(--ink-600);
+}
+.slp .plan__feats svg {
+  flex: none;
+  margin-top: 3px;
+  color: var(--brand-500);
+}
+.slp .plan-note {
+  text-align: center;
+  margin-top: 14px;
+  font-size: 0.75rem;
+  color: var(--ink-400);
+}
+
+/* ============================ WHY YEARLY ================================= */
+.slp .why {
+  position: relative;
+}
+.slp .why p.intro {
+  font-size: 0.875rem;
+  margin-bottom: 18px;
+}
+.slp .why__list {
+  display: grid;
+  gap: 13px;
+  margin-bottom: 24px;
+}
+.slp .why__list li {
+  display: flex;
+  gap: 11px;
+  align-items: center;
+  font-family: Poppins, sans-serif;
+  font-weight: 600;
+  font-size: 0.8125rem;
+  color: var(--ink-900);
+}
+.slp .why__list .tick {
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  background: var(--brand-500);
+  color: #fff;
+  display: grid;
+  place-items: center;
+  flex: none;
+}
+.slp .why__script {
+  position: absolute;
+  right: 0;
+  bottom: 8px;
+  text-align: center;
+  transform: rotate(-7deg);
+  font-size: 1.2rem;
+}
+
+/* ============================= REVIEWS =================================== */
+.slp .rev {
+  background: #fff;
+  border: 1px solid var(--line);
+  border-radius: var(--r-card);
+  padding: 18px;
+  display: flex;
+  gap: 14px;
+}
+.slp .rev__av {
+  width: 42px;
+  height: 42px;
+  border-radius: 50%;
+  background: var(--brand-100);
+  flex: none;
+  overflow: hidden;
+}
+.slp .stars {
+  display: flex;
+  gap: 2px;
+  color: var(--gold);
+  margin-bottom: 8px;
+}
+.slp .rev q {
+  display: block;
+  font-style: normal;
+  font-size: 0.8125rem;
+  color: var(--ink-600);
+  margin-bottom: 12px;
+}
+.slp .rev__name {
+  font-family: Poppins, sans-serif;
+  font-weight: 600;
+  font-size: 0.8125rem;
+  color: var(--ink-900);
+  line-height: 1.3;
+}
+.slp .rev__role {
+  font-size: 0.75rem;
+  color: var(--ink-400);
+}
+.slp .build-note {
+  border: 2px dashed var(--brand-300);
+  border-radius: var(--r-card);
+  padding: 16px 18px 20px;
+  background: rgba(255, 228, 239, 0.32);
+}
+.slp .build-note__tag {
+  display: inline-block;
+  background: var(--brand-500);
+  color: #fff;
+  font-family: Poppins, sans-serif;
+  font-size: 0.625rem;
+  font-weight: 700;
+  padding: 3px 10px;
+  border-radius: var(--r-pill);
+  margin-bottom: 8px;
+}
+.slp .build-note__txt {
+  font-size: 0.75rem;
+  color: var(--ink-600);
+  margin: 0 0 16px;
+  max-width: 78ch;
+}
+
+/* ============================ FINAL CTA ================================== */
+.slp .final {
+  position: relative;
+  background: linear-gradient(180deg, #fdeff4 0%, #fce9f1 100%);
+  overflow: hidden;
+  padding-block: 64px;
+}
+.slp .final .wrap {
+  position: relative;
+  z-index: 2;
+  text-align: center;
+}
+.slp .final p.sub {
+  max-width: 44rem;
+  margin: 0 auto 24px;
+  font-size: 0.9375rem;
+}
+.slp .final__actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  justify-content: center;
+  margin-bottom: 20px;
+}
+.slp .final__trust {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px 20px;
+  justify-content: center;
+  font-size: 0.8125rem;
+  color: var(--ink-700);
+}
+.slp .final__trust li {
+  display: flex;
+  gap: 7px;
+  align-items: center;
+}
+.slp .final__trust svg {
+  color: var(--ink-900);
+  opacity: 0.75;
+}
+.slp .final__side {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  width: 20%;
+  min-width: 150px;
+  z-index: 1;
+}
+.slp .final__side--l {
+  left: 0;
+}
+.slp .final__side--r {
+  right: 0;
+}
+.slp .final__side .ph {
+  position: absolute;
+  inset: 0;
+  border-radius: 0;
+}
+/* Real photographs replaced those placeholders; next/image positions itself,
+   so only the crop rule is needed. These bleed off the page edges and are
+   hidden entirely below 640px. */
+.slp .final__side img {
+  object-fit: cover;
+}
+
+/* ============================== FOOTER =================================== */
+.slp .site-footer {
+  background: var(--ink-900);
+  color: rgba(255, 255, 255, 0.6);
+  padding: 30px 0;
+  font-size: 0.8125rem;
+}
+.slp .site-footer .wrap {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px 24px;
+  align-items: center;
+  justify-content: space-between;
+}
+.slp .site-footer a {
+  color: rgba(255, 255, 255, 0.82);
+}
+
+/* =========================== MOBILE STICKY =============================== */
+.slp .sticky {
+  position: fixed;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  z-index: 70;
+  display: none;
+  padding: 10px 14px calc(10px + env(safe-area-inset-bottom));
+  background: rgba(255, 255, 255, 0.97);
+  backdrop-filter: blur(10px);
+  border-top: 1px solid var(--line);
+  transform: translateY(120%);
+  transition: transform 0.25s ease;
+}
+.slp .sticky.is-on {
+  transform: translateY(0);
+}
+
+/* ============================ RESPONSIVE ================================= */
+@media (max-width: 1100px) {
+  .slp .nav {
+    gap: 18px;
+  }
+  .slp .nav a {
+    font-size: 0.8125rem;
+  }
+  .slp .g5,
+  .slp .g6 {
+    grid-template-columns: repeat(3, 1fr);
+  }
+  .slp .gallery {
+    grid-template-columns: repeat(4, 1fr);
+  }
+}
+@media (max-width: 900px) {
+  :root {
+    --band-y: 56px;
+  }
+  .slp .hero__grid {
+    grid-template-columns: 1fr;
+    min-height: 0;
+  }
+  .slp .hero__copy {
+    padding: 44px 24px 32px;
+    max-width: none;
+    justify-self: stretch;
+  }
+  .slp .hero__media {
+    min-height: 340px;
+  }
+  .slp .row2 {
+    grid-template-columns: 1fr;
+    gap: 52px;
+  }
+  .slp .feats {
+    grid-template-columns: repeat(2, 1fr);
+  }
+  .slp .feat {
+    border-right: 0;
+    border-bottom: 1px solid var(--line-soft);
+  }
+  .slp .feat:nth-child(odd) {
+    border-right: 1px solid var(--line-soft);
+  }
+  .slp .g3 {
+    grid-template-columns: 1fr;
+  }
+  .slp .nav {
+    display: none;
+  }
+}
+@media (max-width: 640px) {
+  :root {
+    --band-y: 44px;
+    --r-card: 12px;
+  }
+  .slp {
+    font-size: 15px;
+    padding-bottom: 74px;
+  }
+  .slp .wrap {
+    padding-inline: 16px;
+  }
+  .slp .site-header .wrap {
+    min-height: 58px;
+    gap: 12px;
+  }
+  .slp .site-header .btn {
+    padding: 9px 16px;
+    font-size: 0.75rem;
+  }
+  .slp .logo {
+    font-size: 1rem;
+  }
+  .slp .logo svg {
+    width: 22px;
+    height: 22px;
+  }
+  .slp .hero__copy {
+    padding: 36px 16px 28px;
+  }
+  .slp .hero__actions {
+    flex-direction: column;
+    gap: 10px;
+  }
+  .slp .hero__actions .btn {
+    width: 100%;
+  }
+  .slp .hero__trust {
+    flex-wrap: wrap;
+    gap: 14px 16px;
+  }
+  .slp .hero__trust li {
+    width: calc(50% - 8px);
+  }
+  .slp .hero__media {
+    min-height: 260px;
+  }
+  .slp .hero__script {
+    font-size: 1.05rem;
+    right: 10px;
+    bottom: 14px;
+  }
+  .slp .g4,
+  .slp .g5,
+  .slp .g6 {
+    grid-template-columns: repeat(2, 1fr);
+  }
+  .slp .gallery {
+    grid-template-columns: repeat(3, 1fr);
+    gap: 8px;
+  }
+  .slp .feats {
+    grid-template-columns: 1fr;
+  }
+  .slp .feat {
+    border-right: 0 !important;
+  }
+  .slp .steps {
+    grid-template-columns: 1fr;
+    gap: 26px;
+  }
+  .slp .steps__arw {
+    display: none;
+  }
+  .slp .plans {
+    grid-template-columns: 1fr;
+    gap: 26px;
+  }
+  .slp .plan--best {
+    order: -1;
+  }
+  .slp .final__side {
+    display: none;
+  }
+  .slp .final__actions .btn {
+    width: 100%;
+  }
+  .slp .why__script {
+    position: static;
+    transform: rotate(-3deg);
+    text-align: right;
+    margin-top: 14px;
+  }
+  .slp .deco {
+    transform: scale(0.5);
+    transform-origin: center;
+  }
+  .slp .deco--tr,
+  .slp .deco--br {
+    transform: scale(0.5) scaleX(-1);
+    transform-origin: center;
+  }
+  .slp .deco--tl,
+  .slp .deco--tr {
+    top: 6px;
+  }
+  .slp .deco--bl,
+  .slp .deco--br {
+    bottom: 6px;
+  }
+  .slp .deco--tl,
+  .slp .deco--bl {
+    left: 2px;
+  }
+  .slp .deco--tr,
+  .slp .deco--br {
+    right: 2px;
+  }
+  .slp .sticky {
+    display: block;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
+  .slp *,
+  .slp *::before,
+  .slp *::after {
+    animation-duration: 0.001ms !important;
+    transition-duration: 0.001ms !important;
+  }
+}
+
+/* ===========================================================================
+   HOST-STYLESHEET RECONCILIATION
+   ---------------------------------------------------------------------------
+   The design was authored as a standalone document. Inside the app it also
+   gets src/app/globals.css, which is far more opinionated than a browser
+   default. Everything below cancels those site-wide rules for this page only —
+   no new styling.
+   =========================================================================== */
+
+/* globals.css sets html{font-size:14px}. Every rem here was measured against a
+   16px root, so without this the entire page renders ~12% small. */
+html {
+  font-size: 16px;
+}
+
+/* globals.css sets body{font-weight:700} and p{color:#111;line-height:1.6},
+   which would bold the page and blacken every paragraph that relies on
+   inheriting --ink-600 (.cat p, .aud p, .step p, .why p …). */
+.slp {
+  font-weight: 400;
+}
+.slp p {
+  color: inherit;
+  line-height: inherit;
+  font-weight: inherit;
+}
+
+/* globals.css sets a{font-family:Poppins!important} and span{…!important}.
+   `inherit` restores the design's Inter/Poppins split and keeps nesting right:
+   a <span> inside an <h1> or .plan__price stays Poppins because its parent is.
+   The second rule puts Poppins back on the links and badges drawn with it. */
+.slp a,
+.slp span {
+  font-family: inherit !important;
+}
+.slp .btn,
+.slp .logo,
+.slp .plan__badge,
+.slp .build-note__tag {
+  font-family: Poppins, Inter, sans-serif !important;
+}
+
+/* The header's row of anchor links was removed on request. `.nav` above used
+   margin-inline:auto to hold the CTA against the right edge, so without it the
+   button would sit next to the logo. The .nav rules are kept so the bar can be
+   restored by putting the <nav> back in page.jsx. */
+.slp .site-header .btn {
+  margin-inline-start: auto;
+}
+
+/* ===========================================================================
+   REVIEW CARDS
+   ---------------------------------------------------------------------------
+   Compact card: a 38px avatar, the author and the stars on one header line,
+   the quote under it, and the customer's stitch-outs pinned to the bottom.
+   The tall design-mockup card (.rev, still defined above) stacked those
+   vertically and made the section twice as tall as it needed to be.
+
+   Every selector is scoped to the page wrapper like the rest of this file —
+   `.review-card` and `.reviews-grid` are generic enough to collide with
+   anything else that ends up on this route.
+   =========================================================================== */
+.slp .reviews-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 12px;
+}
+
+.slp .review-card {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+
+  padding: 14px;
+  border: 1px solid rgba(0, 0, 0, 0.08);
+  border-radius: 14px;
+  background: #fff;
+}
+
+.slp .review-card__header {
+  display: grid;
+  grid-template-columns: 38px minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 9px;
+}
+
+.slp .review-card__avatar {
+  width: 38px;
+  height: 38px;
+  display: grid;
+  place-items: center;
+
+  flex-shrink: 0;
+  overflow: hidden;
+  border-radius: 50%;
+
+  background: #f3f3f3;
+  font-size: 12px;
+  font-weight: 700;
+}
+
+.slp .review-card__avatar img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.slp .review-card__author {
+  min-width: 0;
+}
+
+.slp .review-card__name,
+.slp .review-card__role {
+  margin: 0;
+}
+
+.slp .review-card__name {
+  overflow: hidden;
+  font-size: 14px;
+  font-weight: 700;
+  line-height: 1.2;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.slp .review-card__role {
+  margin-top: 2px;
+
+  overflow: hidden;
+  color: #777;
+  font-size: 11px;
+  line-height: 1.2;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.slp .review-card__stars {
+  flex-shrink: 0;
+}
+
+/* The shared .stars rule carries a bottom margin for the old stacked card;
+   on the header line it has to sit flush. */
+.slp .review-card__stars .stars {
+  margin: 0;
+}
+
+/* Three lines, then ellipsis. Reviews run from four words to a paragraph, and
+   without a clamp the longest one in a row sets the height of every card
+   beside it — which is most of the space this section used to waste. */
+.slp .review-card__text {
+  margin: 0;
+  color: #333;
+  font-size: 13px;
+  line-height: 1.45;
+
+  display: -webkit-box;
+  line-clamp: 3;
+  -webkit-line-clamp: 3;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+/* margin-top:auto pins the photos to the bottom, so they line up across a row
+   whatever length the quotes above them are. */
+.slp .review-card__shots {
+  display: flex;
+  gap: 6px;
+  margin-top: auto;
+}
+
+.slp .review-card__shots img {
+  width: 54px;
+  height: 54px;
+  border-radius: 8px;
+  object-fit: cover;
+}
+
+.slp .rev-more {
+  margin: 16px 0 0;
+  text-align: center;
+  font-size: 13px;
+}
+
+/* Tablet */
+@media (max-width: 900px) {
+  .slp .reviews-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+/* Mobile */
+@media (max-width: 600px) {
+  .slp .reviews-grid {
+    grid-template-columns: 1fr;
+    gap: 10px;
+  }
+
+  .slp .review-card {
+    padding: 12px;
+  }
+
+  .slp .review-card__header {
+    grid-template-columns: 34px minmax(0, 1fr) auto;
+  }
+
+  .slp .review-card__avatar {
+    width: 34px;
+    height: 34px;
+  }
+
+  .slp .review-card__shots img {
+    width: 48px;
+    height: 48px;
+  }
+}
+
+/* ===========================================================================
+   OFFER + LIVE REVIEW ELEMENTS
+   ---------------------------------------------------------------------------
+   The mockup's plan cards were a name, a price and a feature list. The real
+   plans carry an offer (a discount percentage and an anchor price) and a
+   renewal, and /subscriptions shows all of it — a landing page that quotes a
+   different story than the page it sends people to is the one thing worse than
+   quoting no price. These rules dress those extra elements in the page's own
+   tokens; the elements themselves come from LandingPlanCards / LandingReviews.
+   =========================================================================== */
+
+/* Same daily countdown as /subscriptions, drawn as a pill above the cards. */
+.slp .plan-clock {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 7px;
+  width: max-content;
+  max-width: 100%;
+  margin: 0 auto 18px;
+  padding: 8px 18px;
+  border-radius: var(--r-pill);
+  background: var(--ink-900);
+  color: #fff;
+  font-family: Poppins, Inter, sans-serif;
+  font-size: 0.75rem;
+  font-weight: 600;
+}
+
+/* Price block: offer row, headline, term total, renewal note. The wrapper
+   carries the margin the bare .plan__price used to. */
+.slp .plan__pricing {
+  margin-bottom: 16px;
+}
+.slp .plan__pricing .plan__price {
+  margin-bottom: 0;
+}
+/* Kept in the flow when empty so both cards' prices sit on the same line. */
+.slp .plan__offer {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  min-height: 21px;
+  margin-bottom: 3px;
+}
+.slp .plan__off {
+  background: var(--brand-500);
+  color: #fff;
+  font-family: Poppins, Inter, sans-serif;
+  font-size: 0.625rem;
+  font-weight: 700;
+  padding: 2px 9px;
+  border-radius: var(--r-pill);
+  white-space: nowrap;
+}
+.slp .plan__was {
+  font-size: 0.8125rem;
+  color: var(--ink-400);
+  text-decoration: line-through;
+}
+.slp .plan__term {
+  text-align: center;
+  font-size: 0.75rem;
+  color: var(--ink-600);
+  margin: 6px 0 0;
+}
+.slp .plan__renew {
+  text-align: center;
+  font-size: 0.6875rem;
+  color: var(--ink-400);
+  margin: 10px 0 0;
+  padding-top: 10px;
+  border-top: 1px solid var(--line-soft);
+}
+
+/* Unearned stars are dimmed rather than dropped, so every card keeps the same
+   five-star shape. */
+.slp .stars .star--off {
+  color: var(--brand-200);
+}
+.slp .rev-more b {
+  font-family: Poppins, Inter, sans-serif;
+  color: var(--ink-900);
+}

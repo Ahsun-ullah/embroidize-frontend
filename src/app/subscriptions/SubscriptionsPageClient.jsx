@@ -9,6 +9,11 @@ import Header from '@/components/user/HomePage/Header';
 import FeaturedReviews from '@/features/reviews/FeaturedReviews';
 import { trackSubscriptionPurchase } from '@/lib/analytics/subscriptionPurchase';
 import { windowPhrase } from '@/lib/apis/public/siteConfig';
+import {
+  getPlanPricing,
+  getStaticDefaults,
+  money,
+} from '@/lib/subscriptions/planPricing';
 import { useUserInfoQuery } from '@/lib/redux/common/user/userInfoSlice';
 import { Divider } from '@heroui/divider';
 import { GiftIcon } from 'lucide-react';
@@ -181,104 +186,18 @@ const PeopleIcon = ({ size = 22 }) => (
   </svg>
 );
 
-/* Money with cents only when they exist ($149, $4.99). */
-const money = (n) => {
-  const v = Number(n);
-  if (!Number.isFinite(v)) return '';
-  return Number.isInteger(v) ? `$${v}` : `$${v.toFixed(2)}`;
+/* The pricing wording lives in lib/subscriptions/planPricing so the landing
+   pages can render the identical offer; the icon is this page's own. */
+const PLAN_ICONS = {
+  'one-time': <OneTimeIcon />,
+  year: <YearlyIcon />,
+  week: <MonthlyIcon />,
+  month: <MonthlyIcon />,
 };
 
-/* ---------- Derive display info from billingInterval ----------
-   Yearly plans are quoted as a per-month equivalent with the full term total
-   underneath, because "$4.99/mo" beside the monthly plan's "$9.99/mo" is the
-   only presentation that lets someone compare the two at a glance. The
-   strikethrough price is divided by the same term so both stay in one unit.
-
-   renewNote always quotes plan.price, never originalPrice: the gateway charges
-   the same amount on renewal, so a higher "renews at" figure would be a price
-   we never actually bill. */
 const getPlanDisplay = (plan, originalPrice) => {
-  const i = (plan.billingInterval || '').toLowerCase();
-  const price = Number(plan.price) || 0;
-  const orig = originalPrice != null ? Number(originalPrice) : null;
-
-  if (!i) {
-    return {
-      icon: <OneTimeIcon />,
-      tagline: 'Pay once, yours forever',
-      pill: 'One-time payment',
-      headlinePrice: price,
-      headlineSuffix: '',
-      strikePrice: orig,
-      termTotalLine: null,
-      renewNote: 'One-time payment — this never renews',
-      renewsCell: 'Never',
-      billingCell: 'One-time',
-      ctaTitle: `Get ${plan.name}`,
-    };
-  }
-  if (i.startsWith('year')) {
-    return {
-      icon: <YearlyIcon />,
-      tagline: 'Best value — our lowest monthly rate',
-      pill: 'Billed yearly',
-      headlinePrice: price / 12,
-      headlineSuffix: '/mo',
-      strikePrice: orig != null ? orig / 12 : null,
-      termTotalLine: `Get 12 months for ${money(price)}`,
-      renewNote: `Renews at ${money(price)}/year · cancel anytime`,
-      renewsCell: 'Yearly',
-      billingCell: 'Billed yearly',
-      ctaTitle: `Choose ${plan.name}`,
-    };
-  }
-  if (i.startsWith('week')) {
-    return {
-      icon: <MonthlyIcon />,
-      tagline: 'Short commitment, full access',
-      pill: 'Billed weekly',
-      headlinePrice: price,
-      headlineSuffix: '/wk',
-      strikePrice: orig,
-      termTotalLine: null,
-      renewNote: `Renews at ${money(price)}/week · cancel anytime`,
-      renewsCell: 'Weekly',
-      billingCell: 'Billed weekly',
-      ctaTitle: `Choose ${plan.name}`,
-    };
-  }
-  return {
-    icon: <MonthlyIcon />,
-    tagline: 'Flexible — stop whenever you like',
-    pill: 'Billed monthly',
-    headlinePrice: price,
-    headlineSuffix: '/mo',
-    strikePrice: orig,
-    termTotalLine: null,
-    renewNote: `Renews at ${money(price)}/month · cancel anytime`,
-    renewsCell: 'Monthly',
-    billingCell: 'Billed monthly',
-    ctaTitle: `Choose ${plan.name}`,
-  };
-};
-
-const getStaticDefaults = (plan) => {
-  let savePercent = 0;
-
-  if (plan?.billingInterval === null) savePercent = plan?.savePercent ?? '';
-  else if (plan?.billingInterval === 'year')
-    savePercent = plan?.savePercent ?? '';
-  else if (plan?.billingInterval === 'month')
-    savePercent = plan?.savePercent ?? '';
-
-  const originalPrice = (Number(plan.price) / (1 - savePercent / 100)).toFixed(
-    2,
-  );
-
-  return {
-    savePercent,
-    originalPrice: Number(originalPrice),
-  };
+  const pricing = getPlanPricing(plan, originalPrice);
+  return { ...pricing, icon: PLAN_ICONS[pricing.term] ?? <MonthlyIcon /> };
 };
 
 /* ---------- Feature comparison ----------
