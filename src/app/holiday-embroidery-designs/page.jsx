@@ -5,10 +5,34 @@ import {
   getSubscriptionPlans,
   yearlySavingPercent,
 } from '@/lib/apis/public/subscriptionPlans';
+import { Caveat, Inter, Poppins } from 'next/font/google';
 import Image from 'next/image';
 import Link from 'next/link';
+import { Suspense } from 'react';
 import LandingStickyCta from './LandingStickyCta';
 import './landing.css';
+
+// Self-hosted at build time and preloaded with the page, instead of the Google
+// Fonts @import landing.css used to chain (CSS → fonts.googleapis → gstatic)
+// before any text could paint. landing.css reads these variables.
+const poppins = Poppins({
+  subsets: ['latin'],
+  weight: ['500', '600', '700'],
+  display: 'swap',
+  variable: '--font-poppins',
+});
+const inter = Inter({
+  subsets: ['latin'],
+  weight: ['400', '500', '600', '700'],
+  display: 'swap',
+  variable: '--font-inter',
+});
+const caveat = Caveat({
+  subsets: ['latin'],
+  weight: ['600', '700'],
+  display: 'swap',
+  variable: '--font-caveat',
+});
 
 /*
  * Q4 subscription landing page.
@@ -30,21 +54,69 @@ export const metadata = {
     'Get instant access to machine embroidery designs for Halloween, Christmas, holiday gifts, fall, Thanksgiving and New Year projects — all with one Embroidize subscription.',
 };
 
-export default async function HolidayEmbroideryDesignsPage() {
-  // Prices, plan names and feature lists come from the same endpoint the
-  // /subscriptions page reads. They were hard-coded from the mockup before,
-  // which had this page advertising $99.99 a year against a live $49.99 plan.
-  // Plans and reviews are independent reads — fetch them together rather than
-  // making the page wait for one and then the other.
-  const [plans, featured] = await Promise.all([
-    getSubscriptionPlans(),
-    getFeaturedReviews(),
-  ]);
+// Prices, plan names and feature lists come from the same endpoint the
+// /subscriptions page reads. They were hard-coded from the mockup before,
+// which had this page advertising $99.99 a year against a live $49.99 plan.
+// The fetch is uncached (it is money), so it lives in its own Suspense
+// boundary: the hero and everything above the plans stream immediately
+// instead of the whole page waiting on the API round-trip.
+async function PlanColumn() {
+  const plans = await getSubscriptionPlans();
   const savingPercent = yearlySavingPercent(plans);
-  const { reviews, totalCount: reviewCount } = featured;
 
   return (
-    <div className='slp'>
+    <>
+      <LandingPlanCards
+        plans={plans}
+        ctaLabels={{
+          month: 'Start Monthly',
+          year: 'Get Yearly Access',
+          fallback: 'Choose This Plan',
+        }}
+        fallbackCta='View Subscription Plans'
+      />
+      {savingPercent != null && (
+        <p className='plan-note'>
+          Save ~{savingPercent}% compared with paying monthly for 12 months.
+        </p>
+      )}
+    </>
+  );
+}
+
+/* ══ REVIEWS ════════════════════════════════════════════════════════════
+   Real reviews, curated in admin (Content → Reviews) and served by the
+   same getFeaturedReviews() the /subscriptions page uses. The mockup's
+   three empty shells and their dashed "AWAITING REAL CONTENT" wrapper
+   are gone; the whole section hides itself if nothing is curated.
+   (.build-note styles stay in landing.css in case a shell is ever
+   needed again.) Streamed like the plans so it never holds up the page.
+   ════════════════════════════════════════════════════════════════════════ */
+async function ReviewsSection() {
+  const { reviews, totalCount } = await getFeaturedReviews();
+  if (reviews.length === 0) return null;
+
+  return (
+    <section
+      className='band band--wash'
+      id='reviews'
+      style={{ paddingTop: '0', background: '#fff' }}
+    >
+      <div className='wrap'>
+        <div className='head'>
+          <h2>Loved by Embroidery Enthusiasts</h2>
+        </div>
+        <LandingReviews reviews={reviews} totalCount={totalCount} />
+      </div>
+    </section>
+  );
+}
+
+export default function HolidayEmbroideryDesignsPage() {
+  return (
+    <div
+      className={`slp ${poppins.variable} ${inter.variable} ${caveat.variable}`}
+    >
       <a className='skip' href='#main'>
         Skip to content
       </a>
@@ -451,7 +523,7 @@ export default async function HolidayEmbroideryDesignsPage() {
 
             <div className='hero__media'>
               <Image
-                src='/landing/q4/Hero-banner.png'
+                src='/landing/q4/hero-banner.webp'
                 alt="Embroidered canvas bags with a jack-o'-lantern, Christmas tree, give thanks and Merry Christmas design"
                 fill
                 priority
@@ -554,7 +626,7 @@ export default async function HolidayEmbroideryDesignsPage() {
                 <Image
                   className='ph ph--43'
                   role='img'
-                  src='https://embroidize-assets.nyc3.digitaloceanspaces.com/1757575532567.jpg'
+                  src='https://embroidize-assets.nyc3.cdn.digitaloceanspaces.com/1757575532567.jpg'
                   alt='Cute Mummy, Pumpkin & Ghost'
                   width={340}
                   height={340}
@@ -579,7 +651,7 @@ export default async function HolidayEmbroideryDesignsPage() {
                 <Image
                   className='ph ph--43'
                   role='img'
-                  src='https://embroidize-assets.nyc3.digitaloceanspaces.com/1761195496051.png'
+                  src='https://embroidize-assets.nyc3.cdn.digitaloceanspaces.com/1761195496051.png'
                   alt='Thankful Pumpkin'
                   width={340}
                   height={340}
@@ -604,7 +676,7 @@ export default async function HolidayEmbroideryDesignsPage() {
                 <Image
                   className='ph ph--43'
                   role='img'
-                  src='https://embroidize-assets.nyc3.digitaloceanspaces.com/1760610511612.png'
+                  src='https://embroidize-assets.nyc3.cdn.digitaloceanspaces.com/1760610511612.png'
                   alt='Merry Christmas Monster Truck'
                   width={340}
                   height={340}
@@ -629,7 +701,7 @@ export default async function HolidayEmbroideryDesignsPage() {
                 <Image
                   className='ph ph--43'
                   role='img'
-                  src='https://embroidize-assets.nyc3.digitaloceanspaces.com/1764052271903.png'
+                  src='https://embroidize-assets.nyc3.cdn.digitaloceanspaces.com/1764052271903.png'
                   alt='Christmas Gnome Gift'
                   width={340}
                   height={340}
@@ -655,7 +727,7 @@ export default async function HolidayEmbroideryDesignsPage() {
                 <Image
                   className='ph ph--43'
                   role='img'
-                  src='https://embroidize-assets.nyc3.digitaloceanspaces.com/1763550009637.png'
+                  src='https://embroidize-assets.nyc3.cdn.digitaloceanspaces.com/1763550009637.png'
                   alt='Happy New Year Gnome'
                   width={340}
                   height={340}
@@ -726,7 +798,7 @@ export default async function HolidayEmbroideryDesignsPage() {
             <div className='gallery'>
               <Image
                 className='ph ph--sq'
-                src='https://embroidize-assets.nyc3.digitaloceanspaces.com/1760241448221.png'
+                src='https://embroidize-assets.nyc3.cdn.digitaloceanspaces.com/1760241448221.png'
                 alt='Whimsical Lantern Gnome'
                 width={340}
                 height={340}
@@ -735,7 +807,7 @@ export default async function HolidayEmbroideryDesignsPage() {
 
               <Image
                 className='ph ph--sq'
-                src='https://embroidize-assets.nyc3.digitaloceanspaces.com/1752687637220.jpg'
+                src='https://embroidize-assets.nyc3.cdn.digitaloceanspaces.com/1752687637220.jpg'
                 alt='Boo Cute Girl Ghost with Bats'
                 width={340}
                 height={340}
@@ -743,7 +815,7 @@ export default async function HolidayEmbroideryDesignsPage() {
               />
               <Image
                 className='ph ph--sq'
-                src='https://embroidize-assets.nyc3.digitaloceanspaces.com/1759991742073.png'
+                src='https://embroidize-assets.nyc3.cdn.digitaloceanspaces.com/1759991742073.png'
                 alt='Trick or Treat Bats & Webs'
                 width={340}
                 height={340}
@@ -751,7 +823,7 @@ export default async function HolidayEmbroideryDesignsPage() {
               />
               <Image
                 className='ph ph--sq'
-                src='https://embroidize-assets.nyc3.digitaloceanspaces.com/1758444530346.png'
+                src='https://embroidize-assets.nyc3.cdn.digitaloceanspaces.com/1758444530346.png'
                 alt='Purple Truck & Pumpkins'
                 width={340}
                 height={340}
@@ -759,7 +831,7 @@ export default async function HolidayEmbroideryDesignsPage() {
               />
               <Image
                 className='ph ph--sq'
-                src='https://embroidize-assets.nyc3.digitaloceanspaces.com/1768037806507.png'
+                src='https://embroidize-assets.nyc3.cdn.digitaloceanspaces.com/1768037806507.png'
                 alt='Dancing Cowboy Skeletons'
                 width={340}
                 height={340}
@@ -767,7 +839,7 @@ export default async function HolidayEmbroideryDesignsPage() {
               />
               <Image
                 className='ph ph--sq'
-                src='https://embroidize-assets.nyc3.digitaloceanspaces.com/1769086167216.png'
+                src='https://embroidize-assets.nyc3.cdn.digitaloceanspaces.com/1769086167216.png'
                 alt='Halloween Cat & Gnome'
                 width={340}
                 height={340}
@@ -775,7 +847,7 @@ export default async function HolidayEmbroideryDesignsPage() {
               />
               <Image
                 className='ph ph--sq'
-                src='https://embroidize-assets.nyc3.digitaloceanspaces.com/1752253420577.jpg'
+                src='https://embroidize-assets.nyc3.cdn.digitaloceanspaces.com/1752253420577.jpg'
                 alt='My First Thanksgiving'
                 width={340}
                 height={340}
@@ -784,7 +856,7 @@ export default async function HolidayEmbroideryDesignsPage() {
 
               <Image
                 className='ph ph--sq'
-                src='https://embroidize-assets.nyc3.digitaloceanspaces.com/1760606760038.png'
+                src='https://embroidize-assets.nyc3.cdn.digitaloceanspaces.com/1760606760038.png'
                 alt='Snowflakes Kisses from Heaven'
                 width={340}
                 height={340}
@@ -792,7 +864,7 @@ export default async function HolidayEmbroideryDesignsPage() {
               />
               <Image
                 className='ph ph--sq'
-                src='https://embroidize-assets.nyc3.digitaloceanspaces.com/1760180424227.png'
+                src='https://embroidize-assets.nyc3.cdn.digitaloceanspaces.com/1760180424227.png'
                 alt='Merry Christmas Embroidery'
                 width={340}
                 height={340}
@@ -800,7 +872,7 @@ export default async function HolidayEmbroideryDesignsPage() {
               />
               <Image
                 className='ph ph--sq'
-                src='https://embroidize-assets.nyc3.digitaloceanspaces.com/1771826534844.png'
+                src='https://embroidize-assets.nyc3.cdn.digitaloceanspaces.com/1771826534844.png'
                 alt='Baby’s My 1st New Year'
                 width={340}
                 height={340}
@@ -808,7 +880,7 @@ export default async function HolidayEmbroideryDesignsPage() {
               />
               <Image
                 className='ph ph--sq'
-                src='https://embroidize-assets.nyc3.digitaloceanspaces.com/1769246011959.png'
+                src='https://embroidize-assets.nyc3.cdn.digitaloceanspaces.com/1769246011959.png'
                 alt='Happy Thanksgiving'
                 width={340}
                 height={340}
@@ -816,7 +888,7 @@ export default async function HolidayEmbroideryDesignsPage() {
               />
               <Image
                 className='ph ph--sq'
-                src='https://embroidize-assets.nyc3.digitaloceanspaces.com/1758759945868.png'
+                src='https://embroidize-assets.nyc3.cdn.digitaloceanspaces.com/1758759945868.png'
                 alt='Oh, Christmas Tree & Bow'
                 width={340}
                 height={340}
@@ -1278,21 +1350,11 @@ export default async function HolidayEmbroideryDesignsPage() {
                     One plan. More Q4 projects.
                   </p>
                 </div>
-                <LandingPlanCards
-                  plans={plans}
-                  ctaLabels={{
-                    month: 'Start Monthly',
-                    year: 'Get Yearly Access',
-                    fallback: 'Choose This Plan',
-                  }}
-                  fallbackCta='View Subscription Plans'
-                />
-                {savingPercent != null && (
-                  <p className='plan-note'>
-                    Save ~{savingPercent}% compared with paying monthly for 12
-                    months.
-                  </p>
-                )}
+                {/* Reserves the cards' height so nothing below jumps when
+                    the live plans stream in. */}
+                <Suspense fallback={<div style={{ minHeight: '420px' }} />}>
+                  <PlanColumn />
+                </Suspense>
               </div>
 
               <div className='why'>
@@ -1363,35 +1425,16 @@ export default async function HolidayEmbroideryDesignsPage() {
           </div>
         </section>
 
-        {/* ══ REVIEWS ════════════════════════════════════════════════════════════
-           Real reviews, curated in admin (Content → Reviews) and served by the
-           same getFeaturedReviews() the /subscriptions page uses. The mockup's
-           three empty shells and their dashed "AWAITING REAL CONTENT" wrapper
-           are gone; the whole section hides itself if nothing is curated.
-           (.build-note styles stay in landing.css in case a shell is ever
-           needed again.)
-           ════════════════════════════════════════════════════════════════════════ */}
-        {reviews.length > 0 && (
-          <section
-            className='band band--wash'
-            id='reviews'
-            style={{ paddingTop: '0', background: '#fff' }}
-          >
-            <div className='wrap'>
-              <div className='head'>
-                <h2>Loved by Embroidery Enthusiasts</h2>
-              </div>
-              <LandingReviews reviews={reviews} totalCount={reviewCount} />
-            </div>
-          </section>
-        )}
+        <Suspense fallback={null}>
+          <ReviewsSection />
+        </Suspense>
 
         {/* ══ FINAL CTA ═══════════════════════════════════════════════════════════ */}
         <section className='final' id='final'>
           {/* Side photographs bleed off both edges. Replace each .ph with an <img>. */}
           <div className='final__side final__side--l' aria-hidden='true'>
             <Image
-              src='/landing/q4/footer-left-banner.png'
+              src='/landing/q4/footer-left-banner.webp'
               alt=''
               fill
               sizes='(max-width: 640px) 0px, 20vw'
@@ -1399,7 +1442,7 @@ export default async function HolidayEmbroideryDesignsPage() {
           </div>
           <div className='final__side final__side--r' aria-hidden='true'>
             <Image
-              src='/landing/q4/2.png'
+              src='/landing/q4/footer-right-banner.webp'
               alt=''
               fill
               sizes='(max-width: 640px) 0px, 20vw'
