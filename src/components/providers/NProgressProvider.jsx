@@ -38,10 +38,13 @@ const NProgressEvents = () => {
     const handleAnchorClick = (event) => {
       const targetUrl = new URL(event.currentTarget.href);
       const currentUrl = new URL(location.href);
-      // Only for same-origin links that actually change the URL.
+      // Only for same-origin links that load a different page. In-page anchors
+      // (#section) change only the hash: no route change ever fires to finish
+      // the bar, so it would spin forever.
       if (
         targetUrl.origin === currentUrl.origin &&
-        targetUrl.href !== currentUrl.href
+        (targetUrl.pathname !== currentUrl.pathname ||
+          targetUrl.search !== currentUrl.search)
       ) {
         startLoading();
       }

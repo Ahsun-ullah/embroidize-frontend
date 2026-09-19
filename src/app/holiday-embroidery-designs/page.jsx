@@ -9,7 +9,9 @@ import { Caveat, Inter, Poppins } from 'next/font/google';
 import Image from 'next/image';
 import Link from 'next/link';
 import { Suspense } from 'react';
+import HolidayGallerySlider from './HolidayGallerySlider';
 import LandingStickyCta from './LandingStickyCta';
+import { GALLERY_CATEGORIES, galleryHref } from './galleryCategories';
 import './landing.css';
 
 // Self-hosted at build time and preloaded with the page, instead of the Google
@@ -415,6 +417,12 @@ export default function HolidayEmbroideryDesignsPage() {
       <header className='site-header'>
         <div className='wrap'>
           <a className='logo' href='#hero' aria-label='Embroidize home'>
+            <Image
+              src='/logo-black.png'
+              alt='Embroidize'
+              width={100}
+              height={40}
+            />
             <svg
               width='26'
               height='26'
@@ -429,7 +437,6 @@ export default function HolidayEmbroideryDesignsPage() {
               <path d='M12 20s-7.2-4.4-7.2-9.4A3.9 3.9 0 0 1 12 8a3.9 3.9 0 0 1 7.2 2.6C19.2 15.6 12 20 12 20z' />
               <path d='M8.8 12.3l2.1 2.1 4.4-4.8' stroke='var(--brand-300)' />
             </svg>
-            Embroidize
           </a>
           <Link className='btn btn--primary btn--sm' href='/subscriptions'>
             Get Subscription
@@ -642,7 +649,10 @@ export default function HolidayEmbroideryDesignsPage() {
                     Pumpkins, ghosts, witches, spooky sayings, trick-or-treat
                     designs and more.
                   </p>
-                  <a className='btn btn--ghost btn--sm' href='#gallery'>
+                  <a
+                    className='btn btn--ghost btn--sm'
+                    href={galleryHref('halloween')}
+                  >
                     See These Designs
                   </a>
                 </div>
@@ -667,7 +677,10 @@ export default function HolidayEmbroideryDesignsPage() {
                     Autumn leaves, gratitude sayings, turkeys, harvest themes
                     and more.
                   </p>
-                  <a className='btn btn--ghost btn--sm' href='#gallery'>
+                  <a
+                    className='btn btn--ghost btn--sm'
+                    href={galleryHref('fall-thanksgiving')}
+                  >
                     See These Designs
                   </a>
                 </div>
@@ -692,7 +705,10 @@ export default function HolidayEmbroideryDesignsPage() {
                     Christmas trees, Santa, reindeer, ornaments, festive sayings
                     and more.
                   </p>
-                  <a className='btn btn--ghost btn--sm' href='#gallery'>
+                  <a
+                    className='btn btn--ghost btn--sm'
+                    href={galleryHref('christmas')}
+                  >
                     See These Designs
                   </a>
                 </div>
@@ -718,7 +734,10 @@ export default function HolidayEmbroideryDesignsPage() {
                     Monograms, names, gift bags, towels, apparel, home décor and
                     more.
                   </p>
-                  <a className='btn btn--ghost btn--sm' href='#gallery'>
+                  <a
+                    className='btn btn--ghost btn--sm'
+                    href={galleryHref('holiday-gifts')}
+                  >
                     See These Designs
                   </a>
                 </div>
@@ -743,7 +762,10 @@ export default function HolidayEmbroideryDesignsPage() {
                     Celebration graphics, festive typography, fireworks and
                     more.
                   </p>
-                  <a className='btn btn--ghost btn--sm' href='#gallery'>
+                  <a
+                    className='btn btn--ghost btn--sm'
+                    href={galleryHref('new-year')}
+                  >
                     See These Designs
                   </a>
                 </div>
@@ -791,110 +813,21 @@ export default function HolidayEmbroideryDesignsPage() {
             <use href='#i-maple' />
           </svg>
           <div className='wrap'>
+            {/* Targets for the cards' "See These Designs" links. Zero-height and
+                outside the slider, so the jump still works without JS; the
+                slider reads the id and opens that category. */}
+            {GALLERY_CATEGORIES.map((c) => (
+              <span
+                key={c.id}
+                id={`gallery-${c.id}`}
+                className='gslider__anchor'
+              />
+            ))}
             <div className='head' style={{ marginBottom: '20px' }}>
               <h2>See What You Can Create This Season</h2>
               <p>A small taste of the projects you can make with Embroidize.</p>
             </div>
-            <div className='gallery'>
-              <Image
-                className='ph ph--sq'
-                src='https://embroidize-assets.nyc3.cdn.digitaloceanspaces.com/1760241448221.png'
-                alt='Whimsical Lantern Gnome'
-                width={340}
-                height={340}
-                style={{ objectFit: 'cover' }}
-              />
-
-              <Image
-                className='ph ph--sq'
-                src='https://embroidize-assets.nyc3.cdn.digitaloceanspaces.com/1752687637220.jpg'
-                alt='Boo Cute Girl Ghost with Bats'
-                width={340}
-                height={340}
-                style={{ objectFit: 'cover' }}
-              />
-              <Image
-                className='ph ph--sq'
-                src='https://embroidize-assets.nyc3.cdn.digitaloceanspaces.com/1759991742073.png'
-                alt='Trick or Treat Bats & Webs'
-                width={340}
-                height={340}
-                style={{ objectFit: 'cover' }}
-              />
-              <Image
-                className='ph ph--sq'
-                src='https://embroidize-assets.nyc3.cdn.digitaloceanspaces.com/1758444530346.png'
-                alt='Purple Truck & Pumpkins'
-                width={340}
-                height={340}
-                style={{ objectFit: 'cover' }}
-              />
-              <Image
-                className='ph ph--sq'
-                src='https://embroidize-assets.nyc3.cdn.digitaloceanspaces.com/1768037806507.png'
-                alt='Dancing Cowboy Skeletons'
-                width={340}
-                height={340}
-                style={{ objectFit: 'cover' }}
-              />
-              <Image
-                className='ph ph--sq'
-                src='https://embroidize-assets.nyc3.cdn.digitaloceanspaces.com/1769086167216.png'
-                alt='Halloween Cat & Gnome'
-                width={340}
-                height={340}
-                style={{ objectFit: 'cover' }}
-              />
-              <Image
-                className='ph ph--sq'
-                src='https://embroidize-assets.nyc3.cdn.digitaloceanspaces.com/1752253420577.jpg'
-                alt='My First Thanksgiving'
-                width={340}
-                height={340}
-                style={{ objectFit: 'cover' }}
-              />
-
-              <Image
-                className='ph ph--sq'
-                src='https://embroidize-assets.nyc3.cdn.digitaloceanspaces.com/1760606760038.png'
-                alt='Snowflakes Kisses from Heaven'
-                width={340}
-                height={340}
-                style={{ objectFit: 'cover' }}
-              />
-              <Image
-                className='ph ph--sq'
-                src='https://embroidize-assets.nyc3.cdn.digitaloceanspaces.com/1760180424227.png'
-                alt='Merry Christmas Embroidery'
-                width={340}
-                height={340}
-                style={{ objectFit: 'cover' }}
-              />
-              <Image
-                className='ph ph--sq'
-                src='https://embroidize-assets.nyc3.cdn.digitaloceanspaces.com/1771826534844.png'
-                alt='Baby’s My 1st New Year'
-                width={340}
-                height={340}
-                style={{ objectFit: 'cover' }}
-              />
-              <Image
-                className='ph ph--sq'
-                src='https://embroidize-assets.nyc3.cdn.digitaloceanspaces.com/1769246011959.png'
-                alt='Happy Thanksgiving'
-                width={340}
-                height={340}
-                style={{ objectFit: 'cover' }}
-              />
-              <Image
-                className='ph ph--sq'
-                src='https://embroidize-assets.nyc3.cdn.digitaloceanspaces.com/1758759945868.png'
-                alt='Oh, Christmas Tree & Bow'
-                width={340}
-                height={340}
-                style={{ objectFit: 'cover' }}
-              />
-            </div>
+            <HolidayGallerySlider />
             <p
               className='center'
               style={{
