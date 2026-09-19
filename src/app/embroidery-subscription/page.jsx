@@ -3,9 +3,34 @@ import LandingReviews from '@/components/Common/LandingReviews';
 import { getFeaturedReviews } from '@/lib/apis/public/featuredReviews';
 import { getSubscriptionPlans } from '@/lib/apis/public/subscriptionPlans';
 import { money, planTerm } from '@/lib/subscriptions/planPricing';
+import { Caveat, Inter, Poppins } from 'next/font/google';
+import Image from 'next/image';
 import Link from 'next/link';
+import { cache, Suspense } from 'react';
 import EmbroiderySubscriptionStickyCta from './EmbroiderySubscriptionStickyCta';
 import './landing.css';
+
+// Self-hosted at build time and preloaded with the page, instead of the Google
+// Fonts @import landing.css used to chain (CSS → fonts.googleapis → gstatic)
+// before any text could paint. landing.css reads these variables.
+const poppins = Poppins({
+  subsets: ['latin'],
+  weight: ['500', '600', '700'],
+  display: 'swap',
+  variable: '--font-poppins',
+});
+const inter = Inter({
+  subsets: ['latin'],
+  weight: ['400', '500', '600', '700'],
+  display: 'swap',
+  variable: '--font-inter',
+});
+const caveat = Caveat({
+  subsets: ['latin'],
+  weight: ['600', '700'],
+  display: 'swap',
+  variable: '--font-caveat',
+});
 
 /*
  * /embroidery-subscription — evergreen subscription landing page.
@@ -27,21 +52,94 @@ export const metadata = {
     'Get instant access to high-quality machine embroidery designs for your personal projects, gifts, and embroidery business. Choose a monthly or yearly plan and start downloading today.',
 };
 
-export default async function EmbroiderySubscriptionPage() {
-  // Prices, plan names and feature lists come from the same endpoint the
-  // /subscriptions page reads. They were hard-coded from the mockup before,
-  // which had this page advertising $79.99 a year against a live $49.99 plan.
-  // Plans and reviews are independent reads — fetch them together rather than
-  // making the page wait for one and then the other.
-  const [plans, featured] = await Promise.all([
-    getSubscriptionPlans(),
-    getFeaturedReviews(),
-  ]);
+// Prices, plan names and feature lists come from the same endpoint the
+// /subscriptions page reads. They were hard-coded from the mockup before,
+// which had this page advertising $79.99 a year against a live $49.99 plan.
+// The fetch is uncached (it is money), so everything that needs it streams in
+// its own Suspense boundary: the page above the pricing band renders at once
+// instead of waiting on the API round-trip. cache() makes the price circle and
+// the plan cards share ONE request per page view.
+const getPlans = cache(getSubscriptionPlans);
+
+// The handwritten circle quotes the live monthly price, and hides itself if
+// there is no monthly plan to quote.
+async function PricingCircle() {
+  const plans = await getPlans();
   const monthlyPlan = plans.find((plan) => planTerm(plan) === 'month');
-  const { reviews, totalCount: reviewCount } = featured;
+  if (!monthlyPlan) return null;
 
   return (
-    <div className='esub'>
+    <p className='script pricing__circle'>
+      Just
+      <br />
+      {money(monthlyPlan.price)}/month
+      <br />
+      for unlimited
+      <br />
+      designs!
+    </p>
+  );
+}
+
+async function PlanCards() {
+  const plans = await getPlans();
+
+  return (
+    <LandingPlanCards
+      plans={plans}
+      ctaLabels={{
+        month: 'Start Monthly',
+        year: 'Start Yearly',
+        fallback: 'Choose This Plan',
+      }}
+      fallbackCta='View Subscription Plans'
+    />
+  );
+}
+
+/* ══ REVIEWS ════════════════════════════════════════════════════════════
+   Real reviews, curated in admin (Content → Reviews) and served by the
+   same getFeaturedReviews() the /subscriptions page uses. The mockup's
+   three empty shells and their dashed "AWAITING REAL CONTENT" wrapper
+   are gone; the whole section hides itself if nothing is curated.
+   (.build-note styles stay in landing.css in case a shell is ever
+   needed again.) Streamed like the plans so it never holds up the page.
+   ════════════════════════════════════════════════════════════════════════ */
+async function ReviewsSection() {
+  const { reviews, totalCount } = await getFeaturedReviews();
+  if (reviews.length === 0) return null;
+
+  return (
+    <section className='band' id='reviews'>
+      <div className='wrap'>
+        <div className='head' style={{ marginBottom: '20px' }}>
+          <h2>Loved by Creators Like You</h2>
+        </div>
+        <LandingReviews reviews={reviews} totalCount={totalCount} />
+      </div>
+    </section>
+  );
+}
+
+// "See What You Can Create". 2400×1600 design images on the CDN host — never
+// the Spaces origin, which took 35-94s per image on the holiday page.
+const CDN = 'https://embroidize-assets.nyc3.cdn.digitaloceanspaces.com';
+const GALLERY_IMAGES = [
+  { src: `${CDN}/1781583491165.png`, alt: 'Hummingbird Floral' },
+  { src: `${CDN}/1783596988670.png`, alt: 'Happy Duckling Splash' },
+  { src: `${CDN}/1780826186614.png`, alt: 'Bumble Bee Floral' },
+  { src: `${CDN}/1781507724872.png`, alt: 'Japanese Cherry Blossom' },
+  { src: `${CDN}/1780402659954.png`, alt: 'Butterflies in Wildflower Meadow' },
+  { src: `${CDN}/1770805209673.png`, alt: 'Bees in Lavender Garden' },
+  { src: `${CDN}/1759667724249.png`, alt: 'Row of Embroidered Strawberries' },
+  { src: `${CDN}/1759815185512.png`, alt: 'Vintage Peony Floral Bouquet' },
+];
+
+export default function EmbroiderySubscriptionPage() {
+  return (
+    <div
+      className={`esub ${poppins.variable} ${inter.variable} ${caveat.variable}`}
+    >
       <a className='skip' href='#main'>
         Skip to content
       </a>
@@ -281,28 +379,26 @@ export default async function EmbroiderySubscriptionPage() {
       <header className='site-header'>
         <div className='wrap'>
           <a className='logo' href='#hero' aria-label='Embroidize home'>
+            <Image
+              src='/logo-black.png'
+              alt='Embroidize'
+              width={100}
+              height={40}
+            />
             <svg
               width='26'
               height='26'
               viewBox='0 0 24 24'
               fill='none'
+              stroke='var(--brand-500)'
+              strokeWidth='1.9'
+              strokeLinecap='round'
+              strokeLinejoin='round'
               aria-hidden='true'
             >
-              <path
-                d='M12 20.2S4.4 15.4 4.4 10.3A3.9 3.9 0 0 1 12 7.8a3.9 3.9 0 0 1 7.6 2.5c0 5.1-7.6 9.9-7.6 9.9z'
-                stroke='var(--brand-500)'
-                strokeWidth='1.9'
-                strokeLinejoin='round'
-              />
-              <path
-                d='M8.4 11.6l2.4 2.4 4.6-5.2'
-                stroke='var(--brand-300)'
-                strokeWidth='1.7'
-                strokeLinecap='round'
-                strokeLinejoin='round'
-              />
+              <path d='M12 20s-7.2-4.4-7.2-9.4A3.9 3.9 0 0 1 12 8a3.9 3.9 0 0 1 7.2 2.6C19.2 15.6 12 20 12 20z' />
+              <path d='M8.8 12.3l2.1 2.1 4.4-4.8' stroke='var(--brand-300)' />
             </svg>
-            Embroidize
           </a>
           <Link className='signin' href='/auth/login'>
             Sign In
@@ -411,49 +507,45 @@ export default async function EmbroiderySubscriptionPage() {
                 </ul>
               </div>
 
-              {/* Collage. Replace each .ph with the real photograph. */}
+              {/* Collage. Replace each .ph with the real photograph: put a
+                  next/image with `fill` INSIDE the tile, never in place of it —
+                  the tile's class positions it and gives it its shape. */}
               <div className='collage'>
                 <figure className='c-photo' style={{ margin: '0' }}>
-                  <div
-                    className='ph'
-                    role='img'
-                    aria-label='Golden retriever portrait stitched as a photo embroidery'
-                  >
-                    <svg width='46' height='46' aria-hidden='true'>
-                      <use href='#i-hoop' />
-                    </svg>
-                    <span className='ph__tag'>hero-dog-polaroid.jpg</span>
+                  <div className='ph ph--photo'>
+                    <Image
+                      src='/landing/subscription/hero-dog-polaroid.webp'
+                      alt='White apron embroidered with a row of five cartoon chickens'
+                      fill
+                      priority
+                      sizes='(max-width: 900px) 40vw, 240px'
+                    />
                   </div>
                 </figure>
-                <div
-                  className='c-hoop ph ph--43'
-                  role='img'
-                  aria-label='Embroidery hoop with pink floral design'
-                >
-                  <svg width='40' height='40' aria-hidden='true'>
-                    <use href='#i-hoop' />
-                  </svg>
-                  <span className='ph__tag'>hero-hoop-floral.jpg</span>
+                <div className='c-hoop ph ph--43 ph--img'>
+                  <Image
+                    src='/landing/subscription/hero-hoop-floral.webp'
+                    alt='Embroidered designs on a canvas tote bag, a T-shirt and a pink cap'
+                    fill
+                    priority
+                    sizes='(max-width: 900px) 66vw, 32vw'
+                  />
                 </div>
-                <div
-                  className='c-cap ph ph--sq'
-                  role='img'
-                  aria-label='Cream cap with an embroidered M monogram'
-                >
-                  <svg width='34' height='34' aria-hidden='true'>
-                    <use href='#i-hoop' />
-                  </svg>
-                  <span className='ph__tag'>hero-cap-m.jpg</span>
+                <div className='c-cap ph ph--sq ph--photo'>
+                  <Image
+                    src='/landing/subscription/hero-cap-m.webp'
+                    alt='Canvas tote bag embroidered with a cute highland calf wearing a pink bow'
+                    fill
+                    sizes='(max-width: 900px) 30vw, 170px'
+                  />
                 </div>
-                <div
-                  className='c-patch ph ph--sq'
-                  role='img'
-                  aria-label='Butterfly patch embroidered on canvas'
-                >
-                  <svg width='34' height='34' aria-hidden='true'>
-                    <use href='#i-hoop' />
-                  </svg>
-                  <span className='ph__tag'>hero-butterfly.jpg</span>
+                <div className='c-patch ph ph--sq ph--photo'>
+                  <Image
+                    src='/landing/subscription/hero-butterfly.webp'
+                    alt='Linen cushion embroidered with wildflowers growing out of an open book'
+                    fill
+                    sizes='(max-width: 900px) 30vw, 170px'
+                  />
                 </div>
 
                 <p className='script hero__script'>
@@ -566,86 +658,16 @@ export default async function EmbroiderySubscriptionPage() {
               </p>
             </div>
             <div className='gallery'>
-              <div
-                className='ph ph--sq'
-                role='img'
-                aria-label='Golden retriever embroidery design'
-              >
-                <svg width='32' height='32' aria-hidden='true'>
-                  <use href='#i-hoop' />
-                </svg>
-                <span className='ph__tag'>e01-dog.jpg</span>
-              </div>
-              <div
-                className='ph ph--sq'
-                role='img'
-                aria-label='Tabby cat embroidery design'
-              >
-                <svg width='32' height='32' aria-hidden='true'>
-                  <use href='#i-hoop' />
-                </svg>
-                <span className='ph__tag'>e02-cat.jpg</span>
-              </div>
-              <div
-                className='ph ph--sq'
-                role='img'
-                aria-label='Sunflower embroidery design'
-              >
-                <svg width='32' height='32' aria-hidden='true'>
-                  <use href='#i-hoop' />
-                </svg>
-                <span className='ph__tag'>e03-sunflower.jpg</span>
-              </div>
-              <div
-                className='ph ph--sq'
-                role='img'
-                aria-label='Letter A monogram in a floral wreath'
-              >
-                <svg width='32' height='32' aria-hidden='true'>
-                  <use href='#i-hoop' />
-                </svg>
-                <span className='ph__tag'>e04-monogram.jpg</span>
-              </div>
-              <div
-                className='ph ph--sq'
-                role='img'
-                aria-label='Mountain landscape embroidery design'
-              >
-                <svg width='32' height='32' aria-hidden='true'>
-                  <use href='#i-hoop' />
-                </svg>
-                <span className='ph__tag'>e05-mountains.jpg</span>
-              </div>
-              <div
-                className='ph ph--sq'
-                role='img'
-                aria-label='Pumpkin in a witch hat embroidery design'
-              >
-                <svg width='32' height='32' aria-hidden='true'>
-                  <use href='#i-hoop' />
-                </svg>
-                <span className='ph__tag'>e06-pumpkin.jpg</span>
-              </div>
-              <div
-                className='ph ph--sq'
-                role='img'
-                aria-label='Decorated Christmas tree embroidery design'
-              >
-                <svg width='32' height='32' aria-hidden='true'>
-                  <use href='#i-hoop' />
-                </svg>
-                <span className='ph__tag'>e07-tree.jpg</span>
-              </div>
-              <div
-                className='ph ph--sq'
-                role='img'
-                aria-label='Blue butterfly embroidery design'
-              >
-                <svg width='32' height='32' aria-hidden='true'>
-                  <use href='#i-hoop' />
-                </svg>
-                <span className='ph__tag'>e08-butterfly.jpg</span>
-              </div>
+              {GALLERY_IMAGES.map((img) => (
+                <Image
+                  key={img.src}
+                  src={img.src}
+                  alt={img.alt}
+                  width={340}
+                  height={227}
+                  sizes='(max-width: 640px) 50vw, (max-width: 1024px) 25vw, 290px'
+                />
+              ))}
             </div>
             <div className='cta-row'>
               <Link className='btn btn--primary' href='/subscriptions'>
@@ -849,24 +871,15 @@ export default async function EmbroiderySubscriptionPage() {
         {/* ══ PRICING ═════════════════════════════════════════════════════════════
            The cards are rendered from the live plans, so the mockup's $79.99/yr
            (against a real $49.99) can never come back. The handwritten circle
-           below quotes the live monthly price too, and hides itself if there is
-           no monthly plan to quote.
+           (PricingCircle) quotes the live monthly price too.
            ⚠ "unlimited designs" in that circle is still a CLAIM, and the live
              plans are metered (20/day and 25/day). Reword it or drop it before
              this page takes paid traffic.
            ════════════════════════════════════════════════════════════════════════ */}
         <section className='band band--wash pricing' id='pricing'>
-          {monthlyPlan && (
-            <p className='script pricing__circle'>
-              Just
-              <br />
-              {money(monthlyPlan.price)}/month
-              <br />
-              for unlimited
-              <br />
-              designs!
-            </p>
-          )}
+          <Suspense fallback={null}>
+            <PricingCircle />
+          </Suspense>
           <p className='script pricing__script'>
             More designs.
             <br />
@@ -881,36 +894,15 @@ export default async function EmbroiderySubscriptionPage() {
               <p>One plan. Unlimited possibilities.</p>
             </div>
 
-            <LandingPlanCards
-              plans={plans}
-              ctaLabels={{
-                month: 'Start Monthly',
-                year: 'Start Yearly',
-                fallback: 'Choose This Plan',
-              }}
-              fallbackCta='View Subscription Plans'
-            />
+            <Suspense fallback={<div style={{ minHeight: '420px' }} />}>
+              <PlanCards />
+            </Suspense>
           </div>
         </section>
 
-        {/* ══ REVIEWS ════════════════════════════════════════════════════════════
-           Real reviews, curated in admin (Content → Reviews) and served by the
-           same getFeaturedReviews() the /subscriptions page uses. The mockup's
-           three empty shells and their dashed "AWAITING REAL CONTENT" wrapper
-           are gone; the whole section hides itself if nothing is curated.
-           (.build-note styles stay in landing.css in case a shell is ever
-           needed again.)
-           ════════════════════════════════════════════════════════════════════════ */}
-        {reviews.length > 0 && (
-          <section className='band' id='reviews'>
-            <div className='wrap'>
-              <div className='head' style={{ marginBottom: '20px' }}>
-                <h2>Loved by Creators Like You</h2>
-              </div>
-              <LandingReviews reviews={reviews} totalCount={reviewCount} />
-            </div>
-          </section>
-        )}
+        <Suspense fallback={null}>
+          <ReviewsSection />
+        </Suspense>
 
         {/* ══ THREE-COLUMN ROW — formats · trust · FAQ ════════════════════════════
            Three sections sharing one row, exactly as in the approved design.

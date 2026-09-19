@@ -1,8 +1,8 @@
 /* Poppins / Inter / Caveat. The app loads no webfonts of its own (globals.css
    names ABCDiatype and Poppins but nothing ever fetches them), so this page has
-   to bring the three families the design is drawn in. @import instead of a
-   <link> keeps them tied to this route's stylesheet. */
-@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@500;600;700&family=Inter:wght@400;500;600;700&family=Caveat:wght@600;700&display=swap');
+   to bring the three families the design is drawn in. They are self-hosted via
+   next/font in page.jsx (exposed as --font-poppins/--font-inter/--font-caveat on
+   .esub): the old Google Fonts @import here was a render-blocking chain. */
 
 /* ===========================================================================
    EMBROIDERY SUBSCRIPTION LANDING PAGE
@@ -81,6 +81,7 @@ html {
   background: var(--surface);
   color: var(--ink-600);
   font-family:
+    var(--font-inter),
     Inter,
     system-ui,
     -apple-system,
@@ -95,7 +96,8 @@ html {
 .esub h2,
 .esub h3,
 .esub h4 {
-  font-family: Poppins, Inter, sans-serif;
+  font-family:
+    var(--font-poppins), Poppins, var(--font-inter), Inter, sans-serif;
   color: var(--ink-900);
   margin: 0 0 0.5em;
   line-height: 1.16;
@@ -254,7 +256,8 @@ html {
   align-items: center;
   justify-content: center;
   gap: 9px;
-  font-family: Poppins, Inter, sans-serif;
+  font-family:
+    var(--font-poppins), Poppins, var(--font-inter), Inter, sans-serif;
   font-weight: 600;
   font-size: 0.875rem;
   padding: 13px 28px;
@@ -337,7 +340,7 @@ html {
   align-items: center;
   gap: 9px;
   color: var(--ink-900);
-  font-family: Poppins, sans-serif;
+  font-family: var(--font-poppins), Poppins, sans-serif;
   font-weight: 700;
   font-size: 1.15rem;
   letter-spacing: -0.025em;
@@ -467,7 +470,7 @@ html {
 }
 .esub .hero__trust b {
   display: block;
-  font-family: Poppins, sans-serif;
+  font-family: var(--font-poppins), Poppins, sans-serif;
   font-size: 0.75rem;
   font-weight: 600;
   color: var(--ink-900);
@@ -512,8 +515,28 @@ html {
 .esub .collage .c-patch {
   grid-column: 3/4;
 }
+/* A tile holding a real image: no background at all (the images are
+   transparent WebP and sit straight on the hero), and contain so a composed
+   product shot is never cropped by the tile's shape. Written as .ph.ph--img
+   because the .esub .ph placeholder rule comes LATER in this file with the
+   same specificity, and would otherwise paint its stripes back on. */
+.esub .ph.ph--img {
+  background: none;
+}
+.esub .ph.ph--img img {
+  object-fit: contain;
+}
+/* A tile holding a finished lifestyle PHOTO (hero polaroid, cap and patch):
+   it has its own background, so it fills the tile edge to edge. The polaroid
+   tile is 3:3.4 against square photos, so it trims a sliver off each side. */
+.esub .ph.ph--photo {
+  background: none;
+}
+.esub .ph.ph--photo img {
+  object-fit: cover;
+}
 .esub .script {
-  font-family: Caveat, cursive;
+  font-family: var(--font-caveat), Caveat, cursive;
   line-height: 1.05;
   pointer-events: none;
 }
@@ -543,7 +566,7 @@ html {
   text-align: center;
   z-index: 3;
   color: var(--brand-500);
-  font-family: Caveat, cursive;
+  font-family: var(--font-caveat), Caveat, cursive;
   font-size: 1.05rem;
   line-height: 1.1;
   padding: 10px;
@@ -624,10 +647,25 @@ html {
 }
 
 /* ============================== GALLERY ================================== */
+/* 4 per row (two rows of 4), not the mockup's 8: at 8 across each design was
+   ~130px wide, too small to see. */
 .esub .gallery {
   display: grid;
-  grid-template-columns: repeat(8, 1fr);
-  gap: 14px;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 18px;
+}
+/* Real design images replaced the square placeholders. The tiles are 3:2, the
+   ratio of every source (2400×1600), so nothing is cropped — a square tile cut
+   a third off each design, same as on the holiday page. White behind the
+   transparent PNGs; width 100% + height auto turns next/image's declared
+   340×227 into a ratio instead of a fixed box. */
+.esub .gallery img {
+  width: 100%;
+  height: auto;
+  aspect-ratio: 3 / 2;
+  object-fit: cover;
+  background: #fff;
+  border-radius: 10px;
 }
 
 /* ============================ AUDIENCE =================================== */
@@ -677,7 +715,7 @@ html {
 }
 .esub .cmp__h > div {
   padding: 7px 14px;
-  font-family: Poppins, sans-serif;
+  font-family: var(--font-poppins), Poppins, sans-serif;
   font-weight: 600;
   font-size: 0.8125rem;
   text-align: center;
@@ -772,7 +810,7 @@ html {
   transform: translateX(-50%);
   background: var(--brand-500);
   color: #fff;
-  font-family: Poppins, sans-serif;
+  font-family: var(--font-poppins), Poppins, sans-serif;
   font-size: 0.625rem;
   font-weight: 700;
   padding: 3px 12px;
@@ -780,7 +818,7 @@ html {
   white-space: nowrap;
 }
 .esub .plan__name {
-  font-family: Poppins, sans-serif;
+  font-family: var(--font-poppins), Poppins, sans-serif;
   font-weight: 600;
   font-size: 0.9375rem;
   color: var(--ink-900);
@@ -789,7 +827,7 @@ html {
 }
 .esub .plan__price {
   text-align: center;
-  font-family: Poppins, sans-serif;
+  font-family: var(--font-poppins), Poppins, sans-serif;
   font-weight: 700;
   font-size: 1.75rem;
   color: var(--brand-500);
@@ -830,7 +868,7 @@ html {
   place-items: center;
   text-align: center;
   color: var(--brand-500);
-  font-family: Caveat, cursive;
+  font-family: var(--font-caveat), Caveat, cursive;
   font-size: 1.02rem;
   line-height: 1.15;
   padding: 12px;
@@ -878,7 +916,7 @@ html {
   margin-bottom: 9px;
 }
 .esub .rev__name {
-  font-family: Poppins, sans-serif;
+  font-family: var(--font-poppins), Poppins, sans-serif;
   font-weight: 600;
   font-size: 0.8125rem;
   color: var(--ink-900);
@@ -900,7 +938,7 @@ html {
   display: inline-block;
   background: var(--brand-500);
   color: #fff;
-  font-family: Poppins, sans-serif;
+  font-family: var(--font-poppins), Poppins, sans-serif;
   font-size: 0.625rem;
   font-weight: 700;
   padding: 3px 10px;
@@ -916,7 +954,7 @@ html {
 
 /* ====================== FORMATS / TRUST / FAQ ROW ======================== */
 .esub .col-h {
-  font-family: Poppins, sans-serif;
+  font-family: var(--font-poppins), Poppins, sans-serif;
   font-weight: 700;
   font-size: 1.0625rem;
   color: var(--ink-900);
@@ -1043,7 +1081,7 @@ html {
   align-items: center;
   gap: 9px;
   color: #fff;
-  font-family: Poppins, sans-serif;
+  font-family: var(--font-poppins), Poppins, sans-serif;
   font-weight: 700;
   font-size: 1.1rem;
   letter-spacing: -0.025em;
@@ -1219,7 +1257,7 @@ html {
     grid-row: span 2;
   }
   .esub .gallery {
-    grid-template-columns: repeat(3, 1fr);
+    grid-template-columns: repeat(2, 1fr);
     gap: 10px;
   }
   .esub .g4 {
@@ -1312,7 +1350,8 @@ html {
 .esub .plan__badge,
 .esub .build-note__tag,
 .esub .footbar__logo {
-  font-family: Poppins, Inter, sans-serif !important;
+  font-family:
+    var(--font-poppins), Poppins, var(--font-inter), Inter, sans-serif !important;
 }
 
 /* The header's row of anchor links was removed on request. `.nav` above used
@@ -1353,7 +1392,8 @@ html {
   border-radius: var(--r-pill);
   background: var(--ink-900);
   color: #fff;
-  font-family: Poppins, Inter, sans-serif;
+  font-family:
+    var(--font-poppins), Poppins, var(--font-inter), Inter, sans-serif;
   font-size: 0.75rem;
   font-weight: 600;
 }
@@ -1378,7 +1418,8 @@ html {
 .esub .plan__off {
   background: var(--brand-500);
   color: #fff;
-  font-family: Poppins, Inter, sans-serif;
+  font-family:
+    var(--font-poppins), Poppins, var(--font-inter), Inter, sans-serif;
   font-size: 0.625rem;
   font-weight: 700;
   padding: 2px 9px;
@@ -1411,7 +1452,8 @@ html {
   color: var(--brand-200);
 }
 .esub .rev-more b {
-  font-family: Poppins, Inter, sans-serif;
+  font-family:
+    var(--font-poppins), Poppins, var(--font-inter), Inter, sans-serif;
   color: var(--ink-900);
 }
 

@@ -12,7 +12,7 @@ export async function GET() {
     { url: '/refund-and-cancellation-policy', priority: '0.5' },
     { url: '/custom-embroidery-digitizing-service', priority: '0.9' },
     { url: '/free-machine-embroidery-designs', priority: '0.9' },
-    // { url: '/embroidery-subscription', priority: '0.9' },
+    { url: '/embroidery-subscription', priority: '0.9' },
     { url: '/holiday-embroidery-designs', priority: '0.9' },
     { url: '/subscriptions', priority: '0.9' },
     { url: '/products', priority: '0.9' },
