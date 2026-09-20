@@ -1389,10 +1389,10 @@ export default function HolidayEmbroideryDesignsPage() {
               subscription.
             </p>
             <div className='final__actions'>
-              <Link className='btn btn--primary' href='/subscriptions'>
+              <Link className='btn btn--ghost' href='/subscriptions'>
                 Start Monthly
               </Link>
-              <Link className='btn btn--ghost' href='/subscriptions'>
+              <Link className=' btn btn--primary' href='/subscriptions'>
                 Get Yearly Access
               </Link>
             </div>
