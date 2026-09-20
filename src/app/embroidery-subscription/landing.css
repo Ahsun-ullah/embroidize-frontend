@@ -238,14 +238,7 @@ html {
   gap: 54px;
   align-items: start;
 }
-.esub .row3 {
-  display: grid;
-  grid-template-columns: 1.3fr 0.78fr 1.15fr;
-  gap: 34px;
-  align-items: start;
-}
-.esub.stacked .row2,
-.esub.stacked .row3 {
+.esub.stacked .row2 {
   grid-template-columns: 1fr;
   gap: 52px;
 }
@@ -506,8 +499,13 @@ html {
   border-radius: 3px;
   aspect-ratio: 3/3.4;
 }
+/* 5:4, the exact ratio of hero-hoop-floral.webp (1402x1122). The tile was 4:3
+   via .ph--43, and object-fit:contain then fitted the image to the tile's
+   HEIGHT and left ~3% of transparent tile unused down each side — the shot
+   rendered about 7% smaller than the space it was given. */
 .esub .collage .c-hoop {
   grid-column: 2/4;
+  aspect-ratio: 5/4;
 }
 .esub .collage .c-cap {
   grid-column: 2/3;
@@ -649,10 +647,19 @@ html {
 /* ============================== GALLERY ================================== */
 /* 4 per row (two rows of 4), not the mockup's 8: at 8 across each design was
    ~130px wide, too small to see. */
+/* Flex, not grid: the gallery is a curated list whose length changes whenever
+   a design is swapped in, and a count that does not divide by the column count
+   left the last row stranded against the left edge. justify-content:center
+   makes an incomplete final row read as deliberate instead. --gcols/--ggap
+   carry the column count so the tile width stays one expression across the
+   breakpoints — the eighteen designs currently fill three rows exactly. */
 .esub .gallery {
-  display: grid;
-  grid-template-columns: repeat(4, 1fr);
-  gap: 18px;
+  --gcols: 6;
+  --ggap: 14px;
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: var(--ggap);
 }
 /* Real design images replaced the square placeholders. The tiles are 3:2, the
    ratio of every source (2400×1600), so nothing is cropped — a square tile cut
@@ -660,7 +667,7 @@ html {
    transparent PNGs; width 100% + height auto turns next/image's declared
    340×227 into a ratio instead of a fixed box. */
 .esub .gallery img {
-  width: 100%;
+  width: calc((100% - (var(--gcols) - 1) * var(--ggap)) / var(--gcols));
   height: auto;
   aspect-ratio: 3 / 2;
   object-fit: cover;
@@ -885,6 +892,168 @@ html {
   transform: rotate(-5deg);
 }
 
+/* ============================= WHY YEARLY ================================ */
+/* Sits between the plan cards and the reviews: the cards state the two prices,
+   this states what the difference buys. White band so the wash pricing band
+   above it still reads as one block with the cards. */
+.esub .whyy__grid {
+  display: grid;
+  grid-template-columns: 0.92fr 1.08fr;
+  gap: 26px;
+  align-items: stretch;
+  max-width: 940px;
+  margin-inline: auto;
+}
+
+/* --- the receipt --- */
+.esub .whyy__compare {
+  background: var(--brand-50);
+  border: 1px solid var(--brand-200);
+  border-radius: var(--r-card);
+  padding: 24px 24px 20px;
+  display: flex;
+  flex-direction: column;
+}
+.esub .whyy__compare-h {
+  font-family: var(--font-poppins), Poppins, sans-serif;
+  font-size: 0.625rem;
+  font-weight: 700;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--ink-400);
+  margin: 0 0 14px;
+}
+.esub .whyy__line {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 16px;
+  padding: 11px 0;
+  border-bottom: 1px solid var(--brand-200);
+}
+.esub .whyy__line-label {
+  font-family: var(--font-poppins), Poppins, sans-serif;
+  font-size: 0.8438rem;
+  font-weight: 600;
+  color: var(--ink-700);
+  line-height: 1.3;
+}
+.esub .whyy__line-label span {
+  display: block;
+  font-family: var(--font-inter), Inter, sans-serif;
+  font-size: 0.75rem;
+  font-weight: 400;
+  color: var(--ink-400);
+  margin-top: 2px;
+}
+.esub .whyy__line-price {
+  font-family: var(--font-poppins), Poppins, sans-serif;
+  font-size: 1.125rem;
+  font-weight: 700;
+  color: var(--ink-900);
+  white-space: nowrap;
+}
+.esub .whyy__line-price--was {
+  font-weight: 600;
+  color: var(--ink-400);
+  text-decoration: line-through;
+  text-decoration-thickness: 1.5px;
+}
+.esub .whyy__line--win .whyy__line-label {
+  color: var(--ink-900);
+}
+.esub .whyy__line--win .whyy__line-price {
+  color: var(--brand-600);
+  font-size: 1.375rem;
+}
+.esub .whyy__save {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-top: auto;
+  padding-top: 16px;
+}
+.esub .whyy__save-pct {
+  font-family: var(--font-poppins), Poppins, sans-serif;
+  font-size: 0.8125rem;
+  font-weight: 700;
+  letter-spacing: 0.01em;
+  color: #fff;
+  background: var(--brand-500);
+  padding: 7px 14px;
+  border-radius: var(--r-pill);
+  white-space: nowrap;
+}
+.esub .whyy__save-amt {
+  font-size: 0.8125rem;
+  font-weight: 500;
+  color: var(--ink-700);
+  line-height: 1.3;
+}
+.esub .whyy__fine {
+  font-size: 0.6875rem;
+  color: var(--ink-400);
+  margin: 12px 0 0;
+}
+
+/* --- what the saving does not cover --- */
+.esub .whyy__perks {
+  display: grid;
+  gap: 10px;
+  align-content: start;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.esub .whyy__perks li {
+  display: flex;
+  gap: 13px;
+  align-items: flex-start;
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: 11px;
+  padding: 14px 16px;
+}
+.esub .whyy__perks .ic {
+  display: grid;
+  place-items: center;
+  width: 34px;
+  height: 34px;
+  flex: none;
+  border-radius: 9px;
+  background: var(--brand-100);
+  color: var(--brand-600);
+}
+.esub .whyy__perks b {
+  display: block;
+  font-family: var(--font-poppins), Poppins, sans-serif;
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: var(--ink-900);
+  letter-spacing: -0.01em;
+  line-height: 1.35;
+}
+.esub .whyy__perks p {
+  font-size: 0.8125rem;
+  color: var(--ink-600);
+  line-height: 1.5;
+  margin: 3px 0 0;
+}
+
+/* --- close --- */
+.esub .whyy__cta {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+  margin-top: 28px;
+}
+.esub .whyy__cta-note {
+  font-size: 0.8125rem;
+  color: var(--ink-600);
+  text-align: center;
+}
+
 /* ============================= REVIEWS =================================== */
 .esub .rev {
   background: #fff;
@@ -952,101 +1121,192 @@ html {
   max-width: 78ch;
 }
 
-/* ====================== FORMATS / TRUST / FAQ ROW ======================== */
-.esub .col-h {
+/* ==================== COMPATIBILITY + TRUST STRIP ======================== */
+.esub .compat {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  gap: 40px;
+  align-items: center;
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: var(--r-card);
+  padding: 26px 30px;
+}
+.esub .compat__h {
+  display: flex;
+  align-items: center;
+  gap: 10px;
   font-family: var(--font-poppins), Poppins, sans-serif;
   font-weight: 700;
   font-size: 1.0625rem;
   color: var(--ink-900);
-  margin: 0 0 15px;
+  margin: 0 0 6px;
   letter-spacing: -0.02em;
+}
+.esub .compat__hic {
+  display: grid;
+  place-items: center;
+  width: 32px;
+  height: 32px;
+  flex: none;
+  border-radius: 9px;
+  background: var(--brand-100);
+  color: var(--brand-600);
+}
+.esub .compat__p {
+  font-size: 0.8438rem;
+  color: var(--ink-600);
+  margin: 0 0 14px;
+  max-width: 46ch;
 }
 .esub .formats {
   display: flex;
   flex-wrap: wrap;
   gap: 8px;
   align-items: center;
+  margin: 0;
+  padding: 0;
+  list-style: none;
 }
 .esub .fmt {
-  font-size: 0.7812rem;
-  font-weight: 500;
+  font-family: var(--font-poppins), Poppins, sans-serif;
+  font-size: 0.75rem;
+  font-weight: 600;
+  letter-spacing: 0.04em;
   color: var(--ink-700);
   background: var(--grey-50);
-  padding: 6px 12px;
-  border-radius: 7px;
+  border: 1px solid var(--line);
+  padding: 7px 13px;
+  border-radius: 8px;
   white-space: nowrap;
 }
 .esub .fmt--more {
   background: none;
+  border-color: transparent;
+  font-weight: 500;
+  letter-spacing: 0;
   color: var(--ink-400);
   padding-inline: 2px;
 }
-.esub .trust3 {
+.esub .compat__trust {
   display: flex;
-  gap: 26px;
+  gap: 30px;
+  margin: 0;
+  padding: 0 0 0 40px;
+  list-style: none;
+  border-left: 1px solid var(--line);
 }
-.esub .trust3 li {
+.esub .compat__trust li {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 9px;
+  width: 92px;
   text-align: center;
-  max-width: 110px;
 }
-.esub .trust3 .ic {
-  color: var(--ink-900);
+.esub .compat__trust .ic {
   display: grid;
   place-items: center;
-  margin: 0 auto 8px;
-  opacity: 0.85;
+  width: 42px;
+  height: 42px;
+  border-radius: 50%;
+  background: var(--brand-50);
+  border: 1px solid var(--brand-200);
+  color: var(--brand-600);
 }
-.esub .trust3 span {
-  display: block;
+.esub .compat__label {
   font-size: 0.75rem;
-  color: var(--ink-600);
+  font-weight: 600;
+  color: var(--ink-700);
   line-height: 1.3;
 }
+
+/* ================================= FAQ =================================== */
 .esub .faq {
   display: grid;
-  gap: 7px;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+  align-content: start;
+  max-width: 940px;
+  margin-inline: auto;
 }
-.esub .faq details {
-  background: #fff;
+.esub .faq__item {
+  background: var(--surface);
   border: 1px solid var(--line);
-  border-radius: 7px;
+  border-radius: 11px;
   overflow: hidden;
+  align-self: start;
+  transition:
+    border-color 0.18s,
+    box-shadow 0.18s;
 }
-.esub .faq details[open] {
+.esub .faq__item:hover {
   border-color: var(--brand-200);
+}
+.esub .faq__item[open] {
+  border-color: var(--brand-200);
+  box-shadow: 0 6px 18px -12px rgba(11, 15, 30, 0.22);
 }
 .esub .faq summary {
   list-style: none;
   cursor: pointer;
-  padding: 9px 40px 9px 14px;
+  padding: 16px 52px 16px 18px;
   position: relative;
-  font-size: 0.8125rem;
-  font-weight: 500;
-  color: var(--ink-700);
+  font-family: var(--font-poppins), Poppins, sans-serif;
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: var(--ink-900);
+  line-height: 1.4;
 }
 .esub .faq summary::-webkit-details-marker {
   display: none;
 }
-.esub .faq summary::after {
+/* Round +/× affordance: a plus that rotates into a cross when the row opens. */
+.esub .faq summary::before {
   content: '';
   position: absolute;
   right: 16px;
   top: 50%;
-  width: 7px;
-  height: 7px;
-  border-right: 1.8px solid var(--ink-400);
-  border-bottom: 1.8px solid var(--ink-400);
-  transform: translateY(-70%) rotate(45deg);
-  transition: transform 0.18s;
+  width: 26px;
+  height: 26px;
+  transform: translateY(-50%);
+  border-radius: 50%;
+  background: var(--grey-50);
+  transition: background 0.18s;
+}
+.esub .faq summary::after {
+  content: '';
+  position: absolute;
+  right: 22px;
+  top: 50%;
+  width: 14px;
+  height: 14px;
+  margin-top: -7px;
+  background:
+    linear-gradient(var(--ink-700), var(--ink-700)) center/14px 1.8px no-repeat,
+    linear-gradient(var(--ink-700), var(--ink-700)) center/1.8px 14px no-repeat;
+  transition:
+    transform 0.22s ease,
+    background-size 0.22s ease;
+}
+.esub .faq details[open] summary::before {
+  background: var(--brand-100);
 }
 .esub .faq details[open] summary::after {
-  transform: translateY(-30%) rotate(-135deg);
-  border-color: var(--brand-500);
+  transform: rotate(90deg);
+  background:
+    linear-gradient(var(--brand-600), var(--brand-600)) center/14px 1.8px
+      no-repeat,
+    linear-gradient(var(--brand-600), var(--brand-600)) center/0 14px no-repeat;
 }
 .esub .faq .faq__a {
-  padding: 0 14px 13px;
-  font-size: 0.8125rem;
+  padding: 0 52px 16px 18px;
+  font-size: 0.8438rem;
+  line-height: 1.62;
   color: var(--ink-600);
+}
+.esub .faq .faq__a p {
+  margin: 0;
 }
 
 /* ============================ FOOTER BAR ================================= */
@@ -1143,14 +1403,22 @@ html {
 }
 @media (max-width: 1024px) {
   .esub .gallery {
-    grid-template-columns: repeat(4, 1fr);
+    --gcols: 4;
+    --ggap: 14px;
   }
-  .esub .row3 {
-    grid-template-columns: 1fr 1fr;
-    gap: 34px;
+  .esub .compat {
+    grid-template-columns: 1fr;
+    gap: 24px;
   }
-  .esub .row3 > :last-child {
-    grid-column: 1/-1;
+  .esub .compat__trust {
+    padding: 22px 0 0;
+    border-left: 0;
+    border-top: 1px solid var(--line);
+    justify-content: space-between;
+  }
+  .esub .compat__trust li {
+    width: auto;
+    flex: 1;
   }
   .esub .g4 {
     grid-template-columns: repeat(2, 1fr);
@@ -1238,27 +1506,36 @@ html {
     right: 2px;
     bottom: 12px;
   }
+  /* The hoop shot is a composite of three separate products, and the two-column
+     mobile grid used to hand it the narrow 1fr column — about 130px on a 360px
+     phone, where the three items were indistinguishable. It now spans the full
+     width on its own row. That also fills the cell that row 2 / column 2 used
+     to leave empty, and keeps the two handwritten overlays pointing at what
+     they point at on desktop: .hero__script sits bottom-left over the polaroid,
+     .hero__badge bottom-right over the patch. */
   .esub .collage {
     grid-template-columns: 1.25fr 1fr;
     gap: 10px;
   }
   .esub .collage .c-hoop {
-    grid-column: 2/3;
+    grid-column: 1/-1;
+    grid-row: 1;
+  }
+  .esub .collage .c-photo {
+    grid-column: 1/2;
+    grid-row: 2 / span 2;
   }
   .esub .collage .c-cap {
-    grid-column: 1/2;
-    grid-row: 3;
+    grid-column: 2/3;
+    grid-row: 2;
   }
   .esub .collage .c-patch {
     grid-column: 2/3;
     grid-row: 3;
   }
-  .esub .collage .c-photo {
-    grid-row: span 2;
-  }
   .esub .gallery {
-    grid-template-columns: repeat(2, 1fr);
-    gap: 10px;
+    --gcols: 2;
+    --ggap: 10px;
   }
   .esub .g4 {
     grid-template-columns: 1fr;
@@ -1277,16 +1554,19 @@ html {
   .esub .plan--best {
     order: -1;
   }
-  .esub .row3 {
+  .esub .whyy__grid {
     grid-template-columns: 1fr;
-    gap: 34px;
+    gap: 18px;
+    max-width: 560px;
   }
-  .esub .row3 > :last-child {
-    grid-column: auto;
+  .esub .faq {
+    grid-template-columns: 1fr;
   }
-  .esub .trust3 {
-    gap: 14px;
-    justify-content: space-between;
+  .esub .compat {
+    padding: 22px;
+  }
+  .esub .compat__trust {
+    gap: 12px;
   }
   .esub .footbar .wrap {
     flex-direction: column;

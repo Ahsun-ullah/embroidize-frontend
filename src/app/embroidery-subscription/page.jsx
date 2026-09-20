@@ -1,7 +1,10 @@
 import LandingPlanCards from '@/components/Common/LandingPlanCards';
 import LandingReviews from '@/components/Common/LandingReviews';
 import { getFeaturedReviews } from '@/lib/apis/public/featuredReviews';
-import { getSubscriptionPlans } from '@/lib/apis/public/subscriptionPlans';
+import {
+  getSubscriptionPlans,
+  yearlySavingPercent,
+} from '@/lib/apis/public/subscriptionPlans';
 import { money, planTerm } from '@/lib/subscriptions/planPricing';
 import { Caveat, Inter, Poppins } from 'next/font/google';
 import Image from 'next/image';
@@ -97,6 +100,176 @@ async function PlanCards() {
   );
 }
 
+/* ══ WHY YEARLY ══════════════════════════════════════════════════════════
+   Every number here is DERIVED FROM THE LIVE PLANS, never typed: the saving,
+   the twelve-month comparison, the per-month equivalent and the download
+   allowance all come out of the same /public/subscriptions payload the cards
+   are built from. If the two plans are not both there, or the yearly one is
+   not actually cheaper than twelve monthly payments, the whole section
+   renders nothing rather than printing a discount we cannot stand behind.
+   (yearlySavingPercent applies that same test; it is reused so this section
+   and the holiday page can never quote different percentages.)
+   ════════════════════════════════════════════════════════════════════════ */
+async function WhyYearly() {
+  const plans = await getPlans();
+  const monthly = plans.find((plan) => planTerm(plan) === 'month');
+  const yearly = plans.find((plan) => planTerm(plan) === 'year');
+  if (!monthly || !yearly) return null;
+
+  const savingPercent = yearlySavingPercent(plans);
+  if (savingPercent == null) return null;
+
+  const twelveMonths = Number(monthly.price) * 12;
+  const yearlyPrice = Number(yearly.price);
+  const saved = twelveMonths - yearlyPrice;
+  const perMonth = yearlyPrice / 12;
+
+  // The extra daily allowance, only when the yearly plan genuinely carries one.
+  const monthlyDaily = Number(monthly.dailyLimit);
+  const yearlyDaily = Number(yearly.dailyLimit);
+  const extraDaily =
+    Number.isFinite(monthlyDaily) && Number.isFinite(yearlyDaily)
+      ? yearlyDaily - monthlyDaily
+      : 0;
+
+  // Perks the yearly plan lists and the monthly one does not. The download-
+  // allowance line is dropped because it has its own card above.
+  const monthlyFeatures = new Set(
+    (monthly.features || []).map((feature) => feature.trim().toLowerCase()),
+  );
+  const yearlyOnly = (yearly.features || [])
+    .filter((feature) => typeof feature === 'string' && feature.trim())
+    .filter((feature) => !monthlyFeatures.has(feature.trim().toLowerCase()))
+    .filter((feature) => !/downloads?\s+per\s+day/i.test(feature));
+
+  return (
+    <section className='band whyy' id='why-yearly'>
+      <div className='wrap'>
+        <div className='head' style={{ marginBottom: '26px' }}>
+          <p className='kicker'>Why Yearly</p>
+          <h2>The same designs, at our lowest monthly rate</h2>
+          <p>
+            {yearly.name} works out to {money(perMonth)} a month — and it comes
+            with more than the saving.
+          </p>
+        </div>
+
+        <div className='whyy__grid'>
+          {/* The comparison, as a receipt rather than a claim. */}
+          <div className='whyy__compare'>
+            <p className='whyy__compare-h'>12 months of access</p>
+
+            <div className='whyy__line'>
+              <span className='whyy__line-label'>
+                {monthly.name}
+                <span>{money(monthly.price)}/mo × 12</span>
+              </span>
+              <span className='whyy__line-price whyy__line-price--was'>
+                {money(twelveMonths)}
+              </span>
+            </div>
+
+            <div className='whyy__line whyy__line--win'>
+              <span className='whyy__line-label'>
+                {yearly.name}
+                <span>billed once a year</span>
+              </span>
+              <span className='whyy__line-price'>{money(yearlyPrice)}</span>
+            </div>
+
+            <div className='whyy__save'>
+              <span className='whyy__save-pct'>Save {savingPercent}%</span>
+              <span className='whyy__save-amt'>
+                You keep {money(saved)} a year
+              </span>
+            </div>
+
+            <p className='whyy__fine'>
+              Renews at {money(yearlyPrice)}/year · cancel anytime
+            </p>
+          </div>
+
+          {/* What the saving does not cover. */}
+          <ul className='whyy__perks'>
+            <li>
+              <span className='ic'>
+                <svg width='19' height='19' aria-hidden='true'>
+                  <use href='#i-badge' />
+                </svg>
+              </span>
+              <div>
+                <b>{money(perMonth)} a month, effectively</b>
+                <p>
+                  Against {money(monthly.price)} a month on {monthly.name} — the
+                  lowest rate we offer.
+                </p>
+              </div>
+            </li>
+
+            {extraDaily > 0 && (
+              <li>
+                <span className='ic'>
+                  <svg width='19' height='19' aria-hidden='true'>
+                    <use href='#i-dl' />
+                  </svg>
+                </span>
+                <div>
+                  <b>{yearlyDaily} downloads a day</b>
+                  <p>
+                    {extraDaily} more every day than {monthly.name}, which
+                    allows {monthlyDaily}.
+                  </p>
+                </div>
+              </li>
+            )}
+
+            <li>
+              <span className='ic'>
+                <svg width='19' height='19' aria-hidden='true'>
+                  <use href='#i-clock' />
+                </svg>
+              </span>
+              <div>
+                <b>One payment, twelve months</b>
+                <p>
+                  Set it up once instead of watching a charge land every month.
+                </p>
+              </div>
+            </li>
+
+            {yearlyOnly.length > 0 && (
+              <li>
+                <span className='ic'>
+                  <svg width='19' height='19' aria-hidden='true'>
+                    <use href='#i-spark' />
+                  </svg>
+                </span>
+                <div>
+                  <b>Only on {yearly.name}</b>
+                  <p>{yearlyOnly.join(' · ')}</p>
+                </div>
+              </li>
+            )}
+          </ul>
+        </div>
+
+        <div className='whyy__cta'>
+          <Link className='btn btn--primary' href='/subscriptions'>
+            Start Yearly{' '}
+            <svg className='arw' width='17' height='17' aria-hidden='true'>
+              <use href='#i-arw' />
+            </svg>
+          </Link>
+          <span className='whyy__cta-note'>
+            Prefer to go month to month? {monthly.name} is{' '}
+            {money(monthly.price)}/mo.
+          </span>
+        </div>
+      </div>
+    </section>
+  );
+}
+
 /* ══ REVIEWS ════════════════════════════════════════════════════════════
    Real reviews, curated in admin (Content → Reviews) and served by the
    same getFeaturedReviews() the /subscriptions page uses. The mockup's
@@ -124,15 +297,39 @@ async function ReviewsSection() {
 // "See What You Can Create". 2400×1600 design images on the CDN host — never
 // the Spaces origin, which took 35-94s per image on the holiday page.
 const CDN = 'https://embroidize-assets.nyc3.cdn.digitaloceanspaces.com';
+// Ordered so no two neighbours are the same kind of design: the first eight
+// were all florals and insects, which showed breadth the catalogue actually
+// has none of on screen. Animals, holiday and seasonal designs are dealt
+// through them. Every file is 2400x1600 or 1280x853 — 3:2 either way, so the
+// tiles crop nothing.
 const GALLERY_IMAGES = [
+  { src: `${CDN}/1757579307803.jpg`, alt: 'Cute Baby Highland Cow' },
   { src: `${CDN}/1781583491165.png`, alt: 'Hummingbird Floral' },
-  { src: `${CDN}/1783596988670.png`, alt: 'Happy Duckling Splash' },
-  { src: `${CDN}/1780826186614.png`, alt: 'Bumble Bee Floral' },
-  { src: `${CDN}/1781507724872.png`, alt: 'Japanese Cherry Blossom' },
-  { src: `${CDN}/1780402659954.png`, alt: 'Butterflies in Wildflower Meadow' },
-  { src: `${CDN}/1770805209673.png`, alt: 'Bees in Lavender Garden' },
+  {
+    src: `${CDN}/1760157034116.png`,
+    alt: 'Happy Halloween Witch with Broom and Bats',
+  },
   { src: `${CDN}/1759667724249.png`, alt: 'Row of Embroidered Strawberries' },
+  { src: `${CDN}/1757723995277.jpg`, alt: 'Adorable Baby Giraffe' },
+  { src: `${CDN}/1781507724872.png`, alt: 'Japanese Cherry Blossom' },
+  { src: `${CDN}/1766552048650.png`, alt: 'Winter Reindeer with Snowflakes' },
+  { src: `${CDN}/1783596988670.png`, alt: 'Happy Duckling Splash' },
+  {
+    src: `${CDN}/1769079645586.png`,
+    alt: 'Autumn Gnome with Pumpkin and Fall Leaves',
+  },
+  { src: `${CDN}/1780826186614.png`, alt: 'Bumble Bee Floral' },
+  { src: `${CDN}/1759035819567.png`, alt: 'Funny Chicken Peeking Over a Post' },
   { src: `${CDN}/1759815185512.png`, alt: 'Vintage Peony Floral Bouquet' },
+  { src: `${CDN}/1756000078765.png`, alt: 'Cute Reindeer with Santa Hat' },
+  { src: `${CDN}/1780402659954.png`, alt: 'Butterflies in Wildflower Meadow' },
+  { src: `${CDN}/1760241448221.png`, alt: 'Whimsical Lantern Gnome' },
+  { src: `${CDN}/1770805209673.png`, alt: 'Bees in Lavender Garden' },
+  {
+    src: `${CDN}/1755757309888.png`,
+    alt: 'Reindeer Face with Antlers and Bow',
+  },
+  { src: `${CDN}/1787815572919.png`, alt: 'White Daisy Flower Cluster' },
 ];
 
 export default function EmbroiderySubscriptionPage() {
@@ -448,13 +645,7 @@ export default function EmbroiderySubscriptionPage() {
                       <use href='#i-arw' />
                     </svg>
                   </Link>
-                  {/* Reference label is "Explore Designs". The written spec retired it
-                     because it sends cold traffic to free browsing; kept here to match
-                     the design. Change to "See What's Included" + href="#examples"
-                     if the client wants the spec behaviour.
-                     The reference href was /designs, which does not exist; the
-                     catalogue route is /products. */}
-                  <Link className='btn btn--ghost' href='/products'>
+                  <Link className='btn btn--ghost' href='#examples'>
                     Explore Designs
                   </Link>
                 </div>
@@ -510,6 +701,7 @@ export default function EmbroiderySubscriptionPage() {
               {/* Collage. Replace each .ph with the real photograph: put a
                   next/image with `fill` INSIDE the tile, never in place of it —
                   the tile's class positions it and gives it its shape. */}
+
               <div className='collage'>
                 <figure className='c-photo' style={{ margin: '0' }}>
                   <div className='ph ph--photo'>
@@ -518,7 +710,7 @@ export default function EmbroiderySubscriptionPage() {
                       alt='White apron embroidered with a row of five cartoon chickens'
                       fill
                       priority
-                      sizes='(max-width: 900px) 40vw, 240px'
+                      sizes='(max-width: 640px) 52vw, (max-width: 900px) 40vw, 240px'
                     />
                   </div>
                 </figure>
@@ -528,7 +720,7 @@ export default function EmbroiderySubscriptionPage() {
                     alt='Embroidered designs on a canvas tote bag, a T-shirt and a pink cap'
                     fill
                     priority
-                    sizes='(max-width: 900px) 66vw, 32vw'
+                    sizes='(max-width: 640px) 92vw, (max-width: 900px) 62vw, 32vw'
                   />
                 </div>
                 <div className='c-cap ph ph--sq ph--photo'>
@@ -536,7 +728,7 @@ export default function EmbroiderySubscriptionPage() {
                     src='/landing/subscription/hero-cap-m.webp'
                     alt='Canvas tote bag embroidered with a cute highland calf wearing a pink bow'
                     fill
-                    sizes='(max-width: 900px) 30vw, 170px'
+                    sizes='(max-width: 640px) 40vw, (max-width: 900px) 30vw, 170px'
                   />
                 </div>
                 <div className='c-patch ph ph--sq ph--photo'>
@@ -544,7 +736,7 @@ export default function EmbroiderySubscriptionPage() {
                     src='/landing/subscription/hero-butterfly.webp'
                     alt='Linen cushion embroidered with wildflowers growing out of an open book'
                     fill
-                    sizes='(max-width: 900px) 30vw, 170px'
+                    sizes='(max-width: 640px) 40vw, (max-width: 900px) 30vw, 170px'
                   />
                 </div>
 
@@ -665,7 +857,7 @@ export default function EmbroiderySubscriptionPage() {
                   alt={img.alt}
                   width={340}
                   height={227}
-                  sizes='(max-width: 640px) 50vw, (max-width: 1024px) 25vw, 290px'
+                  sizes='(max-width: 640px) 50vw, (max-width: 1024px) 25vw, 180px'
                 />
               ))}
             </div>
@@ -900,19 +1092,38 @@ export default function EmbroiderySubscriptionPage() {
           </div>
         </section>
 
+        {/* Streamed on the same cached plans request as the cards above, so it
+           costs no extra round-trip and can never disagree with them. */}
+        <Suspense fallback={null}>
+          <WhyYearly />
+        </Suspense>
+
         <Suspense fallback={null}>
           <ReviewsSection />
         </Suspense>
 
-        {/* ══ THREE-COLUMN ROW — formats · trust · FAQ ════════════════════════════
-           Three sections sharing one row, exactly as in the approved design.
-           Add className="stacked" to <body> to split them into three full-width rows.
+        {/* ══ COMPATIBILITY + TRUST STRIP ═════════════════════════════════════════
+           Was three cramped columns sharing one row (a badge cloud, two stranded
+           icons and a squeezed accordion). Now one card: formats on the left,
+           the reassurances on the right, split by a hairline that turns into a
+           horizontal rule when the card stacks on narrow screens.
            ════════════════════════════════════════════════════════════════════════ */}
-        <section className='band' id='faq' style={{ paddingTop: '0' }}>
+        <section className='band' style={{ paddingTop: '0' }}>
           <div className='wrap'>
-            <div className='row3'>
-              <div>
-                <h3 className='col-h'>Supported Formats</h3>
+            <div className='compat'>
+              <div className='compat__main'>
+                <h3 className='compat__h'>
+                  <span className='compat__hic'>
+                    <svg width='18' height='18' aria-hidden='true'>
+                      <use href='#i-file' />
+                    </svg>
+                  </span>
+                  Works with your machine
+                </h3>
+                <p className='compat__p'>
+                  Every design comes in the popular machine formats — pick the
+                  one your machine reads.
+                </p>
                 <ul className='formats'>
                   <li className='fmt'>PES</li>
                   <li className='fmt'>DST</li>
@@ -924,78 +1135,90 @@ export default function EmbroiderySubscriptionPage() {
                 </ul>
               </div>
 
-              <div>
-                <h3 className='col-h'>Secure &amp; Trusted</h3>
-                <ul className='trust3'>
-                  <li>
-                    <span className='ic'>
-                      <svg width='26' height='26' aria-hidden='true'>
-                        <use href='#i-lock' />
-                      </svg>
-                    </span>
-                    <span>
-                      Secure
-                      <br />
-                      Checkout
-                    </span>
-                  </li>
-                  <li>
-                    <span className='ic'>
-                      <svg width='26' height='26' aria-hidden='true'>
-                        <use href='#i-badge' />
-                      </svg>
-                    </span>
-                    <span>Safe Payments</span>
-                  </li>
-                </ul>
-              </div>
+              <ul className='compat__trust'>
+                <li>
+                  <span className='ic'>
+                    <svg width='20' height='20' aria-hidden='true'>
+                      <use href='#i-lock' />
+                    </svg>
+                  </span>
+                  <span className='compat__label'>Secure checkout</span>
+                </li>
+                <li>
+                  <span className='ic'>
+                    <svg width='20' height='20' aria-hidden='true'>
+                      <use href='#i-badge' />
+                    </svg>
+                  </span>
+                  <span className='compat__label'>Safe payments</span>
+                </li>
+                <li>
+                  <span className='ic'>
+                    <svg width='20' height='20' aria-hidden='true'>
+                      <use href='#i-dl' />
+                    </svg>
+                  </span>
+                  <span className='compat__label'>Instant download</span>
+                </li>
+              </ul>
+            </div>
+          </div>
+        </section>
 
-              <div>
-                <h3 className='col-h'>Frequently Asked Questions</h3>
-                <div className='faq'>
-                  <details>
-                    <summary>What file formats do I get?</summary>
-                    <div className='faq__a'>
-                      <p>
-                        Designs are supplied in popular machine formats
-                        including PES, DST, EXP, JEF, VP3 and XXX, plus
-                        additional formats where available.
-                      </p>
-                    </div>
-                  </details>
-                  <details>
-                    <summary>Can I use the designs commercially?</summary>
-                    <div className='faq__a'>
-                      <p>
-                        Eligible designs may be used to make finished
-                        embroidered products, including items you sell, in line
-                        with the Embroidize licence.{' '}
-                        {/* ⚠ word to the real licence */}
-                      </p>
-                    </div>
-                  </details>
-                  <details>
-                    <summary>Can I cancel anytime?</summary>
-                    <div className='faq__a'>
-                      <p>
-                        Yes. You can manage or cancel your plan from your
-                        account at any time.{' '}
-                        {/* ⚠ match the real Refund &amp; Cancellation policy */}
-                      </p>
-                    </div>
-                  </details>
-                  <details>
-                    <summary>Do I need any embroidery experience?</summary>
-                    <div className='faq__a'>
-                      <p>
-                        No. You need an embroidery machine that reads one of the
-                        supported formats and a way to transfer the file to it.
-                        Embroidery software is not required to stitch a design.
-                      </p>
-                    </div>
-                  </details>
+        {/* ══ FAQ ═════════════════════════════════════════════════════════════════
+           Full width on its own wash band, two columns of accordions, so the
+           last thing before the footer CTA is the objection handling rather
+           than a 1.15fr sliver of it.
+           ════════════════════════════════════════════════════════════════════════ */}
+        <section className='band band--wash' id='faq'>
+          <div className='wrap'>
+            <div className='head'>
+              <p className='kicker'>Good to know</p>
+              <h2>Frequently Asked Questions</h2>
+              <p>Everything worth knowing before your first download.</p>
+            </div>
+
+            <div className='faq'>
+              <details className='faq__item'>
+                <summary>What file formats do I get?</summary>
+                <div className='faq__a'>
+                  <p>
+                    Designs are supplied in popular machine formats including
+                    PES, DST, EXP, JEF, VP3 and XXX, plus additional formats
+                    where available.
+                  </p>
                 </div>
-              </div>
+              </details>
+              <details className='faq__item'>
+                <summary>Can I use the designs commercially?</summary>
+                <div className='faq__a'>
+                  <p>
+                    Eligible designs may be used to make finished embroidered
+                    products, including items you sell, in line with the
+                    Embroidize licence. {/* ⚠ word to the real licence */}
+                  </p>
+                </div>
+              </details>
+              <details className='faq__item'>
+                <summary>Can I cancel anytime?</summary>
+                <div className='faq__a'>
+                  <p>
+                    Yes. You can manage or cancel your plan from your account at
+                    any time.{' '}
+                    {/* ⚠ match the real Refund &amp; Cancellation policy */}
+                  </p>
+                </div>
+              </details>
+              <details className='faq__item'>
+                <summary>Do I need any embroidery experience?</summary>
+                <div className='faq__a'>
+                  <p>
+                    No. You need an embroidery machine that reads one of the
+                    supported formats and a way to transfer the file to it.
+                    Embroidery software is not required to stitch a design.
+                  </p>
+                </div>
+              </details>
             </div>
           </div>
         </section>
