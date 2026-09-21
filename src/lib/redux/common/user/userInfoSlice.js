@@ -39,6 +39,13 @@ export const userInfoSlice = createApi({
         body,
       }),
     }),
+    // Is the link in this customer's email still good? Asked on page load, so an
+    // expired link can say so instead of quietly presenting a form whose submit
+    // will always be refused.
+    checkResetToken: builder.query({
+      query: (token) =>
+        `/public/reset-password/status?token=${encodeURIComponent(token)}`,
+    }),
     // Paged and filtered server-side. The endpoint used to return the whole
     // history in one response; customers with a thousand-plus downloads were
     // shipping all of it to look at one screen.
@@ -73,4 +80,5 @@ export const {
   useUpdatePasswordMutation,
   useForgotPasswordMutation,
   useResetPasswordMutation,
+  useCheckResetTokenQuery,
 } = userInfoSlice;

@@ -17,7 +17,7 @@ const ForgotPasswordModal = React.memo(function ForgotPasswordModal({ isOpen, on
   const {
     register,
     handleSubmit,
-    formState: { errors, isDirty },
+    formState: { errors },
     reset,
   } = useForm({
     resolver: zodResolver(forgotPasswordSchema),
@@ -69,9 +69,15 @@ const ForgotPasswordModal = React.memo(function ForgotPasswordModal({ isOpen, on
         </h2>
 
         {submitted ? (
-          <p className='text-green-600 text-sm mb-4 text-center'>
-            If your email is registered, a reset link will be sent shortly.
-          </p>
+          <div className='text-sm text-neutral-700 text-center space-y-2'>
+            <p>
+              If your email is registered, a reset link is on its way. It can
+              take a couple of minutes — check your spam folder too.
+            </p>
+            <p className='font-semibold text-neutral-900'>
+              The link is valid for one hour, so open it as soon as it arrives.
+            </p>
+          </div>
         ) : (
           <form onSubmit={handleSubmit(onSubmit)}>
             <div className='mb-6'>
@@ -82,7 +88,7 @@ const ForgotPasswordModal = React.memo(function ForgotPasswordModal({ isOpen, on
                 type='email'
                 id='email'
                 {...register('email')}
-                className='w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500'
+                className='w-full px-3 py-2 border border-neutral-300 rounded-md focus:outline-none focus:border-neutral-900 focus:ring-2 focus:ring-neutral-900/20'
                 placeholder='Enter your email'
                 aria-required='true'
                 aria-invalid={errors.email ? 'true' : 'false'}
@@ -94,13 +100,18 @@ const ForgotPasswordModal = React.memo(function ForgotPasswordModal({ isOpen, on
               )}
             </div>
 
+            {/* Not gated on react-hook-form's isDirty: a browser or password
+                manager filling the field does not reliably mark the form dirty,
+                which left the button greyed out and unclickable with a perfectly
+                good address typed into it. Validation already refuses an empty
+                or malformed email. */}
             <button
               type='submit'
-              disabled={isLoading || !isDirty}
+              disabled={isLoading}
               className={`w-full h-10 font-semibold rounded-md transition ${
-                isLoading || !isDirty
-                  ? 'bg-gray-400 cursor-not-allowed'
-                  : 'bg-black text-white hover:bg-blue-500'
+                isLoading
+                  ? 'bg-neutral-300 text-neutral-600 cursor-not-allowed'
+                  : 'bg-black text-white hover:bg-neutral-800'
               }`}
             >
               {isLoading ? <LoadingSpinner /> : 'Send Reset Link'}
