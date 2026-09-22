@@ -1,5 +1,6 @@
 'use client';
 
+import { useUserInfoQuery } from '@/lib/redux/common/user/userInfoSlice';
 import Cookies from 'js-cookie';
 import { usePathname } from 'next/navigation';
 import { useCallback, useEffect, useState } from 'react';
@@ -33,6 +34,15 @@ const validity = (days) => {
 
 export default function CreditPackList({ note = '', onUnavailable = null }) {
   const pathName = usePathname();
+
+  // A credit cannot be spent while a subscription is running — the download gate
+  // only reaches for the wallet when there is no active plan — so the server
+  // refuses the purchase outright. The button is hidden here for the same
+  // reason, rather than left to fail: offering someone a thing they will be told
+  // off for wanting is worse than not offering it.
+  const isLoggedIn = !!Cookies.get('token');
+  const { data: me } = useUserInfoQuery(undefined, { skip: !isLoggedIn });
+  const coveredBySubscription = me?.isSubscribed === true;
 
   const [packs, setPacks] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -135,7 +145,7 @@ export default function CreditPackList({ note = '', onUnavailable = null }) {
               {money(p.priceCents, p.currency)}
             </span>
 
-            {p.purchasable ? (
+            {p.purchasable && !coveredBySubscription ? (
               <button
                 type='button'
                 onClick={() => buy(p)}
@@ -152,6 +162,14 @@ export default function CreditPackList({ note = '', onUnavailable = null }) {
           </div>
         </div>
       ))}
+
+      {coveredBySubscription ? (
+        <p className='px-1 text-xs text-gray-600'>
+          Your plan already covers premium downloads, so there is nothing to buy
+          here — credits are only spent when there is no active plan. If you want
+          some ready for after your plan ends, just ask us.
+        </p>
+      ) : null}
 
       {error ? (
         <p role='alert' className='px-1 text-xs font-semibold text-red-600'>
