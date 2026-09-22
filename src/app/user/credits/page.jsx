@@ -94,6 +94,56 @@ export default function MyCreditsPage() {
     return () => clearInterval(timer);
   }, [load]);
 
+  // A card purchase, as the invoice renderer wants it.
+  //
+  // Not 'manual': that source prints "payment received directly" and hides the
+  // transaction ids. A card sale went through Creem, so it prints as a card
+  // payment with the order reference on it, and the footer points at the
+  // provider's dashboard — which is where the money can actually be traced.
+  //
+  // Creem is the merchant of record, so THEIR emailed receipt is the payment
+  // receipt. This document is ours: what was bought, for how much, on what date,
+  // under our own numbering. That is what someone means when they ask us for an
+  // invoice, and it is why the two can coexist.
+  const printCardInvoice = (p) => {
+    const amount = (p.amountCents || 0) / 100;
+
+    const ok = openInvoice({
+      invoice: {
+        id: p.reference,
+        source: 'creem',
+        number: p.invoiceNumber,
+        date: p.receivedAt,
+        description: p.packName || `${p.credits} download credits`,
+        amount,
+        // A refunded pack prints its credit note rather than claiming to be paid.
+        amountRefunded: p.refunded ? amount : 0,
+        currency: p.currency || 'USD',
+        status: p.refunded ? 'refunded' : 'paid',
+        receiptNumber: p.reference,
+      },
+      customer: {
+        ...(customer || {}),
+        gateway: 'creem',
+        plan: {
+          name: p.packName || `${p.credits} download credits`,
+          type: 'one-time',
+          accessType: 'credits',
+          downloadLimit: p.credits,
+          dailyLimit: null,
+        },
+      },
+    });
+
+    if (!ok) {
+      ErrorToast(
+        'Popup blocked',
+        'Allow popups for this site to open your invoice.',
+        5000,
+      );
+    }
+  };
+
   const printReceipt = (invoice) => {
     const ok = openInvoice({ invoice, customer: customer || {} });
     if (!ok) {
@@ -138,9 +188,7 @@ export default function MyCreditsPage() {
   const spends = data?.spends || [];
   const spendMeta = data?.spendMeta || {};
   const neverHadCredits = !purchases.length && !events.length && balance === 0;
-  // Card purchases carry no invoice number of ours — that is what tells them
-  // apart from the manual ledger rows in the same list.
-  const cardPayments = purchases.filter((p) => !p.invoiceNumber);
+  const cardPayments = purchases.filter((p) => p.channel === 'card');
 
   return (
     <div className='container space-y-6 px-4 py-8 sm:px-6'>
@@ -370,9 +418,28 @@ export default function MyCreditsPage() {
                         </span>
                       ) : null}
                     </div>
-                    <p className='mt-0.5 text-xs text-gray-500'>
-                      {`${fmtDate(p.receivedAt)} · ${p.method}${p.reference ? ` · ${p.reference}` : ''}`}
-                    </p>
+                    <div className='mt-0.5 flex flex-wrap items-center justify-between gap-2'>
+                      <p className='text-xs text-gray-500'>
+                        {`${fmtDate(p.receivedAt)} · ${p.method}${p.reference ? ` · ${p.reference}` : ''}`}
+                      </p>
+
+                      {p.invoiceNumber ? (
+                        <button
+                          type='button'
+                          onClick={() => printCardInvoice(p)}
+                          className='shrink-0 rounded-lg border border-gray-300 px-3 py-1.5 text-xs font-semibold text-gray-700 hover:bg-gray-50'
+                        >
+                          {`Invoice ${p.invoiceNumber}`}
+                        </button>
+                      ) : (
+                        // Purchases made before numbering existed. Says so
+                        // rather than showing a button that would print a
+                        // document with a blank number on it.
+                        <span className='text-xs text-gray-400'>
+                          No invoice number — ask us and we will issue one
+                        </span>
+                      )}
+                    </div>
                   </li>
                 ))}
               </ul>

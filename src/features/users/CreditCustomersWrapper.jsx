@@ -67,9 +67,13 @@ const authHeaders = () => {
 // the customer's own receipts already use. Built here from the ledger row so a
 // credit purchase prints the identical document, not a second rendering that
 // could drift away from the one support is looking at.
+// Both kinds of purchase print through one renderer. A card sale is NOT
+// 'manual': that source prints "payment received directly" and hides the
+// transaction ids, where a card sale should print as a card payment with its
+// order reference and a footer pointing at the provider's dashboard.
 const toInvoice = (purchase) => ({
-  id: purchase._id,
-  source: 'manual',
+  id: purchase.channel === 'card' ? purchase.reference : purchase._id,
+  source: purchase.channel === 'card' ? 'creem' : 'manual',
   number: purchase.invoiceNumber,
   date: purchase.receivedAt,
   description: purchase.packName || `${purchase.credits} download credits`,
@@ -941,11 +945,10 @@ export default function CreditCustomersWrapper({ customers = [], totals }) {
                           </p>
                           <p className='text-xs text-gray-400'>{p.invoiceNumber}</p>
                         </div>
-                        {/* Only the manual ledger has an invoice WE issued. A
-                            card sale is numbered and receipted by the payment
-                            provider, so generating our own document for it would
-                            be inventing a record — the button is left off rather
-                            than printing one with a blank number. */}
+                        {/* Both channels carry our own number now. A row from
+                            before numbering existed still has none, and prints
+                            nothing rather than a document with a blank number on
+                            it. */}
                         {p.invoiceNumber ? (
                         <button
                           type='button'
