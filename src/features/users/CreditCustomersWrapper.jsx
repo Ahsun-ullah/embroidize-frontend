@@ -127,6 +127,12 @@ export default function CreditCustomersWrapper({ customers = [], totals }) {
   const [packs, setPacks] = useState([]);
   const [packsNote, setPacksNote] = useState('');
   const [packsSaving, setPacksSaving] = useState(false);
+  // Which gateway is live, and which pack sizes the SERVER currently knows
+  // about. A row typed but not yet saved cannot be mirrored into Creem — the
+  // sync looks the pack up by size — so the button says so instead of failing.
+  const [packsGateway, setPacksGateway] = useState('');
+  const [savedSizes, setSavedSizes] = useState([]);
+  const [syncing, setSyncing] = useState(null);
 
   const loadPacks = useCallback(async () => {
     try {
@@ -134,12 +140,38 @@ export default function CreditCustomersWrapper({ customers = [], totals }) {
         headers: authHeaders(),
       });
       const data = await res.json();
-      setPacks(data?.data?.creditPacks || []);
+      const list = data?.data?.creditPacks || [];
+      setPacks(list);
       setPacksNote(data?.data?.creditPacksNote || '');
+      setPacksGateway(data?.data?.activeGateway || '');
+      setSavedSizes(list.map((p) => Number(p.credits)));
     } catch {
       setPacks([]);
     }
   }, []);
+
+  // Create the matching one-time product in Creem, which is what makes a pack
+  // payable by card. Separate from saving on purpose: it writes into another
+  // system, and doing it on every save would litter their dashboard the way the
+  // custom-order flow used to.
+  const sellWithCard = async (credits) => {
+    setSyncing(credits);
+    try {
+      const res = await fetch(`${apiBase()}/admin/credit-packs/sync-creem`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', ...authHeaders() },
+        body: JSON.stringify({ credits }),
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data?.error?.message || 'Could not sync');
+      SuccessToast('Ready to sell', data?.message || 'Pack is now buyable.', 5000);
+      await loadPacks();
+    } catch (err) {
+      ErrorToast('Could not sync', err.message, 6000);
+    } finally {
+      setSyncing(null);
+    }
+  };
 
   useEffect(() => {
     if (showPacks) loadPacks();
@@ -155,7 +187,9 @@ export default function CreditCustomersWrapper({ customers = [], totals }) {
       });
       const data = await res.json();
       if (!res.ok) throw new Error(data?.error?.message || 'Could not save');
-      setPacks(data?.data?.creditPacks || []);
+      const saved = data?.data?.creditPacks || [];
+      setPacks(saved);
+      setSavedSizes(saved.map((p) => Number(p.credits)));
       SuccessToast('Saved', 'Credit packs updated on the pricing page.', 4000);
     } catch (err) {
       ErrorToast('Could not save', err.message, 5000);
@@ -288,8 +322,10 @@ export default function CreditCustomersWrapper({ customers = [], totals }) {
             </p>
             <p className='mt-1 text-xs text-gray-500'>
               Leave this empty and the credits offer still appears, but with no
-              prices — customers ask and you quote. Nothing here is charged
-              automatically; it is what the page advertises.
+              prices — customers ask and you quote. A pack you press
+              &ldquo;Sell with card&rdquo; on gets a matching product in Creem
+              and can be bought on the spot: the credits are added by the
+              payment webhook, not by hand. The rest stay quote-and-transfer.
             </p>
 
             <div className='mt-4 space-y-2'>
@@ -345,6 +381,34 @@ export default function CreditCustomersWrapper({ customers = [], totals }) {
                       <option key={c}>{c}</option>
                     ))}
                   </select>
+                  <span className='text-xs text-gray-500'>valid for</span>
+                  <input
+                    type='number'
+                    min='1'
+                    value={p.validityDays ?? ''}
+                    onChange={(e) =>
+                      setPacks((prev) =>
+                        prev.map((x, j) =>
+                          j === i
+                            ? {
+                                ...x,
+                                // Blank is a real answer: credits that never
+                                // expire. The wallet already understands it.
+                                validityDays: e.target.value
+                                  ? Number(e.target.value)
+                                  : null,
+                              }
+                            : x,
+                        ),
+                      )
+                    }
+                    className='w-24 rounded-lg border border-gray-300 px-3 py-2 text-sm'
+                    placeholder='days'
+                  />
+                  <span className='text-xs text-gray-500'>
+                    {p.validityDays ? 'days' : 'days (blank = never expires)'}
+                  </span>
+
                   <button
                     type='button'
                     onClick={() => setPacks((prev) => prev.filter((_, j) => j !== i))}
@@ -352,6 +416,50 @@ export default function CreditCustomersWrapper({ customers = [], totals }) {
                   >
                     Remove
                   </button>
+
+                  {/* What this pack can actually do today. Two separate facts —
+                      is it mapped, and is that gateway live — because an admin
+                      looking at a pack that will not sell needs to know which
+                      half is missing. */}
+                  <div className='flex w-full flex-wrap items-center gap-3 border-t border-dashed border-gray-200 pt-2'>
+                    {p.sellableNow ? (
+                      <span className='rounded-full bg-gray-900 px-2.5 py-1 text-[11px] font-bold uppercase tracking-wide text-white'>
+                        Buyable by card
+                      </span>
+                    ) : p.hasCreemProduct ? (
+                      <span className='text-xs text-gray-500'>
+                        {`Mapped to Creem, but card checkout is off (gateway: ${packsGateway || 'unknown'})`}
+                      </span>
+                    ) : (
+                      <span className='text-xs text-gray-500'>
+                        Quote-and-transfer only
+                      </span>
+                    )}
+
+                    {!p.hasCreemProduct &&
+                      (savedSizes.includes(Number(p.credits)) ? (
+                        <button
+                          type='button'
+                          onClick={() => sellWithCard(Number(p.credits))}
+                          disabled={syncing === Number(p.credits)}
+                          className='rounded-lg border border-gray-900 px-3 py-1 text-xs font-semibold text-gray-900 hover:bg-gray-900 hover:text-white disabled:opacity-50'
+                        >
+                          {syncing === Number(p.credits)
+                            ? 'Creating…'
+                            : 'Sell with card'}
+                        </button>
+                      ) : (
+                        <span className='text-xs text-gray-400'>
+                          Save first, then it can be sold with a card
+                        </span>
+                      ))}
+
+                    {p.sales?.purchases > 0 && (
+                      <span className='text-xs text-gray-500'>
+                        {`${p.sales.purchases} sold · ${((p.sales.collectedCents || 0) / 100).toFixed(2)}`}
+                      </span>
+                    )}
+                  </div>
                 </div>
               ))}
             </div>
@@ -361,7 +469,12 @@ export default function CreditCustomersWrapper({ customers = [], totals }) {
               onClick={() =>
                 setPacks((prev) => [
                   ...prev,
-                  { credits: 100, priceCents: 500, currency: 'USD' },
+                  {
+                    credits: 100,
+                    priceCents: 500,
+                    currency: 'USD',
+                    validityDays: null,
+                  },
                 ])
               }
               className='mt-3 rounded-lg border border-gray-300 px-3 py-1.5 text-xs font-semibold text-gray-700 hover:bg-gray-50'

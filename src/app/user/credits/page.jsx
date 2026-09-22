@@ -1,5 +1,6 @@
 'use client';
 
+import CreditPackList from '@/components/Common/CreditPackList';
 import { ErrorToast } from '@/components/Common/ErrorToast';
 import { openInvoice } from '@/features/admin/invoice';
 import Cookies from 'js-cookie';
@@ -30,6 +31,11 @@ export default function MyCreditsPage() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
   const [page, setPage] = useState(1);
+  // Came back from a card payment. The credits are granted by the webhook, not
+  // by this redirect, and the browser usually wins that race — so the page says
+  // what is happening and re-reads itself for a few seconds instead of showing
+  // a stale balance to someone who has just paid.
+  const [justPaid, setJustPaid] = useState(false);
 
   const load = useCallback(async (nextPage) => {
     const token = Cookies.get('token');
@@ -65,6 +71,28 @@ export default function MyCreditsPage() {
   useEffect(() => {
     load(page);
   }, [load, page]);
+
+  useEffect(() => {
+    if (typeof window === 'undefined') return undefined;
+    if (new URLSearchParams(window.location.search).get('checkout') !== 'success') {
+      return undefined;
+    }
+
+    setJustPaid(true);
+
+    // Five looks over fifteen seconds. Creem's first delivery attempt is
+    // immediate, so this nearly always lands on the first or second try; if the
+    // webhook runs late the banner stays honest and the balance catches up on
+    // the next visit either way.
+    let tries = 0;
+    const timer = setInterval(() => {
+      tries += 1;
+      load(1);
+      if (tries >= 5) clearInterval(timer);
+    }, 3000);
+
+    return () => clearInterval(timer);
+  }, [load]);
 
   const printReceipt = (invoice) => {
     const ok = openInvoice({ invoice, customer: customer || {} });
@@ -128,6 +156,20 @@ export default function MyCreditsPage() {
         </Link>
       </div>
 
+      {justPaid && (
+        <div className='rounded-2xl border border-gray-900 bg-white p-4 shadow-sm sm:p-5'>
+          <p className='text-sm font-bold text-gray-900'>
+            Payment received — thank you.
+          </p>
+          <p className='mt-1 text-sm text-gray-600'>
+            Your credits are added the moment the payment is confirmed, usually
+            within a few seconds. This page is checking for them now. If the
+            balance below has not moved in a minute or two, refresh — and if it
+            still has not, contact us with your receipt and we will sort it out.
+          </p>
+        </div>
+      )}
+
       {neverHadCredits ? (
         <div className='rounded-2xl bg-white p-6 text-center shadow-sm sm:p-8'>
           <p className='text-lg font-bold text-gray-900'>
@@ -135,14 +177,19 @@ export default function MyCreditsPage() {
           </p>
           <p className='mx-auto mt-2 max-w-lg text-sm leading-relaxed text-gray-600'>
             Credits are prepaid downloads — a way to get premium designs without
-            a subscription. Tell us how many you need and we&apos;ll send you
-            payment details.
+            a subscription. Buy a pack below and the credits land in your account
+            as soon as the payment goes through.
           </p>
+
+          <div className='mx-auto mt-6 max-w-md text-left'>
+            <CreditPackList />
+          </div>
+
           <Link
             href='/subscriptions?pay=credits'
-            className='mt-5 inline-block rounded-xl bg-black px-6 py-3 text-sm font-semibold text-white hover:bg-gray-900'
+            className='mt-2 inline-block text-sm text-gray-600 underline underline-offset-4 hover:text-black'
           >
-            Ask about credits
+            Prefer to pay another way? Ask us
           </Link>
         </div>
       ) : (
@@ -171,7 +218,7 @@ export default function MyCreditsPage() {
                   href='/subscriptions?pay=credits'
                   className='rounded-xl bg-black px-5 py-3 text-center text-sm font-semibold text-white hover:bg-gray-900'
                 >
-                  Get more credits
+                  Other ways to pay
                 </Link>
                 <Link
                   href='/products'
@@ -180,6 +227,13 @@ export default function MyCreditsPage() {
                   Browse designs
                 </Link>
               </div>
+            </div>
+
+            <div className='mt-6 border-t border-gray-100 pt-5'>
+              <p className='mb-3 text-xs font-bold uppercase tracking-widest text-gray-500'>
+                Top up
+              </p>
+              <CreditPackList />
             </div>
 
             <div className='mt-6 grid gap-4 border-t border-gray-100 pt-5 sm:grid-cols-3'>
