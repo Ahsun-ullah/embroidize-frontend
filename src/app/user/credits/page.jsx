@@ -1,5 +1,6 @@
 'use client';
 
+import CreditPackList from '@/components/Common/CreditPackList';
 import { ErrorToast } from '@/components/Common/ErrorToast';
 import { openInvoice } from '@/features/admin/invoice';
 import Cookies from 'js-cookie';
@@ -30,6 +31,11 @@ export default function MyCreditsPage() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
   const [page, setPage] = useState(1);
+  // Came back from a card payment. The credits are granted by the webhook, not
+  // by this redirect, and the browser usually wins that race — so the page says
+  // what is happening and re-reads itself for a few seconds instead of showing
+  // a stale balance to someone who has just paid.
+  const [justPaid, setJustPaid] = useState(false);
 
   const load = useCallback(async (nextPage) => {
     const token = Cookies.get('token');
@@ -65,6 +71,28 @@ export default function MyCreditsPage() {
   useEffect(() => {
     load(page);
   }, [load, page]);
+
+  useEffect(() => {
+    if (typeof window === 'undefined') return undefined;
+    if (new URLSearchParams(window.location.search).get('checkout') !== 'success') {
+      return undefined;
+    }
+
+    setJustPaid(true);
+
+    // Five looks over fifteen seconds. Creem's first delivery attempt is
+    // immediate, so this nearly always lands on the first or second try; if the
+    // webhook runs late the banner stays honest and the balance catches up on
+    // the next visit either way.
+    let tries = 0;
+    const timer = setInterval(() => {
+      tries += 1;
+      load(1);
+      if (tries >= 5) clearInterval(timer);
+    }, 3000);
+
+    return () => clearInterval(timer);
+  }, [load]);
 
   const printReceipt = (invoice) => {
     const ok = openInvoice({ invoice, customer: customer || {} });
@@ -110,6 +138,9 @@ export default function MyCreditsPage() {
   const spends = data?.spends || [];
   const spendMeta = data?.spendMeta || {};
   const neverHadCredits = !purchases.length && !events.length && balance === 0;
+  // Card purchases carry no invoice number of ours — that is what tells them
+  // apart from the manual ledger rows in the same list.
+  const cardPayments = purchases.filter((p) => !p.invoiceNumber);
 
   return (
     <div className='container space-y-6 px-4 py-8 sm:px-6'>
@@ -128,6 +159,20 @@ export default function MyCreditsPage() {
         </Link>
       </div>
 
+      {justPaid && (
+        <div className='rounded-2xl border border-gray-900 bg-white p-4 shadow-sm sm:p-5'>
+          <p className='text-sm font-bold text-gray-900'>
+            Payment received — thank you.
+          </p>
+          <p className='mt-1 text-sm text-gray-600'>
+            Your credits are added the moment the payment is confirmed, usually
+            within a few seconds. This page is checking for them now. If the
+            balance below has not moved in a minute or two, refresh — and if it
+            still has not, contact us with your receipt and we will sort it out.
+          </p>
+        </div>
+      )}
+
       {neverHadCredits ? (
         <div className='rounded-2xl bg-white p-6 text-center shadow-sm sm:p-8'>
           <p className='text-lg font-bold text-gray-900'>
@@ -135,14 +180,19 @@ export default function MyCreditsPage() {
           </p>
           <p className='mx-auto mt-2 max-w-lg text-sm leading-relaxed text-gray-600'>
             Credits are prepaid downloads — a way to get premium designs without
-            a subscription. Tell us how many you need and we&apos;ll send you
-            payment details.
+            a subscription. Buy a pack below and the credits land in your account
+            as soon as the payment goes through.
           </p>
+
+          <div className='mx-auto mt-6 max-w-md text-left'>
+            <CreditPackList />
+          </div>
+
           <Link
             href='/subscriptions?pay=credits'
-            className='mt-5 inline-block rounded-xl bg-black px-6 py-3 text-sm font-semibold text-white hover:bg-gray-900'
+            className='mt-2 inline-block text-sm text-gray-600 underline underline-offset-4 hover:text-black'
           >
-            Ask about credits
+            Prefer to pay another way? Ask us
           </Link>
         </div>
       ) : (
@@ -171,7 +221,7 @@ export default function MyCreditsPage() {
                   href='/subscriptions?pay=credits'
                   className='rounded-xl bg-black px-5 py-3 text-center text-sm font-semibold text-white hover:bg-gray-900'
                 >
-                  Get more credits
+                  Other ways to pay
                 </Link>
                 <Link
                   href='/products'
@@ -180,6 +230,13 @@ export default function MyCreditsPage() {
                   Browse designs
                 </Link>
               </div>
+            </div>
+
+            <div className='mt-6 border-t border-gray-100 pt-5'>
+              <p className='mb-3 text-xs font-bold uppercase tracking-widest text-gray-500'>
+                Top up
+              </p>
+              <CreditPackList />
             </div>
 
             <div className='mt-6 grid gap-4 border-t border-gray-100 pt-5 sm:grid-cols-3'>
@@ -285,6 +342,43 @@ export default function MyCreditsPage() {
             )}
           </div>
 
+          {/* ── Card payments ──
+              The receipts table above is the MANUAL ledger — money taken
+              outside a gateway, each row with an invoice number we issued and a
+              printable receipt. A card purchase has neither: the payment
+              provider numbers and emails that receipt. It still has to appear
+              here, or a customer who paid by card sees no record of the payment
+              anywhere on their account. */}
+          {cardPayments.length > 0 && (
+            <div className='rounded-2xl bg-white p-4 shadow-sm sm:p-6'>
+              <h2 className='text-lg font-bold text-gray-900'>Card payments</h2>
+              <p className='mt-1 text-sm text-gray-500'>
+                Paid by card at checkout. Your receipt for these was emailed by
+                our payment provider.
+              </p>
+
+              <ul className='mt-4 divide-y divide-gray-100'>
+                {cardPayments.map((p) => (
+                  <li key={p._id} className='py-3'>
+                    <div className='flex flex-wrap items-baseline justify-between gap-2'>
+                      <p className='text-sm font-semibold text-gray-900'>
+                        {`${p.credits} credits · ${money(p.amountCents, p.currency)}`}
+                      </p>
+                      {p.refunded ? (
+                        <span className='rounded-full bg-gray-900 px-2 py-0.5 text-[11px] font-bold uppercase tracking-wide text-white'>
+                          Refunded
+                        </span>
+                      ) : null}
+                    </div>
+                    <p className='mt-0.5 text-xs text-gray-500'>
+                      {`${fmtDate(p.receivedAt)} · ${p.method}${p.reference ? ` · ${p.reference}` : ''}`}
+                    </p>
+                  </li>
+                ))}
+              </ul>
+            </div>
+          )}
+
           {/* ── Activity ── */}
           <div className='grid gap-6 lg:grid-cols-2'>
             <div className='rounded-2xl bg-white p-4 shadow-sm sm:p-6'>
@@ -299,12 +393,16 @@ export default function MyCreditsPage() {
                     <li key={e._id} className='py-3'>
                       <div className='flex items-baseline justify-between gap-3'>
                         <p className='text-sm font-semibold text-gray-900'>
-                          {/* A correction REPLACED the balance rather than
-                              adding to it — "+100" would be a lie about what
-                              happened to their account. */}
+                          {/* Three different things, and each has to read as
+                              itself. A correction REPLACED the balance rather
+                              than adding to it, so "+100" would be a lie. And a
+                              refund takes credits AWAY — the old template
+                              rendered that as "+-38 credits". */}
                           {e.corrected
                             ? `Balance set to ${e.balanceAfter}`
-                            : `+${e.added} credit${e.added === 1 ? '' : 's'}`}
+                            : e.added < 0
+                              ? `${Math.abs(e.added)} credit${e.added === -1 ? '' : 's'} taken back`
+                              : `+${e.added} credit${e.added === 1 ? '' : 's'}`}
                         </p>
                         <span className='shrink-0 whitespace-nowrap text-xs text-gray-500'>
                           {e.balanceAfter} total

@@ -2,6 +2,7 @@
 import { ErrorToast } from '@/components/Common/ErrorToast';
 import OfferCountdown from '@/components/Common/OfferCountdown';
 import PaymentHelpModal from '@/components/Common/PaymentHelpModal';
+import CreditPackList from '@/components/Common/CreditPackList';
 import PurchaseButton from '@/components/Common/PurchaseButton';
 import { SuccessToast } from '@/components/Common/SuccessToast';
 import Footer from '@/components/user/HomePage/Footer';
@@ -1016,9 +1017,11 @@ export default function SubscriptionsPageClient({
             comparison that misleads. They sit under the grid as their own
             offer, for the customer who only wants a handful of designs.
 
-            There is no "buy" button because there is no checkout for this: a
-            person quotes it, takes the payment and adds the credits by hand.
-            Saying so plainly is the honest version of the offer.
+            A pack that has been mapped to the live gateway now carries a real
+            Buy button; one that has not still falls back to the quote-and-pay
+            route below, which is how every pack was sold before. Both are
+            honest, and the list says which is which rather than promising a
+            checkout that does not exist.
           */}
           <div className='mt-10 rounded-2xl bg-white p-6 shadow-sm ring-1 ring-black/5 md:p-8'>
             <div className='flex flex-col gap-6 md:flex-row md:items-start md:justify-between'>
@@ -1050,30 +1053,7 @@ export default function SubscriptionsPageClient({
               </div>
 
               <div className='w-full md:w-auto md:min-w-[280px]'>
-                {creditPacks.length > 0 && (
-                  <div className='mb-4 space-y-2'>
-                    {creditPacks.map((p) => (
-                      <div
-                        key={`${p.credits}-${p.priceCents}`}
-                        className='flex items-baseline justify-between rounded-xl bg-gray-50 px-4 py-3'
-                      >
-                        <span className='text-sm font-semibold text-black'>
-                          {p.credits} credits
-                        </span>
-                        <span className='text-sm font-bold text-black'>
-                          {(p.currency || 'USD') === 'USD'
-                            ? `$${((p.priceCents || 0) / 100).toFixed(2)}`
-                            : `${p.currency} ${((p.priceCents || 0) / 100).toFixed(2)}`}
-                        </span>
-                      </div>
-                    ))}
-                    {siteConfig?.creditPacksNote && (
-                      <p className='px-1 text-xs text-gray-500'>
-                        {siteConfig.creditPacksNote}
-                      </p>
-                    )}
-                  </div>
-                )}
+                <CreditPackList note={siteConfig?.creditPacksNote || ''} />
 
                 <button
                   onClick={() => {
@@ -1087,7 +1067,8 @@ export default function SubscriptionsPageClient({
                     : 'Ask us about credits'}
                 </button>
                 <p className='mt-2 text-center text-xs text-gray-500'>
-                  Tell us how many you need and we&apos;ll send payment details.
+                  Prefer to pay another way, or need a size that isn&apos;t
+                  listed? Tell us how many and we&apos;ll send payment details.
                 </p>
               </div>
             </div>

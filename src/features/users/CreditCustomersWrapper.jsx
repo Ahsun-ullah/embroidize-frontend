@@ -127,6 +127,16 @@ export default function CreditCustomersWrapper({ customers = [], totals }) {
   const [packs, setPacks] = useState([]);
   const [packsNote, setPacksNote] = useState('');
   const [packsSaving, setPacksSaving] = useState(false);
+  // Which gateway is live, and which pack sizes the SERVER currently knows
+  // about. A row typed but not yet saved cannot be mirrored into Creem — the
+  // sync looks the pack up by size — so the button says so instead of failing.
+  const [packsGateway, setPacksGateway] = useState('');
+  const [savedSizes, setSavedSizes] = useState([]);
+  const [syncing, setSyncing] = useState(null);
+  // Anything the server could not finish on the payment provider's side. Kept on
+  // screen rather than only in a toast: it is the one message that means a pack
+  // may not sell, and a toast that scrolls past is how that gets missed.
+  const [packWarnings, setPackWarnings] = useState([]);
 
   const loadPacks = useCallback(async () => {
     try {
@@ -134,12 +144,53 @@ export default function CreditCustomersWrapper({ customers = [], totals }) {
         headers: authHeaders(),
       });
       const data = await res.json();
-      setPacks(data?.data?.creditPacks || []);
+      const list = data?.data?.creditPacks || [];
+      setPacks(list);
       setPacksNote(data?.data?.creditPacksNote || '');
+      setPacksGateway(data?.data?.activeGateway || '');
+      setSavedSizes(list.map((p) => Number(p.credits)));
     } catch {
       setPacks([]);
     }
   }, []);
+
+  // Create the matching one-time product in Creem, which is what makes a pack
+  // payable by card. Separate from saving on purpose: it writes into another
+  // system, and doing it on every save would litter their dashboard the way the
+  // custom-order flow used to.
+  const sellWithCard = async (credits) => {
+    setSyncing(credits);
+    try {
+      const res = await fetch(`${apiBase()}/admin/credit-packs/sync-creem`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', ...authHeaders() },
+        body: JSON.stringify({ credits }),
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data?.error?.message || 'Could not sync');
+      SuccessToast('Ready to sell', data?.message || 'Pack is now buyable.', 5000);
+      // Only this row changes. A full reload would overwrite every other row
+      // with the server's copy — silently throwing away a price the admin had
+      // typed but not yet saved.
+      const productId = data?.data?.creemProductId || '';
+      setPacks((prev) =>
+        prev.map((x) =>
+          Number(x.credits) === credits
+            ? {
+                ...x,
+                creemProductId: productId || x.creemProductId,
+                hasCreemProduct: true,
+                sellableNow: packsGateway === 'creem',
+              }
+            : x,
+        ),
+      );
+    } catch (err) {
+      ErrorToast('Could not sync', err.message, 6000);
+    } finally {
+      setSyncing(null);
+    }
+  };
 
   useEffect(() => {
     if (showPacks) loadPacks();
@@ -155,8 +206,15 @@ export default function CreditCustomersWrapper({ customers = [], totals }) {
       });
       const data = await res.json();
       if (!res.ok) throw new Error(data?.error?.message || 'Could not save');
-      setPacks(data?.data?.creditPacks || []);
-      SuccessToast('Saved', 'Credit packs updated on the pricing page.', 4000);
+      const saved = data?.data?.creditPacks || [];
+      setPacks(saved);
+      setSavedSizes(saved.map((p) => Number(p.credits)));
+      setPackWarnings(data?.data?.warnings || []);
+      SuccessToast(
+        'Saved',
+        data?.message || 'Credit packs updated on the pricing page.',
+        4000,
+      );
     } catch (err) {
       ErrorToast('Could not save', err.message, 5000);
     } finally {
@@ -288,9 +346,26 @@ export default function CreditCustomersWrapper({ customers = [], totals }) {
             </p>
             <p className='mt-1 text-xs text-gray-500'>
               Leave this empty and the credits offer still appears, but with no
-              prices — customers ask and you quote. Nothing here is charged
-              automatically; it is what the page advertises.
+              prices — customers ask and you quote. A pack you press
+              &ldquo;Sell with card&rdquo; on gets a matching product in Creem
+              and can be bought on the spot: the credits are added by the
+              payment webhook, not by hand. The rest stay quote-and-transfer.
             </p>
+            <p className='mt-2 text-xs text-gray-500'>
+              Change a price here and it applies everywhere the moment you save —
+              the site, the checkout page and the receipt all take the figure
+              from this list. Nothing to re-sync.
+            </p>
+
+            {packWarnings.length > 0 && (
+              <div className='mt-3 rounded-lg border border-gray-900 bg-gray-50 p-3'>
+                {packWarnings.map((w, i) => (
+                  <p key={i} className='text-xs font-semibold text-gray-900'>
+                    {w}
+                  </p>
+                ))}
+              </div>
+            )}
 
             <div className='mt-4 space-y-2'>
               {packs.map((p, i) => (
@@ -345,6 +420,34 @@ export default function CreditCustomersWrapper({ customers = [], totals }) {
                       <option key={c}>{c}</option>
                     ))}
                   </select>
+                  <span className='text-xs text-gray-500'>valid for</span>
+                  <input
+                    type='number'
+                    min='1'
+                    value={p.validityDays ?? ''}
+                    onChange={(e) =>
+                      setPacks((prev) =>
+                        prev.map((x, j) =>
+                          j === i
+                            ? {
+                                ...x,
+                                // Blank is a real answer: credits that never
+                                // expire. The wallet already understands it.
+                                validityDays: e.target.value
+                                  ? Number(e.target.value)
+                                  : null,
+                              }
+                            : x,
+                        ),
+                      )
+                    }
+                    className='w-24 rounded-lg border border-gray-300 px-3 py-2 text-sm'
+                    placeholder='days'
+                  />
+                  <span className='text-xs text-gray-500'>
+                    {p.validityDays ? 'days' : 'days (blank = never expires)'}
+                  </span>
+
                   <button
                     type='button'
                     onClick={() => setPacks((prev) => prev.filter((_, j) => j !== i))}
@@ -352,6 +455,50 @@ export default function CreditCustomersWrapper({ customers = [], totals }) {
                   >
                     Remove
                   </button>
+
+                  {/* What this pack can actually do today. Two separate facts —
+                      is it mapped, and is that gateway live — because an admin
+                      looking at a pack that will not sell needs to know which
+                      half is missing. */}
+                  <div className='flex w-full flex-wrap items-center gap-3 border-t border-dashed border-gray-200 pt-2'>
+                    {p.sellableNow ? (
+                      <span className='rounded-full bg-gray-900 px-2.5 py-1 text-[11px] font-bold uppercase tracking-wide text-white'>
+                        Buyable by card
+                      </span>
+                    ) : p.hasCreemProduct ? (
+                      <span className='text-xs text-gray-500'>
+                        {`Mapped to Creem, but card checkout is off (gateway: ${packsGateway || 'unknown'})`}
+                      </span>
+                    ) : (
+                      <span className='text-xs text-gray-500'>
+                        Quote-and-transfer only
+                      </span>
+                    )}
+
+                    {!p.hasCreemProduct &&
+                      (savedSizes.includes(Number(p.credits)) ? (
+                        <button
+                          type='button'
+                          onClick={() => sellWithCard(Number(p.credits))}
+                          disabled={syncing === Number(p.credits)}
+                          className='rounded-lg border border-gray-900 px-3 py-1 text-xs font-semibold text-gray-900 hover:bg-gray-900 hover:text-white disabled:opacity-50'
+                        >
+                          {syncing === Number(p.credits)
+                            ? 'Creating…'
+                            : 'Sell with card'}
+                        </button>
+                      ) : (
+                        <span className='text-xs text-gray-400'>
+                          Save first, then it can be sold with a card
+                        </span>
+                      ))}
+
+                    {p.sales?.purchases > 0 && (
+                      <span className='text-xs text-gray-500'>
+                        {`${p.sales.purchases} sold · ${((p.sales.collectedCents || 0) / 100).toFixed(2)}`}
+                      </span>
+                    )}
+                  </div>
                 </div>
               ))}
             </div>
@@ -361,7 +508,12 @@ export default function CreditCustomersWrapper({ customers = [], totals }) {
               onClick={() =>
                 setPacks((prev) => [
                   ...prev,
-                  { credits: 100, priceCents: 500, currency: 'USD' },
+                  {
+                    credits: 100,
+                    priceCents: 500,
+                    currency: 'USD',
+                    validityDays: null,
+                  },
                 ])
               }
               className='mt-3 rounded-lg border border-gray-300 px-3 py-1.5 text-xs font-semibold text-gray-700 hover:bg-gray-50'
@@ -734,10 +886,14 @@ export default function CreditCustomersWrapper({ customers = [], totals }) {
                         <div className='flex items-center justify-between'>
                           <p className='text-sm font-semibold text-gray-900'>
                             {/* A correction REPLACED the balance rather than
-                                adding to it; "+100" would misreport it. */}
+                                adding to it; "+100" would misreport it. And a
+                                refund takes credits away, which this used to
+                                render as "+-38 credits". */}
                             {e.corrected
                               ? `Balance set to ${e.balanceAfter}`
-                              : `+${e.added} credits`}
+                              : e.added < 0
+                                ? `${Math.abs(e.added)} credits taken back`
+                                : `+${e.added} credits`}
                           </p>
                           <span className='text-xs text-gray-500'>
                             {fmtDate(e.at)}
@@ -772,8 +928,12 @@ export default function CreditCustomersWrapper({ customers = [], totals }) {
                       >
                         <div>
                           <p className='text-sm font-semibold text-gray-900'>
-                            {p.credits} credits ·{' '}
-                            {money(p.amountCents, p.currency)}
+                            {`${p.credits} credits · ${money(p.amountCents, p.currency)}`}
+                            {p.refunded ? (
+                              <span className='ml-2 rounded-full bg-gray-900 px-2 py-0.5 text-[11px] font-bold uppercase tracking-wide text-white'>
+                                Refunded
+                              </span>
+                            ) : null}
                           </p>
                           <p className='text-xs text-gray-500'>
                             {fmtDate(p.receivedAt)} · {p.method}
@@ -781,6 +941,12 @@ export default function CreditCustomersWrapper({ customers = [], totals }) {
                           </p>
                           <p className='text-xs text-gray-400'>{p.invoiceNumber}</p>
                         </div>
+                        {/* Only the manual ledger has an invoice WE issued. A
+                            card sale is numbered and receipted by the payment
+                            provider, so generating our own document for it would
+                            be inventing a record — the button is left off rather
+                            than printing one with a blank number. */}
+                        {p.invoiceNumber ? (
                         <button
                           type='button'
                           onClick={() =>
@@ -797,6 +963,7 @@ export default function CreditCustomersWrapper({ customers = [], totals }) {
                         >
                           Invoice
                         </button>
+                        ) : null}
                       </li>
                     ))}
                   </ul>
