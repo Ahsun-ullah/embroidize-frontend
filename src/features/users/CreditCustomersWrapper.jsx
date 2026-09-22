@@ -133,6 +133,10 @@ export default function CreditCustomersWrapper({ customers = [], totals }) {
   const [packsGateway, setPacksGateway] = useState('');
   const [savedSizes, setSavedSizes] = useState([]);
   const [syncing, setSyncing] = useState(null);
+  // Anything the server could not finish on the payment provider's side. Kept on
+  // screen rather than only in a toast: it is the one message that means a pack
+  // may not sell, and a toast that scrolls past is how that gets missed.
+  const [packWarnings, setPackWarnings] = useState([]);
 
   const loadPacks = useCallback(async () => {
     try {
@@ -190,7 +194,12 @@ export default function CreditCustomersWrapper({ customers = [], totals }) {
       const saved = data?.data?.creditPacks || [];
       setPacks(saved);
       setSavedSizes(saved.map((p) => Number(p.credits)));
-      SuccessToast('Saved', 'Credit packs updated on the pricing page.', 4000);
+      setPackWarnings(data?.data?.warnings || []);
+      SuccessToast(
+        'Saved',
+        data?.message || 'Credit packs updated on the pricing page.',
+        4000,
+      );
     } catch (err) {
       ErrorToast('Could not save', err.message, 5000);
     } finally {
@@ -327,6 +336,21 @@ export default function CreditCustomersWrapper({ customers = [], totals }) {
               and can be bought on the spot: the credits are added by the
               payment webhook, not by hand. The rest stay quote-and-transfer.
             </p>
+            <p className='mt-2 text-xs text-gray-500'>
+              Change a price here and it applies everywhere the moment you save —
+              the site, the checkout page and the receipt all take the figure
+              from this list. Nothing to re-sync.
+            </p>
+
+            {packWarnings.length > 0 && (
+              <div className='mt-3 rounded-lg border border-gray-900 bg-gray-50 p-3'>
+                {packWarnings.map((w, i) => (
+                  <p key={i} className='text-xs font-semibold text-gray-900'>
+                    {w}
+                  </p>
+                ))}
+              </div>
+            )}
 
             <div className='mt-4 space-y-2'>
               {packs.map((p, i) => (
