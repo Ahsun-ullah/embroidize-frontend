@@ -348,6 +348,20 @@ export default function EmbroiderySubscriptionPage() {
         aria-hidden='true'
       >
         <defs>
+          {/* Calendar with a plus in the leaf — "a new design, today". */}
+          <symbol
+            id='i-cal'
+            viewBox='0 0 24 24'
+            fill='none'
+            stroke='currentColor'
+            strokeWidth='1.8'
+            strokeLinecap='round'
+            strokeLinejoin='round'
+          >
+            <rect x='3.4' y='5.2' width='17.2' height='15.4' rx='2.4' />
+            <path d='M3.4 9.9h17.2M8.2 3.4v3.6M15.8 3.4v3.6' />
+            <path d='M12 13.3v3.6M10.2 15.1h3.6' />
+          </symbol>
           <symbol
             id='i-spark'
             viewBox='0 0 24 24'
@@ -839,8 +853,81 @@ export default function EmbroiderySubscriptionPage() {
           </div>
         </section>
 
+        {/* ══ NEW DESIGNS EVERY DAY ═══════════════════════════════════════════════
+           The page's key value message, so it is the one band that breaks the
+           white/wash run: brand pink, drawn from the page's OWN --brand-500 →
+           --brand-400 tokens rather than typed hexes, so it can never drift
+           from the buttons around it. The section below it had paddingTop:0
+           to sit flush against the white band that used to precede it; that is
+           restored now that a coloured band separates them.
+           ═══════════════════════════════════════════════════════════════════════ */}
+        <section className='band grows' id='grows'>
+          <div className='wrap grows__wrap'>
+            <div className='grows__copy'>
+              <p className='grows__pill'>Updated Daily</p>
+              <h2>New Designs Every Day. 18,000+ Ready to Stitch.</h2>
+              <p className='grows__lede'>
+                We upload fresh embroidery designs every day based on
+                what&apos;s trending and what embroiderers are asking for — and
+                every one is included in your subscription. Plus instant access
+                to 18,000+ designs across every category.
+              </p>
+              <a className='btn grows__btn' href='#pricing'>
+                View Plans{' '}
+                <svg className='arw' width='17' height='17' aria-hidden='true'>
+                  <use href='#i-arw' />
+                </svg>
+              </a>
+            </div>
+
+            <div className='grows__stats'>
+              <article className='grows__card'>
+                <span className='grows__ic'>
+                  <svg width='24' height='24' aria-hidden='true'>
+                    <use href='#i-cal' />
+                  </svg>
+                </span>
+                <div>
+                  <p className='grows__big'>Daily</p>
+                  <p className='grows__small'>New designs uploaded every day</p>
+                </div>
+              </article>
+
+              <article className='grows__card'>
+                <span className='grows__ic'>
+                  <svg width='24' height='24' aria-hidden='true'>
+                    <use href='#i-layers' />
+                  </svg>
+                </span>
+                <div>
+                  <p className='grows__big'>18,000+</p>
+                  <p className='grows__small'>Designs across all categories</p>
+                </div>
+              </article>
+
+              <article className='grows__card'>
+                <span className='grows__ic'>
+                  <svg width='24' height='24' aria-hidden='true'>
+                    <use href='#i-check' />
+                  </svg>
+                </span>
+                <div>
+                  <p className='grows__big'>Always Included</p>
+                  <p className='grows__small'>
+                    Every new upload is yours from day one
+                  </p>
+                </div>
+              </article>
+
+              <p className='script grows__script'>
+                Your library grows every day!
+              </p>
+            </div>
+          </div>
+        </section>
+
         {/* ══ SEE WHAT YOU CAN CREATE ═════════════════════════════════════════════ */}
-        <section className='band' id='examples' style={{ paddingTop: '0' }}>
+        <section className='band' id='examples'>
           <div className='wrap'>
             <div className='head' style={{ marginBottom: '20px' }}>
               <h2>See What You Can Create</h2>

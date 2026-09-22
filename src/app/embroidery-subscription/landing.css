@@ -1901,3 +1901,169 @@ html {
     height: 48px;
   }
 }
+
+/* ===========================================================================
+   NEW DESIGNS EVERY DAY  (.grows)
+   ---------------------------------------------------------------------------
+   The one coloured band on the page. Its gradient is built from the page's own
+   --brand-500 → --brand-400 rather than typed hexes: on this page those ARE
+   the #F03573 → #F0508C of the approved design, and on the Q4 page the same
+   block resolves to that page's slightly deeper pink, so neither band can
+   drift away from the buttons beside it.
+
+   The stitch texture is a dashed-thread SVG tile rather than a photo — three
+   offset rows of running stitch, painted in an ::before at 8% so it reads as
+   fabric and never as noise behind the copy (which sits on z-index 1).
+   =========================================================================== */
+.esub .grows {
+  background: linear-gradient(
+    135deg,
+    var(--brand-500) 0%,
+    var(--brand-400) 100%
+  );
+  overflow: hidden;
+}
+.esub .grows::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  opacity: 0.08;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='72' height='72' viewBox='0 0 72 72'%3E%3Cg fill='none' stroke='%23ffffff' stroke-width='2.4' stroke-linecap='round' stroke-dasharray='10 12'%3E%3Cpath d='M-12 14h96'/%3E%3Cpath d='M-4 38h96'/%3E%3Cpath d='M-18 62h96'/%3E%3C/g%3E%3C/svg%3E");
+  background-size: 72px 72px;
+}
+.esub .grows__wrap {
+  position: relative;
+  z-index: 1;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 0.92fr);
+  gap: 56px;
+  align-items: center;
+}
+
+/* ---- left column -------------------------------------------------------- */
+.esub .grows__pill {
+  display: inline-block;
+  background: #fff;
+  color: var(--brand-600);
+  font-family:
+    var(--font-poppins), Poppins, var(--font-inter), Inter, sans-serif;
+  font-size: 0.625rem;
+  font-weight: 700;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  padding: 7px 16px;
+  border-radius: var(--r-pill);
+  margin: 0 0 18px;
+}
+.esub .grows h2 {
+  color: #fff;
+  margin: 0 0 16px;
+  max-width: 19ch;
+}
+.esub .grows__lede {
+  color: rgba(255, 255, 255, 0.94);
+  font-size: 0.9375rem;
+  max-width: 48ch;
+  margin: 0 0 26px;
+}
+.esub .grows__btn {
+  background: #fff;
+  color: var(--brand-600);
+  box-shadow: 0 6px 18px rgba(11, 15, 30, 0.14);
+}
+.esub .grows__btn:hover {
+  background: var(--brand-50);
+  color: var(--brand-700);
+  transform: translateY(-1px);
+  box-shadow: 0 10px 24px rgba(11, 15, 30, 0.18);
+}
+.esub .grows__btn:active {
+  transform: none;
+}
+
+/* ---- right column: three stat cards ------------------------------------- */
+.esub .grows__stats {
+  display: grid;
+  gap: 14px;
+}
+.esub .grows__card {
+  display: grid;
+  grid-template-columns: 46px minmax(0, 1fr);
+  gap: 16px;
+  align-items: center;
+  background: #fff;
+  border-radius: 16px;
+  padding: 18px 20px;
+  box-shadow: 0 10px 26px rgba(11, 15, 30, 0.12);
+}
+.esub .grows__ic {
+  width: 46px;
+  height: 46px;
+  border-radius: 12px;
+  display: grid;
+  place-items: center;
+  background: var(--brand-100);
+  color: var(--brand-500);
+}
+.esub .grows__big {
+  font-family:
+    var(--font-poppins), Poppins, var(--font-inter), Inter, sans-serif;
+  font-weight: 700;
+  font-size: 1.1875rem;
+  line-height: 1.2;
+  letter-spacing: -0.01em;
+  color: var(--ink-900);
+  margin: 0;
+}
+.esub .grows__small {
+  font-size: 0.8125rem;
+  line-height: 1.45;
+  color: var(--ink-600);
+  margin: 3px 0 0;
+}
+.esub .grows__script {
+  color: #fff;
+  font-size: 1.3rem;
+  text-align: right;
+  margin: 12px 6px 0 0;
+  transform: rotate(-3deg);
+}
+
+/* ---- responsive --------------------------------------------------------- */
+@media (max-width: 1024px) {
+  .esub .grows__wrap {
+    grid-template-columns: 1fr;
+    gap: 34px;
+  }
+  .esub .grows h2,
+  .esub .grows__lede {
+    max-width: none;
+  }
+  .esub .grows__script {
+    text-align: left;
+    margin: 12px 0 0 6px;
+  }
+}
+@media (max-width: 640px) {
+  .esub .grows__card {
+    grid-template-columns: 40px minmax(0, 1fr);
+    gap: 13px;
+    padding: 15px 16px;
+  }
+  .esub .grows__ic {
+    width: 40px;
+    height: 40px;
+    border-radius: 11px;
+  }
+  .esub .grows__ic svg {
+    width: 21px;
+    height: 21px;
+  }
+  .esub .grows__big {
+    font-size: 1.0625rem;
+  }
+  .esub .grows__btn {
+    width: 100%;
+  }
+}
