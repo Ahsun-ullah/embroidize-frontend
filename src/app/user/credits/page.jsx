@@ -138,6 +138,9 @@ export default function MyCreditsPage() {
   const spends = data?.spends || [];
   const spendMeta = data?.spendMeta || {};
   const neverHadCredits = !purchases.length && !events.length && balance === 0;
+  // Card purchases carry no invoice number of ours — that is what tells them
+  // apart from the manual ledger rows in the same list.
+  const cardPayments = purchases.filter((p) => !p.invoiceNumber);
 
   return (
     <div className='container space-y-6 px-4 py-8 sm:px-6'>
@@ -339,6 +342,43 @@ export default function MyCreditsPage() {
             )}
           </div>
 
+          {/* ── Card payments ──
+              The receipts table above is the MANUAL ledger — money taken
+              outside a gateway, each row with an invoice number we issued and a
+              printable receipt. A card purchase has neither: the payment
+              provider numbers and emails that receipt. It still has to appear
+              here, or a customer who paid by card sees no record of the payment
+              anywhere on their account. */}
+          {cardPayments.length > 0 && (
+            <div className='rounded-2xl bg-white p-4 shadow-sm sm:p-6'>
+              <h2 className='text-lg font-bold text-gray-900'>Card payments</h2>
+              <p className='mt-1 text-sm text-gray-500'>
+                Paid by card at checkout. Your receipt for these was emailed by
+                our payment provider.
+              </p>
+
+              <ul className='mt-4 divide-y divide-gray-100'>
+                {cardPayments.map((p) => (
+                  <li key={p._id} className='py-3'>
+                    <div className='flex flex-wrap items-baseline justify-between gap-2'>
+                      <p className='text-sm font-semibold text-gray-900'>
+                        {`${p.credits} credits · ${money(p.amountCents, p.currency)}`}
+                      </p>
+                      {p.refunded ? (
+                        <span className='rounded-full bg-gray-900 px-2 py-0.5 text-[11px] font-bold uppercase tracking-wide text-white'>
+                          Refunded
+                        </span>
+                      ) : null}
+                    </div>
+                    <p className='mt-0.5 text-xs text-gray-500'>
+                      {`${fmtDate(p.receivedAt)} · ${p.method}${p.reference ? ` · ${p.reference}` : ''}`}
+                    </p>
+                  </li>
+                ))}
+              </ul>
+            </div>
+          )}
+
           {/* ── Activity ── */}
           <div className='grid gap-6 lg:grid-cols-2'>
             <div className='rounded-2xl bg-white p-4 shadow-sm sm:p-6'>
@@ -353,12 +393,16 @@ export default function MyCreditsPage() {
                     <li key={e._id} className='py-3'>
                       <div className='flex items-baseline justify-between gap-3'>
                         <p className='text-sm font-semibold text-gray-900'>
-                          {/* A correction REPLACED the balance rather than
-                              adding to it — "+100" would be a lie about what
-                              happened to their account. */}
+                          {/* Three different things, and each has to read as
+                              itself. A correction REPLACED the balance rather
+                              than adding to it, so "+100" would be a lie. And a
+                              refund takes credits AWAY — the old template
+                              rendered that as "+-38 credits". */}
                           {e.corrected
                             ? `Balance set to ${e.balanceAfter}`
-                            : `+${e.added} credit${e.added === 1 ? '' : 's'}`}
+                            : e.added < 0
+                              ? `${Math.abs(e.added)} credit${e.added === -1 ? '' : 's'} taken back`
+                              : `+${e.added} credit${e.added === 1 ? '' : 's'}`}
                         </p>
                         <span className='shrink-0 whitespace-nowrap text-xs text-gray-500'>
                           {e.balanceAfter} total

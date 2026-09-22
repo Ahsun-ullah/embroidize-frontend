@@ -169,7 +169,22 @@ export default function CreditCustomersWrapper({ customers = [], totals }) {
       const data = await res.json();
       if (!res.ok) throw new Error(data?.error?.message || 'Could not sync');
       SuccessToast('Ready to sell', data?.message || 'Pack is now buyable.', 5000);
-      await loadPacks();
+      // Only this row changes. A full reload would overwrite every other row
+      // with the server's copy — silently throwing away a price the admin had
+      // typed but not yet saved.
+      const productId = data?.data?.creemProductId || '';
+      setPacks((prev) =>
+        prev.map((x) =>
+          Number(x.credits) === credits
+            ? {
+                ...x,
+                creemProductId: productId || x.creemProductId,
+                hasCreemProduct: true,
+                sellableNow: packsGateway === 'creem',
+              }
+            : x,
+        ),
+      );
     } catch (err) {
       ErrorToast('Could not sync', err.message, 6000);
     } finally {
@@ -871,10 +886,14 @@ export default function CreditCustomersWrapper({ customers = [], totals }) {
                         <div className='flex items-center justify-between'>
                           <p className='text-sm font-semibold text-gray-900'>
                             {/* A correction REPLACED the balance rather than
-                                adding to it; "+100" would misreport it. */}
+                                adding to it; "+100" would misreport it. And a
+                                refund takes credits away, which this used to
+                                render as "+-38 credits". */}
                             {e.corrected
                               ? `Balance set to ${e.balanceAfter}`
-                              : `+${e.added} credits`}
+                              : e.added < 0
+                                ? `${Math.abs(e.added)} credits taken back`
+                                : `+${e.added} credits`}
                           </p>
                           <span className='text-xs text-gray-500'>
                             {fmtDate(e.at)}
@@ -909,8 +928,12 @@ export default function CreditCustomersWrapper({ customers = [], totals }) {
                       >
                         <div>
                           <p className='text-sm font-semibold text-gray-900'>
-                            {p.credits} credits ·{' '}
-                            {money(p.amountCents, p.currency)}
+                            {`${p.credits} credits · ${money(p.amountCents, p.currency)}`}
+                            {p.refunded ? (
+                              <span className='ml-2 rounded-full bg-gray-900 px-2 py-0.5 text-[11px] font-bold uppercase tracking-wide text-white'>
+                                Refunded
+                              </span>
+                            ) : null}
                           </p>
                           <p className='text-xs text-gray-500'>
                             {fmtDate(p.receivedAt)} · {p.method}
@@ -918,6 +941,12 @@ export default function CreditCustomersWrapper({ customers = [], totals }) {
                           </p>
                           <p className='text-xs text-gray-400'>{p.invoiceNumber}</p>
                         </div>
+                        {/* Only the manual ledger has an invoice WE issued. A
+                            card sale is numbered and receipted by the payment
+                            provider, so generating our own document for it would
+                            be inventing a record — the button is left off rather
+                            than printing one with a blank number. */}
+                        {p.invoiceNumber ? (
                         <button
                           type='button'
                           onClick={() =>
@@ -934,6 +963,7 @@ export default function CreditCustomersWrapper({ customers = [], totals }) {
                         >
                           Invoice
                         </button>
+                        ) : null}
                       </li>
                     ))}
                   </ul>
