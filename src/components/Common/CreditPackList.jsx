@@ -25,8 +25,17 @@ const money = (cents, currency = 'USD') => {
   return currency === 'USD' ? `$${value.toFixed(2)}` : `${currency} ${value.toFixed(2)}`;
 };
 
-const validity = (days) => {
-  if (!days) return 'no expiry';
+// How long a pack lasts, in words — and ONLY when we actually know.
+//
+// A blank validity means two different things depending on the pack. On one that
+// can be bought with a card it means exactly what it says: the credits never
+// expire, because that is the rule the wallet follows. On a quote-and-transfer
+// pack it means nothing has been decided — the admin sets a deadline when they
+// grant it — so promising "no expiry" on the pricing page would be committing us
+// to something no one agreed to. Those rows simply say nothing.
+const validity = (pack) => {
+  const days = pack.validityDays;
+  if (!days) return pack.purchasable ? 'no expiry' : '';
   if (days % 365 === 0) return `valid ${days / 365} year${days === 365 ? '' : 's'}`;
   if (days % 30 === 0) return `valid ${days / 30} month${days === 30 ? '' : 's'}`;
   return `valid ${days} days`;
@@ -137,7 +146,9 @@ export default function CreditPackList({ note = '', onUnavailable = null }) {
         >
           <div>
             <p className='text-sm font-semibold text-black'>{p.credits} credits</p>
-            <p className='text-xs text-gray-500'>{validity(p.validityDays)}</p>
+            {validity(p) ? (
+              <p className='text-xs text-gray-500'>{validity(p)}</p>
+            ) : null}
           </div>
 
           <div className='flex items-center gap-3'>
