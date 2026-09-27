@@ -4,6 +4,7 @@ import { ErrorToast } from '@/components/Common/ErrorToast';
 import { SuccessToast } from '@/components/Common/SuccessToast';
 import {
   useDisconnectPinterestMutation,
+  useCreateBoardMutation,
   useGetBoardsQuery,
   useGetPinterestAuthUrlMutation,
 } from '@/lib/redux/admin/pinterest/pinterestSlice';
@@ -70,6 +71,9 @@ export default function PinterestConfigWrapper({ settings }) {
     useGetPinterestAuthUrlMutation();
   const [disconnect, { isLoading: isDisconnecting }] =
     useDisconnectPinterestMutation();
+  const [createBoard, { isLoading: isCreatingBoard }] =
+    useCreateBoardMutation();
+  const [newBoardName, setNewBoardName] = useState('');
 
   const setField = (k, v) => setForm((f) => ({ ...f, [k]: v }));
 
@@ -101,6 +105,21 @@ export default function PinterestConfigWrapper({ settings }) {
         err?.data?.message || 'Could not disconnect',
         3000,
       );
+    }
+  };
+
+  // Selects the new board in the form; the admin still presses Save to make it
+  // the default, same as picking an existing one.
+  const handleCreateBoard = async () => {
+    const name = newBoardName.trim();
+    if (!name) return;
+    try {
+      const board = await createBoard({ name }).unwrap();
+      if (board?.id) setField('defaultBoardId', board.id);
+      setNewBoardName('');
+      SuccessToast('Board created', `"${name}" is ready — press Save to make it the default.`, 4000);
+    } catch (err) {
+      ErrorToast('Error', err?.data?.message || 'Could not create board', 4000);
     }
   };
 
@@ -300,6 +319,31 @@ export default function PinterestConfigWrapper({ settings }) {
                 </SelectItem>
               ))}
             </Select>
+          ) : null}
+          {isConnected ? (
+            <div className='mt-3 flex items-end gap-2'>
+              <Input
+                size='sm'
+                label='New board'
+                placeholder='e.g. Embroidery Designs'
+                value={newBoardName}
+                onValueChange={setNewBoardName}
+                description={
+                  !boardsLoading && boards.length === 0
+                    ? 'No boards found. Trial-access (Sandbox) accounts start empty — create one here.'
+                    : undefined
+                }
+              />
+              <Button
+                size='sm'
+                variant='bordered'
+                isLoading={isCreatingBoard}
+                isDisabled={!newBoardName.trim()}
+                onPress={handleCreateBoard}
+              >
+                Create board
+              </Button>
+            </div>
           ) : (
             <p className='text-sm text-gray-500'>
               Connect an account to load your boards.
