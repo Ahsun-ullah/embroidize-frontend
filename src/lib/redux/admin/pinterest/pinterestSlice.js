@@ -13,7 +13,7 @@ export const pinterestSlice = createApi({
       return headers;
     },
   }),
-  tagTypes: ['PinterestSettings', 'PinHistory'],
+  tagTypes: ['PinterestSettings', 'PinHistory', 'PinterestBoards'],
   endpoints: (builder) => ({
     // Boards are fetched live rather than cached in our DB — a board renamed or
     // deleted on Pinterest would otherwise show up here as a stale option that
@@ -21,6 +21,19 @@ export const pinterestSlice = createApi({
     getBoards: builder.query({
       query: () => '/admin/pinterest/boards',
       transformResponse: (res) => res?.data || [],
+      providesTags: ['PinterestBoards'],
+    }),
+
+    // Sandbox has its own boards, separate from the account's real ones, so a
+    // Trial-access connection starts with none until one is created here.
+    createBoard: builder.mutation({
+      query: (body) => ({
+        url: '/admin/pinterest/boards',
+        method: 'POST',
+        body,
+      }),
+      transformResponse: (res) => res?.data,
+      invalidatesTags: ['PinterestBoards'],
     }),
 
     // Everything the modal needs pre-filled: image, suggested caption, link,
@@ -85,6 +98,7 @@ export const pinterestSlice = createApi({
 
 export const {
   useGetBoardsQuery,
+  useCreateBoardMutation,
   useGetPinDraftQuery,
   useCreatePinMutation,
   useBulkQueuePinsMutation,
