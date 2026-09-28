@@ -1,8 +1,8 @@
 'use client';
+import CreditPackList from '@/components/Common/CreditPackList';
 import { ErrorToast } from '@/components/Common/ErrorToast';
 import OfferCountdown from '@/components/Common/OfferCountdown';
 import PaymentHelpModal from '@/components/Common/PaymentHelpModal';
-import CreditPackList from '@/components/Common/CreditPackList';
 import PurchaseButton from '@/components/Common/PurchaseButton';
 import { SuccessToast } from '@/components/Common/SuccessToast';
 import Footer from '@/components/user/HomePage/Footer';
@@ -10,12 +10,12 @@ import Header from '@/components/user/HomePage/Header';
 import FeaturedReviews from '@/features/reviews/FeaturedReviews';
 import { trackSubscriptionPurchase } from '@/lib/analytics/subscriptionPurchase';
 import { windowPhrase } from '@/lib/apis/public/siteConfig';
+import { useUserInfoQuery } from '@/lib/redux/common/user/userInfoSlice';
 import {
   getPlanPricing,
   getStaticDefaults,
   money,
 } from '@/lib/subscriptions/planPricing';
-import { useUserInfoQuery } from '@/lib/redux/common/user/userInfoSlice';
 import { Divider } from '@heroui/divider';
 import { GiftIcon } from 'lucide-react';
 import { usePathname, useRouter } from 'next/navigation';
@@ -816,10 +816,10 @@ export default function SubscriptionsPageClient({
               <ul className='mb-6 flex-1 space-y-2.5'>
                 {[
                   freeAllowance || 'A set number of free downloads',
-                  'Access to the whole design library',
-                  'All design formats in one ZIP',
+                  'Access all free designs in our library',
+                  'All design formats (PES, DST, JEF, VP3, HUS, EXP, PCS, CND, XXX)',
                   'New designs as they are added',
-                  'Personal use only',
+                  'Support via email and chat',
                   'No credit card required',
                 ].map((f) => (
                   <li
