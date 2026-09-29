@@ -79,6 +79,10 @@ export async function trackSubscriptionPurchase() {
         window.dataLayer.push({
           event: 'subscription_purchase',
           transaction_id: purchase.transactionId,
+          // Meta dedupe key: the Pixel's eventID and the Conversions API's
+          // event_id are both mapped from this in GTM, so it must stay the same
+          // real transaction id — never a generated one.
+          event_id: purchase.transactionId,
           value: purchase.value,
           currency: purchase.currency,
           subscription_plan: purchase.planName,
