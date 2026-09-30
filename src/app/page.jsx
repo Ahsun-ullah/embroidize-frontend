@@ -131,7 +131,24 @@ export default async function Home() {
         <Header />
       </Suspense>
 
-      <section className='container overflow-hidden py-10 sm:py-12  mx-auto max-w-7xl'>
+      <section className='relative overflow-hidden border-b border-black/5 bg-white bg-[url("/hero-bg.svg")] bg-cover bg-center'>
+        {/* Stitched flowers pinned to the top corners; kept out of the
+            background SVG because bg-cover crops its sides on narrow screens. */}
+        {/* eslint-disable-next-line @next/next/no-img-element */}
+        <img
+          src='/hero-flower.svg'
+          alt=''
+          aria-hidden
+          className='pointer-events-none absolute left-0 top-0 w-16 sm:w-24 lg:w-28'
+        />
+        {/* eslint-disable-next-line @next/next/no-img-element */}
+        <img
+          src='/hero-flower.svg'
+          alt=''
+          aria-hidden
+          className='pointer-events-none absolute right-0 top-0 w-16 -scale-x-100 sm:w-24 lg:w-28'
+        />
+        <div className='container relative mx-auto max-w-7xl py-12 sm:py-16 lg:py-20'>
         <div className='flex flex-col lg:flex-row items-center justify-between gap-10 lg:gap-16'>
           {/* LEFT: Text */}
           <div className='w-full lg:w-1/2 text-center lg:text-left'>
@@ -211,8 +228,8 @@ export default async function Home() {
           </div>
 
           {/* RIGHT: Custom digitizing promo */}
-          <div className='w-full lg:w-1/2 flex justify-center lg:justify-end'>
-            <div className='animate-float w-full max-w-md rounded-3xl bg-white p-8 sm:p-12 shadow-md ring-1 ring-black/5'>
+          <div className='relative w-full lg:w-1/2 flex justify-center lg:justify-end'>
+            <div className='relative animate-float w-full max-w-md rounded-3xl bg-white p-8 sm:p-12 shadow-xl shadow-black/5 ring-1 ring-black/5'>
               <span className='inline-flex items-center gap-2 rounded-full bg-black px-4 py-1.5 text-sm font-semibold text-white'>
                 <Sparkles className='h-4 w-4' aria-hidden />
                 Custom Digitizing
@@ -264,6 +281,7 @@ export default async function Home() {
               </Link>
             </div>
           </div>
+        </div>
         </div>
       </section>
 
