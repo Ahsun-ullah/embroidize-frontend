@@ -1,3 +1,5 @@
+import ListingEventBanner from '@/components/Common/EventPromotions/ListingEventBanner';
+import { getActiveEventPromotions } from '@/lib/apis/public/eventPromotions';
 import Pagination from '@/components/Common/Pagination';
 import ProductCard from '@/components/Common/ProductCard';
 import Footer from '@/components/user/HomePage/Footer';
@@ -80,10 +82,11 @@ export default async function SubCategoryProducts({ params, searchParams }) {
     sub_category: [subCategorySlug],
   });
 
-  const [productData, facets, subCategoryData] = await Promise.all([
+  const [productData, facets, subCategoryData, eventPromotions] = await Promise.all([
     getProducts('', currentPage, perPageData, apiFilters),
     getProductFilters('', apiFilters),
     getSingleSubCategory(subCategorySlug),
+    getActiveEventPromotions(),
   ]);
 
   const { products, totalCount, totalPages } = productData;
@@ -129,6 +132,12 @@ export default async function SubCategoryProducts({ params, searchParams }) {
               href: `/${subCategory?.category?.slug}/${subCategory?.slug}`,
             },
           ]}
+        />
+
+        <ListingEventBanner
+          promotions={eventPromotions}
+          categorySlug={categorySlug}
+          subCategorySlug={subCategorySlug}
         />
 
         <FilterLayout

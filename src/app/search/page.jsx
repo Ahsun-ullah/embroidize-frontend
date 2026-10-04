@@ -1,3 +1,5 @@
+import ListingEventBanner from '@/components/Common/EventPromotions/ListingEventBanner';
+import { getActiveEventPromotions } from '@/lib/apis/public/eventPromotions';
 import Pagination from '@/components/Common/Pagination';
 import ProductCard from '@/components/Common/ProductCard';
 import Footer from '@/components/user/HomePage/Footer';
@@ -62,9 +64,10 @@ export default async function SearchPage({ searchParams }) {
   const filterState = readFilterParams(params);
   const apiFilters = toApiFilters(filterState);
 
-  const [productData, facets] = await Promise.all([
+  const [productData, facets, eventPromotions] = await Promise.all([
     getProducts(searchQuery, currentPage || 0, perPageData, apiFilters),
     getProductFilters(searchQuery, apiFilters),
+    getActiveEventPromotions(),
   ]);
 
   const { products, totalCount, totalPages } = productData;
@@ -91,6 +94,10 @@ export default async function SearchPage({ searchParams }) {
 
         <div className=' flex flex-col justify-between'>
           <section className='text-black border-b-2'>
+            <ListingEventBanner
+              promotions={eventPromotions}
+              categorySlug={filterState.category?.length === 1 ? filterState.category[0] : undefined}
+            />
             <FilterLayout facets={facets} total={totalCount} context='search'>
               {products?.length > 0 ? (
                 <div className='grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6'>

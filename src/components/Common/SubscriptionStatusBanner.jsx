@@ -15,7 +15,9 @@ import { useState } from 'react';
 //
 // Silent for every other state: active, cancelling, lifetime and free users see
 // nothing at all.
-export default function SubscriptionStatusBanner() {
+// Rendered by SiteTopBar, which shares the top spot with the event strip;
+// `onDismiss` tells it the spot is free again.
+export default function SubscriptionStatusBanner({ onDismiss }) {
   const { data: userInfoData } = useUserInfoQuery();
   const router = useRouter();
   const [dismissed, setDismissed] = useState(false);
@@ -61,7 +63,10 @@ export default function SubscriptionStatusBanner() {
             {ctaLabel}
           </button>
           <button
-            onClick={() => setDismissed(true)}
+            onClick={() => {
+              setDismissed(true);
+              onDismiss?.();
+            }}
             aria-label='Dismiss notice'
             className='rounded-lg px-2 py-2 text-lg leading-none text-white/60 transition hover:text-white'
           >

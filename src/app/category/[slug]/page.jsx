@@ -1,3 +1,5 @@
+import ListingEventBanner from '@/components/Common/EventPromotions/ListingEventBanner';
+import { getActiveEventPromotions } from '@/lib/apis/public/eventPromotions';
 import Pagination from '@/components/Common/Pagination';
 import ProductCard from '@/components/Common/ProductCard';
 import Footer from '@/components/user/HomePage/Footer';
@@ -81,10 +83,11 @@ export default async function CategoryProducts({ params, searchParams }) {
   const filterState = readFilterParams(searchParams);
   const apiFilters = toApiFilters({ ...filterState, category: [params?.slug] });
 
-  const [productData, facets, singleCategoryData] = await Promise.all([
+  const [productData, facets, singleCategoryData, eventPromotions] = await Promise.all([
     getProducts('', currentPage, perPageData, apiFilters),
     getProductFilters('', apiFilters),
     getSingleCategory(params?.slug),
+    getActiveEventPromotions(),
   ]);
 
   const {
@@ -143,6 +146,10 @@ export default async function CategoryProducts({ params, searchParams }) {
       <div className='flex flex-col justify-between'>
         <section className='text-black mb-8 mt-4 border-b-2'>
           <div className='container mx-auto px-4'>
+            <ListingEventBanner
+              promotions={eventPromotions}
+              categorySlug={singleCategoryData?.data?.slug}
+            />
             <FilterLayout
               facets={facets}
               total={totalCount}
