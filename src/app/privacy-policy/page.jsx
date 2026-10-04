@@ -62,7 +62,7 @@ export default function PrivacyPolicyPage() {
     },
     {
       title: '9. Data Sharing',
-      content: `We do not sell your personal data.\n\nWe may share information with trusted third parties including:\n\n- Secure payment processors\n- Analytics providers\n- Hosting and infrastructure services\n\nThese parties are required to protect your data.`,
+      content: `We do not sell your personal data.\n\nWe may share information with trusted third parties including:\n\n- Secure payment processors\n- Analytics providers\n- Hosting and infrastructure services\n- Advertising partners such as Meta (Facebook and Instagram), which receive hashed contact details, such as your email address, to measure how our ads perform\n\nThese parties are required to protect your data.`,
     },
     {
       title: '10. Social Media & Marketing Platform Integrations',
