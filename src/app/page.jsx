@@ -6,6 +6,8 @@ import MostFavoritedDesigns from '@/components/user/HomePage/MostFavoritedDesign
 import PopularDesign from '@/components/user/HomePage/PopularDesign';
 import RecentBundleSection from '@/components/user/HomePage/RecentBundleSection';
 import RecentProductsSection from '@/components/user/HomePage/RecentProductsSection';
+import HomeEventSections from '@/components/Common/EventPromotions/HomeEventSections';
+import { getActiveEventPromotions } from '@/lib/apis/public/eventPromotions';
 import { getAllBundlesForDashboard } from '@/lib/apis/protected/bundles';
 import {
   getAdminChoiceProducts,
@@ -95,12 +97,14 @@ export default async function Home() {
     recentPromise,
     bundlePromise,
     mostFavoritedPromise,
+    eventPromotionsPromise,
   ] = [
     getPopularProducts('', 1, 8, { cache: 'no-store' }),
     getAdminChoiceProducts('', 1, 8, { cache: 'no-store' }),
     getProducts('', 1, 8, { cache: 'no-store' }),
     getAllBundlesForDashboard('', 1, 8, { cache: 'no-store' }),
     getMostFavoritedProducts('', 1, 8, { cache: 'no-store' }),
+    getActiveEventPromotions(),
   ];
 
   const [
@@ -109,12 +113,14 @@ export default async function Home() {
     recentProducts,
     bundles,
     mostFavoritedProducts,
+    eventPromotions,
   ] = await Promise.all([
     popularPromise,
     adminChoicePromise,
     recentPromise,
     bundlePromise,
     mostFavoritedPromise,
+    eventPromotionsPromise,
   ]);
 
   return (
@@ -285,6 +291,11 @@ export default async function Home() {
         </div>
       </section>
 
+      {/* Seasonal event posters (Admin → Content → Event Promotions), spot 1 of
+          3: "After hero". Each event picks its own spot; empty spots render
+          nothing. */}
+      <HomeEventSections promotions={eventPromotions} position='after_hero' />
+
       <BrowseCategories />
 
       <section
@@ -313,6 +324,10 @@ export default async function Home() {
           )}
         </Suspense>
       </section>
+
+      {/* Event posters, spot 2 of 3: one shared row after the first product
+          section. */}
+      <HomeEventSections promotions={eventPromotions} position='middle' />
 
       {/* Limited-time promo — same grayscale card, now with the countdown and the
           "Save 75%" framing from the design. Still no hardcoded plan price: the
@@ -490,6 +505,9 @@ export default async function Home() {
           )}
         </Suspense>
       </section>
+
+      {/* Event posters, spot 3 of 3: after the last section, before the footer. */}
+      <HomeEventSections promotions={eventPromotions} position='before_footer' />
 
       <Footer />
     </div>

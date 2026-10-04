@@ -1,3 +1,5 @@
+import ListingEventBanner from '@/components/Common/EventPromotions/ListingEventBanner';
+import { getActiveEventPromotions } from '@/lib/apis/public/eventPromotions';
 import Pagination from '@/components/Common/Pagination';
 import ProductCard from '@/components/Common/ProductCard';
 import Footer from '@/components/user/HomePage/Footer';
@@ -137,9 +139,10 @@ export default async function AllProductsPage({ searchParams }) {
   const isRecent = filterState.since === recentDays;
   const isAll = !isPopular && !isAdminChoice && !isMostFavourited && !isRecent;
 
-  const [productData, facets] = await Promise.all([
+  const [productData, facets, eventPromotions] = await Promise.all([
     getProducts('', currentPage, perPageData, apiFilters),
     getProductFilters('', apiFilters),
+    getActiveEventPromotions(),
   ]);
 
   const { products, totalCount, totalPages } = productData;
@@ -214,6 +217,11 @@ export default async function AllProductsPage({ searchParams }) {
               </Link>
             </div>
           </div>
+
+          <ListingEventBanner
+            promotions={eventPromotions}
+            categorySlug={filterState.category?.length === 1 ? filterState.category[0] : undefined}
+          />
 
           <FilterLayout facets={facets} total={totalCount}>
             {products.length > 0 ? (
