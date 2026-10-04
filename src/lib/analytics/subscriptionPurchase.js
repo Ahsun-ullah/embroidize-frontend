@@ -86,6 +86,13 @@ export async function trackSubscriptionPurchase() {
           value: purchase.value,
           currency: purchase.currency,
           subscription_plan: purchase.planName,
+          // Meta customer matching (em, external_id, and ph/fn/ln/ct/st/zp/
+          // country when we have them). Already normalised and SHA-256 hashed
+          // by the API — no raw personal data enters the dataLayer. Absent
+          // fields are simply missing, never placeholders. GTM maps these to
+          // Pixel advanced matching and CAPI user_data; IP, user agent, _fbp
+          // and _fbc stay with GTM, unhashed, as before.
+          user_data: purchase.userData || {},
         });
 
         markTracked(purchase.transactionId);
