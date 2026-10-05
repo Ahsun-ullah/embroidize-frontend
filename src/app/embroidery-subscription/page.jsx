@@ -6,34 +6,17 @@ import {
   yearlySavingPercent,
 } from '@/lib/apis/public/subscriptionPlans';
 import { money, planTerm } from '@/lib/subscriptions/planPricing';
-import { Caveat, Inter, Poppins } from 'next/font/google';
+import { caveat, inter, poppins } from '@/fonts/landingFonts';
 import Image from 'next/image';
 import Link from 'next/link';
 import { cache, Suspense } from 'react';
 import EmbroiderySubscriptionStickyCta from './EmbroiderySubscriptionStickyCta';
 import './landing.css';
 
-// Self-hosted at build time and preloaded with the page, instead of the Google
-// Fonts @import landing.css used to chain (CSS → fonts.googleapis → gstatic)
-// before any text could paint. landing.css reads these variables.
-const poppins = Poppins({
-  subsets: ['latin'],
-  weight: ['500', '600', '700'],
-  display: 'swap',
-  variable: '--font-poppins',
-});
-const inter = Inter({
-  subsets: ['latin'],
-  weight: ['400', '500', '600', '700'],
-  display: 'swap',
-  variable: '--font-inter',
-});
-const caveat = Caveat({
-  subsets: ['latin'],
-  weight: ['600', '700'],
-  display: 'swap',
-  variable: '--font-caveat',
-});
+// Fonts are self-hosted from src/fonts (see landingFonts.js) and preloaded with
+// the page, instead of the Google Fonts @import landing.css used to chain
+// (CSS → fonts.googleapis → gstatic) before any text could paint.
+// landing.css reads their --font-* variables.
 
 /*
  * /embroidery-subscription — evergreen subscription landing page.
