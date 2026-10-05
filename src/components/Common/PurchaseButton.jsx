@@ -1,5 +1,6 @@
 'use client';
 import Cookies from 'js-cookie';
+import { getMetaBrowserIds } from '@/lib/analytics/metaBrowserIds';
 import { usePathname } from 'next/navigation';
 import { useState } from 'react';
 
@@ -43,7 +44,9 @@ export default function PurchaseButton({
             Authorization: `Bearer ${token}`,
           },
           // Canonical planId — the backend resolves the active gateway's product.
-          body: JSON.stringify({ planId: plan._id }),
+          // _fbp/_fbc ride along for the server-side Meta Purchase the payment
+          // webhook sends (it has no browser of its own).
+          body: JSON.stringify({ planId: plan._id, ...getMetaBrowserIds() }),
         },
       );
 
