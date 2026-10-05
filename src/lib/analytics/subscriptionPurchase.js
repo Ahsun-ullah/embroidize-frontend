@@ -18,14 +18,17 @@ import Cookies from 'js-cookie';
 //             retry for a few seconds and then give up in silence rather than
 //             firing an event with missing values.
 //
-//   DUPLICATES — a refresh, a back-button, or a second visit inside the same
-//             billing period must not report a second purchase. The
-//             transaction id is unique per billing PERIOD, so it doubles as the
-//             dedupe key: renewals count as new purchases, revisits do not.
+//   DUPLICATES — a refresh, a back-button, or a second visit must not report a
+//             second purchase. The transaction id is the gateway's checkout id
+//             (unique per purchase) and is also the event_id of the server-side
+//             Conversions API copy, so Meta merges the two. The API only reports
+//             a purchase confirmed in the last 24 hours.
 
 const SEEN_KEY_PREFIX = 'sub_purchase_tracked:';
-const MAX_ATTEMPTS = 8;
-const RETRY_DELAY_MS = 1500;
+// ~30s: the checkout webhook can lag the redirect, and giving up early loses
+// the browser copy of a real sale.
+const MAX_ATTEMPTS = 15;
+const RETRY_DELAY_MS = 2000;
 
 const alreadyTracked = (transactionId) => {
   try {
@@ -73,7 +76,12 @@ export async function trackSubscriptionPurchase() {
       const purchase = (await res.json())?.data;
 
       if (purchase?.ready) {
-        if (alreadyTracked(purchase.transactionId)) return false;
+        // Already reported — but keep polling: on an upgrade the record still
+        // shows the PREVIOUS purchase until the new checkout's webhook lands.
+        if (alreadyTracked(purchase.transactionId)) {
+          if (attempt < MAX_ATTEMPTS - 1) await sleep(RETRY_DELAY_MS);
+          continue;
+        }
 
         window.dataLayer = window.dataLayer || [];
         window.dataLayer.push({
@@ -83,6 +91,8 @@ export async function trackSubscriptionPurchase() {
           // event_id are both mapped from this in GTM, so it must stay the same
           // real transaction id — never a generated one.
           event_id: purchase.transactionId,
+          // Meta order_id (custom_data) — same id; the server copy sends it too.
+          order_id: purchase.transactionId,
           value: purchase.value,
           currency: purchase.currency,
           subscription_plan: purchase.planName,
