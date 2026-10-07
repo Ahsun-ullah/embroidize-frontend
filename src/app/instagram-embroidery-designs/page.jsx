@@ -1,4 +1,5 @@
-import { getLinkInBioItems } from '@/lib/apis/public/linkInBio';
+import { getLinkInBioPage } from '@/lib/apis/public/linkInBio';
+import LinkInBioGrid from './LinkInBioGrid';
 import Image from 'next/image';
 import Link from 'next/link';
 
@@ -29,10 +30,10 @@ export const metadata = {
 };
 
 export default async function LinksPage() {
-  const items = await getLinkInBioItems();
+  const { items, hasMore } = await getLinkInBioPage(1);
 
   return (
-    <div className='mx-auto w-full max-w-3xl px-3 pb-12 pt-8 sm:px-4'>
+    <div className='mx-auto w-full max-w-6xl px-3 pb-12 pt-8 sm:px-4'>
       <header className='flex flex-col items-center text-center'>
         <Link href={`/?${UTM}`} aria-label='Embroidize home'>
           <Image
@@ -61,36 +62,11 @@ export default async function LinksPage() {
       </p>
 
       {items.length ? (
-        <ul className='mt-2 grid grid-cols-3 gap-2 sm:gap-3'>
-          {items.map((item, i) => (
-            <li key={item._id}>
-              <Link
-                href={`/product/${item.slug}?${UTM}`}
-                // Same 3:2 frame as the product cards and product page, so designs
-                // show whole instead of being cropped to a square.
-                className='group relative block aspect-[3/2] overflow-hidden rounded-xl border border-gray-200 bg-white shadow-sm transition-shadow hover:shadow-md'
-                title={item.name}
-              >
-                {item.image ? (
-                  <Image
-                    src={item.image}
-                    alt={item.name}
-                    fill
-                    sizes='(max-width: 768px) 33vw, 256px'
-                    quality={78}
-                    className='object-cover object-center transition-transform duration-300 group-hover:scale-105'
-                    // The first two rows are what a phone shows on arrival.
-                    priority={i < 6}
-                  />
-                ) : (
-                  <span className='flex h-full items-center justify-center p-2 text-center text-xs text-gray-500'>
-                    {item.name}
-                  </span>
-                )}
-              </Link>
-            </li>
-          ))}
-        </ul>
+        <LinkInBioGrid
+          initialItems={items}
+          initialHasMore={hasMore}
+          utm={UTM}
+        />
       ) : (
         <p className='mt-10 text-center text-sm text-gray-500'>
           New designs are on their way.{' '}
