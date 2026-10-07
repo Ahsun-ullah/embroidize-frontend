@@ -705,13 +705,18 @@ export default function SubscriptionsPageClient({
           )}
 
           {/* Trust claims on a single line from tablet up (they wrap only on
-              phones). Only claims this page can stand behind. */}
+              phones). Deliberately not the plan-card features again: these
+              say what the cards don't. Only claims this page can stand behind. */}
           <ul className='mt-4 flex flex-wrap items-center justify-center gap-2 md:flex-nowrap'>
             {[
-              'Cancel anytime',
-              'All machine formats included',
-              'Commercial use on paid plans',
-              'Instant download',
+              'Secure checkout',
+              'Pay by card, PayPal or bank transfer',
+              'Re-download anything free',
+              // The real review count, rounded down to the hundred so the
+              // claim is always true; too few to boast about, no number.
+              totalReviewCount >= 100
+                ? `Loved by ${(Math.floor(totalReviewCount / 100) * 100).toLocaleString('en-US')}+ embroiderers`
+                : 'Real reviews from real stitchers',
             ].map((chip) => (
               <li
                 key={chip}
