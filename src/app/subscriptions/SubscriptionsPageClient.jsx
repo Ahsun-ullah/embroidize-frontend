@@ -706,16 +706,16 @@ export default function SubscriptionsPageClient({
 
           {/* Trust claims on a single line from tablet up (they wrap only on
               phones). Only claims this page can stand behind. */}
-          <ul className='mt-4 flex flex-wrap items-center justify-center gap-2 md:flex-nowrap'>
+          <ul className='my-4 flex flex-wrap items-center justify-center gap-2 md:flex-nowrap'>
             {[
-              'Cancel anytime',
-              'All machine formats included',
-              'Commercial use on paid plans',
+              'Secure checkout',
+              'Zero lock-in',
+              'Re-download anything',
               'Instant download',
             ].map((chip) => (
               <li
                 key={chip}
-                className='flex items-center gap-1.5 whitespace-nowrap rounded-full bg-white px-3.5 py-1.5 text-xs font-medium text-gray-700 shadow-sm ring-1 ring-black/5 md:text-sm'
+                className='flex items-center gap-1.5 whitespace-nowrap rounded-full bg-white px-3.5 py-1.5 text-xs font-medium text-gray-700 shadow-sm ring-1 ring-black/5 md:text-sm mb-6'
               >
                 <span className='text-black'>
                   <CheckCircle size={14} />

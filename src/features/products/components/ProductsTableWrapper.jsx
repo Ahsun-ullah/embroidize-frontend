@@ -67,10 +67,7 @@ const customSelectStyles = {
   menu: (base) => ({ ...base, zIndex: 50, fontSize: '0.875rem' }),
 };
 
-export default function ProductsTableWrapper({
-  initialData = [],
-  pagination,
-}) {
+export default function ProductsTableWrapper({ initialData = [], pagination }) {
   const router = useRouter();
   const searchParams = useSearchParams();
   const [selectedKeys, setSelectedKeys] = useState(new Set([]));
@@ -752,7 +749,7 @@ export default function ProductsTableWrapper({
 
   return (
     <>
-      <div className='flex justify-between items-center mb-4'>
+      <div className='flex gap-10 items-center mb-4'>
         <h1 className='text-xl font-bold'>
           Total {pagination?.total || 0} Products
         </h1>

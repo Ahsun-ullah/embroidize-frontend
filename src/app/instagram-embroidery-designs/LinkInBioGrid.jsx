@@ -60,7 +60,7 @@ export default function LinkInBioGrid({ initialItems, initialHasMore, utm }) {
 
   return (
     <>
-      <ul className='mt-3 grid grid-cols-3 gap-2 sm:gap-3 md:grid-cols-4 lg:grid-cols-5'>
+      <ul className='mt-3 grid grid-cols-3 gap-2 sm:gap-3 md:grid-cols-3 lg:grid-cols-3'>
         {items.map((item, i) => (
           <li key={item._id}>
             <Link

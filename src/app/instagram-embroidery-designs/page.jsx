@@ -37,17 +37,13 @@ export default async function LinksPage() {
       <header className='flex flex-col items-center text-center'>
         <Link href={`/?${UTM}`} aria-label='Embroidize home'>
           <Image
-            src='/favicon.png'
+            src='/logo-black.png'
             alt='Embroidize'
-            width={64}
+            width={200}
             height={64}
             priority
-            className='h-16 w-16 rounded-full'
           />
         </Link>
-        <h1 className='mt-2 text-base font-semibold text-gray-900'>
-          embroidize
-        </h1>
       </header>
 
       <Link
