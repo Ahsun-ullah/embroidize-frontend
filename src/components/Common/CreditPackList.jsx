@@ -189,13 +189,14 @@ export default function CreditPackList({
   );
 
   if (variant === 'rich') {
-    // The smallest pack carries the badge: it is the low-commitment way in,
-    // and the one this section exists for ("only need a few designs?").
-    const smallest = Math.min(...packs.map((p) => p.credits));
+    // Biggest pack first, and it carries the badge: it is the best value per
+    // design, so it leads the list and is selected by default.
+    const ordered = [...packs].sort((a, b) => b.credits - a.credits);
+    const largest = ordered[0]?.credits;
 
     return (
       <div className='mb-4 space-y-2.5' role='radiogroup' aria-label='Credit packs'>
-        {packs.map((p, i) => {
+        {ordered.map((p, i) => {
           const isSelected = selected === i;
           const valid = validity(p);
           const chips = [
@@ -223,7 +224,7 @@ export default function CreditPackList({
                   : 'border-gray-200 bg-white hover:border-gray-300'
               }`}
             >
-              {p.credits === smallest ? (
+              {p.credits === largest ? (
                 <span className='absolute -top-3 right-4 inline-flex items-center gap-1 rounded-full bg-violet-600 px-3 py-1 text-xs font-semibold text-white shadow-sm'>
                   <Flame size={12} className='fill-orange-300 text-orange-300' />
                   Most Popular

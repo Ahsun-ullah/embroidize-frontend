@@ -20,6 +20,7 @@ import { Divider } from '@heroui/divider';
 import {
   ArrowRight,
   CreditCard,
+  Crown,
   Download,
   Gift,
   GiftIcon,
@@ -658,51 +659,71 @@ export default function SubscriptionsPageClient({
             Kept compact on purpose: the plan cards are what people came for,
             so the header, timer and trust line share as little height as they
             can before the grid starts. */}
-        <div className='mx-auto mb-6 max-w-3xl text-center'>
-          <span className='text-xs font-bold uppercase tracking-[0.2em] text-gray-400'>
+        <div className='mx-auto mb-8 max-w-4xl text-center'>
+          <span className='inline-flex items-center gap-2 rounded-full bg-violet-50 px-4 py-1.5 text-xs font-bold uppercase tracking-[0.2em] text-gray-700'>
+            <Crown size={14} className='text-violet-600' aria-hidden='true' />
             Pricing
           </span>
-          <h1 className='mt-2 text-3xl font-extrabold tracking-tight text-black md:text-4xl'>
-            Choose Your Plan
+          <h1 className='mt-3 font-serif text-4xl font-bold tracking-tight text-slate-900 md:text-6xl'>
+            Choose{' '}
+            <span className='relative inline-block text-violet-700'>
+              Your Plan
+              {/* Hand-drawn underline, matching the credits heading below. */}
+              <svg
+                aria-hidden='true'
+                viewBox='0 0 200 12'
+                preserveAspectRatio='none'
+                className='absolute -bottom-2 left-0 h-3 w-1/2 text-violet-600'
+              >
+                <path
+                  d='M2 9 C 50 2, 120 2, 198 6'
+                  stroke='currentColor'
+                  strokeWidth='3'
+                  fill='none'
+                  strokeLinecap='round'
+                />
+              </svg>
+            </span>
           </h1>
-          <p className='mx-auto mt-2 max-w-xl text-sm leading-relaxed text-gray-600'>
+          <p className='mx-auto mt-4 max-w-2xl text-sm leading-relaxed text-gray-600 md:text-base'>
             Get instant access to premium embroidery designs in every format.
             Commercial use included, cancel anytime.
           </p>
 
-          {/* One offer timer above the grid (styled like the homepage promo
-              pill, so the two read as the same offer), and the trust claims as
-              a single quiet line beside it rather than a row of pills. Only
-              claims this page can stand behind. */}
-          <div className='mt-4 flex flex-wrap items-center justify-center gap-x-5 gap-y-2'>
-            {plans.length > 0 && (
-              <div className='inline-flex items-center gap-2 rounded-full bg-green-50 px-4 py-1.5 text-sm ring-1 ring-green-100'>
-                <span className='text-green-600'>
-                  <ClockIcon size={16} />
-                </span>
-                <span className='font-semibold text-slate-700'>
-                  Offer ends in
-                </span>
-                <OfferCountdown className='font-bold text-green-600' />
-              </div>
-            )}
+          {/* One offer timer above the grid, green like the homepage promo
+              pill so the two read as the same offer. */}
+          {plans.length > 0 && (
+            <div className='mt-5 inline-flex items-center gap-2.5 rounded-full bg-green-50 px-6 py-2.5 text-base shadow-sm ring-1 ring-green-200'>
+              <span className='text-green-600'>
+                <ClockIcon size={18} />
+              </span>
+              <span className='font-semibold text-slate-700'>
+                Limited time offer — ends in
+              </span>
+              <OfferCountdown className='font-bold text-green-600' />
+            </div>
+          )}
 
-            <ul className='flex flex-wrap items-center justify-center gap-x-4 gap-y-1 text-xs font-medium text-gray-600'>
-              {[
-                'Cancel anytime',
-                'All machine formats',
-                'Commercial use on paid plans',
-                'Instant download',
-              ].map((chip) => (
-                <li key={chip} className='flex items-center gap-1.5'>
-                  <span className='text-black'>
-                    <CheckCircle size={13} />
-                  </span>
-                  {chip}
-                </li>
-              ))}
-            </ul>
-          </div>
+          {/* Trust claims on a single line from tablet up (they wrap only on
+              phones). Only claims this page can stand behind. */}
+          <ul className='mt-4 flex flex-wrap items-center justify-center gap-2 md:flex-nowrap'>
+            {[
+              'Cancel anytime',
+              'All machine formats included',
+              'Commercial use on paid plans',
+              'Instant download',
+            ].map((chip) => (
+              <li
+                key={chip}
+                className='flex items-center gap-1.5 whitespace-nowrap rounded-full bg-white px-3.5 py-1.5 text-xs font-medium text-gray-700 shadow-sm ring-1 ring-black/5 md:text-sm'
+              >
+                <span className='text-black'>
+                  <CheckCircle size={14} />
+                </span>
+                {chip}
+              </li>
+            ))}
+          </ul>
         </div>
 
         {/* Loud version — only after we KNOW checkout didn't complete. */}
