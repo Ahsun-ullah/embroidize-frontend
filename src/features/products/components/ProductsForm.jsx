@@ -399,7 +399,9 @@ export function ProductsForm({ product }) {
                       field.onChange(value);
                     }}
                     preview='edit'
-                    height={220}
+                    height={460}
+                    minHeight={260}
+                    visibleDragbar
                     textareaProps={{
                       placeholder: 'Enter Product Description',
                     }}
