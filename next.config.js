@@ -40,6 +40,12 @@ const nextConfig = {
   experimental: { optimizeCss: true },
   async redirects() {
     return [
+      // Links page moved; /links may already be in the Instagram bio.
+      {
+        source: '/links',
+        destination: '/instagram-embroidery-designs',
+        permanent: true,
+      },
       {
         source: '/:path*',
         has: [{ type: 'host', value: 'www.embroidize.com' }],

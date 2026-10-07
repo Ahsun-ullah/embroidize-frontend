@@ -3,19 +3,10 @@
 import { ErrorToast } from '@/components/Common/ErrorToast';
 import { SuccessToast } from '@/components/Common/SuccessToast';
 import { Button, Chip, Input, Spinner, Tooltip } from '@heroui/react';
-import {
-  ArrowDown,
-  ArrowUp,
-  ArrowUpToLine,
-  Check,
-  Copy,
-  ExternalLink,
-  Search,
-  Trash2,
-} from 'lucide-react';
+import { Check, Copy, ExternalLink, Search, Trash2 } from 'lucide-react';
 import { useEffect, useMemo, useState } from 'react';
 
-const PUBLIC_URL = 'https://embroidize.com/links';
+const PUBLIC_URL = 'https://embroidize.com/instagram-embroidery-designs';
 
 function getToken() {
   const row = document.cookie.split('; ').find((r) => r.startsWith('token='));
@@ -50,7 +41,7 @@ async function call(path, options = {}) {
 }
 
 // Admin → Content → Links Page. Picks which designs show on
-// embroidize.com/links (the Instagram bio link) and in what order.
+// embroidize.com/instagram-embroidery-designs (the Instagram bio link) and in what order.
 export default function LinkInBioWrapper({ initialItems = [] }) {
   const [items, setItems] = useState(initialItems);
   const [busy, setBusy] = useState(false);
@@ -127,29 +118,6 @@ export default function LinkInBioWrapper({ initialItems = [] }) {
     }
   };
 
-  const saveOrder = async (next) => {
-    const prev = items;
-    setItems(next); // optimistic
-    try {
-      const body = await call('/admin/link-in-bio/reorder', {
-        method: 'PUT',
-        body: JSON.stringify({ ids: next.map((i) => i._id) }),
-      });
-      setItems(body.data || next);
-    } catch (e) {
-      setItems(prev);
-      ErrorToast('Could not save order', e.message, 4000);
-    }
-  };
-
-  const move = (index, to) => {
-    if (to < 0 || to >= items.length || to === index) return;
-    const next = [...items];
-    const [it] = next.splice(index, 1);
-    next.splice(to, 0, it);
-    saveOrder(next);
-  };
-
   const remove = async (item) => {
     const prev = items;
     setItems(items.filter((i) => i._id !== item._id));
@@ -180,8 +148,9 @@ export default function LinkInBioWrapper({ initialItems = [] }) {
             <p className='mt-1 max-w-2xl text-sm text-gray-600'>
               The page for your Instagram bio. Pick designs below; the newest
               pick shows first and each tile opens that design&apos;s page.
-              Links carry UTM tags, so Instagram visits show up as their own
-              source in Analytics. Unpublished designs are hidden automatically.
+              Unpublished designs are hidden automatically. Visits from this
+              page appear in Google Analytics under Reports → Acquisition →
+              Traffic acquisition as <b>instagram / social</b>.
             </p>
           </div>
           <div className='flex items-center gap-2'>
@@ -199,7 +168,7 @@ export default function LinkInBioWrapper({ initialItems = [] }) {
                 size='sm'
                 variant='flat'
                 as='a'
-                href='/links'
+                href='/instagram-embroidery-designs'
                 target='_blank'
                 rel='noopener'
               >
@@ -227,7 +196,7 @@ export default function LinkInBioWrapper({ initialItems = [] }) {
                   key={item._id}
                   className='overflow-hidden rounded-lg border border-gray-200'
                 >
-                  <div className='relative aspect-square bg-gray-100'>
+                  <div className='relative aspect-[3/2] bg-white'>
                     {p?.image ? (
                       // eslint-disable-next-line @next/next/no-img-element
                       <img
@@ -265,42 +234,7 @@ export default function LinkInBioWrapper({ initialItems = [] }) {
                     >
                       {p?.name || 'Deleted design'}
                     </p>
-                    <div className='mt-1 flex items-center justify-between'>
-                      <div className='flex'>
-                        <Tooltip content='Move to first'>
-                          <Button
-                            isIconOnly
-                            size='sm'
-                            variant='light'
-                            isDisabled={i === 0}
-                            onPress={() => move(i, 0)}
-                          >
-                            <ArrowUpToLine size={14} />
-                          </Button>
-                        </Tooltip>
-                        <Tooltip content='Move earlier'>
-                          <Button
-                            isIconOnly
-                            size='sm'
-                            variant='light'
-                            isDisabled={i === 0}
-                            onPress={() => move(i, i - 1)}
-                          >
-                            <ArrowUp size={14} />
-                          </Button>
-                        </Tooltip>
-                        <Tooltip content='Move later'>
-                          <Button
-                            isIconOnly
-                            size='sm'
-                            variant='light'
-                            isDisabled={i === items.length - 1}
-                            onPress={() => move(i, i + 1)}
-                          >
-                            <ArrowDown size={14} />
-                          </Button>
-                        </Tooltip>
-                      </div>
+                    <div className='mt-1 flex items-center justify-end'>
                       <Tooltip content='Remove from page'>
                         <Button
                           isIconOnly
@@ -375,7 +309,7 @@ export default function LinkInBioWrapper({ initialItems = [] }) {
                         : 'border-transparent hover:border-gray-300'
                     } ${added ? 'cursor-default opacity-50' : ''}`}
                   >
-                    <div className='aspect-square bg-gray-100'>
+                    <div className='aspect-[3/2] bg-white'>
                       {p.image?.url ? (
                         // eslint-disable-next-line @next/next/no-img-element
                         <img

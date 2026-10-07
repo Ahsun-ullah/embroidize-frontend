@@ -2,24 +2,26 @@ import { getLinkInBioItems } from '@/lib/apis/public/linkInBio';
 import Image from 'next/image';
 import Link from 'next/link';
 
-// embroidize.com/links: the URL in the Instagram bio. A tap on a tile goes to
-// that design's page. Every link carries UTM tags so visits and sales from
+// embroidize.com/instagram-embroidery-designs: the URL in the Instagram bio
+// (the old /links redirects here, see next.config.js). A tap on a tile goes
+// to that design's page. Every link carries UTM tags so visits and sales from
 // Instagram show up as their own source in Google Analytics.
 const UTM = 'utm_source=instagram&utm_medium=social&utm_campaign=link_in_bio';
 
 export const revalidate = 60;
 
 export const metadata = {
-  title: 'Shop Our Instagram',
+  title: 'Instagram Embroidery Designs',
   description:
     'Tap a design from our Instagram to see it on Embroidize and download the embroidery file.',
-  alternates: { canonical: 'https://embroidize.com/links' },
-  // A thin page of thumbnails that duplicates product pages: keep it out of
-  // search results, but let crawlers follow through to the products.
-  robots: { index: false, follow: true },
+  alternates: {
+    canonical: 'https://embroidize.com/instagram-embroidery-designs',
+  },
+  // Listed in the static sitemap, so it is indexable.
+  robots: { index: true, follow: true },
   openGraph: {
-    title: 'Shop Our Instagram | Embroidize',
-    url: 'https://embroidize.com/links',
+    title: 'Instagram Embroidery Designs | Embroidize',
+    url: 'https://embroidize.com/instagram-embroidery-designs',
     images: [
       { url: 'https://embroidize.com/og-banner.jpg', width: 1200, height: 630 },
     ],
@@ -59,12 +61,14 @@ export default async function LinksPage() {
       </p>
 
       {items.length ? (
-        <ul className='mt-1 grid grid-cols-3 gap-1'>
+        <ul className='mt-2 grid grid-cols-3 gap-2 sm:gap-3'>
           {items.map((item, i) => (
             <li key={item._id}>
               <Link
                 href={`/product/${item.slug}?${UTM}`}
-                className='group relative block aspect-square overflow-hidden bg-gray-100'
+                // Same 3:2 frame as the product cards and product page, so designs
+                // show whole instead of being cropped to a square.
+                className='group relative block aspect-[3/2] overflow-hidden rounded-xl border border-gray-200 bg-white shadow-sm transition-shadow hover:shadow-md'
                 title={item.name}
               >
                 {item.image ? (
@@ -72,9 +76,9 @@ export default async function LinksPage() {
                     src={item.image}
                     alt={item.name}
                     fill
-                    quality={75}
                     sizes='(max-width: 768px) 33vw, 256px'
-                    className='object-cover transition-transform duration-300 group-hover:scale-105'
+                    quality={78}
+                    className='object-cover object-center transition-transform duration-300 group-hover:scale-105'
                     // The first two rows are what a phone shows on arrival.
                     priority={i < 6}
                   />
