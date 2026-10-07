@@ -2,6 +2,7 @@
 
 import { useUserInfoQuery } from '@/lib/redux/common/user/userInfoSlice';
 import Cookies from 'js-cookie';
+import { Clock, Flame, Layers, Tag } from 'lucide-react';
 import { usePathname } from 'next/navigation';
 import { useCallback, useEffect, useState } from 'react';
 
@@ -41,7 +42,20 @@ const validity = (pack) => {
   return `valid ${days} days`;
 };
 
-export default function CreditPackList({ note = '', onUnavailable = null }) {
+// "$0.27" — what one design costs inside the pack. Rounded to the cent for
+// display only; nothing is charged from this number.
+const perDesign = (pack) =>
+  money(Math.round((Number(pack.priceCents) || 0) / (pack.credits || 1)), pack.currency);
+
+// `variant`:
+//   'compact' — the plain stacked list the My credits page uses.
+//   'rich'    — the pricing page's selectable rows, with the per-design price,
+//               validity and design count spelled out as chips.
+export default function CreditPackList({
+  note = '',
+  onUnavailable = null,
+  variant = 'compact',
+}) {
   const pathName = usePathname();
 
   // A credit cannot be spent while a subscription is running — the download gate
@@ -57,6 +71,7 @@ export default function CreditPackList({ note = '', onUnavailable = null }) {
   const [loading, setLoading] = useState(true);
   const [buying, setBuying] = useState(null);
   const [error, setError] = useState('');
+  const [selected, setSelected] = useState(0);
 
   useEffect(() => {
     let cancelled = false;
@@ -137,6 +152,123 @@ export default function CreditPackList({ note = '', onUnavailable = null }) {
     return onUnavailable ? onUnavailable() : null;
   }
 
+  const buyButton = (p, className = '') =>
+    p.purchasable && !coveredBySubscription ? (
+      <button
+        type='button'
+        onClick={() => buy(p)}
+        disabled={buying === p.credits}
+        className={`rounded-xl px-5 py-2.5 text-sm font-semibold transition ${className} ${
+          buying === p.credits
+            ? 'cursor-not-allowed bg-gray-300 text-gray-600'
+            : 'bg-black text-white hover:bg-gray-800'
+        }`}
+      >
+        {buying === p.credits ? 'Opening…' : 'Buy now'}
+      </button>
+    ) : null;
+
+  const footer = (
+    <>
+      {coveredBySubscription ? (
+        <p className='px-1 text-xs text-gray-600'>
+          Your plan already covers premium downloads, so there is nothing to buy
+          here — credits are only spent when there is no active plan. If you want
+          some ready for after your plan ends, just ask us.
+        </p>
+      ) : null}
+
+      {error ? (
+        <p role='alert' className='px-1 text-xs font-semibold text-red-600'>
+          {error}
+        </p>
+      ) : null}
+
+      {note ? <p className='px-1 text-xs text-gray-500'>{note}</p> : null}
+    </>
+  );
+
+  if (variant === 'rich') {
+    // The smallest pack carries the badge: it is the low-commitment way in,
+    // and the one this section exists for ("only need a few designs?").
+    const smallest = Math.min(...packs.map((p) => p.credits));
+
+    return (
+      <div className='mb-4 space-y-2.5' role='radiogroup' aria-label='Credit packs'>
+        {packs.map((p, i) => {
+          const isSelected = selected === i;
+          const valid = validity(p);
+          const chips = [
+            { icon: Tag, text: `${perDesign(p)} per design` },
+            valid ? { icon: Clock, text: valid === 'no expiry' ? 'No expiry' : valid } : null,
+            { icon: Layers, text: `${p.credits} designs` },
+          ].filter(Boolean);
+
+          return (
+            <div
+              key={`${p.credits}-${p.priceCents}`}
+              role='radio'
+              aria-checked={isSelected}
+              tabIndex={0}
+              onClick={() => setSelected(i)}
+              onKeyDown={(e) => {
+                if (e.key === ' ' || e.key === 'Enter') {
+                  e.preventDefault();
+                  setSelected(i);
+                }
+              }}
+              className={`relative flex cursor-pointer flex-wrap items-center gap-x-4 gap-y-3 rounded-2xl border px-4 py-3.5 transition md:flex-nowrap md:gap-x-3 ${
+                isSelected
+                  ? 'border-violet-300 bg-violet-50/60 shadow-sm'
+                  : 'border-gray-200 bg-white hover:border-gray-300'
+              }`}
+            >
+              {p.credits === smallest ? (
+                <span className='absolute -top-3 right-4 inline-flex items-center gap-1 rounded-full bg-violet-600 px-3 py-1 text-xs font-semibold text-white shadow-sm'>
+                  <Flame size={12} className='fill-orange-300 text-orange-300' />
+                  Most Popular
+                </span>
+              ) : null}
+
+              <span
+                aria-hidden='true'
+                className={`flex h-6 w-6 flex-shrink-0 items-center justify-center rounded-full border-2 ${
+                  isSelected ? 'border-violet-600' : 'border-gray-300'
+                }`}
+              >
+                {isSelected ? <span className='h-3 w-3 rounded-full bg-violet-600' /> : null}
+              </span>
+
+              <span className='w-[5.75rem] flex-shrink-0 whitespace-nowrap text-base font-bold text-black'>
+                {p.credits} credits
+              </span>
+
+              <span className='order-last flex w-full flex-wrap gap-1.5 md:order-none md:w-auto md:flex-1 xl:flex-nowrap'>
+                {chips.map(({ icon: Icon, text }) => (
+                  <span
+                    key={text}
+                    className='inline-flex items-center gap-1.5 whitespace-nowrap rounded-full bg-gray-100 px-2.5 py-1.5 text-xs font-medium text-gray-700'
+                  >
+                    <Icon size={13} className='text-violet-600' aria-hidden='true' />
+                    {text}
+                  </span>
+                ))}
+              </span>
+
+              <span className='ml-auto text-lg font-bold text-black md:ml-0'>
+                {money(p.priceCents, p.currency)}
+              </span>
+
+              {buyButton(p, 'flex-shrink-0')}
+            </div>
+          );
+        })}
+
+        {footer}
+      </div>
+    );
+  }
+
   return (
     <div className='mb-4 space-y-2'>
       {packs.map((p) => (
@@ -174,21 +306,7 @@ export default function CreditPackList({ note = '', onUnavailable = null }) {
         </div>
       ))}
 
-      {coveredBySubscription ? (
-        <p className='px-1 text-xs text-gray-600'>
-          Your plan already covers premium downloads, so there is nothing to buy
-          here — credits are only spent when there is no active plan. If you want
-          some ready for after your plan ends, just ask us.
-        </p>
-      ) : null}
-
-      {error ? (
-        <p role='alert' className='px-1 text-xs font-semibold text-red-600'>
-          {error}
-        </p>
-      ) : null}
-
-      {note ? <p className='px-1 text-xs text-gray-500'>{note}</p> : null}
+      {footer}
     </div>
   );
 }

@@ -61,6 +61,67 @@ function Avatar({ name, src }) {
   );
 }
 
+/* The design a review is about: thumbnail, name, tier and a couple of facts,
+   in the same terms the product cards use (Free / Pro, downloads, formats).
+   `compact` drops the thumbnail when two stitch-out photos already fill the
+   row. Every extra field is optional so an older API response still renders. */
+function ReviewedProduct({ product, compact = false }) {
+  const formats = product.formats?.length || 0;
+  const downloads = Number(product.downloadCount) || 0;
+
+  return (
+    <Link
+      href={`/product/${product.slug}`}
+      className='group flex min-w-[10rem] flex-1 flex-col justify-between rounded-xl bg-gray-50 p-3 ring-1 ring-black/5 transition hover:bg-gray-100'
+    >
+      <div className='flex min-w-0 items-start gap-2.5'>
+        {product.image && !compact && (
+          <Image
+            src={product.image}
+            alt={product.name}
+            width={44}
+            height={44}
+            className='h-11 w-11 flex-shrink-0 rounded-lg bg-white object-cover'
+          />
+        )}
+        <p className='line-clamp-2 min-w-0 text-xs font-semibold leading-snug text-black'>
+          {product.name}
+        </p>
+      </div>
+
+      <div className='mt-2 flex min-w-0 items-center gap-2 text-[11px] text-gray-500'>
+        {product.isFree != null && (
+          <span
+            className={`inline-flex flex-shrink-0 items-center rounded px-1.5 py-0.5 text-[10px] font-bold uppercase tracking-wide ${
+              product.isFree
+                ? 'border border-green-500 text-green-600'
+                : 'bg-black text-white'
+            }`}
+          >
+            {product.isFree ? 'Free' : 'Pro'}
+          </span>
+        )}
+        <span className='truncate'>
+          {[
+            downloads > 0 &&
+              `${new Intl.NumberFormat('en-US', {
+                notation: 'compact',
+                maximumFractionDigits: 1,
+              }).format(downloads)} downloads`,
+            formats > 0 && `${formats} formats`,
+          ]
+            .filter(Boolean)
+            .join(' · ')}
+        </span>
+      </div>
+
+      <span className='mt-2 text-xs font-semibold text-black transition-transform group-hover:translate-x-0.5'>
+        View design →
+      </span>
+    </Link>
+  );
+}
+
 /* "2,400+" rather than "2,431": rounded DOWN to the nearest 100 so the claim is
    always true, and the "+" carries the rest. Under 100 it stays exact, because
    "0+" would be absurd and a small honest number reads better than a fake one. */
@@ -118,42 +179,34 @@ export default function FeaturedReviews({ reviews, totalCount = 0 }) {
               {review.reviewText}
             </blockquote>
 
-            {/* The customer's own stitch-outs — the most persuasive thing on
-                the page, so they render full width rather than as thumbnails. */}
-            {review.images?.length > 0 && (
-              <div className='mt-4 flex gap-2'>
-                {review.images.map((img) => (
-                  <Image
-                    key={img.url}
-                    src={img.url}
-                    alt={`Stitched result by ${review.author?.name || 'a customer'}`}
-                    width={96}
-                    height={96}
-                    className='h-24 w-24 rounded-lg object-cover'
-                  />
-                ))}
-              </div>
-            )}
+            {/* Stitch-out photo(s) on the left, the design they stitched on
+                the right — the photo alone left a blank half-card, and the
+                design is exactly what a reader wants next. Without photos the
+                design panel takes the full width. */}
+            {(review.images?.length > 0 || review.product) && (
+              <div className='mt-4 flex flex-wrap items-stretch gap-3'>
+                {review.images?.length > 0 && (
+                  <div className='flex flex-shrink-0 gap-2'>
+                    {review.images.slice(0, 2).map((img) => (
+                      <Image
+                        key={img.url}
+                        src={img.url}
+                        alt={`Stitched result by ${review.author?.name || 'a customer'}`}
+                        width={112}
+                        height={112}
+                        className='h-28 w-28 rounded-xl object-cover'
+                      />
+                    ))}
+                  </div>
+                )}
 
-            {review.product && (
-              <Link
-                href={`/product/${review.product.slug}`}
-                className='mt-4 flex items-center gap-2.5 border-t border-gray-100 pt-3 transition-opacity hover:opacity-70'
-              >
-                {review.product.image && (
-                  <Image
-                    src={review.product.image}
-                    alt={review.product.name}
-                    width={32}
-                    height={32}
-                    className='h-8 w-8 flex-shrink-0 rounded object-cover'
+                {review.product && (
+                  <ReviewedProduct
+                    product={review.product}
+                    compact={review.images?.length > 1}
                   />
                 )}
-                <span className='min-w-0 flex-1 truncate text-xs font-medium text-gray-600'>
-                  {review.product.name}
-                </span>
-                <span className='flex-shrink-0 text-xs text-gray-400'>→</span>
-              </Link>
+              </div>
             )}
           </figure>
         ))}
