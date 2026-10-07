@@ -17,7 +17,14 @@ import {
   money,
 } from '@/lib/subscriptions/planPricing';
 import { Divider } from '@heroui/divider';
-import { GiftIcon } from 'lucide-react';
+import {
+  ArrowRight,
+  CreditCard,
+  Download,
+  Gift,
+  GiftIcon,
+  Wallet,
+} from 'lucide-react';
 import { usePathname, useRouter } from 'next/navigation';
 import { useCallback, useEffect, useState } from 'react';
 import { buildSubscriptionFaqs } from './faqs';
@@ -105,10 +112,10 @@ const DashIcon = () => (
     />
   </svg>
 );
-const ClockIcon = () => (
+const ClockIcon = ({ size = 18 }) => (
   <svg
-    width='18'
-    height='18'
+    width={size}
+    height={size}
     viewBox='0 0 24 24'
     fill='none'
     stroke='currentColor'
@@ -646,54 +653,56 @@ export default function SubscriptionsPageClient({
     <>
       <Header />
 
-      <div className='min-h-screen bg-[#F5F5F7] py-12 pb-20 px-4 relative overflow-hidden'>
-        {/* ---------- HERO ---------- */}
-        <div className='mx-auto mb-8 max-w-2xl text-center'>
+      <div className='min-h-screen bg-[#F5F5F7] py-8 pb-20 px-4 relative overflow-hidden md:py-10'>
+        {/* ---------- HERO ----------
+            Kept compact on purpose: the plan cards are what people came for,
+            so the header, timer and trust line share as little height as they
+            can before the grid starts. */}
+        <div className='mx-auto mb-6 max-w-3xl text-center'>
           <span className='text-xs font-bold uppercase tracking-[0.2em] text-gray-400'>
             Pricing
           </span>
-          <h1 className='mt-3 text-4xl font-extrabold tracking-tight text-black md:text-5xl'>
+          <h1 className='mt-2 text-3xl font-extrabold tracking-tight text-black md:text-4xl'>
             Choose Your Plan
           </h1>
-          <p className='mx-auto mt-4 max-w-xl text-sm leading-relaxed text-gray-600 md:text-base'>
+          <p className='mx-auto mt-2 max-w-xl text-sm leading-relaxed text-gray-600'>
             Get instant access to premium embroidery designs in every format.
             Commercial use included, cancel anytime.
           </p>
-        </div>
 
-        {/* ---------- SINGLE OFFER COUNTDOWN ----------
-            Was repeated inside every paid card; one bar above the grid says it
-            once and leaves each card telling a single price story. */}
-        {plans.length > 0 && (
-          <div className='mx-auto mb-8 flex max-w-md items-center justify-center gap-3 rounded-full bg-black px-6 py-3 text-white shadow-md'>
-            <ClockIcon />
-            <p className='text-sm font-semibold text-white'>
-              Limited time offer — ends in{' '}
-              <OfferCountdown className='font-mono' />
-            </p>
+          {/* One offer timer above the grid (styled like the homepage promo
+              pill, so the two read as the same offer), and the trust claims as
+              a single quiet line beside it rather than a row of pills. Only
+              claims this page can stand behind. */}
+          <div className='mt-4 flex flex-wrap items-center justify-center gap-x-5 gap-y-2'>
+            {plans.length > 0 && (
+              <div className='inline-flex items-center gap-2 rounded-full bg-green-50 px-4 py-1.5 text-sm ring-1 ring-green-100'>
+                <span className='text-green-600'>
+                  <ClockIcon size={16} />
+                </span>
+                <span className='font-semibold text-slate-700'>
+                  Offer ends in
+                </span>
+                <OfferCountdown className='font-bold text-green-600' />
+              </div>
+            )}
+
+            <ul className='flex flex-wrap items-center justify-center gap-x-4 gap-y-1 text-xs font-medium text-gray-600'>
+              {[
+                'Cancel anytime',
+                'All machine formats',
+                'Commercial use on paid plans',
+                'Instant download',
+              ].map((chip) => (
+                <li key={chip} className='flex items-center gap-1.5'>
+                  <span className='text-black'>
+                    <CheckCircle size={13} />
+                  </span>
+                  {chip}
+                </li>
+              ))}
+            </ul>
           </div>
-        )}
-
-        {/* Trust chips — only claims this page can stand behind. Rendered as
-            white pills so they read as part of the carded page rather than
-            loose text floating on the grey. */}
-        <div className='mx-auto mb-10 flex max-w-3xl flex-wrap items-center justify-center gap-2'>
-          {[
-            'Cancel anytime',
-            'All machine formats included',
-            'Commercial use on paid plans',
-            'Instant download',
-          ].map((chip) => (
-            <span
-              key={chip}
-              className='flex items-center gap-1.5 rounded-full bg-white px-3.5 py-1.5 text-xs font-medium text-gray-700 shadow-sm ring-1 ring-black/5'
-            >
-              <span className='text-black'>
-                <CheckCircle size={14} />
-              </span>
-              {chip}
-            </span>
-          ))}
         </div>
 
         {/* Loud version — only after we KNOW checkout didn't complete. */}
@@ -1023,50 +1032,112 @@ export default function SubscriptionsPageClient({
             honest, and the list says which is which rather than promising a
             checkout that does not exist.
           */}
-          <div className='mt-10 rounded-2xl bg-white p-6 shadow-sm ring-1 ring-black/5 md:p-8'>
-            <div className='flex flex-col gap-6 md:flex-row md:items-start md:justify-between'>
-              <div className='max-w-xl'>
-                <div className='mb-2 inline-flex items-center gap-2 rounded-full bg-gray-100 px-3 py-1 text-xs font-bold uppercase tracking-wide text-gray-700'>
+          <div className='mt-10 rounded-3xl bg-white p-6 shadow-sm ring-1 ring-black/5 md:p-8'>
+            <div className='grid gap-8 lg:grid-cols-[minmax(0,4fr)_minmax(0,7fr)] lg:items-center'>
+              <div>
+                <div className='mb-4 inline-flex items-center gap-2 rounded-full bg-violet-50 px-3 py-1.5 text-xs font-bold uppercase tracking-wide text-gray-800'>
+                  <Wallet
+                    size={14}
+                    className='text-violet-600'
+                    aria-hidden='true'
+                  />
                   No subscription
                 </div>
-                <h2 className='text-2xl font-bold text-black'>
-                  Only need a few designs? Pay per download.
+                <h2 className='font-serif text-3xl font-bold leading-tight tracking-tight text-slate-900 md:text-4xl'>
+                  Only need a few designs?{' '}
+                  <span className='relative inline-block text-violet-600'>
+                    Pay per download.
+                    {/* Hand-drawn underline, like the homepage promo's accent. */}
+                    <svg
+                      aria-hidden='true'
+                      viewBox='0 0 200 12'
+                      preserveAspectRatio='none'
+                      className='absolute -bottom-1 left-0 h-2.5 w-3/5 text-pink-400'
+                    >
+                      <path
+                        d='M2 9 C 50 2, 120 2, 198 6'
+                        stroke='currentColor'
+                        strokeWidth='3'
+                        fill='none'
+                        strokeLinecap='round'
+                      />
+                    </svg>
+                  </span>
                 </h2>
-                <p className='mt-2 text-sm leading-relaxed text-gray-600'>
+                <p className='mt-4 text-sm leading-relaxed text-gray-600 md:text-base'>
                   Buy download credits instead of a plan. One credit takes one
                   premium design, in every format we have. Nothing renews, there
                   is no card on file, and free designs never use a credit.
                 </p>
 
-                <ul className='mt-4 space-y-2 text-sm text-gray-700'>
+                <ul className='mt-6 space-y-4'>
                   {[
-                    'Credits stay on your account until you use them',
-                    'Anything you download is yours to keep and re-download free',
-                    'Pay by PayPal, Payoneer, bank transfer or another method',
-                  ].map((line) => (
-                    <li key={line} className='flex items-start gap-2'>
-                      <span className='mt-1.5 h-1.5 w-1.5 flex-shrink-0 rounded-full bg-black' />
-                      {line}
+                    {
+                      icon: Gift,
+                      tone: 'bg-pink-50 text-pink-500',
+                      title: 'Credits stay on your account until you use them',
+                      body: 'Spend them whenever you find a design you want.',
+                    },
+                    {
+                      icon: Download,
+                      tone: 'bg-green-50 text-green-600',
+                      title:
+                        'Anything you download is yours to keep and re-download free',
+                      body: 'Download again anytime, no extra cost.',
+                    },
+                    {
+                      icon: CreditCard,
+                      tone: 'bg-violet-50 text-violet-600',
+                      title:
+                        'Pay by PayPal, Payoneer, bank transfer or another method',
+                      body: 'Multiple secure payment options.',
+                    },
+                  ].map(({ icon: Icon, tone, title, body }) => (
+                    <li key={title} className='flex items-start gap-3'>
+                      <span
+                        className={`flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-xl ${tone}`}
+                      >
+                        <Icon size={18} aria-hidden='true' />
+                      </span>
+                      <span>
+                        <span className='block text-sm font-semibold text-black'>
+                          {title}
+                        </span>
+                        <span className='block text-xs text-gray-500'>
+                          {body}
+                        </span>
+                      </span>
                     </li>
                   ))}
                 </ul>
               </div>
 
-              <div className='w-full md:w-auto md:min-w-[280px]'>
-                <CreditPackList note={siteConfig?.creditPacksNote || ''} />
+              <div className='w-full pt-3'>
+                {/* The admin's note sits under the button here (as in the
+                    design), so the list itself is handed none. */}
+                <CreditPackList variant='rich' />
 
                 <button
                   onClick={() => {
                     setPayHelpType('credits');
                     setShowPayHelp(true);
                   }}
-                  className='w-full rounded-xl bg-black py-3.5 text-sm font-semibold text-white transition hover:bg-gray-900'
+                  className='relative flex w-full items-center justify-center rounded-2xl bg-black py-3.5 text-sm font-semibold text-white transition hover:bg-gray-900'
                 >
                   {creditPacks.length > 0
                     ? 'Request credits'
                     : 'Ask us about credits'}
+                  <span className='absolute right-2 flex h-9 w-9 items-center justify-center rounded-full bg-white text-black'>
+                    <ArrowRight size={16} aria-hidden='true' />
+                  </span>
                 </button>
-                <p className='mt-2 text-center text-xs text-gray-500'>
+                <p className='mt-3 text-center text-xs text-gray-500'>
+                  {siteConfig?.creditPacksNote ? (
+                    <>
+                      {siteConfig.creditPacksNote}
+                      <br />
+                    </>
+                  ) : null}
                   Prefer to pay another way, or need a size that isn&apos;t
                   listed? Tell us how many and we&apos;ll send payment details.
                 </p>
