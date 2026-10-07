@@ -937,3 +937,34 @@ span {
 .sidebar-scroll::-webkit-scrollbar-thumb:hover {
   background-color: rgba(148, 163, 184, 0.7);
 }
+
+/* =========================
+   Markdown editor (@uiw/react-md-editor)
+   The editor stacks a transparent <textarea> (caret + selection) over a
+   syntax-highlighted <pre>. Both layers must use identical font metrics or
+   the caret and selection drift away from the visible text. The global
+   `span { font-family: Poppins !important }` rule hit the highlighted token
+   spans in the <pre> but not the textarea, and body's font-weight 700 made
+   everything bold, so lock every layer to one font, size and weight here.
+========================= */
+.w-md-editor {
+  font-weight: 400;
+}
+
+.w-md-editor .w-md-editor-text,
+.w-md-editor .w-md-editor-text-pre,
+.w-md-editor .w-md-editor-text-pre > code,
+.w-md-editor .w-md-editor-text-pre span,
+.w-md-editor .w-md-editor-text-input {
+  font-family: var(--md-editor-font-family) !important;
+  font-size: 15px !important;
+  line-height: 24px !important;
+  font-weight: 400 !important;
+  font-style: normal !important;
+  letter-spacing: normal !important;
+}
+
+.w-md-editor .w-md-editor-text {
+  padding: 12px 14px;
+  color: #1f2937;
+}
