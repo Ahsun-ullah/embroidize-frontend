@@ -59,12 +59,14 @@ export default async function LinksPage() {
       </p>
 
       {items.length ? (
-        <ul className='mt-1 grid grid-cols-3 gap-1'>
+        <ul className='mt-2 grid grid-cols-3 gap-2 sm:gap-3'>
           {items.map((item, i) => (
             <li key={item._id}>
               <Link
                 href={`/product/${item.slug}?${UTM}`}
-                className='group relative block aspect-square overflow-hidden bg-gray-100'
+                // Same 3:2 frame as the product cards and product page, so designs
+                // show whole instead of being cropped to a square.
+                className='group relative block aspect-[3/2] overflow-hidden rounded-xl border border-gray-200 bg-white shadow-sm transition-shadow hover:shadow-md'
                 title={item.name}
               >
                 {item.image ? (
@@ -72,9 +74,9 @@ export default async function LinksPage() {
                     src={item.image}
                     alt={item.name}
                     fill
-                    quality={75}
                     sizes='(max-width: 768px) 33vw, 256px'
-                    className='object-cover transition-transform duration-300 group-hover:scale-105'
+                    quality={78}
+                    className='object-cover object-center transition-transform duration-300 group-hover:scale-105'
                     // The first two rows are what a phone shows on arrival.
                     priority={i < 6}
                   />
