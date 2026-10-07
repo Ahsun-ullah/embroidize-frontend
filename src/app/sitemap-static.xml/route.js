@@ -14,6 +14,7 @@ export async function GET() {
     { url: '/free-machine-embroidery-designs', priority: '0.9' },
     { url: '/embroidery-subscription', priority: '0.9' },
     { url: '/holiday-embroidery-designs', priority: '0.9' },
+    { url: '/instagram-embroidery-designs', priority: '0.7' },
     { url: '/subscriptions', priority: '0.9' },
     { url: '/products', priority: '0.9' },
   ];

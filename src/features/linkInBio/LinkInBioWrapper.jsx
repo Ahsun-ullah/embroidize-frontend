@@ -6,7 +6,7 @@ import { Button, Chip, Input, Spinner, Tooltip } from '@heroui/react';
 import { Check, Copy, ExternalLink, Search, Trash2 } from 'lucide-react';
 import { useEffect, useMemo, useState } from 'react';
 
-const PUBLIC_URL = 'https://embroidize.com/links';
+const PUBLIC_URL = 'https://embroidize.com/instagram-embroidery-designs';
 
 function getToken() {
   const row = document.cookie.split('; ').find((r) => r.startsWith('token='));
@@ -41,7 +41,7 @@ async function call(path, options = {}) {
 }
 
 // Admin → Content → Links Page. Picks which designs show on
-// embroidize.com/links (the Instagram bio link) and in what order.
+// embroidize.com/instagram-embroidery-designs (the Instagram bio link) and in what order.
 export default function LinkInBioWrapper({ initialItems = [] }) {
   const [items, setItems] = useState(initialItems);
   const [busy, setBusy] = useState(false);
@@ -168,7 +168,7 @@ export default function LinkInBioWrapper({ initialItems = [] }) {
                 size='sm'
                 variant='flat'
                 as='a'
-                href='/links'
+                href='/instagram-embroidery-designs'
                 target='_blank'
                 rel='noopener'
               >
