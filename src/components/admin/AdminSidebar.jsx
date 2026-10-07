@@ -345,6 +345,11 @@ export default function AdminSidebar({ isCollapsed, setIsCollapsed }) {
               icon: 'ri-calendar-event-line',
             },
             {
+              href: '/admin/links-page',
+              label: 'Links Page',
+              icon: 'ri-instagram-line',
+            },
+            {
               href: '/admin/contact-submissions',
               label: 'Contact Submissions',
               icon: 'ri-mail-line',
