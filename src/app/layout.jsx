@@ -18,7 +18,7 @@ export const metadata = {
     template: '%s | Embroidize',
   },
   description:
-    'Download high-quality machine embroidery designs in popular formats (PES, DST, JEF, EXP) — tested and free.',
+    'Download high-quality machine embroidery designs in popular formats (PES, DST, JEF, EXP) — tested, with a growing collection of free designs.',
   alternates: { canonical: 'https://embroidize.com' },
   openGraph: {
     type: 'website',

@@ -46,12 +46,14 @@ export default function TermsPage() {
 
 You may:
 - Use designs for personal use
-- Use designs for small business commercial products (physical items only)
+- Use designs commercially on physical products you stitch and sell (physical items only)
 
 You may NOT:
 - Resell or redistribute digital files
 - Share files publicly or privately
-- Claim designs as your own`,
+- Claim designs as your own
+
+Only designs marked Free may be downloaded at no cost, within the free download allowance. All other designs require an active subscription or download credits.`,
     },
     {
       title: '4. Subscription Services',

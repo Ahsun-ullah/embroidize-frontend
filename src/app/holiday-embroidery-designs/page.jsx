@@ -530,8 +530,8 @@ export default function HolidayEmbroideryDesignsPage() {
                     </svg>
                   </span>
                   <span>
-                    <b>Commercial</b>
-                    <span>Use Included</span>
+                    <b>Commercial Use</b>
+                    <span>On Physical Products</span>
                   </span>
                 </li>
               </ul>
@@ -611,7 +611,6 @@ export default function HolidayEmbroideryDesignsPage() {
                 </p>
               </article>
               <article className='feat'>
-                {/* ⚠ Word to your actual licence. Do not imply resale of the files. */}
                 <span className='feat__ic'>
                   <svg width='22' height='22' aria-hidden='true'>
                     <use href='#i-heart' />
@@ -619,8 +618,8 @@ export default function HolidayEmbroideryDesignsPage() {
                 </span>
                 <h3>Commercial Use</h3>
                 <p>
-                  Use eligible designs for personal projects or finished
-                  products for your business.
+                  Stitch designs onto finished products and sell them. The
+                  digital files themselves may not be resold or shared.
                 </p>
               </article>
             </div>

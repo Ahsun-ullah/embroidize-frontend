@@ -11,7 +11,7 @@ export const buildSubscriptionFaqs = (freeLimit, freeWindow) => [
       freeLimit && freeWindow
         ? `${freeLimit} designs per ${freeWindow}`
         : 'a set number of designs'
-    } for personal use. A subscription raises that allowance, and every design you download comes with a commercial use licence, so you can sell what you stitch.`,
+    }, and only designs marked Free. A subscription unlocks the premium designs too and raises your download allowance. On every plan, free included, you can sell what you stitch: designs may be used commercially on physical products.`,
   },
   {
     q: 'Which embroidery file formats are included?',
@@ -19,7 +19,7 @@ export const buildSubscriptionFaqs = (freeLimit, freeWindow) => [
   },
   {
     q: 'Can I use the designs on items I sell?',
-    a: 'Yes, on any paid plan. Designs downloaded on a paid plan include a commercial use licence, so you can stitch and sell finished items on Etsy, at markets, in your own shop or for client orders with no extra licensing fee. The free plan is for personal use only.',
+    a: 'Yes, on any plan, including the free one. You can stitch any design onto physical products and sell them on Etsy, at markets, in your own shop or for client orders with no extra licensing fee. Commercial use covers physical stitched items only: the digital design files may not be resold, shared or redistributed.',
   },
   {
     q: 'Can I cancel at any time?',

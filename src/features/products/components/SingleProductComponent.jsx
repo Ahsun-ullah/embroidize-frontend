@@ -119,9 +119,9 @@ export const SingleProductComponent = ({
                   <path d='m9 12 2 2 4-4' />
                 </svg>
                 <p className='font-bold text-xs text-center'>
-                  Commercial
+                  Commercial Use
                   <br />
-                  License
+                  Physical Products
                 </p>
               </div>
 

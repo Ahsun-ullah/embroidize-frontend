@@ -14,24 +14,24 @@ export const fetchCache = 'force-no-store';
 export const revalidate = 0;
 
 export const metadata = {
-  title: 'Free Machine Embroidery Designs | 18,000+ Instant Downloads',
+  title: 'Free Machine Embroidery Designs | Instant Downloads in Every Format',
   description:
-    'Browse 18,000+ free machine embroidery designs in PES, DST, JEF, VP3, HUS and more. Professionally digitized, commercial use approved. Create a free account for instant access.',
+    'Download free machine embroidery designs in PES, DST, JEF, VP3, HUS and more. Every design marked Free is free to download with a free account, and all designs can be used on physical products you sell.',
   keywords: [
     'free embroidery designs download',
     'machine embroidery patterns',
     'free embroidery files',
     'embroidery design library',
-    'commercial use embroidery designs',
+    'embroidery designs for commercial use on physical products',
   ],
   robots: 'index, follow',
   alternates: {
     canonical: 'https://embroidize.com/free-machine-embroidery-designs',
   },
   openGraph: {
-    title: 'Free Machine Embroidery Designs | 18,000+ Instant Downloads',
+    title: 'Free Machine Embroidery Designs | Instant Downloads in Every Format',
     description:
-      'Browse 18,000+ free machine embroidery designs in PES, DST, JEF, VP3, HUS and more. Professionally digitized, commercial use approved.',
+      'Download free machine embroidery designs in PES, DST, JEF, VP3, HUS and more. Every design marked Free is free to download, and all designs can be used on physical products you sell.',
     url: 'https://embroidize.com/free-machine-embroidery-designs',
     siteName: 'Embroidize',
     images: [
@@ -74,7 +74,7 @@ const MACHINE_BRANDS = [
 const buildFaqs = (freeLimit, freeWindow) => [
   {
     q: 'Are the machine embroidery designs on Embroidize really free?',
-    a: `Yes. Every design in our free collection is 100% free to download — no hidden fees and no credit card required. Create a free account and ${
+    a: `Yes, every design marked Free is free to download, with no hidden fees and no credit card required. Premium designs are not free; they need a subscription or download credits. Create a free account and ${
       freeLimit && freeWindow
         ? `download up to ${freeLimit} free designs per ${freeWindow}`
         : 'start downloading'
@@ -82,7 +82,7 @@ const buildFaqs = (freeLimit, freeWindow) => [
   },
   {
     q: 'Can I use Embroidize designs to sell embroidered products?',
-    a: 'Yes. All designs include a commercial use license. You can legally use them to create items for sale on Etsy, at markets, through your own shop, or for client orders — without paying additional licensing fees.',
+    a: 'Yes. You can stitch any Embroidize design onto physical products and sell them on Etsy, at markets, through your own shop, or for client orders, with no extra licensing fee. The commercial use covers physical stitched items only: the digital design files themselves may not be resold, shared or redistributed.',
   },
   {
     q: 'What embroidery file formats are included in each download?',
@@ -93,8 +93,8 @@ const buildFaqs = (freeLimit, freeWindow) => [
     a: 'Yes, a free account is required. Creating one takes less than a minute — just sign up with your email address. Your account saves your download history so you can re-download any design at any time.',
   },
   {
-    q: 'How many free embroidery designs does Embroidize have?',
-    a: 'Embroidize currently has over 15,000 free machine embroidery designs across florals, animals, kids, holiday, sports, fashion, home and living, and more. New designs are added regularly.',
+    q: 'Are all designs on Embroidize free?',
+    a: 'No. Only designs marked Free are free to download. The rest of the library is premium and is available with a subscription or download credits. Both free and premium designs cover florals, animals, kids, holiday, sports, fashion, home and living, and more, and new designs are added regularly.',
   },
   {
     q: 'Are Embroidize designs suitable for beginners?',
@@ -176,7 +176,7 @@ export default async function LandingPage() {
           <div className='text-center'>
             {/* Trust Badge */}
             <div className='inline-block mb-6 px-6 py-3 bg-green-400 text-black rounded-full text-base font-bold shadow-md'>
-              ✓ 100% Free • No Credit Card Required • Instant Access
+              ✓ Free Account • No Credit Card Required • Instant Access
             </div>
 
             {/* Main Headline */}
@@ -184,7 +184,7 @@ export default async function LandingPage() {
               style={{ fontFamily: 'Inter, sans-serif', fontWeight: 700 }}
               className='text-5xl sm:text-6xl lg:text-7xl font-extrabold tracking-tight leading-tight mb-6'
             >
-              Download 18,000+ Free
+              Download Free
               <br />
               <span className='bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent'>
                 Machine Embroidery Designs
@@ -220,7 +220,7 @@ export default async function LandingPage() {
                     18,000+
                   </div>
                   <div className='mt-2 text-sm sm:text-base text-gray-600 font-medium'>
-                    Free Designs
+                    Designs
                   </div>
                 </div>
                 <div className='text-center'>
@@ -233,10 +233,10 @@ export default async function LandingPage() {
                 </div>
                 <div className='text-center'>
                   <div className='text-3xl sm:text-5xl font-extrabold text-gray-900'>
-                    100%
+                    $0
                   </div>
                   <div className='mt-2 text-sm sm:text-base text-gray-600 font-medium'>
-                    Free Forever
+                    Free Account
                   </div>
                 </div>
               </div>
@@ -266,20 +266,21 @@ export default async function LandingPage() {
             Free machine embroidery designs — download instantly in any format
           </h2>
           <p className='text-lg text-gray-600 leading-relaxed mb-4'>
-            Embroidize is a free machine embroidery designs platform built for
-            hobbyists, small businesses, and professional embroiderers who want
-            premium-quality files without the cost. Every design is
-            professionally digitized, tested for clean stitching, and available
-            in all major formats — completely free, forever.
+            Embroidize is a machine embroidery designs platform built for
+            hobbyists, small businesses, and professional embroiderers. Every
+            design is professionally digitized, tested for clean stitching, and
+            available in all major formats. Designs marked Free cost nothing to
+            download with a free account; premium designs are available with a
+            subscription or download credits.
           </p>
           <p className='text-lg text-gray-600 leading-relaxed'>
             All Embroidize designs include{' '}
             <span className='font-bold text-gray-900'>
-              full commercial use rights
+              commercial use on physical products
             </span>
-            . You can use these designs to create and sell embroidered products
-            on Etsy, at markets, or through your own business — without paying
-            licensing fees or requesting permission.
+            . You can stitch them onto items and sell those items on Etsy, at
+            markets, or through your own business without paying licensing
+            fees. The digital files themselves may not be resold or shared.
           </p>
         </div>
       </section>
@@ -316,8 +317,8 @@ export default async function LandingPage() {
               </div>
               <h3 className='text-xl font-bold mb-2'>Instant Downloads</h3>
               <p className='text-gray-600'>
-                Download any design immediately after signup. No waiting, no
-                limits.
+                Download free designs immediately after signup. No waiting, no
+                credit card.
               </p>
             </div>
 
@@ -419,7 +420,7 @@ export default async function LandingPage() {
           className='group relative inline-flex items-center justify-center rounded-full bg-gradient-to-r from-blue-600 to-purple-600 px-12 py-5 text-lg sm:text-xl font-bold text-white hover:from-blue-700 hover:to-purple-700 transition-all shadow-2xl hover:shadow-3xl transform hover:scale-105 w-full sm:w-auto'
         >
           <span className='relative z-10'>
-            Unlock All Designs – Sign Up Free
+            Sign Up Free
           </span>
           <div className='absolute inset-0 rounded-full bg-white opacity-0 group-hover:opacity-20 transition-opacity'></div>
         </Link>
@@ -458,7 +459,7 @@ export default async function LandingPage() {
                   href='/auth/register'
                   className='group relative inline-flex items-center justify-center rounded-full bg-gradient-to-r from-blue-600 to-purple-600 px-12 py-5 text-lg sm:text-xl font-bold text-white hover:from-blue-700 hover:to-purple-700 transition-all shadow-2xl hover:shadow-3xl transform hover:scale-105 w-full sm:w-auto'
                 >
-                  <span className='relative z-10'>Unlock Full Library</span>
+                  <span className='relative z-10'>Create Free Account</span>
                   <div className='absolute inset-0 rounded-full bg-white opacity-0 group-hover:opacity-20 transition-opacity'></div>
                 </Link>
               </div>
@@ -473,7 +474,7 @@ export default async function LandingPage() {
       <section className='py-16 bg-white'>
         <div className='mx-auto max-w-5xl px-4 sm:px-6 lg:px-8 text-center'>
           <h2 className='text-3xl sm:text-4xl font-bold text-gray-900 mb-4'>
-            Browse free machine embroidery designs by category
+            Browse machine embroidery designs by category
           </h2>
           <p className='text-lg text-gray-600 mb-10'>
             Our library covers every style and occasion. Browse by category to
@@ -571,7 +572,7 @@ export default async function LandingPage() {
             <div className='grid grid-cols-1 sm:grid-cols-2 gap-y-4 gap-x-10 max-w-3xl mx-auto text-left'>
               {[
                 '15,000+ Designs Available',
-                'Free for Personal & Commercial Use',
+                'Commercial Use on Physical Products',
                 'New Designs Added Daily',
                 'Secure & Fast Access',
               ].map((item) => (
@@ -596,20 +597,18 @@ export default async function LandingPage() {
           </h2>
           <p className='text-lg text-gray-600 leading-relaxed mb-4'>
             Most &quot;free&quot; embroidery design sites come with hidden
-            limits — personal-use-only licenses, low digitizing quality, or
-            designs locked behind a subscription paywall. Embroidize is
-            different.
+            limits — personal-use-only licenses or low digitizing quality.
+            Embroidize is different.
           </p>
           <p className='text-lg text-gray-600 leading-relaxed'>
-            Our library of 15,000+ free machine embroidery designs is
-            professionally digitized to the same standard as paid platforms —
-            clean stitching, accurate color sequences, optimized pathing. Every
-            file is tested before publishing. And unlike most free embroidery
-            sites, every design includes{' '}
+            Every design in our library, free or premium, is professionally
+            digitized: clean stitching, accurate color sequences, optimized
+            pathing. Every file is tested before publishing. And unlike most
+            free embroidery sites, every design includes{' '}
             <span className='font-bold text-gray-900'>
-              full commercial use rights
+              commercial use on physical products
             </span>
-            .
+            , so you can sell what you stitch.
           </p>
         </div>
       </section>
@@ -649,8 +648,8 @@ export default async function LandingPage() {
 
           <p className='text-base sm:text-lg text-white mb-6'>
             Join thousands of embroiderers and small business owners who use
-            Embroidize as their go-to source for free, commercially licensed
-            designs. Create your free account in under a minute.
+            Embroidize as their go-to source for quality designs they can
+            stitch and sell. Create your free account in under a minute.
           </p>
 
           <Link
