@@ -38,7 +38,7 @@ export const revalidate = 0;
 export const metadata = {
   title: 'Free Machine Embroidery Designs - Embroidize',
   description:
-    'Download free embroidery designs instantly – Browse unlimited machine embroidery Design in multiple categories and styles. All designs are tested and come in the most popular formats.',
+    'Download free and premium machine embroidery designs instantly in every popular format. Designs marked Free are free to download, and all designs are tested and ready to stitch.',
   keywords: [
     'free embroidery machine designs',
     'Embroidery design',
@@ -54,7 +54,7 @@ export const metadata = {
   openGraph: {
     title: 'Free Machine Embroidery Designs - Embroidize',
     description:
-      'Download free embroidery designs instantly – Browse unlimited machine embroidery Design in multiple categories and styles.',
+      'Download free and premium machine embroidery designs instantly in every popular format. Designs marked Free are free to download.',
     url: 'https://embroidize.com/',
     siteName: 'Embroidize',
     images: [
@@ -71,7 +71,7 @@ export const metadata = {
     card: 'summary_large_image',
     title: 'Free Embroidery Machine Designs',
     description:
-      'Download free embroidery designs instantly – Browse unlimited machine embroidery Design in multiple categories and styles.',
+      'Download free and premium machine embroidery designs instantly in every popular format. Designs marked Free are free to download.',
     images: ['https://embroidize.com/og-banner.jpg'],
   },
 };
@@ -161,7 +161,7 @@ export default async function Home() {
             {/* Badge */}
             <span className='inline-flex items-center gap-2 rounded-full bg-gray-300/70 px-4 py-1.5 text-sm font-semibold text-black'>
               <Sparkles className='h-4 w-4' aria-hidden />
-              100% Free Designs
+              Free Designs Available
             </span>
 
             {/* Heading */}
@@ -368,7 +368,7 @@ export default async function Home() {
                     <Download className='h-5 w-5' aria-hidden />
                   </span>
                   <p className='font-semibold text-slate-900'>
-                    Unlimited downloads
+                    Full premium library
                   </p>
                 </li>
                 <li className='flex items-center gap-3'>

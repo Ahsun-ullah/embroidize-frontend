@@ -61,8 +61,8 @@ const Footer = () => {
             <p className='text-[15px] leading-relaxed text-gray-700 max-w-sm'>
               Discover high-quality machine embroidery designs for hobbyists,
               embroidery businesses, and creators. Instantly download
-              commercial-use embroidery files in PES, DST, EXP, JEF, VP3, XXX,
-              and more formats. Explore our{' '}
+              embroidery files in PES, DST, EXP, JEF, VP3, XXX, and more
+              formats, licensed for use on physical products you sell. Explore our{' '}
               <a
                 href='https://embroidize.com/free-machine-embroidery-designs'
                 className='text-gray-900 underline hover:text-gray-700'

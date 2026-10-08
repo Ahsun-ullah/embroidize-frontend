@@ -8,16 +8,16 @@ import SubscriptionsPageClient from './SubscriptionsPageClient';
 export const metadata = {
   title: 'Embroidery Design Subscription Plans',
   description:
-    'Choose a subscription plan and get instant access to premium machine embroidery designs in every format. Commercial use included, cancel anytime.',
+    'Choose a subscription plan and get instant access to premium machine embroidery designs in every format. Commercial use on physical products, cancel anytime.',
   keywords:
-    'embroidery subscription, machine embroidery designs, embroidery plans, unlimited embroidery downloads, Embroidize premium',
+    'embroidery subscription, machine embroidery designs, embroidery plans, premium embroidery downloads, Embroidize premium',
   alternates: {
     canonical: 'https://embroidize.com/subscriptions',
   },
   openGraph: {
     title: 'Embroidery Design Subscription Plans',
     description:
-      'Choose a subscription plan and get instant access to premium machine embroidery designs in every format. Commercial use included, cancel anytime.',
+      'Choose a subscription plan and get instant access to premium machine embroidery designs in every format. Commercial use on physical products, cancel anytime.',
     url: 'https://embroidize.com/subscriptions',
     type: 'website',
     images: [
@@ -33,7 +33,7 @@ export const metadata = {
     card: 'summary_large_image',
     title: 'Embroidery Design Subscription Plans | Embroidize',
     description:
-      'Choose a subscription plan and get instant access to premium machine embroidery designs in every format. Commercial use included, cancel anytime.',
+      'Choose a subscription plan and get instant access to premium machine embroidery designs in every format. Commercial use on physical products, cancel anytime.',
     images: ['https://embroidize.com/og-banner.jpg'],
   },
 };

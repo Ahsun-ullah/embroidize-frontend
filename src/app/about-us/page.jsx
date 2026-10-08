@@ -4,14 +4,14 @@ import Header from '@/components/user/HomePage/Header';
 export const metadata = {
   title: 'About Embroidize – Premium Embroidery Design Platform',
   description:
-    'Discover Embroidize, a leading platform for high-quality embroidery machine designs. Free downloads, premium files, and creator-focused tools for embroidery enthusiasts and small businesses.',
+    'Discover Embroidize, a leading platform for high-quality embroidery machine designs. Free designs, premium files, and creator-focused tools for embroidery enthusiasts and small businesses.',
   alternates: {
     canonical: 'https://embroidize.com/about-us',
   },
   openGraph: {
     title: 'About Embroidize – Premium Embroidery Design Platform',
     description:
-      'Explore Embroidize — your trusted source for high-quality embroidery designs with free downloads and commercial use options.',
+      'Explore Embroidize — your trusted source for high-quality embroidery designs, free and premium, licensed for use on physical products you sell.',
     url: 'https://embroidize.com',
     siteName: 'Embroidize',
     images: [
@@ -82,9 +82,9 @@ export default function AboutUsPage() {
               <li>✔ High-quality embroidery design files</li>
               <li>✔ Multiple machine formats (PES, DST, JEF, EXP, etc.)</li>
               <li>✔ Instant digital downloads</li>
-              <li>✔ Free daily downloads for registered users</li>
+              <li>✔ Free downloads of designs marked Free for registered users</li>
               <li>✔ Premium and subscription-based access</li>
-              <li>✔ Commercial use for small businesses</li>
+              <li>✔ Commercial use on physical products (stitched items you sell)</li>
             </ul>
           </section>
 
@@ -94,8 +94,10 @@ export default function AboutUsPage() {
               Free Downloads with Fair Use
             </h2>
             <p className='text-gray-700 leading-relaxed'>
-              We offer a limited number of free downloads to help users explore
-              our designs before committing. This system ensures fair access
+              Designs marked Free can be downloaded at no cost, within a
+              limited free download allowance, so you can explore our designs
+              before committing. Premium designs need a subscription or
+              download credits. This system ensures fair access
               while maintaining platform sustainability.
             </p>
           </section>

@@ -22,8 +22,8 @@ const HeroSection = () => {
             Embroidery Designs
           </h1>
           <p className='text-xs sm:text-base md:text-lg text-center my-2 max-w-2xl'>
-            All you need for your next machine embroidery project. <br /> The
-            highest quality for free.
+            All you need for your next machine embroidery project. <br /> Free
+            and premium designs, all high quality.
           </p>
           <Link
             href='/products'

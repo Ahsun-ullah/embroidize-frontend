@@ -216,7 +216,7 @@ const COMPARISON_ROWS = [
   { label: 'Price', get: (c) => c.priceCell },
   { label: 'Billing', get: (c) => c.billingCell },
   { label: 'Downloads', get: (c) => c.downloadsCell },
-  { label: 'Entire design library', get: () => true },
+  { label: 'Premium designs', get: (c) => c.premium },
   {
     label: 'All machine formats (PES, DST, JEF, VP3, HUS, EXP, PCS, CND, XXX)',
     // The full format list is fine across a wide table cell but wraps to four
@@ -225,7 +225,7 @@ const COMPARISON_ROWS = [
     get: () => true,
   },
   { label: 'New designs as they are added', get: () => true },
-  { label: 'Commercial use licence', get: (c) => c.commercial },
+  { label: 'Commercial use on physical products', get: () => true },
   { label: 'Re-download anything you have taken', get: () => true },
   { label: 'Renews', get: (c) => c.renewsCell },
 ];
@@ -262,8 +262,8 @@ function ComparisonTable({ columns }) {
           Compare the plans
         </h2>
         <p className='mt-2 text-sm text-gray-600'>
-          Every plan opens the same library. What changes is how much you can
-          take each day, and what you are allowed to do with it.
+          The free plan covers designs marked Free. Paid plans add every
+          premium design and a bigger download allowance.
         </p>
       </div>
 
@@ -626,7 +626,7 @@ export default function SubscriptionsPageClient({
       billingCell: 'No billing',
       downloadsCell:
         freeLimit && freeWindow ? `${freeLimit} per ${freeWindow}` : 'Limited',
-      commercial: false,
+      premium: false,
       renewsCell: 'Never',
       highlight: false,
     },
@@ -641,7 +641,7 @@ export default function SubscriptionsPageClient({
         billingCell: d.billingCell,
         downloadsCell:
           plan.dailyLimit != null ? `${plan.dailyLimit} per day` : '—',
-        commercial: true,
+        premium: true,
         renewsCell: d.renewsCell,
         highlight: (plan.billingInterval || '')
           .toLowerCase()
@@ -687,7 +687,7 @@ export default function SubscriptionsPageClient({
           </h1>
           <p className='mx-auto mt-4 max-w-2xl text-sm leading-relaxed text-gray-600 md:text-base'>
             Get instant access to premium embroidery designs in every format.
-            Commercial use included, cancel anytime.
+            Commercial use on physical products, cancel anytime.
           </p>
 
           {/* One offer timer above the grid, green like the homepage promo
@@ -776,7 +776,7 @@ export default function SubscriptionsPageClient({
                     Free Forever
                   </h2>
                   <p className='text-xs text-gray-500'>
-                    Try the whole library first
+                    Start with the free designs
                   </p>
                 </div>
               </div>
@@ -846,7 +846,7 @@ export default function SubscriptionsPageClient({
               <ul className='mb-6 flex-1 space-y-2.5'>
                 {[
                   freeAllowance || 'A set number of free downloads',
-                  'Access all free designs in our library',
+                  'Download every design marked Free',
                   'All design formats (PES, DST, JEF, VP3, HUS, EXP, PCS, CND, XXX)',
                   'New designs as they are added',
                   'Support via email and chat',

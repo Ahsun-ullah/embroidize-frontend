@@ -58,8 +58,9 @@ function ThankYouContent() {
         <p className='text-gray-600 mb-3 text-lg'>Thank you for registering!</p>
         <p className='text-gray-500 mb-8'>
           Your account has been created successfully. You&apos;re now ready to
-          download unlimited embroidery designs and explore our entire
-          collection.
+          download designs marked Free and explore our entire collection.
+          Premium designs are available with a subscription or download
+          credits.
         </p>
 
         {/* Features List */}

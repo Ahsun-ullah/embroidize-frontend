@@ -39,7 +39,7 @@ export async function generateMetadata({ params, searchParams }) {
       title: category?.meta_title || category?.name,
       description:
         category?.meta_description ||
-        'Download high-quality embroidery machine designs for free.',
+        'Download high-quality machine embroidery designs, including free designs, in every popular format.',
       ...(isFiltered && { robots: { index: false, follow: true } }),
       alternates: {
         canonical: canonicalUrl,
@@ -48,7 +48,7 @@ export async function generateMetadata({ params, searchParams }) {
         title: category?.meta_title || category?.name,
         description:
           category?.meta_description ||
-          'Download high-quality embroidery machine designs for free.',
+          'Download high-quality machine embroidery designs, including free designs, in every popular format.',
         images: [
           {
             url:

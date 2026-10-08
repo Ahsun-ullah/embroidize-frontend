@@ -60,9 +60,9 @@ async function PricingCircle() {
       <br />
       {money(monthlyPlan.price)}/month
       <br />
-      for unlimited
+      for the full
       <br />
-      designs!
+      library!
     </p>
   );
 }
@@ -616,7 +616,7 @@ export default function EmbroiderySubscriptionPage() {
                   <svg width='14' height='14' aria-hidden='true'>
                     <use href='#i-spark' />
                   </svg>{' '}
-                  Unlimited Embroidery Designs
+                  Full Premium Library Access
                 </span>
                 <h1>
                   Premium Machine
@@ -666,8 +666,8 @@ export default function EmbroiderySubscriptionPage() {
                       </svg>
                     </span>
                     <span>
-                      <b>Commercial</b>
-                      <span>Use</span>
+                      <b>Commercial Use</b>
+                      <span>Physical Products</span>
                     </span>
                   </li>
                   <li>
@@ -820,7 +820,6 @@ export default function EmbroiderySubscriptionPage() {
                 </p>
               </article>
               <article className='fcard'>
-                {/* ⚠ Word to your actual licence. Do not imply resale of the files. */}
                 <span className='fcard__ic'>
                   <svg width='22' height='22' aria-hidden='true'>
                     <use href='#i-heart' />
@@ -828,8 +827,9 @@ export default function EmbroiderySubscriptionPage() {
                 </span>
                 <h3>Commercial Use</h3>
                 <p>
-                  Create finished embroidered products for yourself, gifts, or
-                  your business according to the Embroidize license terms.
+                  Stitch designs onto finished products for yourself, as gifts,
+                  or to sell. The digital files themselves may not be resold or
+                  shared.
                 </p>
               </article>
             </div>
@@ -1134,9 +1134,8 @@ export default function EmbroiderySubscriptionPage() {
            The cards are rendered from the live plans, so the mockup's $79.99/yr
            (against a real $49.99) can never come back. The handwritten circle
            (PricingCircle) quotes the live monthly price too.
-           ⚠ "unlimited designs" in that circle is still a CLAIM, and the live
-             plans are metered (20/day and 25/day). Reword it or drop it before
-             this page takes paid traffic.
+           Plans are metered (a daily download limit), so nothing here may
+           promise "unlimited" designs.
            ════════════════════════════════════════════════════════════════════════ */}
         <section className='band band--wash pricing' id='pricing'>
           <Suspense fallback={null}>
@@ -1153,7 +1152,7 @@ export default function EmbroiderySubscriptionPage() {
             <div className='head' style={{ marginBottom: '22px' }}>
               <p className='kicker'>Simple Pricing</p>
               <h2>Choose the Plan That Works for You</h2>
-              <p>One plan. Unlimited possibilities.</p>
+              <p>One plan. The whole premium library.</p>
             </div>
 
             <Suspense fallback={<div style={{ minHeight: '420px' }} />}>
@@ -1263,9 +1262,10 @@ export default function EmbroiderySubscriptionPage() {
                 <summary>Can I use the designs commercially?</summary>
                 <div className='faq__a'>
                   <p>
-                    Eligible designs may be used to make finished embroidered
-                    products, including items you sell, in line with the
-                    Embroidize licence. {/* ⚠ word to the real licence */}
+                    Yes, on physical products. You can stitch any design onto
+                    items and sell those items, with no extra licensing fee.
+                    The digital design files themselves may not be resold,
+                    shared or redistributed.
                   </p>
                 </div>
               </details>
@@ -1347,7 +1347,7 @@ export default function EmbroiderySubscriptionPage() {
             Embroidize
           </span>
           <p>
-            Get unlimited embroidery designs today and bring your ideas to life.
+            Get the full premium design library today and bring your ideas to life.
           </p>
           <Link className='btn btn--white' href='/subscriptions'>
             Start Your Subscription{' '}
