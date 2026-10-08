@@ -36,12 +36,18 @@ export default async function LinksPage() {
     <div className='mx-auto w-full max-w-6xl px-3 pb-12 pt-8 sm:px-4'>
       <header className='flex flex-col items-center text-center'>
         <Link href={`/?${UTM}`} aria-label='Embroidize home'>
+          {/* Served as the static file, not through /_next/image: the PNG is
+              only 22 KB, and on a cold cache the optimizer queues the logo
+              behind every design tile, so it showed up last or not at all.
+              width/height match the file's 675x325 so it never stretches. */}
           <Image
             src='/logo-black.png'
             alt='Embroidize'
             width={200}
-            height={64}
+            height={96}
+            unoptimized
             priority
+            className='h-auto w-[200px]'
           />
         </Link>
       </header>

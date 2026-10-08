@@ -67,7 +67,7 @@ export default function LinkInBioGrid({ initialItems, initialHasMore, utm }) {
               href={`/product/${item.slug}?${utm}`}
               // Same 3:2 frame as the product cards and product page, so
               // designs show whole instead of being cropped to a square.
-              className='group relative block aspect-[3/2] overflow-hidden rounded-xl border border-gray-200 bg-white shadow-sm transition-shadow hover:shadow-md'
+              className='group relative block aspect-[3/2] overflow-hidden rounded-xl border border-gray-200 bg-gray-100 shadow-sm transition-shadow hover:shadow-md'
               title={item.name}
             >
               {item.image ? (
@@ -75,11 +75,18 @@ export default function LinkInBioGrid({ initialItems, initialHasMore, utm }) {
                   src={item.image}
                   alt={item.name}
                   fill
-                  sizes='(max-width: 767px) 33vw, (max-width: 1023px) 25vw, 240px'
-                  quality={75}
+                  // Three columns at every width inside a max-w-6xl page, so a
+                  // tile is about a third of the viewport up to ~370px. The
+                  // old 240px/25vw hint picked files smaller than the tile on
+                  // desktop, which is what made designs look soft there.
+                  sizes='(max-width: 1151px) 31vw, 370px'
+                  quality={85}
                   className='object-cover object-center transition-transform duration-300 group-hover:scale-105'
-                  // Only the first row is above the fold on every screen.
+                  // The first row is preloaded; the next few rows are on
+                  // screen on a phone, so they load straight away instead of
+                  // waiting for the lazy-load check after layout.
                   priority={i < 3}
+                  loading={i < 3 ? undefined : i < 12 ? 'eager' : 'lazy'}
                 />
               ) : (
                 <span className='flex h-full items-center justify-center p-2 text-center text-xs text-gray-500'>

@@ -8,7 +8,11 @@ const nextConfig = {
   reactStrictMode: true,
   compress: true,
   images: {
-    formats: ['image/avif', 'image/webp'],
+    // WebP only. AVIF is a little smaller but several times slower to
+    // encode, and every image is re-encoded on this 1-vCPU server after each
+    // deploy; a page of 30 designs sat waiting on that queue. WebP at the
+    // same quality looks the same and is ready far sooner.
+    formats: ['image/webp'],
 
     minimumCacheTTL: 2678400,
 
