@@ -126,17 +126,17 @@ export default function PinToPinterestModal({ isOpen, onClose, productId }) {
             </div>
           ) : (
             <div className='flex flex-col gap-5 sm:flex-row'>
-              {/* Preview */}
+              {/* Preview — square, matching the padded 1:1 image the pin is posted with */}
               <div className='shrink-0'>
-                <div className='relative h-[300px] w-full overflow-hidden rounded-2xl border border-gray-200 bg-gray-50 sm:w-[200px]'>
+                <div className='relative aspect-square w-full overflow-hidden rounded-2xl border border-gray-200 bg-gray-50 sm:w-[220px]'>
                   {draft?.imageUrl ? (
                     <Image
                       src={draft.imageUrl}
                       alt={form.title || 'Product image'}
                       fill
                       unoptimized
-                      sizes='200px'
-                      className='object-cover'
+                      sizes='220px'
+                      className='object-contain'
                     />
                   ) : (
                     <div className='flex h-full items-center justify-center px-3 text-center text-xs text-gray-400'>
