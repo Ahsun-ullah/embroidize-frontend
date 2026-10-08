@@ -157,6 +157,36 @@ done
 # that nesting is exactly how the old script compounded the image cache.
 rm -rf .next/standalone/.next/cache
 
+# Carry the optimized-image cache forward as HARD LINKS, capped and pruned.
+# Without it every deploy starts cold, and this 1-vCPU box re-downloads and
+# re-encodes every product image the first time anyone views it, so image-heavy
+# pages (the Instagram link-in-bio grid above all) crawl after each release.
+# This does not bring back the old disk problem: hard links take no extra space
+# while the rollback copy holds the same files, only this one directory is
+# carried (never nested), entries past the 31-day minimumCacheTTL are dropped,
+# and a cache over the cap is not carried at all.
+IMAGE_CACHE_MAX_MB="${IMAGE_CACHE_MAX_MB:-1500}"
+LIVE_IMAGE_CACHE="$LIVE_DIR/.next/standalone/.next/cache/images"
+NEW_IMAGE_CACHE=".next/standalone/.next/cache/images"
+if [ -d "$LIVE_IMAGE_CACHE" ]; then
+  IMAGE_CACHE_MB=$(du -sm "$LIVE_IMAGE_CACHE" 2>/dev/null | cut -f1 || true)
+  IMAGE_CACHE_MB=${IMAGE_CACHE_MB:-0}
+  if [ "$IMAGE_CACHE_MB" -le "$IMAGE_CACHE_MAX_MB" ]; then
+    log "Carrying image cache forward (${IMAGE_CACHE_MB}MB, hard-linked)…"
+    mkdir -p "$(dirname "$NEW_IMAGE_CACHE")"
+    # cp -al fails across filesystems; then start cold rather than copy.
+    if cp -al "$LIVE_IMAGE_CACHE" "$NEW_IMAGE_CACHE" 2>/dev/null; then
+      find "$NEW_IMAGE_CACHE" -type f -mtime +31 -delete 2>/dev/null || true
+      find "$NEW_IMAGE_CACHE" -mindepth 1 -type d -empty -delete 2>/dev/null || true
+    else
+      rm -rf "$NEW_IMAGE_CACHE"
+      log "Could not hard-link the image cache; starting with a cold cache."
+    fi
+  else
+    log "Image cache is ${IMAGE_CACHE_MB}MB (cap ${IMAGE_CACHE_MAX_MB}MB); starting cold."
+  fi
+fi
+
 if [ -f "$ENV_FILE" ]; then
   cp "$ENV_FILE" .next/standalone/.env.production
 else
