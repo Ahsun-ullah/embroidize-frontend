@@ -4,11 +4,6 @@ import { ErrorToast } from '@/components/Common/ErrorToast';
 import { SuccessToast } from '@/components/Common/SuccessToast';
 import { openInvoice } from '@/features/admin/invoice';
 import {
-  openStatementShell,
-  renderStatement,
-  renderStatementError,
-} from '@/features/admin/statement';
-import {
   Button,
   Chip,
   Divider,
@@ -51,6 +46,7 @@ import Cookies from 'js-cookie';
 import { useRouter } from 'next/navigation';
 import { useEffect, useMemo, useState } from 'react';
 import GrantAccessModal from '@/features/admin/GrantAccessModal';
+import IncomePanel from '@/features/users/IncomePanel';
 
 // ─── Constants ────────────────────────────────────────────────────────────────
 
@@ -484,83 +480,6 @@ export default function SubscribersTableWrapper({ subscribers, revenue }) {
   const [refundReason, setRefundReason] = useState('');
   const [isRefunding, setIsRefunding] = useState(false);
 
-  // Income statement (built from Stripe: invoices + one-time plan purchases
-  // + refunds). Defaults to the current month.
-  const monthStart = () => {
-    const d = new Date();
-    return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-01`;
-  };
-  const todayStr = () => {
-    const d = new Date();
-    return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
-  };
-  const [stmtStart, setStmtStart] = useState(monthStart());
-  const [stmtEnd, setStmtEnd] = useState(todayStr());
-  const [buildingStatement, setBuildingStatement] = useState(false);
-
-  const showStatement = async () => {
-    // Open the window synchronously, inside the click gesture — opening it
-    // after the awaited fetch gets popup-blocked by the browser.
-    const shell = openStatementShell();
-    if (!shell) {
-      ErrorToast('Popup blocked', 'Allow popups to view the statement', 4000);
-      return;
-    }
-    setBuildingStatement(true);
-    try {
-      const url = new URL(`${apiBase()}/admin/subscriptions/statement`);
-      if (stmtStart) url.searchParams.set('startDate', stmtStart);
-      if (stmtEnd) url.searchParams.set('endDate', stmtEnd);
-      const res = await fetch(url.toString(), { headers: authHeaders() });
-      const result = await res.json();
-      if (!res.ok)
-        throw new Error(result?.message || 'Failed to build statement');
-      const { rows = [], summary = {} } = result?.data || {};
-      const f = (d) =>
-        new Date(d).toLocaleDateString('en-US', {
-          year: 'numeric',
-          month: 'short',
-          day: 'numeric',
-        });
-      renderStatement(shell, {
-        title: 'Subscriptions Statement',
-        periodLabel:
-          !stmtStart && !stmtEnd
-            ? 'All time'
-            : `${stmtStart ? f(stmtStart) : 'Start'} – ${stmtEnd ? f(stmtEnd) : 'Today'}`,
-        columns: [
-          { key: 'date', label: 'Date' },
-          { key: 'type', label: 'Type' },
-          { key: 'description', label: 'Description' },
-          { key: 'customer', label: 'Customer' },
-          { key: 'ref', label: 'Reference' },
-          { key: 'amount', label: 'Amount', align: 'right' },
-        ],
-        rows,
-        totals: [
-          {
-            label: `Payments in (${summary.count ?? 0} transactions)`,
-            value: `$${Number(summary.gross || 0).toFixed(2)}`,
-          },
-          {
-            label: 'Refunds',
-            value: `−$${Number(summary.refunds || 0).toFixed(2)}`,
-          },
-          {
-            label: 'Net collected',
-            value: `$${Number(summary.net || 0).toFixed(2)}`,
-            strong: true,
-          },
-        ],
-      });
-    } catch (err) {
-      renderStatementError(shell, err.message);
-      ErrorToast('Error', err.message || 'Failed to build statement', 4000);
-    } finally {
-      setBuildingStatement(false);
-    }
-  };
-
   // ── Filtering ──────────────────────────────────────────────────────────────
 
   const filtered = useMemo(() => {
@@ -705,8 +624,16 @@ export default function SubscribersTableWrapper({ subscribers, revenue }) {
       else if (st === 'expired') stats.expired++;
 
       if (s?.createdAt && new Date(s.createdAt) >= som) newThisMonth++;
-      if (st === 'canceled' && s?.updatedAt && new Date(s.updatedAt) >= som)
-        canceledThisMonth++;
+      // Dated by when access ended, like the backend: updatedAt alone counted
+      // an old cancellation again whenever its record was edited. updatedAt is
+      // only used for an immediate cancel whose paid period hasn't run out.
+      if (st === 'canceled') {
+        const end = s?.periodEndDate ? new Date(s.periodEndDate) : null;
+        const now = new Date();
+        const edited = s?.updatedAt && new Date(s.updatedAt) >= som;
+        if (end ? (end >= som && end <= now) || (end > now && edited) : edited)
+          canceledThisMonth++;
+      }
 
       if (st === 'active' || st === 'trialing') {
         const m = monthlyOf(s?.planId);
@@ -1309,6 +1236,14 @@ export default function SubscribersTableWrapper({ subscribers, revenue }) {
         />
       </div>
 
+      {/* ── Income: gross / fees / refunds / net by period ── */}
+      <IncomePanel
+        source={providerFilter}
+        onSourceChange={handleProviderFilter}
+        apiBase={apiBase}
+        authHeaders={authHeaders}
+      />
+
       {/* ── Revenue Dashboard ── */}
       {revenue && (
         <div className='bg-white dark:bg-gray-900 rounded-xl border border-gray-200 dark:border-gray-800 p-5'>
@@ -1324,40 +1259,18 @@ export default function SubscribersTableWrapper({ subscribers, revenue }) {
                 </Chip>
               )}
             </div>
-            {/* Income statement for a period — pulled live from Stripe. */}
-            <div className='flex items-center gap-2'>
-              <Input
-                type='date'
-                size='sm'
-                aria-label='Statement start date'
-                className='w-36'
-                value={stmtStart}
-                onChange={(e) => setStmtStart(e.target.value)}
-              />
-              <span className='text-gray-400'>-</span>
-              <Input
-                type='date'
-                size='sm'
-                aria-label='Statement end date'
-                className='w-36'
-                value={stmtEnd}
-                onChange={(e) => setStmtEnd(e.target.value)}
-              />
-              <Button
-                size='sm'
-                variant='flat'
-                isLoading={buildingStatement}
-                startContent={!buildingStatement && <FileText size={14} />}
-                onPress={showStatement}
-              >
-                Statement
-              </Button>
-            </div>
           </div>
           <div className='grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-6 gap-4 mb-5'>
             {/* All-time gross (invoices + one-time plan purchases, custom orders
                 excluded). Follows the provider filter only — status/plan/cancelling
                 don't apply to historical payments. null = unreachable → hide. */}
+            {collectedInScope == null && revenue?.incomeImporting && (
+              <StatCard
+                label='Total Collected'
+                value='…'
+                sub='Importing payment history — refresh in a minute'
+              />
+            )}
             {collectedInScope != null && (
               <StatCard
                 label='Total Collected'
@@ -1365,8 +1278,8 @@ export default function SubscribersTableWrapper({ subscribers, revenue }) {
                 color='text-emerald-600'
                 sub={
                   providerFilter === 'all'
-                    ? 'All-time gross (all gateways)'
-                    : `All-time gross · ${providerLabel(providerFilter)}`
+                    ? 'All-time gross excl. VAT (all gateways)'
+                    : `All-time gross excl. VAT · ${providerLabel(providerFilter)}`
                 }
               />
             )}
@@ -1434,7 +1347,7 @@ export default function SubscribersTableWrapper({ subscribers, revenue }) {
                   return (
                     <div
                       key={p}
-                      className='flex items-center justify-between gap-4 p-4 bg-gray-50 dark:bg-gray-800 rounded-lg'
+                      className='flex flex-wrap items-center justify-between gap-4 p-4 bg-gray-50 dark:bg-gray-800 rounded-lg'
                     >
                       <div className='flex items-center gap-2'>
                         <Chip size='sm' variant='flat' className='capitalize'>
@@ -1601,12 +1514,15 @@ export default function SubscribersTableWrapper({ subscribers, revenue }) {
         </div>
       </div>
 
-      {/* ── Table ── */}
+      {/* ── Table ── 11 columns never fit a phone: scroll sideways inside the
+          card instead of squeezing every cell into a wrapped column. */}
+      <div className='-mx-1 overflow-x-auto px-1'>
       <Table
         aria-label='Subscribers table'
         removeWrapper
         sortDescriptor={sortDescriptor}
         onSortChange={handleSortChange}
+        classNames={{ table: 'min-w-[1100px]', td: 'whitespace-nowrap', th: 'whitespace-nowrap' }}
       >
         <TableHeader columns={columns}>
           {(col) => (
@@ -1631,6 +1547,7 @@ export default function SubscribersTableWrapper({ subscribers, revenue }) {
           )}
         </TableBody>
       </Table>
+      </div>
 
       {totalPages > 1 && (
         <div className='flex justify-center'>
