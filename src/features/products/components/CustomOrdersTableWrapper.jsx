@@ -242,7 +242,7 @@ export default function CustomOrdersTableWrapper({
             <button
               type='button'
               onClick={() => act('view', order)}
-              className='font-mono text-[13px] font-semibold text-gray-900 underline-offset-2 hover:underline'
+              className='whitespace-nowrap font-mono text-[13px] font-semibold text-gray-900 underline-offset-2 hover:underline'
             >
               {order.orderNumber}
             </button>
@@ -680,13 +680,16 @@ export default function CustomOrdersTableWrapper({
         )}
       </div>
 
-      {/* ─── Rows ─── */}
+      {/* ─── Rows ─── 8 columns never fit a phone: scroll sideways inside the
+          card instead of squeezing every cell into a narrow wrapped column. */}
+      <div className='overflow-x-auto'>
       <Table
         aria-label='Custom orders'
         removeWrapper
         isCompact
         classNames={{
-          th: 'bg-white text-[10px] font-semibold uppercase tracking-wide text-gray-400 border-b border-gray-100 rounded-none',
+          table: 'min-w-[1000px]',
+          th: 'whitespace-nowrap bg-white text-[10px] font-semibold uppercase tracking-wide text-gray-400 border-b border-gray-100 rounded-none',
           td: 'py-2.5 align-top',
           tr: 'border-b border-gray-50 last:border-b-0 hover:bg-gray-50/70',
         }}
@@ -711,6 +714,7 @@ export default function CustomOrdersTableWrapper({
           )}
         </TableBody>
       </Table>
+      </div>
 
       {/* ─── Pagination ─── */}
       {pagination.totalPages > 1 && (
