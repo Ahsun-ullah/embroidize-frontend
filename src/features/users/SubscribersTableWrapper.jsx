@@ -1264,6 +1264,13 @@ export default function SubscribersTableWrapper({ subscribers, revenue }) {
             {/* All-time gross (invoices + one-time plan purchases, custom orders
                 excluded). Follows the provider filter only — status/plan/cancelling
                 don't apply to historical payments. null = unreachable → hide. */}
+            {collectedInScope == null && revenue?.incomeImporting && (
+              <StatCard
+                label='Total Collected'
+                value='…'
+                sub='Importing payment history — refresh in a minute'
+              />
+            )}
             {collectedInScope != null && (
               <StatCard
                 label='Total Collected'
@@ -1340,7 +1347,7 @@ export default function SubscribersTableWrapper({ subscribers, revenue }) {
                   return (
                     <div
                       key={p}
-                      className='flex items-center justify-between gap-4 p-4 bg-gray-50 dark:bg-gray-800 rounded-lg'
+                      className='flex flex-wrap items-center justify-between gap-4 p-4 bg-gray-50 dark:bg-gray-800 rounded-lg'
                     >
                       <div className='flex items-center gap-2'>
                         <Chip size='sm' variant='flat' className='capitalize'>
@@ -1507,12 +1514,15 @@ export default function SubscribersTableWrapper({ subscribers, revenue }) {
         </div>
       </div>
 
-      {/* ── Table ── */}
+      {/* ── Table ── 11 columns never fit a phone: scroll sideways inside the
+          card instead of squeezing every cell into a wrapped column. */}
+      <div className='-mx-1 overflow-x-auto px-1'>
       <Table
         aria-label='Subscribers table'
         removeWrapper
         sortDescriptor={sortDescriptor}
         onSortChange={handleSortChange}
+        classNames={{ table: 'min-w-[1100px]', td: 'whitespace-nowrap', th: 'whitespace-nowrap' }}
       >
         <TableHeader columns={columns}>
           {(col) => (
@@ -1537,6 +1547,7 @@ export default function SubscribersTableWrapper({ subscribers, revenue }) {
           )}
         </TableBody>
       </Table>
+      </div>
 
       {totalPages > 1 && (
         <div className='flex justify-center'>
