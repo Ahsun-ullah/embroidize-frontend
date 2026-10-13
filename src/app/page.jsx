@@ -1,6 +1,8 @@
 import AdminChoiceDesign from '@/components/user/HomePage/AdminChoiceSection';
 import BrowseCategories from '@/components/user/HomePage/BrowseCategories';
+import CustomDigitizingBanner from '@/components/user/HomePage/CustomDigitizingBanner';
 import Footer from '@/components/user/HomePage/Footer';
+import HeroMembershipCard from '@/components/user/HomePage/HeroMembershipCard';
 import Header from '@/components/user/HomePage/Header';
 import MostFavoritedDesigns from '@/components/user/HomePage/MostFavoritedDesigns';
 import PopularDesign from '@/components/user/HomePage/PopularDesign';
@@ -15,17 +17,7 @@ import {
   getPopularProducts,
   getProducts,
 } from '@/lib/apis/public/products';
-import {
-  ArrowRight,
-  BadgeCheck,
-  Clock,
-  Download,
-  FileCheck,
-  RefreshCw,
-  ShieldCheck,
-  Sparkles,
-} from 'lucide-react';
-import OfferCountdown from '@/components/Common/OfferCountdown';
+import { ArrowRight, BadgeCheck, Download, Sparkles } from 'lucide-react';
 import Link from 'next/link';
 import { Suspense } from 'react';
 import ProductUpdates from './products/ProductUpdates';
@@ -233,60 +225,7 @@ export default async function Home() {
             </Link>
           </div>
 
-          {/* RIGHT: Custom digitizing promo */}
-          <div className='relative w-full lg:w-1/2 flex justify-center lg:justify-end'>
-            <div className='relative animate-float w-full max-w-md rounded-3xl bg-white p-8 sm:p-12 shadow-xl shadow-black/5 ring-1 ring-black/5'>
-              <span className='inline-flex items-center gap-2 rounded-full bg-black px-4 py-1.5 text-sm font-semibold text-white'>
-                <Sparkles className='h-4 w-4' aria-hidden />
-                Custom Digitizing
-              </span>
-
-              <h2 className='mt-5 text-3xl sm:text-4xl font-extrabold leading-[1.1] tracking-tight text-slate-900'>
-                Need Custom Embroidery Digitizing?
-              </h2>
-              <p className='mt-3 text-base text-slate-500'>
-                Send us your logo or artwork and get it back as a machine-ready
-                embroidery file, digitized by hand — from $5.
-              </p>
-
-              <div className='mt-7 space-y-4'>
-                <div className='flex items-center gap-3'>
-                  <span className='flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-gray-100 text-slate-900'>
-                    <Clock className='h-5 w-5' aria-hidden />
-                  </span>
-                  <p className='font-semibold text-slate-900'>
-                    1–24 hour delivery
-                  </p>
-                </div>
-                <div className='flex items-center gap-3'>
-                  <span className='flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-gray-100 text-slate-900'>
-                    <FileCheck className='h-5 w-5' aria-hidden />
-                  </span>
-                  <p className='font-semibold text-slate-900'>
-                    DST, PES, JEF &amp; more
-                  </p>
-                </div>
-                <div className='flex items-center gap-3'>
-                  <span className='flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-gray-100 text-slate-900'>
-                    <RefreshCw className='h-5 w-5' aria-hidden />
-                  </span>
-                  <p className='font-semibold text-slate-900'>
-                    Free unlimited revisions
-                  </p>
-                </div>
-              </div>
-
-              <Link
-                href='/custom-embroidery-digitizing-service'
-                className='group mt-8 inline-flex w-full items-center justify-between gap-4 rounded-full bg-black py-4 px-7 text-base font-bold text-white transition hover:bg-gray-800'
-              >
-                Start a custom order
-                <span className='flex h-9 w-9 items-center justify-center rounded-full bg-white text-gray-500 transition-transform group-hover:translate-x-0.5'>
-                  <ArrowRight className='h-5 w-5' aria-hidden />
-                </span>
-              </Link>
-            </div>
-          </div>
+          <HeroMembershipCard />
         </div>
         </div>
       </section>
@@ -329,79 +268,7 @@ export default async function Home() {
           section. */}
       <HomeEventSections promotions={eventPromotions} position='middle' />
 
-      {/* Limited-time promo — same grayscale card, now with the countdown and the
-          "Save 75%" framing from the design. Still no hardcoded plan price: the
-          card routes to /subscriptions so the real figures come from the database.
-          The countdown is static text to match the mock — see note on making it tick. */}
-      <section
-        aria-labelledby='limited-offer-heading'
-        className='container mx-auto max-w-7xl px-4 py-6'
-      >
-        <div className='overflow-hidden rounded-3xl bg-white shadow-sm ring-1 ring-black/5'>
-          <div className='flex flex-col gap-10 p-8 sm:p-12 lg:flex-row lg:items-center lg:justify-between'>
-            <div className='min-w-0'>
-              <span className='inline-flex items-center gap-2 rounded-full bg-black px-4 py-1.5 text-sm font-semibold text-white'>
-                <Clock className='h-4 w-4' aria-hidden />
-                Limited Time Offer
-              </span>
-
-              <h2
-                id='limited-offer-heading'
-                className='mt-5 font-serif text-4xl font-bold leading-[1.05] tracking-tight text-slate-900 sm:text-5xl'
-              >
-                Save up to 75% Today
-              </h2>
-              <p className='mt-4 max-w-xl text-base text-slate-500'>
-                Unlock premium embroidery designs in every machine format with
-                instant access and unbeatable value.
-              </p>
-
-              <div className='mt-6 inline-flex items-center gap-2 rounded-full bg-green-50 px-4 py-1.5 text-sm'>
-                <Clock className='h-4 w-4 text-green-600' aria-hidden />
-                <span className='text-slate-700'>Offer ends in</span>
-                <OfferCountdown className='font-bold text-green-600' />
-              </div>
-
-              <ul className='mt-7 flex flex-col gap-4 sm:flex-row sm:flex-wrap sm:gap-x-8'>
-                <li className='flex items-center gap-3'>
-                  <span className='flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-gray-100 text-slate-900'>
-                    <Download className='h-5 w-5' aria-hidden />
-                  </span>
-                  <p className='font-semibold text-slate-900'>
-                    Full premium library
-                  </p>
-                </li>
-                <li className='flex items-center gap-3'>
-                  <span className='flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-gray-100 text-slate-900'>
-                    <BadgeCheck className='h-5 w-5' aria-hidden />
-                  </span>
-                  <p className='font-semibold text-slate-900'>
-                    All machine formats included
-                  </p>
-                </li>
-                <li className='flex items-center gap-3'>
-                  <span className='flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-gray-100 text-slate-900'>
-                    <ShieldCheck className='h-5 w-5' aria-hidden />
-                  </span>
-                  <p className='font-semibold text-slate-900'>Cancel anytime</p>
-                </li>
-              </ul>
-            </div>
-
-            <div className='flex w-full shrink-0 flex-col items-stretch gap-5 lg:w-auto lg:items-end'>
-              <Link
-                href='/subscriptions'
-                className='group inline-flex items-center justify-between gap-4 rounded-full bg-black py-4 px-7 text-base font-bold text-white transition hover:bg-gray-800'
-              >
-                View Plans &amp; Save 75%
-                <span className='flex h-9 w-9 items-center justify-center rounded-full bg-white text-slate-900 transition-transform group-hover:translate-x-0.5'>
-                  <ArrowRight className='h-5 w-5' aria-hidden />
-                </span>
-              </Link>
-            </div>
-          </div>
-        </div>
-      </section>
+      <CustomDigitizingBanner />
 
       {/* Most Favourited Designs Section */}
       {mostFavoritedProducts?.products?.length ? (
