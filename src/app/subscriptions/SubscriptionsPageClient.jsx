@@ -569,6 +569,9 @@ export default function SubscriptionsPageClient({
   // people straight into credit mode instead of making them find the toggle.
   const [payHelpType, setPayHelpType] = useState('subscription');
   const creditPacks = siteConfig?.creditPacks || [];
+  const showCreditRequestButton = siteConfig?.showCreditRequestButton !== false;
+  const showOtherPaymentMethodsLink =
+    siteConfig?.showOtherPaymentMethodsLink !== false;
   const [checkoutTrouble, setCheckoutTrouble] = useState(false);
 
   const faqs = buildSubscriptionFaqs(freeLimit, freeWindow);
@@ -1138,47 +1141,57 @@ export default function SubscriptionsPageClient({
                     design), so the list itself is handed none. */}
                 <CreditPackList variant='rich' />
 
-                <button
-                  onClick={() => {
-                    setPayHelpType('credits');
-                    setShowPayHelp(true);
-                  }}
-                  className='relative flex w-full items-center justify-center rounded-2xl bg-black py-3.5 text-sm font-semibold text-white transition hover:bg-gray-900'
-                >
-                  {creditPacks.length > 0
-                    ? 'Request credits'
-                    : 'Ask us about credits'}
-                  <span className='absolute right-2 flex h-9 w-9 items-center justify-center rounded-full bg-white text-black'>
-                    <ArrowRight size={16} aria-hidden='true' />
-                  </span>
-                </button>
-                <p className='mt-3 text-center text-xs text-gray-500'>
-                  {siteConfig?.creditPacksNote ? (
-                    <>
-                      {siteConfig.creditPacksNote}
-                      <br />
-                    </>
-                  ) : null}
-                  Prefer to pay another way, or need a size that isn&apos;t
-                  listed? Tell us how many and we&apos;ll send payment details.
-                </p>
+                {/* Button + caption can be switched off from the admin
+                    dashboard (Credit Customers → Credit packs & pricing). */}
+                {showCreditRequestButton && (
+                  <>
+                    <button
+                      onClick={() => {
+                        setPayHelpType('credits');
+                        setShowPayHelp(true);
+                      }}
+                      className='relative flex w-full items-center justify-center rounded-2xl bg-black py-3.5 text-sm font-semibold text-white transition hover:bg-gray-900'
+                    >
+                      {creditPacks.length > 0
+                        ? 'Request credits'
+                        : 'Ask us about credits'}
+                      <span className='absolute right-2 flex h-9 w-9 items-center justify-center rounded-full bg-white text-black'>
+                        <ArrowRight size={16} aria-hidden='true' />
+                      </span>
+                    </button>
+                    <p className='mt-3 text-center text-xs text-gray-500'>
+                      {siteConfig?.creditPacksNote ? (
+                        <>
+                          {siteConfig.creditPacksNote}
+                          <br />
+                        </>
+                      ) : null}
+                      Prefer to pay another way, or need a size that isn&apos;t
+                      listed? Tell us how many and we&apos;ll send payment
+                      details.
+                    </p>
+                  </>
+                )}
               </div>
             </div>
           </div>
 
-          {/* Quiet, permanent entry point. This is the one that actually
-              catches most people — see the note where showPayHelp is declared. */}
-          <div className='mt-8 text-center'>
-            <button
-              onClick={() => {
-                setPayHelpType('subscription');
-                setShowPayHelp(true);
-              }}
-              className='text-sm text-gray-600 underline underline-offset-4 transition hover:text-black'
-            >
-              Having trouble paying? Other payment methods →
-            </button>
-          </div>
+          {/* Quiet entry point, on unless the admin turns it off. This is the
+              one that actually catches most people — see the note where
+              showPayHelp is declared. */}
+          {showOtherPaymentMethodsLink && (
+            <div className='mt-8 text-center'>
+              <button
+                onClick={() => {
+                  setPayHelpType('subscription');
+                  setShowPayHelp(true);
+                }}
+                className='text-sm text-gray-600 underline underline-offset-4 transition hover:text-black'
+              >
+                Having trouble paying? Other payment methods →
+              </button>
+            </div>
+          )}
 
           {/* ---------- COMPARISON TABLE ---------- */}
           {plans.length > 0 && <ComparisonTable columns={comparisonColumns} />}
