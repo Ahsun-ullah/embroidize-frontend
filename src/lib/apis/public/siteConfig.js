@@ -24,6 +24,11 @@ const UNKNOWN = {
   freeDownloadWindow: null,
   creditPacks: [],
   creditPacksNote: '',
+  // Admin switches for the credits section's "pay another way" entry points.
+  // True when unknown: they were always shown before the switches existed, and
+  // hiding a way to pay because of an API blip would cost real orders.
+  showCreditRequestButton: true,
+  showOtherPaymentMethodsLink: true,
   whatsappNumber: '',
   whatsappMessage: '',
   // Null, not a number: a caller that cannot read the config must fall back to
@@ -45,6 +50,9 @@ export async function getSiteConfig() {
       freeDownloadWindow: result?.data?.freeDownloadWindow ?? null,
       creditPacks: result?.data?.creditPacks ?? [],
       creditPacksNote: result?.data?.creditPacksNote ?? '',
+      showCreditRequestButton: result?.data?.showCreditRequestButton !== false,
+      showOtherPaymentMethodsLink:
+        result?.data?.showOtherPaymentMethodsLink !== false,
       whatsappNumber: result?.data?.whatsappNumber ?? '',
       whatsappMessage: result?.data?.whatsappMessage ?? '',
       recentTabDays: result?.data?.recentTabDays ?? null,

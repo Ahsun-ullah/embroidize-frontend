@@ -130,6 +130,10 @@ export default function CreditCustomersWrapper({ customers = [], totals }) {
   const [showPacks, setShowPacks] = useState(false);
   const [packs, setPacks] = useState([]);
   const [packsNote, setPacksNote] = useState('');
+  // Pricing-page switches for the two "pay another way" entry points. Saved
+  // with the packs; both start on so an unread config never hides anything.
+  const [showRequestButton, setShowRequestButton] = useState(true);
+  const [showOtherMethodsLink, setShowOtherMethodsLink] = useState(true);
   const [packsSaving, setPacksSaving] = useState(false);
   // Which gateway is live, and which pack sizes the SERVER currently knows
   // about. A row typed but not yet saved cannot be mirrored into Creem — the
@@ -151,6 +155,10 @@ export default function CreditCustomersWrapper({ customers = [], totals }) {
       const list = data?.data?.creditPacks || [];
       setPacks(list);
       setPacksNote(data?.data?.creditPacksNote || '');
+      setShowRequestButton(data?.data?.showCreditRequestButton !== false);
+      setShowOtherMethodsLink(
+        data?.data?.showOtherPaymentMethodsLink !== false,
+      );
       setPacksGateway(data?.data?.activeGateway || '');
       setSavedSizes(list.map((p) => Number(p.credits)));
     } catch {
@@ -206,12 +214,21 @@ export default function CreditCustomersWrapper({ customers = [], totals }) {
       const res = await fetch(`${apiBase()}/admin/credit-packs`, {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json', ...authHeaders() },
-        body: JSON.stringify({ creditPacks: packs, creditPacksNote: packsNote }),
+        body: JSON.stringify({
+          creditPacks: packs,
+          creditPacksNote: packsNote,
+          showCreditRequestButton: showRequestButton,
+          showOtherPaymentMethodsLink: showOtherMethodsLink,
+        }),
       });
       const data = await res.json();
       if (!res.ok) throw new Error(data?.error?.message || 'Could not save');
       const saved = data?.data?.creditPacks || [];
       setPacks(saved);
+      setShowRequestButton(data?.data?.showCreditRequestButton !== false);
+      setShowOtherMethodsLink(
+        data?.data?.showOtherPaymentMethodsLink !== false,
+      );
       setSavedSizes(saved.map((p) => Number(p.credits)));
       setPackWarnings(data?.data?.warnings || []);
       SuccessToast(
@@ -535,13 +552,51 @@ export default function CreditCustomersWrapper({ customers = [], totals }) {
               className='mt-1 w-full rounded-lg border border-gray-300 px-3 py-2 text-sm'
             />
 
+            <p className='mt-5 text-xs font-bold uppercase tracking-wide text-gray-500'>
+              Show on the pricing page
+            </p>
+            <div className='mt-2 space-y-2'>
+              {[
+                {
+                  checked: showRequestButton,
+                  onChange: setShowRequestButton,
+                  label: '“Request credits” button',
+                  hint: 'The button under the packs, with the note and the “Prefer to pay another way…” line under it.',
+                },
+                {
+                  checked: showOtherMethodsLink,
+                  onChange: setShowOtherMethodsLink,
+                  label: '“Having trouble paying? Other payment methods” link',
+                  hint: 'The link under the credits card.',
+                },
+              ].map((t) => (
+                <label
+                  key={t.label}
+                  className='flex cursor-pointer items-start gap-2 text-sm text-gray-800'
+                >
+                  <input
+                    type='checkbox'
+                    checked={t.checked}
+                    onChange={(e) => t.onChange(e.target.checked)}
+                    className='mt-0.5 h-4 w-4'
+                  />
+                  <span>
+                    <span className='block font-semibold'>{t.label}</span>
+                    <span className='block text-xs text-gray-500'>
+                      {t.hint}
+                    </span>
+                  </span>
+                </label>
+              ))}
+            </div>
+
             <button
               type='button'
               onClick={savePacks}
               disabled={packsSaving}
               className='mt-4 rounded-lg bg-gray-900 px-4 py-2 text-sm font-semibold text-white hover:bg-black disabled:opacity-50'
             >
-              {packsSaving ? 'Saving…' : 'Save packs'}
+              {packsSaving ? 'Saving…' : 'Save'}
             </button>
           </div>
         )}
