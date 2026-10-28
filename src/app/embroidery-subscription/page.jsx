@@ -1,4 +1,5 @@
 import LandingPlanCards from '@/components/Common/LandingPlanCards';
+import PlanCheckoutButton from '@/components/Common/PlanCheckoutButton';
 import LandingReviews from '@/components/Common/LandingReviews';
 import { getFeaturedReviews } from '@/lib/apis/public/featuredReviews';
 import {
@@ -237,12 +238,12 @@ async function WhyYearly() {
         </div>
 
         <div className='whyy__cta'>
-          <Link className='btn btn--primary' href='/subscriptions'>
+          <PlanCheckoutButton plan={yearly} className='btn btn--primary'>
             Start Yearly{' '}
             <svg className='arw' width='17' height='17' aria-hidden='true'>
               <use href='#i-arw' />
             </svg>
-          </Link>
+          </PlanCheckoutButton>
           <span className='whyy__cta-note'>
             Prefer to go month to month? {monthly.name} is{' '}
             {money(monthly.price)}/mo.
@@ -1263,9 +1264,9 @@ export default function EmbroiderySubscriptionPage() {
                 <div className='faq__a'>
                   <p>
                     Yes, on physical products. You can stitch any design onto
-                    items and sell those items, with no extra licensing fee.
-                    The digital design files themselves may not be resold,
-                    shared or redistributed.
+                    items and sell those items, with no extra licensing fee. The
+                    digital design files themselves may not be resold, shared or
+                    redistributed.
                   </p>
                 </div>
               </details>
@@ -1347,7 +1348,8 @@ export default function EmbroiderySubscriptionPage() {
             Embroidize
           </span>
           <p>
-            Get the full premium design library today and bring your ideas to life.
+            Get the full premium design library today and bring your ideas to
+            life.
           </p>
           <Link className='btn btn--white' href='/subscriptions'>
             Start Your Subscription{' '}

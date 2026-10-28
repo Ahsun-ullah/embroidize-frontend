@@ -1,8 +1,9 @@
 import LandingPlanCards from '@/components/Common/LandingPlanCards';
+import PlanTermCta from '@/components/Common/PlanTermCta';
 import LandingReviews from '@/components/Common/LandingReviews';
 import { getFeaturedReviews } from '@/lib/apis/public/featuredReviews';
 import {
-  getSubscriptionPlans,
+  getLandingPlans,
   yearlySavingPercent,
 } from '@/lib/apis/public/subscriptionPlans';
 import { caveat, inter, poppins } from '@/fonts/landingFonts';
@@ -46,7 +47,7 @@ export const metadata = {
 // boundary: the hero and everything above the plans stream immediately
 // instead of the whole page waiting on the API round-trip.
 async function PlanColumn() {
-  const plans = await getSubscriptionPlans();
+  const plans = await getLandingPlans();
   const savingPercent = yearlySavingPercent(plans);
 
   return (
@@ -1410,7 +1411,7 @@ export default function HolidayEmbroideryDesignsPage() {
                     Useful for year-round small-business projects
                   </li>
                 </ul>
-                <Link className='btn btn--primary' href='/subscriptions'>
+                <PlanTermCta term='year' className='btn btn--primary'>
                   Choose Yearly{' '}
                   <svg
                     className='arw'
@@ -1420,7 +1421,7 @@ export default function HolidayEmbroideryDesignsPage() {
                   >
                     <use href='#i-arw' />
                   </svg>
-                </Link>
+                </PlanTermCta>
                 <p className='script why__script'>
                   More
                   <br />
@@ -1466,12 +1467,12 @@ export default function HolidayEmbroideryDesignsPage() {
               subscription.
             </p>
             <div className='final__actions'>
-              <Link className='btn btn--ghost' href='/subscriptions'>
+              <PlanTermCta term='month' className='btn btn--ghost'>
                 Start Monthly
-              </Link>
-              <Link className=' btn btn--primary' href='/subscriptions'>
+              </PlanTermCta>
+              <PlanTermCta term='year' className='btn btn--primary'>
                 Get Yearly Access
-              </Link>
+              </PlanTermCta>
             </div>
             <ul className='final__trust'>
               <li>

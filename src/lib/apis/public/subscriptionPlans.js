@@ -1,4 +1,5 @@
 import { getPlanOffer, planTerm } from '@/lib/subscriptions/planPricing';
+import { cache } from 'react';
 
 // Public subscription plans — the same payload the /subscriptions page reads
 // (GET /public/subscriptions), so a landing page can print real prices instead
@@ -34,6 +35,10 @@ export async function getSubscriptionPlans() {
     return [];
   }
 }
+
+// One fetch per request for a landing page: its plan cards and the plan
+// buttons elsewhere on the page all read the same plans through this.
+export const getLandingPlans = cache(getSubscriptionPlans);
 
 /* Shortest commitment first, one-time last. The /subscriptions page sorts
    year-first because its yearly card is the hero; the landing designs put the
