@@ -1,6 +1,5 @@
 'use client';
-import Cookies from 'js-cookie';
-import { getMetaBrowserIds } from '@/lib/analytics/metaBrowserIds';
+import { startSubscriptionCheckout } from '@/lib/subscriptions/startCheckout';
 import { usePathname } from 'next/navigation';
 import { useState } from 'react';
 
@@ -15,7 +14,6 @@ export default function PurchaseButton({
   const [error, setError] = useState(null);
   const pathName = usePathname();
 
-  const endpoint = '/subscriptions/create-checkout-session';
   // The backend decides purchasability (a gateway is live AND this plan is
   // mapped to it). Fall back to the legacy "has a stripe price" check for older
   // API responses that don't include the flag.
@@ -24,54 +22,22 @@ export default function PurchaseButton({
     (plan.purchasable == null && !plan.stripePriceId);
 
   const handlePurchase = async () => {
-    const token = Cookies.get('token');
-
-    if (!token) {
-      window.location.href = `/auth/login?pathName=${pathName}`;
-      return;
-    }
+    // Set once we're leaving the page — the spinner stays on through the short
+    // tracking wait so the button can't start a second checkout.
+    let leaving = false;
 
     try {
       setIsLoading(true);
       setError(null);
-
-      const response = await fetch(
-        `${process.env.NEXT_PUBLIC_BASE_API_URL_PROD}${endpoint}`,
-        {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-            Authorization: `Bearer ${token}`,
-          },
-          // Canonical planId — the backend resolves the active gateway's product.
-          // _fbp/_fbc ride along for the server-side Meta Purchase the payment
-          // webhook sends (it has no browser of its own).
-          body: JSON.stringify({ planId: plan._id, ...getMetaBrowserIds() }),
-        },
-      );
-
-      if (!response.ok) {
-        const errorData = await response.json();
-        throw new Error(
-          errorData.message || 'Failed to create checkout session',
-        );
-      }
-
-      const data = await response.json();
-      const checkoutSessionUrl = data.data.url;
-
-      if (checkoutSessionUrl) {
-        window.location.href = checkoutSessionUrl;
-      } else {
-        throw new Error('No checkout session URL received from backend.');
-      }
+      await startSubscriptionCheckout(plan, pathName);
+      leaving = true;
     } catch (err) {
       setError(
         err instanceof Error ? err.message : 'An unexpected error occurred.',
       );
       console.error('Checkout error:', err);
     } finally {
-      setIsLoading(false);
+      if (!leaving) setIsLoading(false);
     }
   };
 

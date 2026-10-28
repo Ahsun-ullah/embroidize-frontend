@@ -1,4 +1,5 @@
 import OfferCountdown from '@/components/Common/OfferCountdown';
+import PlanCheckoutButton from '@/components/Common/PlanCheckoutButton';
 import {
   bestValuePlanId,
   sortPlansForLanding,
@@ -25,8 +26,9 @@ import Link from 'next/link';
  * Both host pages define the `#i-check` sprite symbol used by the feature
  * bullets, and scope these class names under their own wrapper.
  *
- * Deliberately NOT a checkout: the CTA sends people to /subscriptions, where
- * PurchaseButton handles auth, the gateway and the "pay another way" path.
+ * Each card's button goes straight to that plan's checkout (and fires the
+ * `subscription_checkout` GTM event); a plan that can't be bought online links
+ * to /subscriptions, which has the "pay another way" path.
  *
  * Both designs draw a two-column grid because there are two paid plans. A third
  * plan wraps onto a second row rather than breaking; if the catalogue grows,
@@ -119,12 +121,12 @@ export default function LandingPlanCards({
                 ))}
               </ul>
 
-              <Link
+              <PlanCheckoutButton
+                plan={plan}
                 className='btn btn--primary btn--block'
-                href='/subscriptions'
               >
                 {label}
-              </Link>
+              </PlanCheckoutButton>
             </article>
           );
         })}
