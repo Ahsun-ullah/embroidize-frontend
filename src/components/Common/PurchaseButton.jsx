@@ -1,6 +1,7 @@
 'use client';
 import Cookies from 'js-cookie';
 import { getMetaBrowserIds } from '@/lib/analytics/metaBrowserIds';
+import { trackSubscriptionCheckout } from '@/lib/analytics/subscriptionCheckout';
 import { usePathname } from 'next/navigation';
 import { useState } from 'react';
 
@@ -30,6 +31,10 @@ export default function PurchaseButton({
       window.location.href = `/auth/login?pathName=${pathName}`;
       return;
     }
+
+    // Set once we're leaving for the gateway — the spinner stays on through
+    // the short tracking wait so the button can't start a second checkout.
+    let redirecting = false;
 
     try {
       setIsLoading(true);
@@ -61,7 +66,10 @@ export default function PurchaseButton({
       const checkoutSessionUrl = data.data.url;
 
       if (checkoutSessionUrl) {
-        window.location.href = checkoutSessionUrl;
+        redirecting = true;
+        trackSubscriptionCheckout(plan, () => {
+          window.location.href = checkoutSessionUrl;
+        });
       } else {
         throw new Error('No checkout session URL received from backend.');
       }
@@ -71,7 +79,7 @@ export default function PurchaseButton({
       );
       console.error('Checkout error:', err);
     } finally {
-      setIsLoading(false);
+      if (!redirecting) setIsLoading(false);
     }
   };
 
