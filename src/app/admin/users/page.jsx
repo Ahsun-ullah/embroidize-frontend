@@ -1,43 +1,31 @@
 import UsersTableWrapper from '@/features/users/UsersTableWrapper';
+import { readUserFilters } from '@/features/users/userFilters';
 import { getUsers } from '@/lib/apis/protected/users';
 
 export default async function AllUsersListPage({ searchParams }) {
-  // 1. Extract params from URL
-  const page = Number(searchParams?.page) || 1;
-  const search = searchParams?.search || '';
-  const minDownloads = searchParams?.minDownloads || '';
-  const startDate = searchParams?.startDate || '';
-  const endDate = searchParams?.endDate || '';
-  const blocked = searchParams?.blocked === '1';
+  const params = await searchParams;
+  const page = Number(params?.page) || 1;
+  const filters = readUserFilters(params);
 
-  // 2. Fetch data with filters
-  const usersResponse = await getUsers(
-    page,
-    10,
-    search,
-    minDownloads,
-    startDate,
-    endDate,
-    blocked,
-  );
-  const { data: users, pagination } = usersResponse;
+  const { data: users, pagination, stats } = await getUsers(page, 10, filters);
 
   const columns = [
     { name: 'ID', uid: 'id' },
     { name: 'NAME', uid: 'name' },
     { name: 'EMAIL', uid: 'email' },
+    { name: 'PLAN', uid: 'plan' },
     { name: 'DOWNLOAD', uid: 'downloadCount' },
     { name: 'SIGNUP VIA', uid: 'provider' },
     { name: 'Registration Date', uid: 'createdAt' },
     { name: 'ACTIONS', uid: 'actions' },
   ];
 
-
   return (
     <div className='flex flex-col gap-3'>
       <UsersTableWrapper
         initialData={users ?? []}
         pagination={pagination}
+        stats={stats}
         columns={columns}
       />
     </div>

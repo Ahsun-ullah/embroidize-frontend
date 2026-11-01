@@ -2,6 +2,11 @@
 import { ErrorToast } from '@/components/Common/ErrorToast';
 import { SuccessToast } from '@/components/Common/SuccessToast';
 import UserTable from '@/components/Common/Table';
+import ExportFieldsModal from '@/features/admin/ExportFieldsModal';
+import {
+  readUserFilters,
+  userFiltersToQuery,
+} from '@/features/users/userFilters';
 import { VerticalDotsIcon } from '@/components/icons';
 import {
   Button,
@@ -16,17 +21,177 @@ import {
   ModalFooter,
   ModalHeader,
   User,
+  useDisclosure,
 } from '@heroui/react';
+import { Download, Search, X } from 'lucide-react';
 import AddCreditsModal from '@/features/admin/AddCreditsModal';
 import GrantAccessModal from '@/features/admin/GrantAccessModal';
 import Cookies from 'js-cookie';
 import { useRouter, useSearchParams } from 'next/navigation';
-import { useCallback, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+
+// ─── Filter options ───────────────────────────────────────────────────────────
+
+const PLAN_OPTIONS = [
+  ['', 'All'],
+  ['free', 'Free'],
+  ['premium', 'Premium'],
+];
+const PROVIDER_OPTIONS = [
+  ['', 'All'],
+  ['local', 'Email'],
+  ['google', 'Google'],
+  ['apple', 'Apple'],
+];
+const VERIFIED_OPTIONS = [
+  ['', 'All'],
+  ['yes', 'Verified'],
+  ['no', 'Not verified'],
+];
+const CREDITS_OPTIONS = [
+  ['', 'All'],
+  ['has', 'Has credits now'],
+  ['ever', 'Ever bought credits'],
+  ['never', 'Never bought credits'],
+];
+const ACTIVITY_OPTIONS = [
+  ['', 'Any time'],
+  ['7', 'Downloaded in last 7 days'],
+  ['30', 'Downloaded in last 30 days'],
+  ['90', 'Downloaded in last 90 days'],
+];
+const SORT_OPTIONS = [
+  ['', 'Newest first'],
+  ['oldest', 'Oldest first'],
+];
+
+const labelOf = (options, value) =>
+  options.find(([v]) => v === (value || ''))?.[1] || 'All';
+
+// Text inputs wait for a pause in typing before they reload the page.
+const TEXT_FILTERS = ['search', 'country', 'minDownloads', 'maxDownloads'];
+
+// ─── Export fields ────────────────────────────────────────────────────────────
+
+const isoDay = (d) => {
+  if (!d) return '';
+  const t = new Date(d);
+  return Number.isNaN(t.getTime()) ? '' : t.toISOString().slice(0, 10);
+};
+
+const providerName = (p) => {
+  const v = p || 'local';
+  return v === 'local' ? 'Email' : v.charAt(0).toUpperCase() + v.slice(1);
+};
+
+const planBilling = (plan) => {
+  if (!plan) return '';
+  if (plan.type === 'one-time' || !plan.billingInterval) return 'One-time';
+  const i = plan.billingInterval;
+  return `${i.charAt(0).toUpperCase()}${i.slice(1)}ly`;
+};
+
+const gatewayName = (g) =>
+  g ? g.charAt(0).toUpperCase() + g.slice(1) : '';
+
+// Everything the Users export can write. `default` marks the fields pre-ticked
+// the first time; after that the admin's last choice is remembered.
+const USER_EXPORT_FIELDS = [
+  // Customer
+  { key: 'name', label: 'Name', group: 'Customer', default: true, get: (u) => u.name },
+  { key: 'email', label: 'Email', group: 'Customer', default: true, get: (u) => u.email },
+  { key: 'phone', label: 'Phone', group: 'Customer', get: (u) => u.phone },
+  { key: 'country', label: 'Country', group: 'Customer', default: true, get: (u) => u.country || u.ipInfo?.country },
+  { key: 'state', label: 'State', group: 'Customer', get: (u) => u.state },
+  { key: 'city', label: 'City', group: 'Customer', get: (u) => u.city },
+  { key: 'zip', label: 'ZIP', group: 'Customer', get: (u) => u.zip },
+  { key: 'userId', label: 'User ID', group: 'Customer', get: (u) => u._id },
+
+  // Account
+  { key: 'joined', label: 'Joined', group: 'Account', default: true, get: (u) => isoDay(u.createdAt) },
+  { key: 'signupVia', label: 'Signup via', group: 'Account', default: true, get: (u) => providerName(u.provider) },
+  { key: 'emailVerified', label: 'Email verified', group: 'Account', get: (u) => !!u.isEmailVerified },
+  { key: 'accountStatus', label: 'Account status', group: 'Account', get: (u) => (u.status === 'blocked' ? 'Blocked' : 'Active') },
+  { key: 'ipCountry', label: 'Signup country (IP)', group: 'Account', get: (u) => u.ipInfo?.country },
+  { key: 'ipCity', label: 'Signup city (IP)', group: 'Account', get: (u) => u.ipInfo?.city },
+  { key: 'ipRegion', label: 'Signup region (IP)', group: 'Account', get: (u) => u.ipInfo?.region },
+
+  // Plan
+  { key: 'tier', label: 'Free / Premium', group: 'Plan', default: true, get: (u) => (u.isSubscribed ? 'Premium' : 'Free') },
+  { key: 'planName', label: 'Plan', group: 'Plan', default: true, get: (u) => u.subscription?.plan?.name },
+  { key: 'billing', label: 'Billing', group: 'Plan', get: (u) => planBilling(u.subscription?.plan) },
+  { key: 'price', label: 'Plan price', group: 'Plan', get: (u) => u.subscription?.plan?.price },
+  { key: 'subStatus', label: 'Subscription status', group: 'Plan', get: (u) => u.subscription?.status?.replace('_', ' ') },
+  { key: 'gateway', label: 'Payment provider', group: 'Plan', get: (u) => gatewayName(u.subscription?.gateway) },
+  { key: 'cancelling', label: 'Cancels at period end', group: 'Plan', get: (u) => (u.subscription ? !!u.subscription.cancelAtPeriodEnd : '') },
+  { key: 'subscribed', label: 'Subscribed', group: 'Plan', get: (u) => isoDay(u.subscription?.subscribedAt) },
+  { key: 'periodEnd', label: 'Renews / expires', group: 'Plan', get: (u) => isoDay(u.subscription?.periodEndDate) },
+
+  // Usage
+  { key: 'downloads', label: 'Total downloads', group: 'Usage', default: true, get: (u) => u.downloadCount ?? 0 },
+  { key: 'lastDownload', label: 'Last download', group: 'Usage', default: true, get: (u) => isoDay(u.lastDownloadAt) },
+  { key: 'periodDownloads', label: 'Downloads this period', group: 'Usage', get: (u) => (u.subscription ? u.subscription.periodDownloads ?? 0 : '') },
+  { key: 'credits', label: 'Download credits', group: 'Usage', get: (u) => u.downloadCredits ?? 0 },
+  { key: 'creditsExpire', label: 'Credits expire', group: 'Usage', get: (u) => isoDay(u.creditsExpireAt) },
+  { key: 'creditsEver', label: 'Ever bought credits', group: 'Usage', get: (u) => !!u.creditsEverGranted },
+];
+
+const EXPORT_PAGE_SIZE = 500;
+
+async function fetchUserPages(query, onPage) {
+  const apiUrl = process.env.NEXT_PUBLIC_BASE_API_URL_PROD;
+  const token = Cookies.get('token');
+  const rows = [];
+  let page = 1;
+  let totalPages = 1;
+  do {
+    const params = new URLSearchParams(query);
+    params.set('page', String(page));
+    params.set('perPage', String(EXPORT_PAGE_SIZE));
+    const res = await fetch(`${apiUrl}/all-users?${params.toString()}`, {
+      headers: token ? { Authorization: `Bearer ${token}` } : {},
+    });
+    if (!res.ok) throw new Error(`Export failed (status ${res.status}).`);
+    const json = await res.json();
+    rows.push(...(json?.data?.users || []));
+    totalPages = json?.data?.pagination?.totalPages || 1;
+    onPage(rows.length, json?.data?.pagination?.total);
+    page += 1;
+  } while (page <= totalPages);
+  return rows;
+}
+
+function FilterDropdown({ label, value, options, onChange, active }) {
+  return (
+    <Dropdown>
+      <DropdownTrigger>
+        <Button
+          size='sm'
+          variant={active ? 'solid' : 'flat'}
+          className={active ? 'bg-black text-white' : ''}
+        >
+          {label}: {labelOf(options, value)}
+        </Button>
+      </DropdownTrigger>
+      <DropdownMenu
+        aria-label={`${label} filter`}
+        selectionMode='single'
+        selectedKeys={[value || 'any']}
+        onAction={(k) => onChange(k === 'any' ? '' : String(k))}
+      >
+        {options.map(([v, l]) => (
+          <DropdownItem key={v || 'any'}>{l}</DropdownItem>
+        ))}
+      </DropdownMenu>
+    </Dropdown>
+  );
+}
 
 export default function UsersTableWrapper({
   initialData,
   columns,
   pagination, // Received from server
+  stats,
 }) {
   const router = useRouter();
   const searchParams = useSearchParams();
@@ -43,43 +208,73 @@ export default function UsersTableWrapper({
     setIsModalOpen(false);
   };
 
-  // --- Filter State ---
-  // Initialize from URL so filters persist on refresh
-  const [filters, setFilters] = useState({
-    search: searchParams.get('search') || '',
-    minDownloads: searchParams.get('minDownloads') || '',
-    startDate: searchParams.get('startDate') || '',
-    endDate: searchParams.get('endDate') || '',
+  // --- Filters ---
+  // The URL is the source of truth (the server page reads it). Text inputs keep
+  // a local draft so typing stays smooth, then sync after a short pause.
+  const filters = useMemo(() => readUserFilters(searchParams), [searchParams]);
+  const [drafts, setDrafts] = useState(() => {
+    const d = {};
+    TEXT_FILTERS.forEach((k) => (d[k] = filters[k] || ''));
+    return d;
   });
 
-  // --- Filter Logic ---
-  const updateURL = (newFilters, newPage = 1) => {
-    const params = new URLSearchParams(searchParams);
+  const pushFilters = useCallback(
+    (changes) => {
+      const params = new URLSearchParams(searchParams);
+      Object.entries(changes).forEach(([k, v]) => {
+        if (v != null && String(v) !== '') params.set(k, String(v));
+        else params.delete(k);
+      });
+      // Always back to page 1 when the set of rows changes.
+      params.set('page', '1');
+      router.push(`?${params.toString()}`);
+    },
+    [router, searchParams],
+  );
 
-    // Update params based on state
-    if (newFilters.search) params.set('search', newFilters.search);
-    else params.delete('search');
+  const handleFilterChange = (key, value) => pushFilters({ [key]: value });
 
-    if (newFilters.minDownloads)
-      params.set('minDownloads', newFilters.minDownloads);
-    else params.delete('minDownloads');
-
-    if (newFilters.startDate) params.set('startDate', newFilters.startDate);
-    else params.delete('startDate');
-
-    if (newFilters.endDate) params.set('endDate', newFilters.endDate);
-    else params.delete('endDate');
-
-    // Always reset to page 1 when filtering
-    params.set('page', newPage.toString());
-
-    router.push(`?${params.toString()}`);
+  // Debounce text drafts into the URL.
+  const draftTimer = useRef(null);
+  const draftPending = useRef(false);
+  const setDraft = (key, value) => {
+    setDrafts((prev) => ({ ...prev, [key]: value }));
+    clearTimeout(draftTimer.current);
+    draftPending.current = true;
+    draftTimer.current = setTimeout(() => {
+      draftPending.current = false;
+      pushFilters({ [key]: value });
+    }, 400);
   };
+  useEffect(() => () => clearTimeout(draftTimer.current), []);
 
-  const handleFilterChange = (key, value) => {
-    const newFilters = { ...filters, [key]: value };
-    setFilters(newFilters);
-    updateURL(newFilters);
+  // Keep drafts in step when the URL changes from elsewhere (back button), but
+  // never while the admin is mid-typing: the URL lags the input by the debounce.
+  useEffect(() => {
+    if (draftPending.current) return;
+    setDrafts((prev) => {
+      const next = { ...prev };
+      let changed = false;
+      TEXT_FILTERS.forEach((k) => {
+        const v = filters[k] || '';
+        if (next[k] !== v) {
+          next[k] = v;
+          changed = true;
+        }
+      });
+      return changed ? next : prev;
+    });
+  }, [filters]);
+
+  const clearFilters = () => {
+    clearTimeout(draftTimer.current);
+    draftPending.current = false;
+    const changes = {};
+    Object.keys(filters).forEach((k) => {
+      if (k !== 'blocked') changes[k] = '';
+    });
+    setDrafts({ search: '', country: '', minDownloads: '', maxDownloads: '' });
+    pushFilters(changes);
   };
 
   const onPageChange = (newPage) => {
@@ -111,10 +306,11 @@ export default function UsersTableWrapper({
   const [creditUser, setCreditUser] = useState(null);
   const [grantPlans, setGrantPlans] = useState([]);
 
-  const handleGrantClick = useCallback(
-    async (user) => {
-      setGrantUser(user);
-      if (grantPlans.length) return;
+  // Plans feed both the Plan filter and the Grant Access modal (inactive ones
+  // included: a hidden "Custom Access" plan is the usual target for a grant).
+  useEffect(() => {
+    let cancelled = false;
+    (async () => {
       try {
         const token = Cookies.get('token');
         const res = await fetch(
@@ -123,13 +319,17 @@ export default function UsersTableWrapper({
         );
         if (!res.ok) return;
         const data = await res.json();
-        setGrantPlans(data?.data?.plans || []);
+        if (!cancelled) setGrantPlans(data?.data?.plans || []);
       } catch {
-        // Non-fatal — the modal blocks submission with an empty plan list.
+        // Non-fatal: no plan filter, and the grant modal blocks submission.
       }
-    },
-    [grantPlans.length],
-  );
+    })();
+    return () => {
+      cancelled = true;
+    };
+  }, []);
+
+  const handleGrantClick = useCallback((user) => setGrantUser(user), []);
 
   const performBlock = useCallback(
     async (user) => {
@@ -195,6 +395,31 @@ export default function UsersTableWrapper({
         );
       case 'createdAt':
         return <>{new Date(user.createdAt).toISOString().split('T')[0]}</>;
+      case 'plan': {
+        const credits =
+          user.downloadCredits > 0 &&
+          (!user.creditsExpireAt || new Date(user.creditsExpireAt) > new Date())
+            ? user.downloadCredits
+            : 0;
+        return (
+          <div className='flex flex-col items-start gap-1'>
+            {user.isSubscribed ? (
+              <span className='rounded-full bg-amber-100 px-2 py-0.5 text-xs font-semibold text-amber-800'>
+                {user.subscription?.plan?.name || 'Premium'}
+              </span>
+            ) : (
+              <span className='rounded-full bg-gray-100 px-2 py-0.5 text-xs font-semibold text-gray-600'>
+                Free
+              </span>
+            )}
+            {credits > 0 && (
+              <span className='text-[11px] text-gray-500'>
+                {credits} credit{credits !== 1 ? 's' : ''}
+              </span>
+            )}
+          </div>
+        );
+      }
       case 'email':
         return <a href={`mailto:${user.email}`}>{user.email}</a>;
       case 'downloadCount':
@@ -280,198 +505,223 @@ export default function UsersTableWrapper({
     }
   }, [handleBlockClick, handleGrantClick]);
 
-  const [isExporting, setIsExporting] = useState(false);
+  // --- Export ---
+  const {
+    isOpen: isExportOpen,
+    onOpen: onExportOpen,
+    onOpenChange: onExportChange,
+  } = useDisclosure();
 
-  // Kept for the CSV export path, which is currently not wired to a button.
-  const _convertUsersToCSV = (users) => {
-    const headers = ['Email', 'Name', 'Country', 'Date'];
+  const planOptions = useMemo(
+    () => [['', 'All plans'], ...grantPlans.map((p) => [String(p._id), p.name])],
+    [grantPlans],
+  );
 
-    const escapeCSVValue = (value) => {
-      const stringValue = value == null ? '' : String(value);
-      return `"${stringValue.replace(/"/g, '""')}"`;
-    };
-
-    const rows = users.map((user) => [
-      escapeCSVValue(user.email),
-      escapeCSVValue(user.name),
-      escapeCSVValue(user.country),
-      escapeCSVValue(user.date),
-    ]);
-
-    return [headers.join(','), ...rows.map((row) => row.join(','))].join('\n');
-  };
-
-  const _downloadCSV = (csvContent, fileName) => {
-    const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
-    const url = window.URL.createObjectURL(blob);
-
-    const link = document.createElement('a');
-    link.href = url;
-    link.setAttribute('download', fileName);
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
-
-    window.URL.revokeObjectURL(url);
-  };
-
-  const handleExport = async () => {
-    try {
-      setIsExporting(true);
-
-      const params = new URLSearchParams();
-
-      if (filters.search) params.set('search', filters.search);
-      if (filters.minDownloads)
-        params.set('minDownloads', filters.minDownloads);
-      if (filters.startDate) params.set('startDate', filters.startDate);
-      if (filters.endDate) params.set('endDate', filters.endDate);
-
-      params.set('export', 'true');
-
-      const apiUrl = process.env.NEXT_PUBLIC_BASE_API_URL_PROD;
-      if (!apiUrl) {
-        throw new Error('Missing NEXT_PUBLIC_BASE_API_URL_PROD');
-      }
-
-      const token =
-        localStorage.getItem('token') ||
-        document.cookie
-          .split('; ')
-          .find((row) => row.startsWith('token='))
-          ?.split('=')[1];
-
-      const headers = {};
-      if (token) {
-        headers['Authorization'] = `Bearer ${token}`;
-      }
-
-      const response = await fetch(`${apiUrl}/all-users?${params.toString()}`, {
-        method: 'GET',
-        headers,
-      });
-
-      if (!response.ok) {
-        throw new Error(`Export failed: ${response.status}`);
-      }
-
-      // ✅ IMPORTANT: get blob instead of json
-      const blob = await response.blob();
-
-      // ✅ dynamic filename
-      const fileName =
-        filters.startDate && filters.endDate
-          ? `users-${filters.startDate}-to-${filters.endDate}.csv`
-          : 'users-export.csv';
-
-      // ✅ create download link
-      const url = window.URL.createObjectURL(blob);
-
-      const a = document.createElement('a');
-      a.href = url;
-      a.download = fileName;
-      document.body.appendChild(a);
-      a.click();
-
-      a.remove();
-      window.URL.revokeObjectURL(url);
-    } catch (error) {
-      console.error('Export failed:', error);
-      alert('Failed to export users.');
-    } finally {
-      setIsExporting(false);
+  // Human summary of the current view, for the export dialog.
+  const filterSummary = useMemo(() => {
+    const f = filters;
+    const parts = [];
+    if (f.blocked === '1') parts.push('Blocked users');
+    if (f.search) parts.push(`Search "${f.search}"`);
+    if (f.plan) parts.push(labelOf(PLAN_OPTIONS, f.plan));
+    if (f.planId) {
+      const name = planOptions.find(([v]) => v === f.planId)?.[1];
+      parts.push(`Plan: ${name || 'selected plan'}`);
     }
-  };
+    if (f.provider) parts.push(`Signup: ${labelOf(PROVIDER_OPTIONS, f.provider)}`);
+    if (f.verified) parts.push(labelOf(VERIFIED_OPTIONS, f.verified));
+    if (f.credits) parts.push(labelOf(CREDITS_OPTIONS, f.credits));
+    if (f.activeWithin) parts.push(labelOf(ACTIVITY_OPTIONS, f.activeWithin));
+    if (f.country) parts.push(`Country "${f.country}"`);
+    if (f.minDownloads) parts.push(`≥ ${f.minDownloads} downloads`);
+    if (f.maxDownloads) parts.push(`≤ ${f.maxDownloads} downloads`);
+    if (f.startDate || f.endDate)
+      parts.push(`Joined ${f.startDate || '…'} to ${f.endDate || '…'}`);
+    return parts;
+  }, [filters, planOptions]);
+
+  const hasNarrowingFilter = Object.keys(filters).some(
+    (k) => k !== 'sort' && k !== 'blocked',
+  );
+
+  // "All" = every user, active and blocked, with no filters.
+  const allCount = stats?.totalUsers ?? pagination?.total ?? 0;
+
+  const loadExportRows = useCallback(
+    async (scope, onProgress) => {
+      if (scope === 'all') {
+        const sortOnly = filters.sort ? { sort: filters.sort } : {};
+        const active = await fetchUserPages(userFiltersToQuery(sortOnly), (n) =>
+          onProgress(n, allCount),
+        );
+        const blocked = await fetchUserPages(
+          userFiltersToQuery({ ...sortOnly, blocked: '1' }),
+          (n) => onProgress(active.length + n, allCount),
+        );
+        return [...active, ...blocked];
+      }
+      return fetchUserPages(userFiltersToQuery(filters), (n, total) =>
+        onProgress(n, total ?? pagination?.total ?? n),
+      );
+    },
+    [filters, allCount, pagination?.total],
+  );
 
   // --- Custom Filter Bar ---
   const topContent = (
-    <div className='mb-4'>
-      <div className='mb-3 flex gap-2'>
-        <Button
-          size='sm'
-          variant={!blockedView ? 'solid' : 'flat'}
-          className={!blockedView ? 'bg-black text-white' : ''}
-          onPress={() => setBlockedView(false)}
-        >
-          Active Users
-        </Button>
-        <Button
-          size='sm'
-          variant={blockedView ? 'solid' : 'flat'}
-          className={blockedView ? 'bg-black text-white' : ''}
-          onPress={() => setBlockedView(true)}
-        >
-          Blocked Users
-        </Button>
+    <div className='mb-4 flex flex-col gap-3'>
+      <div className='flex flex-wrap items-center justify-between gap-2'>
+        <div className='flex gap-2'>
+          <Button
+            size='sm'
+            variant={!blockedView ? 'solid' : 'flat'}
+            className={!blockedView ? 'bg-black text-white' : ''}
+            onPress={() => setBlockedView(false)}
+          >
+            Active Users
+          </Button>
+          <Button
+            size='sm'
+            variant={blockedView ? 'solid' : 'flat'}
+            className={blockedView ? 'bg-black text-white' : ''}
+            onPress={() => setBlockedView(true)}
+          >
+            Blocked Users
+          </Button>
+        </div>
+        <div className='flex gap-2'>
+          {hasNarrowingFilter && (
+            <Button
+              size='sm'
+              variant='light'
+              startContent={<X size={14} />}
+              onPress={clearFilters}
+            >
+              Clear filters
+            </Button>
+          )}
+          <Button
+            size='sm'
+            color='primary'
+            variant='flat'
+            startContent={<Download size={16} />}
+            onPress={onExportOpen}
+          >
+            Export
+          </Button>
+        </div>
       </div>
-      <div className='flex flex-nowrap items-end gap-3 overflow-x-auto'>
-        <Input
-          isClearable
-          className='min-w-[260px] flex-[2]'
-          label='Search'
-          labelPlacement='outside'
-          placeholder='Search name or email...'
-          value={filters.search}
-          onValueChange={(val) => handleFilterChange('search', val)}
-          onClear={() => handleFilterChange('search', '')}
-        />
 
+      <Input
+        isClearable
+        size='sm'
+        className='w-full sm:max-w-md'
+        placeholder='Search name or email…'
+        startContent={<Search size={16} className='text-gray-400' />}
+        value={drafts.search}
+        onValueChange={(val) => setDraft('search', val)}
+        onClear={() => setDraft('search', '')}
+      />
+
+      <div className='flex flex-wrap items-center gap-2'>
+        <FilterDropdown
+          label='Plan'
+          value={filters.plan}
+          options={PLAN_OPTIONS}
+          active={!!filters.plan}
+          onChange={(v) => pushFilters({ plan: v, ...(v === 'free' ? { planId: '' } : {}) })}
+        />
+        {grantPlans.length > 0 && filters.plan !== 'free' && (
+          <FilterDropdown
+            label='Premium plan'
+            value={filters.planId}
+            options={planOptions}
+            active={!!filters.planId}
+            onChange={(v) => handleFilterChange('planId', v)}
+          />
+        )}
+        <FilterDropdown
+          label='Signup via'
+          value={filters.provider}
+          options={PROVIDER_OPTIONS}
+          active={!!filters.provider}
+          onChange={(v) => handleFilterChange('provider', v)}
+        />
+        <FilterDropdown
+          label='Email'
+          value={filters.verified}
+          options={VERIFIED_OPTIONS}
+          active={!!filters.verified}
+          onChange={(v) => handleFilterChange('verified', v)}
+        />
+        <FilterDropdown
+          label='Credits'
+          value={filters.credits}
+          options={CREDITS_OPTIONS}
+          active={!!filters.credits}
+          onChange={(v) => handleFilterChange('credits', v)}
+        />
+        <FilterDropdown
+          label='Activity'
+          value={filters.activeWithin}
+          options={ACTIVITY_OPTIONS}
+          active={!!filters.activeWithin}
+          onChange={(v) => handleFilterChange('activeWithin', v)}
+        />
+        <FilterDropdown
+          label='Sort'
+          value={filters.sort}
+          options={SORT_OPTIONS}
+          active={false}
+          onChange={(v) => handleFilterChange('sort', v)}
+        />
+      </div>
+
+      <div className='grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-5'>
         <Input
+          size='sm'
+          label='Country'
+          labelPlacement='outside'
+          placeholder='e.g. US or Germany'
+          value={drafts.country}
+          onValueChange={(val) => setDraft('country', val)}
+        />
+        <Input
+          size='sm'
           type='number'
-          className='min-w-[180px] flex-1'
-          label='Min Downloads'
+          min={0}
+          label='Min downloads'
           labelPlacement='outside'
-          placeholder='Min Downloads'
-          value={filters.minDownloads}
-          onValueChange={(val) => handleFilterChange('minDownloads', val)}
+          placeholder='0'
+          value={drafts.minDownloads}
+          onValueChange={(val) => setDraft('minDownloads', val)}
         />
-
         <Input
-          type='date'
-          className='min-w-[180px] flex-1'
-          label='Start Date'
+          size='sm'
+          type='number'
+          min={0}
+          label='Max downloads'
           labelPlacement='outside'
-          value={filters.startDate}
+          placeholder='Any'
+          value={drafts.maxDownloads}
+          onValueChange={(val) => setDraft('maxDownloads', val)}
+        />
+        <Input
+          size='sm'
+          type='date'
+          label='Joined from'
+          labelPlacement='outside'
+          value={filters.startDate || ''}
           onChange={(e) => handleFilterChange('startDate', e.target.value)}
         />
-
         <Input
+          size='sm'
           type='date'
-          className='min-w-[180px] flex-1'
-          label='End Date'
+          label='Joined to'
           labelPlacement='outside'
-          value={filters.endDate}
+          value={filters.endDate || ''}
           onChange={(e) => handleFilterChange('endDate', e.target.value)}
         />
-
-        <Button
-          className='min-w-fit'
-          variant='flat'
-          color='default'
-          onClick={() => {
-            const newFilters = {
-              ...filters,
-              search: '',
-              minDownloads: '',
-              startDate: '',
-              endDate: '',
-            };
-            setFilters(newFilters);
-            updateURL(newFilters);
-          }}
-        >
-          Clear Filters
-        </Button>
-
-        <Button
-          className='min-w-fit '
-          color='primary'
-          onPress={handleExport}
-          isLoading={isExporting}
-          isDisabled={isExporting}
-        >
-          {isExporting ? 'Exporting...' : 'Export'}
-        </Button>
       </div>
     </div>
   );
@@ -495,6 +745,19 @@ export default function UsersTableWrapper({
         pagination={pagination}
         onPageChange={onPageChange}
         topContent={topContent}
+      />
+
+      <ExportFieldsModal
+        isOpen={isExportOpen}
+        onOpenChange={onExportChange}
+        title='Export users'
+        fields={USER_EXPORT_FIELDS}
+        filteredCount={pagination?.total ?? 0}
+        allCount={allCount}
+        loadRows={loadExportRows}
+        filterSummary={filterSummary}
+        filenameBase='users'
+        storageKey='embroidize.usersExport.fields'
       />
 
       {creditUser && (

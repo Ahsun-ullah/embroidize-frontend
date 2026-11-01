@@ -1,14 +1,7 @@
 import { cookies } from 'next/headers';
 
-export async function getUsers(
-  page = 1,
-  perPage = 10,
-  search = '',
-  minDownloads = '',
-  startDate = '',
-  endDate = '',
-  blocked = false,
-) {
+// filters: any of USER_FILTER_KEYS (see features/users/userFilters.js).
+export async function getUsers(page = 1, perPage = 10, filters = {}) {
   'use server';
   try {
     const cookieStore = await cookies();
@@ -22,14 +15,11 @@ export async function getUsers(
     const apiUrl = process.env.NEXT_PUBLIC_BASE_API_URL_PROD;
     const url = new URL(`${apiUrl}/all-users`);
 
-    // Append all params
     url.searchParams.set('page', String(page));
     url.searchParams.set('perPage', String(perPage));
-    if (search) url.searchParams.set('search', search);
-    if (minDownloads) url.searchParams.set('minDownloads', minDownloads);
-    if (startDate) url.searchParams.set('startDate', startDate);
-    if (endDate) url.searchParams.set('endDate', endDate);
-    if (blocked) url.searchParams.set('blocked', '1');
+    Object.entries(filters || {}).forEach(([k, v]) => {
+      if (v != null && String(v) !== '') url.searchParams.set(k, String(v));
+    });
 
     const response = await fetch(url.toString(), {
       headers,
@@ -42,14 +32,14 @@ export async function getUsers(
 
     const responseData = await response.json();
 
-    // Structure matches the new backend response
     return {
       data: responseData?.data?.users,
       pagination: responseData?.data?.pagination,
+      stats: responseData?.data?.stats,
     };
   } catch (error) {
     console.error('Error fetching users:', error);
-    return { data: [], pagination: { total: 0, totalPages: 0 } };
+    return { data: [], pagination: { total: 0, totalPages: 0 }, stats: null };
   }
 }
 
