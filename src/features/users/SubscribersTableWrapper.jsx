@@ -35,6 +35,7 @@ import {
   ExternalLink,
   Eye,
   FileText,
+  Download,
   Gift,
   Receipt,
   RotateCcw,
@@ -45,6 +46,7 @@ import {
 import Cookies from 'js-cookie';
 import { useRouter } from 'next/navigation';
 import { useEffect, useMemo, useState } from 'react';
+import ExportFieldsModal from '@/features/admin/ExportFieldsModal';
 import GrantAccessModal from '@/features/admin/GrantAccessModal';
 import IncomePanel from '@/features/users/IncomePanel';
 
@@ -246,6 +248,68 @@ function estLtv(sub) {
   const cycles = 1 + Math.floor(days / periodDays);
   return plan.price * cycles;
 }
+
+// ─── Export fields ────────────────────────────────────────────────────────────
+
+// Spreadsheet-friendly date: sorts and filters correctly once opened.
+function isoDay(date) {
+  if (!date) return '';
+  const d = new Date(date);
+  return Number.isNaN(d.getTime()) ? '' : d.toISOString().slice(0, 10);
+}
+
+function planBilling(plan) {
+  if (!plan) return '';
+  if (plan.type === 'one-time' || !plan.billingInterval) return 'One-time';
+  return `${plan.billingInterval.charAt(0).toUpperCase()}${plan.billingInterval.slice(1)}ly`;
+}
+
+// Everything the Subscribers export can write. `default` marks the fields
+// pre-ticked the first time; after that the admin's last choice is remembered.
+// Limits are the EFFECTIVE ones (custom terms included), same as the table.
+const SUBSCRIBER_EXPORT_FIELDS = [
+  // Customer
+  { key: 'name', label: 'Name', group: 'Customer', default: true, get: (u) => u.name },
+  { key: 'email', label: 'Email', group: 'Customer', default: true, get: (u) => u.email },
+  { key: 'phone', label: 'Phone', group: 'Customer', get: (u) => u.phone },
+  { key: 'country', label: 'Country', group: 'Customer', default: true, get: (u) => u.country },
+  { key: 'state', label: 'State', group: 'Customer', get: (u) => u.state },
+  { key: 'city', label: 'City', group: 'Customer', get: (u) => u.city },
+  { key: 'zip', label: 'ZIP', group: 'Customer', get: (u) => u.zip },
+  { key: 'emailVerified', label: 'Email verified', group: 'Customer', get: (u) => !!u.isEmailVerified },
+  { key: 'joined', label: 'Joined', group: 'Customer', default: true, get: (u) => isoDay(u.createdAt) },
+  { key: 'userId', label: 'User ID', group: 'Customer', get: (u) => u._id },
+
+  // Subscription
+  { key: 'plan', label: 'Plan', group: 'Subscription', default: true, get: (u) => u.subscription?.planId?.name },
+  { key: 'billing', label: 'Billing', group: 'Subscription', default: true, get: (u) => planBilling(u.subscription?.planId) },
+  { key: 'price', label: 'Plan price', group: 'Subscription', default: true, get: (u) => u.subscription?.planId?.price },
+  { key: 'provider', label: 'Provider', group: 'Subscription', default: true, get: (u) => providerLabel(subProvider(u.subscription)) },
+  { key: 'status', label: 'Status', group: 'Subscription', default: true, get: (u) => u.subscription?.status?.replace('_', ' ') },
+  { key: 'cancelling', label: 'Cancels at period end', group: 'Subscription', default: true, get: (u) => !!u.subscription?.cancelAtPeriodEnd },
+  { key: 'subscribed', label: 'Subscribed', group: 'Subscription', default: true, get: (u) => isoDay(u.subscription?.createdAt) },
+  { key: 'periodEnd', label: 'Renews / expires', group: 'Subscription', default: true, get: (u) => isoDay(u.subscription?.periodEndDate) },
+  { key: 'priorGateway', label: 'Previous provider', group: 'Subscription', get: (u) => priorGatewayLabel(u.subscription) },
+
+  // Usage
+  { key: 'periodUsed', label: 'Downloads used (period)', group: 'Usage', default: true, get: (u) => u.subscription?.downloadCount ?? 0 },
+  { key: 'periodLimit', label: 'Download limit (period)', group: 'Usage', default: true, get: (u) => effectiveOf(u.subscription).downloadLimit ?? 'Unlimited' },
+  { key: 'dailyUsed', label: 'Downloads used (today)', group: 'Usage', get: (u) => u.subscription?.dailyDownloadCount ?? 0 },
+  { key: 'dailyLimit', label: 'Daily limit', group: 'Usage', get: (u) => effectiveOf(u.subscription).dailyLimit ?? 'Unlimited' },
+  { key: 'customLimits', label: 'Custom limits', group: 'Usage', get: (u) => effectiveOf(u.subscription).isCustom },
+  { key: 'customLimitsUntil', label: 'Custom limits until', group: 'Usage', get: (u) => isoDay(effectiveOf(u.subscription).expiresAt) },
+
+  // Payment
+  { key: 'ltv', label: 'Est. LTV', group: 'Payment', default: true, get: (u) => Math.round(estLtv(u.subscription) * 100) / 100 },
+  { key: 'manualMethod', label: 'Manual payment method', group: 'Payment', get: (u) => u.subscription?.manualPayment?.method },
+  { key: 'manualTotal', label: 'Manual total paid', group: 'Payment', get: (u) => u.subscription?.manualPayment?.totalPaid },
+  { key: 'manualLastDate', label: 'Manual last payment', group: 'Payment', get: (u) => isoDay(u.subscription?.manualPayment?.receivedAt) },
+  { key: 'manualInvoice', label: 'Manual last invoice', group: 'Payment', get: (u) => u.subscription?.manualPayment?.invoiceNumber },
+  { key: 'stripeCustomerId', label: 'Stripe customer ID', group: 'Payment', get: (u) => u.subscription?.stripeCustomerId },
+  { key: 'stripeSubscriptionId', label: 'Stripe subscription ID', group: 'Payment', get: (u) => u.subscription?.stripeSubscriptionId },
+  { key: 'creemCustomerId', label: 'Creem customer ID', group: 'Payment', get: (u) => u.subscription?.creemCustomerId },
+  { key: 'creemSubscriptionId', label: 'Creem subscription ID', group: 'Payment', get: (u) => u.subscription?.creemSubscriptionId },
+];
 
 function QuotaBar({ used, limit }) {
   if (limit == null)
@@ -509,7 +573,9 @@ export default function SubscribersTableWrapper({ subscribers, revenue }) {
   }, [subscribers, statusFilter, providerFilter, planFilter, cancelingOnly, search]);
 
   // Sorting. Accessors return comparable primitives; missing values sort low.
-  const sorted = useMemo(() => {
+  // Returns a sorter rather than a list so the export can apply the table's
+  // order to the unfiltered set too.
+  const sortRows = useMemo(() => {
     const accessors = {
       user: (u) => (u.name || u.email || '').toLowerCase(),
       status: (u) => u.subscription?.status || '',
@@ -525,16 +591,19 @@ export default function SubscribersTableWrapper({ subscribers, revenue }) {
       ltv: (u) => estLtv(u.subscription),
     };
     const acc = accessors[sortDescriptor.column];
-    if (!acc) return filtered;
+    if (!acc) return (list) => list;
     const dir = sortDescriptor.direction === 'ascending' ? 1 : -1;
-    return [...filtered].sort((a, b) => {
-      const av = acc(a);
-      const bv = acc(b);
-      if (av < bv) return -1 * dir;
-      if (av > bv) return 1 * dir;
-      return 0;
-    });
-  }, [filtered, sortDescriptor]);
+    return (list) =>
+      [...list].sort((a, b) => {
+        const av = acc(a);
+        const bv = acc(b);
+        if (av < bv) return -1 * dir;
+        if (av > bv) return 1 * dir;
+        return 0;
+      });
+  }, [sortDescriptor]);
+
+  const sorted = useMemo(() => sortRows(filtered), [sortRows, filtered]);
 
   const totalPages = Math.max(1, Math.ceil(sorted.length / PER_PAGE));
   const paginated = sorted.slice((page - 1) * PER_PAGE, page * PER_PAGE);
@@ -543,6 +612,29 @@ export default function SubscribersTableWrapper({ subscribers, revenue }) {
     setSortDescriptor(descriptor);
     setPage(1);
   };
+
+  // ── Export ─────────────────────────────────────────────────────────────────
+
+  const {
+    isOpen: isExportOpen,
+    onOpen: onExportOpen,
+    onOpenChange: onExportChange,
+  } = useDisclosure();
+
+  // Human summary of what "current view" means, shown in the export dialog.
+  const exportFilterSummary = useMemo(() => {
+    const parts = [];
+    if (search.trim()) parts.push(`Search "${search.trim()}"`);
+    if (statusFilter !== 'all') parts.push(`Status: ${statusFilter.replace('_', ' ')}`);
+    if (providerFilter !== 'all') parts.push(`Provider: ${providerLabel(providerFilter)}`);
+    if (planFilter !== 'all') {
+      parts.push(`Plan: ${planOptions.find((p) => p.id === planFilter)?.name || planFilter}`);
+    }
+    if (cancelingOnly) parts.push('Cancelling only');
+    return parts;
+  }, [search, statusFilter, providerFilter, planFilter, planOptions, cancelingOnly]);
+
+  const allSorted = useMemo(() => sortRows(subscribers), [sortRows, subscribers]);
 
   const handleSearch = (val) => {
     setSearch(val);
@@ -1510,6 +1602,14 @@ export default function SubscribersTableWrapper({ subscribers, revenue }) {
             onPress={toggleCancelingOnly}
           >
             Cancelling
+          </Button>
+          <Button
+            color='primary'
+            variant='flat'
+            startContent={<Download size={16} />}
+            onPress={onExportOpen}
+          >
+            Export
           </Button>
         </div>
       </div>
@@ -2663,6 +2763,18 @@ export default function SubscribersTableWrapper({ subscribers, revenue }) {
           }}
         </ModalContent>
       </Modal>
+
+      <ExportFieldsModal
+        isOpen={isExportOpen}
+        onOpenChange={onExportChange}
+        title='Export subscribers'
+        fields={SUBSCRIBER_EXPORT_FIELDS}
+        filteredRows={sorted}
+        allRows={allSorted}
+        filterSummary={exportFilterSummary}
+        filenameBase='subscribers'
+        storageKey='embroidize.subscribersExport.fields'
+      />
     </div>
   );
 }
