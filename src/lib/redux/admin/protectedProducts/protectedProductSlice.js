@@ -16,6 +16,11 @@ export const protectedProductSlice = createApi({
     },
   }),
   endpoints: (builder) => ({
+    // One past the highest numeric SKU — prefilled on the new-product form.
+    getNextSku: builder.query({
+      query: () => ({ url: '/product/next-sku', method: 'GET' }),
+      keepUnusedDataFor: 0,
+    }),
     addProduct: builder.mutation({
       query: (body) => ({
         url: '/product',
@@ -43,4 +48,5 @@ export const {
   useAddProductMutation,
   useUpdateProductMutation,
   useDeleteProductMutation,
+  useGetNextSkuQuery,
 } = protectedProductSlice;

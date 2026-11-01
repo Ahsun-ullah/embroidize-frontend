@@ -7,10 +7,8 @@ import {
   useGetPublicProductCategoriesQuery,
   useGetPublicProductSubCategoriesQuery,
 } from '@/lib/redux/admin/categoryAndSubcategory/categoryAndSubcategorySlice';
-import {
-  useAddProductMutation,
-  useUpdateProductMutation,
-} from '@/lib/redux/admin/protectedProducts/protectedProductSlice';
+import { useGetNextSkuQuery } from '@/lib/redux/admin/protectedProducts/protectedProductSlice';
+import { uploadProductWithProgress } from '@/lib/redux/admin/protectedProducts/uploadProductWithProgress';
 import { useAllProductsQuery } from '@/lib/redux/public/products/productSlice';
 import { productSchema } from '@/lib/zodValidation/productValidation';
 import { slugify } from '@/utils/functions/page';
@@ -87,8 +85,15 @@ export function ProductsForm({ product }) {
   const pageNumber = searchParams.get('pageNumber') || '1';
   const { data: categoryData } = useGetPublicProductCategoriesQuery();
   const { data: subCategoryData } = useGetPublicProductSubCategoriesQuery();
-  const [addProduct] = useAddProductMutation();
-  const [updateProduct] = useUpdateProductMutation();
+  // Only a new product gets a suggested SKU; an edit keeps the one it has.
+  const { data: nextSkuData } = useGetNextSkuQuery(undefined, {
+    skip: Boolean(product?._id),
+  });
+  // Upload state for the progress bar: null = idle, 0–100 = sending files,
+  // 'processing' = all bytes sent, server is storing them.
+  const [uploadProgress, setUploadProgress] = useState(null);
+  // The meta title follows the product name until the admin edits it by hand.
+  const [metaTitleTouched, setMetaTitleTouched] = useState(false);
   const { refetch: allProductRefetch } = useAllProductsQuery();
 
   // `dropError` reports files dropped on the Files section that belong in no
@@ -102,6 +107,7 @@ export function ProductsForm({ product }) {
     formState: { errors, isSubmitting },
     reset,
     setValue,
+    getValues,
     // The file tiles render from the form value, so a file routed by a section
     // drop shows up on the right tile without any local state to keep in sync.
     watch,
@@ -190,10 +196,35 @@ export function ProductsForm({ product }) {
     }
   }, [categoryData, subCategoryData]);
 
+  // Prefill the suggested SKU on a new product, unless one was already typed.
+  useEffect(() => {
+    const next = nextSkuData?.data?.next_sku;
+    if (!product?._id && next && !getValues('sku_code')) {
+      setValue('sku_code', next);
+    }
+  }, [nextSkuData, product?._id, getValues, setValue]);
+
   const handleNameChange = (e) => {
     const nameValue = e.target.value;
     setSlug(slugify(nameValue));
     setValue('name', nameValue);
+    // New products only: an edit's meta title is already set and may be tuned.
+    if (!product?._id && !metaTitleTouched) {
+      setValue('meta_title', nameValue);
+    }
+  };
+
+  const sendForm = async (formData, id) => {
+    setUploadProgress(0);
+    try {
+      return await uploadProductWithProgress({
+        id,
+        formData,
+        onProgress: (pct) => setUploadProgress(pct ?? 'processing'),
+      });
+    } finally {
+      setUploadProgress(null);
+    }
   };
 
   const onSubmit = async (data) => {
@@ -235,17 +266,18 @@ export function ProductsForm({ product }) {
 
       if (product?._id) {
         formData.append('id', product._id);
-        const response = await updateProduct(formData).unwrap();
+        const response = await sendForm(formData, product._id);
         if (response.error) {
           ErrorToast('Error', response.error.data.message || 'API Error', 3000);
         } else {
           SuccessToast(
             'Success',
-            response.data.message || 'Action successfully done!',
+            response.message || 'Action successfully done!',
             3000,
           );
           try {
-            await allProductRefetch();
+            // Don't hold the admin on this page while the list reloads.
+            allProductRefetch();
             reset();
             setDescription('');
             router.push(`/admin/all-products?page=${pageNumber}`);
@@ -257,13 +289,13 @@ export function ProductsForm({ product }) {
         }
       } else {
         // Here you would typically make an API call
-        const response = await addProduct(formData).unwrap();
+        const response = await sendForm(formData);
         if (response.error) {
           ErrorToast('Error', response.error.data.message || 'API Error', 3000);
         } else {
           SuccessToast(
             'Success',
-            response.data.message || 'Action successfully done!',
+            response.message || 'Action successfully done!',
             3000,
           );
           allProductRefetch();
@@ -348,6 +380,33 @@ export function ProductsForm({ product }) {
         </div>
       </div>
 
+      {uploadProgress !== null && (
+        <div
+          className='mb-4 rounded-lg border border-gray-200 bg-white px-4 py-3'
+          role='status'
+          aria-live='polite'
+        >
+          <div className='mb-1 flex justify-between text-xs text-gray-600'>
+            <span>
+              {uploadProgress === 'processing'
+                ? 'Files sent. Saving them to storage…'
+                : 'Uploading files…'}
+            </span>
+            {uploadProgress !== 'processing' && <span>{uploadProgress}%</span>}
+          </div>
+          <div className='h-2 w-full overflow-hidden rounded-full bg-gray-100'>
+            <div
+              className={`h-full rounded-full bg-slate-800 transition-all ${
+                uploadProgress === 'processing' ? 'animate-pulse' : ''
+              }`}
+              style={{
+                width: `${uploadProgress === 'processing' ? 100 : uploadProgress}%`,
+              }}
+            />
+          </div>
+        </div>
+      )}
+
       <div className='grid grid-cols-1 gap-4 lg:grid-cols-3'>
         {/* ---------------- Main column ---------------- */}
         <div className='flex flex-col gap-4 lg:col-span-2'>
@@ -428,9 +487,16 @@ export function ProductsForm({ product }) {
               <input
                 id='meta_title'
                 placeholder='Meta title'
-                {...register('meta_title')}
+                {...register('meta_title', {
+                  onChange: () => setMetaTitleTouched(true),
+                })}
                 className={INPUT}
               />
+              {!product?._id && !metaTitleTouched && (
+                <p className='mt-1 text-xs text-gray-400'>
+                  Copied from the product name. Edit it to set your own.
+                </p>
+              )}
               {errors.meta_title && (
                 <p className={ERROR}>{errors.meta_title.message}</p>
               )}
@@ -613,6 +679,12 @@ export function ProductsForm({ product }) {
                 {...register('sku_code')}
                 className={INPUT}
               />
+              {!product?._id && nextSkuData?.data?.highest && (
+                <p className='mt-1 text-xs text-gray-400'>
+                  Suggested: next after the highest SKU (
+                  {nextSkuData.data.highest}).
+                </p>
+              )}
               {errors.sku_code && (
                 <p className={ERROR}>{errors.sku_code.message}</p>
               )}
