@@ -92,6 +92,12 @@ function writeSaved(storageKey, keys) {
  * them already sorted the way the table shows them.
  *
  * fields: [{ key, label, group, default?: boolean, get: (row) => value }]
+ *
+ * Rows come one of two ways:
+ *  - in memory: `filteredRows` + `allRows` (the table already holds them all);
+ *  - from the server: `filteredCount` + `allCount` for the labels, and
+ *    `loadRows(scope, onProgress)` resolving to the rows, for a table that
+ *    only holds one page. onProgress(loaded, total) drives the button label.
  */
 export default function ExportFieldsModal({
   isOpen,
@@ -100,6 +106,9 @@ export default function ExportFieldsModal({
   fields,
   filteredRows,
   allRows,
+  filteredCount,
+  allCount,
+  loadRows,
   filterSummary = [],
   filenameBase = 'export',
   storageKey,
@@ -111,6 +120,8 @@ export default function ExportFieldsModal({
 
   const [selected, setSelected] = useState(() => new Set(defaultKeys));
   const [scope, setScope] = useState('filtered');
+  const [progress, setProgress] = useState(null); // { loaded, total } while fetching
+  const [error, setError] = useState('');
 
   // Restore the last field choice each time the dialog opens, and default the
   // scope to what's on screen.
@@ -121,6 +132,8 @@ export default function ExportFieldsModal({
     const keys = saved ? saved.filter((k) => known.has(k)) : defaultKeys;
     setSelected(new Set(keys.length ? keys : defaultKeys));
     setScope('filtered');
+    setProgress(null);
+    setError('');
   }, [isOpen, fields, defaultKeys, storageKey]);
 
   const groups = useMemo(() => {
@@ -149,21 +162,40 @@ export default function ExportFieldsModal({
     });
 
   const hasFilters = filterSummary.length > 0;
-  const rows = scope === 'all' ? allRows : filteredRows;
+  const remote = typeof loadRows === 'function';
+  const nFiltered = remote ? filteredCount ?? 0 : filteredRows?.length ?? 0;
+  const nAll = remote ? allCount ?? 0 : allRows?.length ?? 0;
+  const rowCount = scope === 'all' ? nAll : nFiltered;
   const chosen = fields.filter((f) => selected.has(f.key));
-  const canExport = chosen.length > 0 && rows.length > 0;
+  const busy = progress !== null;
+  const canExport = chosen.length > 0 && rowCount > 0 && !busy;
 
-  const doExport = (onClose) => {
+  const doExport = async (onClose) => {
     if (!canExport) return;
     if (storageKey)
       writeSaved(
         storageKey,
         chosen.map((f) => f.key),
       );
+    let rows = scope === 'all' ? allRows : filteredRows;
+    if (remote) {
+      setError('');
+      setProgress({ loaded: 0, total: rowCount });
+      try {
+        rows = await loadRows(scope, (loaded, total) =>
+          setProgress({ loaded, total }),
+        );
+      } catch (err) {
+        setProgress(null);
+        setError(err?.message || 'Could not load the rows. Try again.');
+        return;
+      }
+      setProgress(null);
+    }
     const date = new Date().toISOString().slice(0, 10);
     const suffix = scope === 'all' || !hasFilters ? 'all' : 'filtered';
     downloadText(
-      buildCsv(chosen, rows),
+      buildCsv(chosen, rows || []),
       `${filenameBase}-${suffix}-${date}.csv`,
     );
     onClose();
@@ -191,7 +223,12 @@ export default function ExportFieldsModal({
             <ModalBody className='gap-5'>
               <div>
                 <p className='mb-2 text-sm font-semibold'>Rows</p>
-                <RadioGroup value={scope} onValueChange={setScope} size='sm'>
+                <RadioGroup
+                  value={scope}
+                  onValueChange={setScope}
+                  size='sm'
+                  isDisabled={busy}
+                >
                   <Radio
                     value='filtered'
                     description={
@@ -200,13 +237,13 @@ export default function ExportFieldsModal({
                         : 'No filters set, so this is everyone'
                     }
                   >
-                    Current view ({filteredRows.length})
+                    Current view ({nFiltered.toLocaleString()})
                   </Radio>
                   <Radio
                     value='all'
                     description='Ignores search and every filter'
                   >
-                    All ({allRows.length})
+                    All ({nAll.toLocaleString()})
                   </Radio>
                 </RadioGroup>
               </div>
@@ -286,20 +323,28 @@ export default function ExportFieldsModal({
                   })}
                 </div>
               </div>
+              {error && (
+                <p className='rounded-lg bg-red-50 p-3 text-sm text-red-700'>
+                  {error}
+                </p>
+              )}
             </ModalBody>
             <ModalFooter>
-              <Button variant='light' onPress={onClose}>
+              <Button variant='light' onPress={onClose} isDisabled={busy}>
                 Cancel
               </Button>
               <Button
                 color='primary'
                 startContent={<Download size={16} />}
                 isDisabled={!canExport}
+                isLoading={busy}
                 onPress={() => doExport(onClose)}
               >
-                {rows.length === 0
-                  ? 'No rows to export'
-                  : `Export ${rows.length} row${rows.length !== 1 ? 's' : ''}`}
+                {busy
+                  ? `Fetching ${progress.loaded.toLocaleString()} of ${progress.total.toLocaleString()}…`
+                  : rowCount === 0
+                    ? 'No rows to export'
+                    : `Export ${rowCount.toLocaleString()} row${rowCount !== 1 ? 's' : ''}`}
               </Button>
             </ModalFooter>
           </>
