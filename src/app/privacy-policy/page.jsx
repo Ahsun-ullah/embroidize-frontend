@@ -50,7 +50,7 @@ export default function PrivacyPolicyPage() {
     },
     {
       title: '6. Analytics & Usage Tracking',
-      content: `We may collect analytics data such as page views, clicks, downloads, and session behavior to improve our platform.\n\nThis data may be aggregated and anonymized.`,
+      content: `We may collect analytics data such as page views, clicks, downloads, and session behavior to improve our platform.\n\nWhen you are signed in, we link some of this activity to your account, including:\n\n- Designs you view and download\n- Visits to our pricing and subscription pages, and the plans you click\n- Checkouts you start and complete\n- Searches you run\n- Times you reach a download limit\n- How you first found our website (for example a search engine, social media site, advertisement, or email link)\n\nWe use this to improve the site, understand which designs and pages are useful, and, where you allow it, send you offers that match your interests. Activity records linked to your account are deleted automatically after 180 days. Download and purchase records are kept as described under Data Retention.\n\nOther analytics data may be aggregated and anonymized.`,
     },
     {
       title: '7. Anti-Fraud & Abuse Detection',
@@ -58,11 +58,11 @@ export default function PrivacyPolicyPage() {
     },
     {
       title: '8. Data Retention',
-      content: `We retain your data only as long as necessary to:\n\n- Provide services\n- Maintain legal and financial records\n- Resolve disputes\n- Enforce agreements`,
+      content: `We retain your data only as long as necessary to:\n\n- Provide services\n- Maintain legal and financial records\n- Resolve disputes\n- Enforce agreements\n\nActivity records linked to your account (such as design and page views) are deleted automatically after 180 days.`,
     },
     {
       title: '9. Data Sharing',
-      content: `We do not sell your personal data.\n\nWe may share information with trusted third parties including:\n\n- Secure payment processors\n- Analytics providers\n- Hosting and infrastructure services\n- Advertising partners such as Meta (Facebook and Instagram), which receive hashed contact details, such as your email address, to measure how our ads perform\n\nThese parties are required to protect your data.`,
+      content: `We do not sell your personal data.\n\nWe may share information with trusted third parties including:\n\n- Secure payment processors\n- Analytics providers\n- Hosting and infrastructure services\n- Our email providers (Zoho), to send account emails and, if you allow it, marketing emails\n- Advertising partners such as Meta (Facebook and Instagram), which receive hashed contact details, such as your email address, to measure how our ads perform\n\nThese parties are required to protect your data.`,
     },
     {
       title: '10. Social Media & Marketing Platform Integrations',
@@ -78,7 +78,7 @@ export default function PrivacyPolicyPage() {
     },
     {
       title: '13. Marketing Communications',
-      content: `We may send promotional emails. You can unsubscribe at any time by contacting us or using the unsubscribe link.`,
+      content: `We send promotional emails only where you allow it. You can say yes when you create your account, and change it at any time with the "Design offers by email" switch on your account page.\n\nIf you are in the European Union, the European Economic Area, the United Kingdom, or Switzerland, we send you promotional emails only after you have opted in.\n\nIf you start a subscription checkout and don't complete it, and you allow promotional emails, we may send you one reminder email. We send at most one such reminder every 14 days.\n\nEvery promotional email includes an unsubscribe link. You can also unsubscribe by contacting us. Unsubscribing does not affect emails about your account, orders, or payments.`,
     },
     {
       title: '14. Children’s Privacy',
