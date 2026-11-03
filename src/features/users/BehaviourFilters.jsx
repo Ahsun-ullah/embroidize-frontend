@@ -19,7 +19,42 @@ export const BEHAVIOUR_NUMBER_KEYS = [
   'daysMax',
   'freeMin',
   'inactiveDays',
+  'viewsMin',
+  'pricingMin',
+  'limitHitsMin',
+  'premiumMin',
+  'notSeenDays',
 ];
+
+export const CHECKOUT_OPTIONS = [
+  ['', 'Any'],
+  ['abandoned', 'Started, did not pay'],
+  ['started', 'Started a checkout'],
+  ['completed', 'Paid'],
+  ['none', 'No checkout started'],
+];
+
+export const CHECKOUT_LABELS = {
+  abandoned: 'Abandoned',
+  completed: 'Paid',
+  none: '',
+};
+
+export const MARKETING_OPTIONS = [
+  ['', 'Any'],
+  ['emailable', 'Can receive offers'],
+  ['opted_in', 'Opted in'],
+  ['not_asked', 'Never asked'],
+  ['opted_out', 'Opted out'],
+  ['unsubscribed', 'Unsubscribed'],
+];
+
+export const MARKETING_LABELS = {
+  opted_in: 'Opted in',
+  not_asked: 'Never asked',
+  opted_out: 'Opted out',
+  unsubscribed: 'Unsubscribed',
+};
 
 export const EVER_DOWNLOADED_OPTIONS = [
   ['', 'Any'],
@@ -58,6 +93,11 @@ export const BEHAVIOUR_PRESETS = [
   { key: 'never', label: 'Never downloaded', hint: 'Signed up, 0 downloads', values: { everDownloaded: 'no' } },
   { key: 'freeonly', label: 'Free-only downloaders', hint: 'Free users with free downloads in 30 days', values: { plan: 'free', window: '30', freeMin: '1' } },
   { key: 'likely', label: 'Likely subscribers', hint: 'Free users, 3+ download days in 30 days', values: { plan: 'free', window: '30', daysMin: '3' } },
+  { key: 'pricing', label: 'Pricing visitors', hint: 'Visited pricing in 30 days, no checkout', values: { plan: 'free', window: '30', pricingMin: '1', checkout: 'none' } },
+  { key: 'abandoned', label: 'Checkout abandoners', hint: 'Started a checkout in 30 days and did not pay', values: { window: '30', checkout: 'abandoned' } },
+  { key: 'limit', label: 'Hit free limit', hint: 'Free users refused by the daily limit 2+ times in 30 days', values: { plan: 'free', window: '30', limitHitsMin: '2' } },
+  { key: 'premium', label: 'Want premium', hint: 'Free users who tried a premium design in 30 days', values: { plan: 'free', window: '30', premiumMin: '1' } },
+  { key: 'browsers', label: 'Browse, no download', hint: '5+ design views and 0 downloads in 30 days', values: { window: '30', viewsMin: '5', winMax: '0' } },
   { key: 'lapsed', label: 'Lapsed subscribers', hint: 'Subscription ended, not renewed', values: { subState: 'lapsed' } },
   { key: 'cancelling', label: 'Cancelling', hint: 'Turned off auto-renew', values: { subState: 'cancelling' } },
   { key: 'failed', label: 'Payment failed', hint: 'Renewal payment failing', values: { subState: 'payment_failed' } },
@@ -224,10 +264,57 @@ export default function BehaviourFilters({ filters, drafts, setDraft, pushFilter
         />
       </div>
 
+      <div className='grid grid-cols-2 gap-3 sm:grid-cols-4 lg:grid-cols-9'>
+        <NumberField
+          label='Design views min'
+          placeholder='Any'
+          value={drafts.viewsMin}
+          onChange={(v) => setDraft('viewsMin', v)}
+        />
+        <NumberField
+          label='Pricing visits min'
+          placeholder='Any'
+          value={drafts.pricingMin}
+          onChange={(v) => setDraft('pricingMin', v)}
+        />
+        <NumberField
+          label='Limit hits min'
+          placeholder='Any'
+          value={drafts.limitHitsMin}
+          onChange={(v) => setDraft('limitHitsMin', v)}
+        />
+        <NumberField
+          label='Premium tries min'
+          placeholder='Any'
+          value={drafts.premiumMin}
+          onChange={(v) => setDraft('premiumMin', v)}
+        />
+        <Select
+          label='Checkout'
+          value={filters.checkout}
+          options={CHECKOUT_OPTIONS}
+          onChange={(v) => pushFilters({ checkout: v })}
+        />
+        <NumberField
+          label='Not on site for (days)'
+          placeholder='Off'
+          value={drafts.notSeenDays}
+          onChange={(v) => setDraft('notSeenDays', v)}
+        />
+        <Select
+          label='Offer emails'
+          value={filters.marketing}
+          options={MARKETING_OPTIONS}
+          onChange={(v) => pushFilters({ marketing: v })}
+        />
+      </div>
+
       <span className='text-xs text-gray-500'>
         Downloads, download days and free downloads count the last{' '}
         {windowLabel}. A download day is a calendar day (UTC) with at least one
-        download. Staff downloads are never counted.
+        download. Staff downloads are never counted. Views, pricing visits,
+        checkouts and limit hits are tracked from the day this went live, for
+        signed-in users, and kept for 180 days.
       </span>
     </div>
   );

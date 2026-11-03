@@ -14,6 +14,14 @@ export const BEHAVIOUR_FILTER_KEYS = [
   'inactiveDays', // downloaded before, nothing in the last N days
   'everDownloaded', // yes | no
   'subState', // active | cancelling | payment_failed | lapsed | never
+  // Tracked behaviour (same window, capped at the 180 days events are kept)
+  'viewsMin', // design page views
+  'pricingMin', // pricing page visits
+  'limitHitsMin', // downloads refused by a limit
+  'premiumMin', // premium designs refused to a free user
+  'checkout', // started | abandoned | completed | none
+  'notSeenDays', // not on the site for N days
+  'marketing', // emailable | opted_in | opted_out | not_asked | unsubscribed
 ];
 
 export const USER_FILTER_KEYS = [

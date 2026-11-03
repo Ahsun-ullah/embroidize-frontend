@@ -54,6 +54,9 @@ const RegisterContent = () => {
       email: formData.get('email')?.toString().trim().toLowerCase() || '',
       password: formData.get('password')?.toString() || '',
       fingerprint,
+      // Unticked by default: offer emails need an active yes. Stored with the
+      // date on the account (backend registerUser).
+      marketingOptIn: formData.get('marketingOptIn') === 'on',
     };
 
     // Validate data before proceeding
@@ -238,6 +241,19 @@ const RegisterContent = () => {
                   autoComplete='new-password'
                 />
               </div>
+
+              <label className='flex items-start gap-2 text-sm text-gray-700'>
+                <input
+                  type='checkbox'
+                  name='marketingOptIn'
+                  className='mt-1 h-4 w-4 accent-black'
+                  disabled={otpGenerateIsLoading}
+                />
+                <span>
+                  Email me new designs and member offers. You can unsubscribe
+                  anytime.
+                </span>
+              </label>
 
               <p className='text-sm text-gray-500 my-0'>
                 By registering, you agree to our{' '}

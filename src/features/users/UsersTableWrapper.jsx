@@ -3,8 +3,14 @@ import { ErrorToast } from '@/components/Common/ErrorToast';
 import { SuccessToast } from '@/components/Common/SuccessToast';
 import UserTable from '@/components/Common/Table';
 import ExportFieldsModal from '@/features/admin/ExportFieldsModal';
+import UserTimelineModal from '@/features/users/UserTimelineModal';
+import ZohoPushModal from '@/features/users/ZohoPushModal';
 import BehaviourFilters, {
   BEHAVIOUR_NUMBER_KEYS,
+  CHECKOUT_LABELS,
+  CHECKOUT_OPTIONS,
+  MARKETING_LABELS,
+  MARKETING_OPTIONS,
   EVER_DOWNLOADED_OPTIONS,
   SUB_STATE_LABELS,
   SUB_STATE_OPTIONS,
@@ -31,7 +37,7 @@ import {
   User,
   useDisclosure,
 } from '@heroui/react';
-import { Download, Search, X } from 'lucide-react';
+import { Download, Search, Send, X } from 'lucide-react';
 import AddCreditsModal from '@/features/admin/AddCreditsModal';
 import GrantAccessModal from '@/features/admin/GrantAccessModal';
 import Cookies from 'js-cookie';
@@ -155,6 +161,18 @@ const USER_EXPORT_FIELDS = [
   { key: 'windowDownloadDays', label: 'Download days in window', group: 'Behaviour', default: true, get: (u) => u.activity?.downloadDays ?? 0 },
   { key: 'windowFree', label: 'Free downloads in window', group: 'Behaviour', get: (u) => u.activity?.freeDownloads ?? 0 },
   { key: 'subState', label: 'Subscription state', group: 'Behaviour', default: true, get: (u) => SUB_STATE_LABELS[u.subscriptionState] || '' },
+  { key: 'designViews', label: 'Design views in window', group: 'Behaviour', get: (u) => u.activity?.designViews ?? 0 },
+  { key: 'pricingViews', label: 'Pricing visits in window', group: 'Behaviour', get: (u) => u.activity?.pricingViews ?? 0 },
+  { key: 'checkoutState', label: 'Checkout in window', group: 'Behaviour', get: (u) => CHECKOUT_LABELS[u.activity?.checkoutState] ?? '' },
+  { key: 'lastCheckoutStart', label: 'Last checkout started', group: 'Behaviour', get: (u) => isoDay(u.activity?.lastCheckoutStart) },
+  { key: 'limitHits', label: 'Limit hits in window', group: 'Behaviour', get: (u) => u.activity?.limitHits ?? 0 },
+  { key: 'premiumBlocked', label: 'Premium tries in window', group: 'Behaviour', get: (u) => u.activity?.premiumBlocked ?? 0 },
+  { key: 'lastSeen', label: 'Last seen', group: 'Behaviour', get: (u) => isoDay(u.lastSeenAt) },
+  { key: 'lastLogin', label: 'Last sign-in', group: 'Behaviour', get: (u) => isoDay(u.lastLoginAt) },
+
+  // Email
+  { key: 'marketingState', label: 'Offer emails', group: 'Email', get: (u) => MARKETING_LABELS[u.marketingState] || '' },
+  { key: 'marketingEmailable', label: 'Can receive offers', group: 'Email', get: (u) => !!u.marketingEmailable },
 ];
 
 const EXPORT_PAGE_SIZE = 500;
@@ -317,6 +335,12 @@ export default function UsersTableWrapper({
   };
 
   const [blockConfirm, setBlockConfirm] = useState(null);
+  const [timelineUser, setTimelineUser] = useState(null);
+  const {
+    isOpen: isZohoOpen,
+    onOpen: onZohoOpen,
+    onClose: onZohoClose,
+  } = useDisclosure();
   const [isBlocking, setIsBlocking] = useState(false);
 
   // ── Manual "Grant / Extend Access" ────────────────────────────────────────
@@ -488,6 +512,22 @@ export default function UsersTableWrapper({
             <span className='text-gray-400'>
               Last: {user.lastDownloadAt ? isoDay(user.lastDownloadAt) : 'never'}
             </span>
+            {(a.designViews > 0 || a.pricingViews > 0) && (
+              <span className='text-gray-500'>
+                {a.designViews ?? 0} views · {a.pricingViews ?? 0} pricing
+              </span>
+            )}
+            {(a.checkoutState === 'abandoned' || a.limitHits > 0 || a.premiumBlocked > 0) && (
+              <span className='font-semibold text-amber-700'>
+                {[
+                  a.checkoutState === 'abandoned' ? 'Abandoned checkout' : '',
+                  a.limitHits > 0 ? `${a.limitHits} limit hits` : '',
+                  a.premiumBlocked > 0 ? `${a.premiumBlocked} premium tries` : '',
+                ]
+                  .filter(Boolean)
+                  .join(' · ')}
+              </span>
+            )}
           </div>
         );
       }
@@ -524,6 +564,12 @@ export default function UsersTableWrapper({
                   onPress={() => handleOpenModal(user)}
                 >
                   More Info
+                </DropdownItem>
+                <DropdownItem
+                  key='timeline'
+                  onPress={() => setTimelineUser(user)}
+                >
+                  Activity timeline
                 </DropdownItem>
                 {/* Manual payments: convert any user into a subscriber. Lives
                     here as well as on the Subscribers page because a first-time
@@ -605,6 +651,13 @@ export default function UsersTableWrapper({
       parts.push(labelOf(EVER_DOWNLOADED_OPTIONS, f.everDownloaded));
     if (f.subState)
       parts.push(`Subscription: ${labelOf(SUB_STATE_OPTIONS, f.subState)}`);
+    if (f.viewsMin) parts.push(`≥ ${f.viewsMin} design views ${win}`);
+    if (f.pricingMin) parts.push(`≥ ${f.pricingMin} pricing visits ${win}`);
+    if (f.limitHitsMin) parts.push(`≥ ${f.limitHitsMin} limit hits ${win}`);
+    if (f.premiumMin) parts.push(`≥ ${f.premiumMin} premium tries ${win}`);
+    if (f.checkout) parts.push(`Checkout: ${labelOf(CHECKOUT_OPTIONS, f.checkout)}`);
+    if (f.notSeenDays) parts.push(`Not on site for ${f.notSeenDays} days`);
+    if (f.marketing) parts.push(`Offer emails: ${labelOf(MARKETING_OPTIONS, f.marketing)}`);
     return parts;
   }, [filters, planOptions]);
 
@@ -699,6 +752,14 @@ export default function UsersTableWrapper({
             onPress={onExportOpen}
           >
             Export
+          </Button>
+          <Button
+            size='sm'
+            variant='flat'
+            startContent={<Send size={14} />}
+            onPress={onZohoOpen}
+          >
+            Send to Zoho
           </Button>
         </div>
       </div>
@@ -857,6 +918,21 @@ export default function UsersTableWrapper({
         filenameBase='users'
         storageKey='embroidize.usersExport.fields'
       />
+
+      <ZohoPushModal
+        isOpen={isZohoOpen}
+        onClose={onZohoClose}
+        matchCount={pagination?.total ?? 0}
+        filterSummary={filterSummary}
+        loadRows={(onProgress) => loadExportRows('filtered', onProgress)}
+      />
+
+      {timelineUser && (
+        <UserTimelineModal
+          user={timelineUser}
+          onClose={() => setTimelineUser(null)}
+        />
+      )}
 
       {creditUser && (
         <AddCreditsModal

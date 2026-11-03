@@ -29,7 +29,7 @@ export default function PurchaseButton({
     try {
       setIsLoading(true);
       setError(null);
-      await startSubscriptionCheckout(plan, pathName);
+      await startSubscriptionCheckout(plan, pathName, 'pricing');
       leaving = true;
     } catch (err) {
       setError(

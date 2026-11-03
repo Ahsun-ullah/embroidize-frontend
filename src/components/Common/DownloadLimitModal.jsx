@@ -205,6 +205,7 @@ function DownloadLimitModal({ limitModalData = {}, product, onClose }) {
           {isFree ? (
             <UpgradePlanPicker
               plans={plans}
+              source='limit_popup'
               ctaLabel={
                 isExpired
                   ? 'Renew and download this design'
