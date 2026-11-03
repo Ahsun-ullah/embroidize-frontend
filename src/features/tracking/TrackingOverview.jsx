@@ -2,6 +2,7 @@
 import { Button, Spinner } from '@heroui/react';
 import Cookies from 'js-cookie';
 import Link from 'next/link';
+import TrackingSettings from './TrackingSettings';
 import { useEffect, useState } from 'react';
 
 const RANGES = [7, 30, 90, 180];
@@ -31,6 +32,7 @@ function Stat({ label, value, hint, href }) {
 export default function TrackingOverview() {
   const [days, setDays] = useState(30);
   const [state, setState] = useState({ loading: true, error: '', data: null });
+  const [reload, setReload] = useState(0);
 
   useEffect(() => {
     let cancelled = false;
@@ -53,7 +55,7 @@ export default function TrackingOverview() {
     return () => {
       cancelled = true;
     };
-  }, [days]);
+  }, [days, reload]);
 
   const d = state.data;
   const funnel = d?.funnel || [];
@@ -84,6 +86,8 @@ export default function TrackingOverview() {
           ))}
         </div>
       </div>
+
+      <TrackingSettings onBackfillDone={() => setReload((n) => n + 1)} />
 
       {state.loading && !d && (
         <div className='flex justify-center py-10'>

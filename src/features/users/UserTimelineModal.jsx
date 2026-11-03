@@ -130,7 +130,15 @@ export default function UserTimelineModal({ user, onClose }) {
                 )}
                 {it.plan && <span className='text-gray-900'>{it.plan.name}</span>}
                 {it.value && <span className='text-xs text-gray-500'>{it.value}</span>}
-                {it.source && <span className='text-xs text-gray-400'>from {it.source}</span>}
+                {it.source === 'backfill' && (
+                  <span className='text-xs text-gray-400'>imported from past records</span>
+                )}
+                {it.source === 'backfill_est' && (
+                  <span className='text-xs text-gray-400'>estimated from past records</span>
+                )}
+                {it.source && !String(it.source).startsWith('backfill') && (
+                  <span className='text-xs text-gray-400'>from {it.source}</span>
+                )}
               </li>
             ))}
           </ol>
