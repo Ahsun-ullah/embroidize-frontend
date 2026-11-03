@@ -15,6 +15,8 @@ export default async function AllUsersListPage({ searchParams }) {
     { name: 'EMAIL', uid: 'email' },
     { name: 'PLAN', uid: 'plan' },
     { name: 'DOWNLOAD', uid: 'downloadCount' },
+    { name: `LAST ${Math.min(Number(filters.window) || 30, 730)} DAYS`, uid: 'activity' },
+    { name: 'SUBSCRIPTION', uid: 'subscriptionState' },
     { name: 'SIGNUP VIA', uid: 'provider' },
     { name: 'Registration Date', uid: 'createdAt' },
     { name: 'ACTIONS', uid: 'actions' },

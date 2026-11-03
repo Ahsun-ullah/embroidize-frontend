@@ -3,6 +3,14 @@ import { ErrorToast } from '@/components/Common/ErrorToast';
 import { SuccessToast } from '@/components/Common/SuccessToast';
 import UserTable from '@/components/Common/Table';
 import ExportFieldsModal from '@/features/admin/ExportFieldsModal';
+import BehaviourFilters, {
+  BEHAVIOUR_NUMBER_KEYS,
+  EVER_DOWNLOADED_OPTIONS,
+  SUB_STATE_LABELS,
+  SUB_STATE_OPTIONS,
+  matchingPreset,
+} from '@/features/users/BehaviourFilters';
+import SavedSegmentsMenu from '@/features/users/SavedSegmentsMenu';
 import {
   readUserFilters,
   userFiltersToQuery,
@@ -69,7 +77,13 @@ const labelOf = (options, value) =>
   options.find(([v]) => v === (value || ''))?.[1] || 'All';
 
 // Text inputs wait for a pause in typing before they reload the page.
-const TEXT_FILTERS = ['search', 'country', 'minDownloads', 'maxDownloads'];
+const TEXT_FILTERS = [
+  'search',
+  'country',
+  'minDownloads',
+  'maxDownloads',
+  ...BEHAVIOUR_NUMBER_KEYS,
+];
 
 // ─── Export fields ────────────────────────────────────────────────────────────
 
@@ -134,6 +148,13 @@ const USER_EXPORT_FIELDS = [
   { key: 'credits', label: 'Download credits', group: 'Usage', get: (u) => u.downloadCredits ?? 0 },
   { key: 'creditsExpire', label: 'Credits expire', group: 'Usage', get: (u) => isoDay(u.creditsExpireAt) },
   { key: 'creditsEver', label: 'Ever bought credits', group: 'Usage', get: (u) => !!u.creditsEverGranted },
+
+  // Behaviour: counted over the window chosen in the filters (default 30 days)
+  { key: 'windowDays', label: 'Window (days)', group: 'Behaviour', get: (u) => u.activity?.windowDays },
+  { key: 'windowDownloads', label: 'Downloads in window', group: 'Behaviour', default: true, get: (u) => u.activity?.downloads ?? 0 },
+  { key: 'windowDownloadDays', label: 'Download days in window', group: 'Behaviour', default: true, get: (u) => u.activity?.downloadDays ?? 0 },
+  { key: 'windowFree', label: 'Free downloads in window', group: 'Behaviour', get: (u) => u.activity?.freeDownloads ?? 0 },
+  { key: 'subState', label: 'Subscription state', group: 'Behaviour', default: true, get: (u) => SUB_STATE_LABELS[u.subscriptionState] || '' },
 ];
 
 const EXPORT_PAGE_SIZE = 500;
@@ -273,7 +294,9 @@ export default function UsersTableWrapper({
     Object.keys(filters).forEach((k) => {
       if (k !== 'blocked') changes[k] = '';
     });
-    setDrafts({ search: '', country: '', minDownloads: '', maxDownloads: '' });
+    const emptyDrafts = {};
+    TEXT_FILTERS.forEach((k) => (emptyDrafts[k] = ''));
+    setDrafts(emptyDrafts);
     pushFilters(changes);
   };
 
@@ -452,6 +475,38 @@ export default function UsersTableWrapper({
           </span>
         );
       }
+      case 'activity': {
+        const a = user.activity || {};
+        return (
+          <div className='flex flex-col text-xs'>
+            <span className='font-semibold text-gray-900'>
+              {a.downloads ?? 0} download{a.downloads === 1 ? '' : 's'}
+            </span>
+            <span className='text-gray-500'>
+              {a.downloadDays ?? 0} day{a.downloadDays === 1 ? '' : 's'} · {a.freeDownloads ?? 0} free
+            </span>
+            <span className='text-gray-400'>
+              Last: {user.lastDownloadAt ? isoDay(user.lastDownloadAt) : 'never'}
+            </span>
+          </div>
+        );
+      }
+      case 'subscriptionState': {
+        const st = user.subscriptionState;
+        const tone =
+          st === 'active'
+            ? 'bg-green-100 text-green-800'
+            : st === 'cancelling' || st === 'payment_failed'
+              ? 'bg-amber-100 text-amber-800'
+              : st === 'lapsed'
+                ? 'bg-red-100 text-red-700'
+                : 'bg-gray-100 text-gray-600';
+        return (
+          <span className={`rounded-full px-2 py-0.5 text-xs font-semibold ${tone}`}>
+            {SUB_STATE_LABELS[st] || '—'}
+          </span>
+        );
+      }
       case 'id':
         return <span>{user._id}</span>;
       case 'actions':
@@ -537,8 +592,39 @@ export default function UsersTableWrapper({
     if (f.maxDownloads) parts.push(`≤ ${f.maxDownloads} downloads`);
     if (f.startDate || f.endDate)
       parts.push(`Joined ${f.startDate || '…'} to ${f.endDate || '…'}`);
+    const preset = matchingPreset(f);
+    if (preset) parts.push(`Preset: ${preset.label}`);
+    const win = `in ${f.window || 30} days`;
+    if (f.winMin) parts.push(`≥ ${f.winMin} downloads ${win}`);
+    if (f.winMax) parts.push(`≤ ${f.winMax} downloads ${win}`);
+    if (f.daysMin) parts.push(`≥ ${f.daysMin} download days ${win}`);
+    if (f.daysMax) parts.push(`≤ ${f.daysMax} download days ${win}`);
+    if (f.freeMin) parts.push(`≥ ${f.freeMin} free downloads ${win}`);
+    if (f.inactiveDays) parts.push(`No download for ${f.inactiveDays} days`);
+    if (f.everDownloaded)
+      parts.push(labelOf(EVER_DOWNLOADED_OPTIONS, f.everDownloaded));
+    if (f.subState)
+      parts.push(`Subscription: ${labelOf(SUB_STATE_OPTIONS, f.subState)}`);
     return parts;
   }, [filters, planOptions]);
+
+  // The filters as a query string (what a saved segment stores). Blocked view
+  // is a tab, not a filter, so it stays out.
+  const segmentQuery = useMemo(() => {
+    const rest = { ...filters };
+    delete rest.blocked;
+    return userFiltersToQuery(rest).toString();
+  }, [filters]);
+
+  const openSegment = useCallback(
+    (query) => {
+      const params = new URLSearchParams(query);
+      if (blockedView) params.set('blocked', '1');
+      params.set('page', '1');
+      router.push(`?${params.toString()}`);
+    },
+    [router, blockedView],
+  );
 
   const hasNarrowingFilter = Object.keys(filters).some(
     (k) => k !== 'sort' && k !== 'blocked',
@@ -589,7 +675,12 @@ export default function UsersTableWrapper({
             Blocked Users
           </Button>
         </div>
-        <div className='flex gap-2'>
+        <div className='flex flex-wrap gap-2'>
+          <SavedSegmentsMenu
+            page='users'
+            currentQuery={segmentQuery}
+            onOpen={openSegment}
+          />
           {hasNarrowingFilter && (
             <Button
               size='sm'
@@ -723,6 +814,13 @@ export default function UsersTableWrapper({
           onChange={(e) => handleFilterChange('endDate', e.target.value)}
         />
       </div>
+
+      <BehaviourFilters
+        filters={filters}
+        drafts={drafts}
+        setDraft={setDraft}
+        pushFilters={pushFilters}
+      />
     </div>
   );
 
