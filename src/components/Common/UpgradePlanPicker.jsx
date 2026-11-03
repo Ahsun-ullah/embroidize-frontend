@@ -160,7 +160,7 @@ export default function UpgradePlanPicker({
                 <span className='shrink-0 text-right'>
                   <span
                     className={`block text-xl font-extrabold tabular-nums ${
-                      isSelected ? 'text-[#6d28d9]' : 'text-slate-900'
+                      isSelected ? 'text-pink-600' : 'text-slate-900'
                     }`}
                   >
                     {money(pricing.headlinePrice)}
