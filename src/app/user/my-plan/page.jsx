@@ -1,5 +1,10 @@
 'use client';
+import UpgradePlanPicker, {
+  planDailyLimit,
+  upgradePlans,
+} from '@/components/Common/UpgradePlanPicker';
 import { useDownloadReset } from '@/lib/hooks/useDownloadReset';
+import { formatDesignCount, useUpgradeOffer } from '@/lib/hooks/useUpgradeOffer';
 import { useUserInfoQuery } from '@/lib/redux/common/user/userInfoSlice';
 import {
   formatCountdown,
@@ -10,18 +15,17 @@ import {
 import { Divider } from '@heroui/divider';
 import { Button } from '@heroui/react';
 import Cookies from 'js-cookie';
-import { Crown, Download } from 'lucide-react';
+import { Crown } from 'lucide-react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { useEffect, useState } from 'react';
 
-export default function MyPlanPage({ onClose }) {
+export default function MyPlanPage() {
   const { data: userInfoData, isLoading: userLoading } = useUserInfoQuery();
   const [isRedirecting, setIsRedirecting] = useState(false);
   const [error, setError] = useState(null);
   const router = useRouter();
   const [isUpgrading, setIsUpgrading] = useState(false);
-  const { currentPlanName } = useDownloadReset({ tickMs: 60_000 });
 
   const subscription = userInfoData?.subscription ?? null;
 
@@ -70,7 +74,15 @@ export default function MyPlanPage({ onClose }) {
     isLimitReached,
     isReady,
     msLeft: timeLeft,
+    nextResetTime,
   } = useDownloadReset();
+
+  // Free-tier reset moment as "tomorrow at 6:30 PM" (only once mounted — it is
+  // locale-formatted, so the server and first client paint would disagree).
+  const freeResetLabel = (() => {
+    const label = timeLeft > 0 ? formatResetTime(nextResetTime) : '';
+    return label ? label.charAt(0).toLowerCase() + label.slice(1) : '';
+  })();
 
   const nextDailyReset = new Date();
   nextDailyReset.setUTCHours(24, 0, 0, 0);
@@ -113,26 +125,12 @@ export default function MyPlanPage({ onClose }) {
     router.push('/subscriptions');
   };
 
-  const [tiers, setTiers] = useState([]);
-  useEffect(() => {
-    let active = true;
-    (async () => {
-      try {
-        const res = await fetch(
-          `${process.env.NEXT_PUBLIC_BASE_API_URL_PROD}/public/subscriptions`,
-        );
-        if (!res.ok) return;
-        const data = await res.json();
-        const plans = data?.data?.plans ?? [];
-        if (active) setTiers(plans);
-      } catch {
-        // Non-critical — the modal still works without the upgrade grid.
-      }
-    })();
-    return () => {
-      active = false;
-    };
-  }, []);
+  const { plans, totalDesigns } = useUpgradeOffer();
+  const designCount = formatDesignCount(totalDesigns);
+  const maxDaily = upgradePlans(plans)
+    .map(planDailyLimit)
+    .filter((n) => n != null)
+    .reduce((max, n) => Math.max(max, n), 0);
 
   // Per-month download history (aggregated from the download log — gateway
   // agnostic, so it works the same for Stripe and Creem subscribers).
@@ -305,150 +303,67 @@ export default function MyPlanPage({ onClose }) {
               />
             </div>
 
-            {/* 🔥 VISUAL COUNTDOWN BLOCK */}
-            <div
-              className={`rounded-2xl p-5 text-center border ${
-                isLimitReached
-                  ? 'bg-gradient-to-br from-red-50 to-white border-red-200'
-                  : 'bg-gradient-to-br from-green-50 to-white border-green-200'
-              }`}
-            >
-              {isLimitReached ? (
-                <>
-                  <div className='text-red-500 text-sm font-semibold mb-1'>
-                    Download Locked
-                  </div>
-
-                  {/* BIG COUNTDOWN */}
-                  <div className='text-3xl font-extrabold text-red-600 tracking-wide animate-pulse'>
-                    {formatCountdown(timeLeft)}
-                  </div>
-
-                  <p className='text-xs text-slate-500 mt-1'>
-                    Next download available in
+            {/* ── Status ── */}
+            {isLimitReached ? (
+              <div className='flex items-center justify-between gap-3 rounded-2xl border border-red-100 bg-red-50 px-4 py-3'>
+                <div>
+                  <p className='text-sm font-semibold text-red-600'>
+                    Download locked
                   </p>
-
-                  {/* Glow ring effect */}
-                  <div className='mt-4 flex justify-center'>
-                    <div className='w-20 h-20 rounded-full border-4 border-red-200 flex items-center justify-center shadow-inner animate-pulse'>
-                      ⏳
-                    </div>
-                  </div>
-                </>
-              ) : (
-                <>
-                  <div className='text-green-600 text-sm font-semibold mb-1'>
-                    Ready to Download 🎉
-                  </div>
-
-                  <div className='text-lg font-bold text-green-700'>
-                    No waiting — go ahead!
-                  </div>
-                </>
-              )}
-            </div>
-
-            {/* CTA */}
-            {remaining === 0 && (
-              <div className='text-center space-y-3'>
-                <p className='text-lg text-red-500 font-medium'>
-                  Skip the wait and download instantly 🚀
+                  <p className='text-xs text-slate-500'>
+                    {isReady && freeResetLabel
+                      ? `Next free download ${freeResetLabel}`
+                      : 'Next free download available in'}
+                  </p>
+                </div>
+                <p className='text-xl font-extrabold tabular-nums text-red-600'>
+                  {formatCountdown(timeLeft)}
                 </p>
+              </div>
+            ) : (
+              <div className='rounded-2xl border border-green-100 bg-green-50 px-4 py-3 text-sm font-semibold text-green-700'>
+                Ready to download, you have {remaining} free download
+                {remaining === 1 ? '' : 's'} left
               </div>
             )}
 
-            {/* ── Upgrade tiers ── */}
-            <div>
-              <div className='grid grid-cols-3 gap-2.5'>
-                {tiers.length > 0 &&
-                  tiers.map((tier) => {
-                    const isCurrent =
-                      currentPlanName?.toLowerCase() ===
-                      tier.name.toLowerCase();
-                    return (
-                      <button
-                        key={tier.name}
-                        onClick={() => {
-                          onClose?.();
-                          router.push('/subscriptions');
-                        }}
-                        aria-label={`Upgrade to ${tier.name}, ${tier.dailyLimit} downloads per day`}
-                        className={`group relative flex items-center gap-2.5 rounded-2xl border p-3 text-left transition-all duration-200 hover:-translate-y-0.5 hover:shadow-md focus:outline-none focus-visible:ring-2 focus-visible:ring-green-500 ${
-                          isCurrent
-                            ? 'border-green-600 bg-green-600 text-white'
-                            : 'border-green-100 bg-green-50 hover:border-green-400 dark:border-green-500/20 dark:bg-green-500/10 dark:hover:border-green-400'
-                        }`}
-                      >
-                        <span
-                          className={`flex h-9 w-9 shrink-0 items-center justify-center rounded-lg ${
-                            isCurrent
-                              ? 'bg-white/20 text-white'
-                              : 'bg-green-100 text-green-600 dark:bg-green-500/20 dark:text-green-400'
-                          }`}
-                        >
-                          <Download className='h-5 w-5' aria-hidden />
-                        </span>
-                        <span className='flex flex-col leading-tight'>
-                          <span
-                            className={`text-base font-extrabold tabular-nums ${
-                              isCurrent
-                                ? 'text-white'
-                                : 'text-green-700 dark:text-green-400'
-                            }`}
-                          >
-                            {tier.dailyLimit}
-                            <span className='ml-0.5 text-[11px] font-medium'>
-                              / day
-                            </span>
-                          </span>
-                          <span
-                            className={`text-xs font-semibold ${
-                              isCurrent
-                                ? 'text-white/90'
-                                : 'text-green-800 dark:text-green-300'
-                            }`}
-                          >
-                            {tier.name}
-                            {isCurrent && (
-                              <span className='ml-1 text-[9px] font-semibold uppercase opacity-80'>
-                                · Current
-                              </span>
-                            )}
-                          </span>
-                        </span>
-                      </button>
-                    );
-                  })}
+            {/* ── Upgrade: live plans, straight to checkout ── */}
+            <div className='mx-auto max-w-xl rounded-2xl border border-slate-100 bg-slate-50/50 p-5'>
+              <div className='mb-4 text-center'>
+                <h3 className='text-xl font-extrabold leading-tight text-slate-900'>
+                  {isLimitReached
+                    ? 'Skip the wait and download now'
+                    : 'Download more with Pro'}
+                </h3>
+                <p className='mx-auto mt-1.5 max-w-md text-sm text-slate-500'>
+                  {maxDaily > 0
+                    ? `Pro members download up to ${maxDaily} designs a day`
+                    : 'Pro members get more downloads every day'}
+                  {designCount ? ` from ${designCount} designs` : ''}, in every
+                  machine format.
+                </p>
               </div>
-            </div>
 
-            {/* ── CTAs ── */}
-            <div className='mt-6 space-y-2'>
-              <Button
-                onPress={goToUpgrade}
-                isLoading={isUpgrading}
-                aria-label='Upgrade now'
-                className='h-12 w-full rounded-xl bg-green-600 text-base font-semibold text-white hover:bg-green-700'
-                startContent={
-                  !isUpgrading ? (
-                    <Crown
-                      className='h-4 w-4'
-                      fill='currentColor'
-                      aria-hidden
-                    />
-                  ) : null
+              <UpgradePlanPicker
+                plans={plans}
+                ctaLabel={
+                  isLimitReached ? 'Skip the wait with Pro' : 'Upgrade to Pro'
                 }
-              >
-                Upgrade Now
-              </Button>
+              />
 
-              {/*  Browse Designs */}
-              <button
-                onClick={() => router.push('/products')}
-                className='w-full rounded-xl py-2.5 text-sm  h-12 font-semibold text-gray-600 bg-gray-50 transition hover:bg-blue-50 dark:text-blue-400 dark:hover:bg-blue-500/10'
-              >
-                Browse Designs
-              </button>
+              <div className='mt-4 flex items-center justify-between gap-3 border-t border-slate-100 pt-3 text-xs text-slate-500'>
+                <span>
+                  {isReady && freeResetLabel && usedDownloads > 0
+                    ? `Free downloads reset ${freeResetLabel}`
+                    : `Free plan: ${limit} downloads / ${formatWindow(userInfoData?.downloadWindow)}`}
+                </span>
+                <Link
+                  href='/products'
+                  className='shrink-0 font-semibold text-pink-700 underline underline-offset-2 hover:text-pink-800'
+                >
+                  Browse designs
+                </Link>
+              </div>
             </div>
           </div>
         </div>
