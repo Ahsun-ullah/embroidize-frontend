@@ -1,11 +1,12 @@
 'use client';
 
+import { bestValuePlanId } from '@/lib/apis/public/subscriptionPlans';
 import {
-  bestValuePlanId,
-  yearlySavingPercent,
-} from '@/lib/apis/public/subscriptionPlans';
+  getPlanPricing,
+  money,
+  planTerm,
+} from '@/lib/subscriptions/planPricing';
 import { startSubscriptionCheckout } from '@/lib/subscriptions/startCheckout';
-import { getPlanPricing, money, planTerm } from '@/lib/subscriptions/planPricing';
 import { ArrowRight, Check } from 'lucide-react';
 import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
@@ -39,9 +40,11 @@ export function upgradePlans(plans = []) {
 
 function planSubline(plan) {
   const perDay = planDailyLimit(plan);
-  const daily = perDay != null ? `${perDay} downloads a day` : 'Unlimited downloads';
+  const daily =
+    perDay != null ? `${perDay} downloads a day` : 'Unlimited downloads';
   const term = planTerm(plan);
-  if (term === 'year') return `${daily} · billed ${money(plan.price)} once a year`;
+  if (term === 'year')
+    return `${daily} · billed ${money(plan.price)} once a year`;
   if (term === 'week') return `${daily} · billed weekly · cancel anytime`;
   return `${daily} · cancel anytime`;
 }
@@ -67,7 +70,6 @@ export default function UpgradePlanPicker({
   const pathName = usePathname();
   const ordered = useMemo(() => upgradePlans(plans), [plans]);
   const bestId = useMemo(() => bestValuePlanId(ordered), [ordered]);
-  const yearlySave = useMemo(() => yearlySavingPercent(ordered), [ordered]);
 
   const [selectedId, setSelectedId] = useState(null);
   const [busy, setBusy] = useState(false);
@@ -115,8 +117,6 @@ export default function UpgradePlanPicker({
             const isSelected = plan._id === selectedId;
             const isBest = plan._id === bestId;
             const pricing = getPlanPricing(plan);
-            const showSave =
-              planTerm(plan) === 'year' && yearlySave != null && yearlySave > 0;
 
             return (
               <button
@@ -160,7 +160,7 @@ export default function UpgradePlanPicker({
                 <span className='shrink-0 text-right'>
                   <span
                     className={`block text-xl font-extrabold tabular-nums ${
-                      isSelected && isBest ? 'text-pink-600' : 'text-slate-900'
+                      isSelected ? 'text-[#6d28d9]' : 'text-slate-900'
                     }`}
                   >
                     {money(pricing.headlinePrice)}
@@ -170,11 +170,9 @@ export default function UpgradePlanPicker({
                       </span>
                     )}
                   </span>
-                  {showSave && (
-                    <span className='block text-[11px] font-medium text-slate-500'>
-                      Save {yearlySave}%
-                    </span>
-                  )}
+                  <span className='block text-[11px] font-medium text-slate-500'>
+                    Save {plan?.savePercent || 0}%
+                  </span>
                 </span>
               </button>
             );
