@@ -22,6 +22,8 @@ export const BEHAVIOUR_FILTER_KEYS = [
   'checkout', // started | abandoned | completed | none
   'notSeenDays', // not on the site for N days
   'marketing', // emailable | opted_in | opted_out | not_asked | unsubscribed
+  'signupChannel', // where the account came from (google, pinterest, …, unknown)
+  'utmCampaign', // exact utm_campaign of the signup link
 ];
 
 export const USER_FILTER_KEYS = [

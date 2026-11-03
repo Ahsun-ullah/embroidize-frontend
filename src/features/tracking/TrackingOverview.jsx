@@ -1,11 +1,35 @@
 'use client';
-import { Button, Spinner } from '@heroui/react';
+import {
+  Button,
+  Dropdown,
+  DropdownItem,
+  DropdownMenu,
+  DropdownTrigger,
+  Spinner,
+} from '@heroui/react';
+import { ErrorToast } from '@/components/Common/ErrorToast';
+import { SIGNUP_CHANNEL_LABELS } from '@/features/users/BehaviourFilters';
 import Cookies from 'js-cookie';
 import Link from 'next/link';
 import TrackingSettings from './TrackingSettings';
 import { useEffect, useState } from 'react';
 
 const RANGES = [7, 30, 90, 180];
+
+// What "Download raw data" can export (GET /admin/tracking/events.csv).
+const RAW_EXPORTS = [
+  ['', 'Everything (events and downloads)'],
+  ['download', 'Downloads only'],
+  ['design_view', 'Design views'],
+  ['pricing_view', 'Pricing visits'],
+  ['plan_click', 'Plan clicks'],
+  ['checkout_started', 'Checkouts started'],
+  ['checkout_completed', 'Payments'],
+  ['limit_hit', 'Limit hits'],
+  ['premium_blocked', 'Premium refusals'],
+  ['search', 'Searches'],
+  ['login', 'Sign-ins'],
+];
 
 const pct = (part, whole) =>
   whole ? `${Math.round((part / whole) * 1000) / 10}%` : '—';
@@ -57,6 +81,30 @@ export default function TrackingOverview() {
     };
   }, [days, reload]);
 
+  const [exporting, setExporting] = useState(false);
+  const downloadRaw = async (type) => {
+    setExporting(true);
+    try {
+      const token = Cookies.get('token');
+      const qs = new URLSearchParams({ days: String(days), ...(type ? { type } : {}) });
+      const res = await fetch(
+        `${process.env.NEXT_PUBLIC_BASE_API_URL_PROD}/admin/tracking/events.csv?${qs}`,
+        { headers: token ? { Authorization: `Bearer ${token}` } : {} },
+      );
+      if (!res.ok) throw new Error('Could not export.');
+      const url = URL.createObjectURL(await res.blob());
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `tracking-${type || 'all'}-${days}d.csv`;
+      a.click();
+      setTimeout(() => URL.revokeObjectURL(url), 1000);
+    } catch (err) {
+      ErrorToast('Error', err.message || 'Could not export.', 3000);
+    } finally {
+      setExporting(false);
+    }
+  };
+
   const d = state.data;
   const funnel = d?.funnel || [];
   const first = funnel[0]?.users || 0;
@@ -72,7 +120,22 @@ export default function TrackingOverview() {
             those users on the Users page.
           </p>
         </div>
-        <div className='flex gap-2'>
+        <div className='flex flex-wrap gap-2'>
+          <Dropdown>
+            <DropdownTrigger>
+              <Button size='sm' variant='bordered' isLoading={exporting}>
+                Download raw data
+              </Button>
+            </DropdownTrigger>
+            <DropdownMenu
+              aria-label='Download raw tracking data'
+              onAction={(k) => downloadRaw(k === 'all' ? '' : String(k))}
+            >
+              {RAW_EXPORTS.map(([v, l]) => (
+                <DropdownItem key={v || 'all'}>{`${l}, last ${days} days`}</DropdownItem>
+              ))}
+            </DropdownMenu>
+          </Dropdown>
           {RANGES.map((r) => (
             <Button
               key={r}
@@ -184,6 +247,52 @@ export default function TrackingOverview() {
             <p className='text-xs text-gray-500'>
               Counts are events, not users. A payment is credited to the button of that
               user&apos;s latest checkout start. Credit packs are included.
+            </p>
+          </section>
+
+          <section className='flex flex-col gap-3'>
+            <h2 className='text-lg font-semibold'>Where new signups came from</h2>
+            <div className='overflow-x-auto rounded-xl border border-gray-200 bg-white'>
+              <table className='w-full min-w-[480px] text-sm'>
+                <thead className='bg-gray-50 text-left text-xs uppercase text-gray-500'>
+                  <tr>
+                    <th className='px-4 py-2'>Came from</th>
+                    <th className='px-4 py-2 text-right'>Signups</th>
+                    <th className='px-4 py-2 text-right'>Subscribed now</th>
+                    <th className='px-4 py-2 text-right'>Rate</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {(d.signupChannels || []).length === 0 && (
+                    <tr>
+                      <td className='px-4 py-3 text-gray-500' colSpan={4}>
+                        No signups in this period.
+                      </td>
+                    </tr>
+                  )}
+                  {(d.signupChannels || []).map((c) => (
+                    <tr key={c.channel} className='border-t border-gray-100'>
+                      <td className='px-4 py-2 font-medium'>
+                        <Link
+                          href={usersLink({ signupChannel: c.channel })}
+                          className='hover:underline'
+                        >
+                          {SIGNUP_CHANNEL_LABELS[c.channel] || c.channel}
+                        </Link>
+                      </td>
+                      <td className='px-4 py-2 text-right'>{c.signups}</td>
+                      <td className='px-4 py-2 text-right'>{c.subscribed}</td>
+                      <td className='px-4 py-2 text-right'>{pct(c.subscribed, c.signups)}</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+            <p className='text-xs text-gray-500'>
+              Saved from the first page each visitor opened (ad click, UTM tags or referring
+              site). Accounts created before this went live show as &quot;Not recorded&quot;.
+              Tag your Pinterest pins and Zoho campaign links with utm_source and utm_campaign
+              to see them separately.
             </p>
           </section>
 

@@ -12,6 +12,8 @@ import BehaviourFilters, {
   MARKETING_LABELS,
   MARKETING_OPTIONS,
   EVER_DOWNLOADED_OPTIONS,
+  SIGNUP_CHANNEL_LABELS,
+  SIGNUP_CHANNEL_OPTIONS,
   SUB_STATE_LABELS,
   SUB_STATE_OPTIONS,
   matchingPreset,
@@ -173,6 +175,14 @@ const USER_EXPORT_FIELDS = [
   // Email
   { key: 'marketingState', label: 'Offer emails', group: 'Email', get: (u) => MARKETING_LABELS[u.marketingState] || '' },
   { key: 'marketingEmailable', label: 'Can receive offers', group: 'Email', get: (u) => !!u.marketingEmailable },
+
+  // Signup source (first touch, saved when the account was created)
+  { key: 'signupChannel', label: 'Came from', group: 'Signup source', get: (u) => SIGNUP_CHANNEL_LABELS[u.signupChannel] || 'Not recorded' },
+  { key: 'utmSource', label: 'UTM source', group: 'Signup source', get: (u) => u.signupSource?.utmSource || '' },
+  { key: 'utmMedium', label: 'UTM medium', group: 'Signup source', get: (u) => u.signupSource?.utmMedium || '' },
+  { key: 'utmCampaign', label: 'UTM campaign', group: 'Signup source', get: (u) => u.signupSource?.utmCampaign || '' },
+  { key: 'referrer', label: 'Referring site', group: 'Signup source', get: (u) => u.signupSource?.referrer || '' },
+  { key: 'landing', label: 'First page', group: 'Signup source', get: (u) => u.signupSource?.landing || '' },
 ];
 
 const EXPORT_PAGE_SIZE = 500;
@@ -658,6 +668,9 @@ export default function UsersTableWrapper({
     if (f.checkout) parts.push(`Checkout: ${labelOf(CHECKOUT_OPTIONS, f.checkout)}`);
     if (f.notSeenDays) parts.push(`Not on site for ${f.notSeenDays} days`);
     if (f.marketing) parts.push(`Offer emails: ${labelOf(MARKETING_OPTIONS, f.marketing)}`);
+    if (f.signupChannel)
+      parts.push(`Came from: ${labelOf(SIGNUP_CHANNEL_OPTIONS, f.signupChannel)}`);
+    if (f.utmCampaign) parts.push(`Campaign "${f.utmCampaign}"`);
     return parts;
   }, [filters, planOptions]);
 

@@ -1,4 +1,5 @@
 'use client';
+import { readFirstTouch } from '@/lib/analytics/firstTouch';
 
 import Image from 'next/image';
 import Link from 'next/link';
@@ -57,6 +58,9 @@ const RegisterContent = () => {
       // Unticked by default: offer emails need an active yes. Stored with the
       // date on the account (backend registerUser).
       marketingOptIn: formData.get('marketingOptIn') === 'on',
+      // Where they first came from (Google, Pinterest, an ad...), for the
+      // admin "signup source" filter. Undefined when nothing was recorded.
+      signupSource: readFirstTouch(),
     };
 
     // Validate data before proceeding

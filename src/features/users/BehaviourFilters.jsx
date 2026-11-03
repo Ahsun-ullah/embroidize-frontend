@@ -24,6 +24,7 @@ export const BEHAVIOUR_NUMBER_KEYS = [
   'limitHitsMin',
   'premiumMin',
   'notSeenDays',
+  'utmCampaign', // text, but debounced the same way
 ];
 
 export const CHECKOUT_OPTIONS = [
@@ -55,6 +56,29 @@ export const MARKETING_LABELS = {
   opted_out: 'Opted out',
   unsubscribed: 'Unsubscribed',
 };
+
+// Where the account came from: first-touch attribution saved at signup.
+export const SIGNUP_CHANNEL_OPTIONS = [
+  ['', 'Any'],
+  ['google', 'Google search'],
+  ['google_ads', 'Google Ads'],
+  ['pinterest', 'Pinterest'],
+  ['facebook', 'Facebook'],
+  ['instagram', 'Instagram'],
+  ['meta_ads', 'Facebook / Instagram ads'],
+  ['youtube', 'YouTube'],
+  ['bing', 'Bing'],
+  ['other_search', 'Other search engine'],
+  ['email', 'Email campaign'],
+  ['campaign', 'Other tagged link (UTM)'],
+  ['other_referral', 'Other website'],
+  ['direct', 'Direct / typed in'],
+  ['unknown', 'Not recorded (older accounts)'],
+];
+
+export const SIGNUP_CHANNEL_LABELS = Object.fromEntries(
+  SIGNUP_CHANNEL_OPTIONS.filter(([v]) => v),
+);
 
 export const EVER_DOWNLOADED_OPTIONS = [
   ['', 'Any'],
@@ -307,6 +331,20 @@ export default function BehaviourFilters({ filters, drafts, setDraft, pushFilter
           options={MARKETING_OPTIONS}
           onChange={(v) => pushFilters({ marketing: v })}
         />
+        <Select
+          label='Came from'
+          value={filters.signupChannel}
+          options={SIGNUP_CHANNEL_OPTIONS}
+          onChange={(v) => pushFilters({ signupChannel: v })}
+        />
+        <Input
+          size='sm'
+          label='Signup campaign'
+          labelPlacement='outside'
+          placeholder='utm_campaign'
+          value={drafts.utmCampaign}
+          onValueChange={(v) => setDraft('utmCampaign', v)}
+        />
       </div>
 
       <span className='text-xs text-gray-500'>
@@ -314,7 +352,8 @@ export default function BehaviourFilters({ filters, drafts, setDraft, pushFilter
         {windowLabel}. A download day is a calendar day (UTC) with at least one
         download. Staff downloads are never counted. Views, pricing visits,
         checkouts and limit hits are tracked from the day this went live, for
-        signed-in users, and kept for 180 days.
+        signed-in users, and kept for 180 days. &quot;Came from&quot; is saved
+        when an account is created, from the first page that visitor opened.
       </span>
     </div>
   );
