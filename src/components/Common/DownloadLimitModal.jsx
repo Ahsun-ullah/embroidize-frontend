@@ -1,85 +1,79 @@
 'use client';
 
+import UpgradePlanPicker, {
+  planDailyLimit,
+  upgradePlans,
+} from '@/components/Common/UpgradePlanPicker';
 import { windowPhrase } from '@/lib/apis/public/siteConfig';
 import { useDownloadReset } from '@/lib/hooks/useDownloadReset';
-import { formatResetCountdown, formatResetTime } from '@/utils/functions/page';
-import { Button } from '@heroui/react';
-import {
-  AlertTriangle,
-  Clock,
-  Crown,
-  Download,
-  Info,
-  Settings,
-  XCircleIcon,
-} from 'lucide-react';
+import { formatDesignCount, useUpgradeOffer } from '@/lib/hooks/useUpgradeOffer';
+import { formatResetTime } from '@/utils/functions/page';
+import { Download, X } from 'lucide-react';
+import Image from 'next/image';
 import { useRouter } from 'next/navigation';
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useRef } from 'react';
 
-function DownloadLimitModal({ limitModalData = {}, onClose, formatDuration }) {
+const lowerFirst = (s) => (s ? s.charAt(0).toLowerCase() + s.slice(1) : '');
+
+/**
+ * Shown when a download is refused for quota reasons.
+ *
+ * Free users (and lapsed subscribers, who are free users again) get the
+ * upsell: the design they tried to download, the live plans as radio cards and
+ * a CTA that goes straight to that plan's checkout (with the
+ * `subscription_checkout` tracking event — see UpgradePlanPicker).
+ *
+ * Paying subscribers who hit their own daily / period cap get the same shell
+ * without the plan cards: they already have a plan, so the action is to manage
+ * it, not to start a second checkout.
+ *
+ * @param {object} limitModalData  { type, count, duration, planName, endedAt }
+ *                                 from the download endpoint's 403
+ * @param {object} product         { name, imageUrl } of the design they tried
+ *                                 to download (optional)
+ */
+function DownloadLimitModal({ limitModalData = {}, product, onClose }) {
   const router = useRouter();
   const dialogRef = useRef(null);
-  const [isUpgrading, setIsUpgrading] = useState(false);
-  const [barReady, setBarReady] = useState(false);
 
-  const {
-    usedDownloads,
-    limit,
-    downloadWindow,
-    msLeft,
-    nextResetTime,
-    currentPlanName,
-  } = useDownloadReset({ tickMs: 60_000 });
-
-  // "1d" (the default) keeps the original "24 hours" phrasing — it's a rolling
-  // window, not a calendar day. Other windows read naturally: "2 days", "week".
-  //
-  // windowPhrase now returns null for a missing or unparseable window instead
-  // of assuming "day". Here that lands on the same "24 hours" wording, because
-  // this modal only ever opens once the API has told us the window — and a
-  // null slipping through to windowAdj below would throw on .includes().
-  const windowLabel = windowPhrase(downloadWindow);
-  const windowEvery =
-    !windowLabel || windowLabel === 'day' ? '24 hours' : windowLabel;
-  // Adjective form for "this … window": "24-hour", "2-day", "week-long".
-  const windowAdj = windowEvery.includes(' ')
-    ? windowEvery.replace(' ', '-').replace(/s$/, '')
-    : `${windowEvery}-long`;
-
-  // Upgrade tiers are pulled live from the real subscription plans so they never
-  // drift from what's actually offered. Recurring plans only.
-  const [tiers, setTiers] = useState([]);
-  useEffect(() => {
-    let active = true;
-    (async () => {
-      try {
-        const res = await fetch(
-          `${process.env.NEXT_PUBLIC_BASE_API_URL_PROD}/public/subscriptions`,
-        );
-        if (!res.ok) return;
-        const data = await res.json();
-        const plans = data?.data?.plans ?? [];
-        if (active) setTiers(plans);
-      } catch {
-        // Non-critical — the modal still works without the upgrade grid.
-      }
-    })();
-    return () => {
-      active = false;
-    };
-  }, []);
+  const { usedDownloads, limit, downloadWindow, msLeft, nextResetTime } =
+    useDownloadReset({ tickMs: 60_000 });
+  const { plans, totalDesigns } = useUpgradeOffer();
 
   const total = limit > 0 ? limit : (limitModalData?.count ?? 0);
-  const used = limit > 0 ? usedDownloads : (limitModalData?.count ?? total);
-  const pct = total > 0 ? Math.min(Math.round((used / total) * 100), 100) : 0;
+  const used = limit > 0 ? usedDownloads : total;
 
   // A lapsed subscriber is a FREE user now, so their numbers and countdown are
   // the free-tier ones — /userinfo reports them that way, which is what feeds
-  // useDownloadReset above. Only the wording and the call to action differ.
+  // useDownloadReset above. Only the wording differs.
   const isExpired = limitModalData?.type === 'subscription_expired';
   const isPeriod = limitModalData?.type === 'period';
   const isFree = limitModalData?.type === 'free' || isExpired;
   const isDaily = !isPeriod && !isFree;
+
+  // "1d" (the default) is a rolling 24-hour window, which the copy calls
+  // "today's"; other windows read as "all N free downloads".
+  const windowLabel = windowPhrase(downloadWindow);
+  const isDayWindow = !windowLabel || windowLabel === 'day';
+  const windowEvery = isDayWindow ? '24 hours' : windowLabel;
+
+  // Subscriber daily quota rolls over at the server day boundary (UTC
+  // midnight), not the user's local midnight — same math as My Plan. The
+  // hook's own msLeft/nextResetTime only cover the free-tier window.
+  const nextDailyReset = new Date();
+  nextDailyReset.setUTCHours(24, 0, 0, 0);
+  const effectiveMsLeft = isDaily
+    ? Math.max(0, nextDailyReset.getTime() - Date.now())
+    : msLeft;
+  const effectiveResetTime = isDaily ? nextDailyReset : nextResetTime;
+  const resetLabel =
+    effectiveMsLeft > 0 ? lowerFirst(formatResetTime(effectiveResetTime)) : '';
+
+  const designCount = formatDesignCount(totalDesigns);
+  const maxDaily = upgradePlans(plans)
+    .map(planDailyLimit)
+    .filter((n) => n != null)
+    .reduce((max, n) => Math.max(max, n), 0);
 
   const endedOnLabel = limitModalData?.endedAt
     ? new Date(limitModalData.endedAt).toLocaleDateString('en-US', {
@@ -89,35 +83,49 @@ function DownloadLimitModal({ limitModalData = {}, onClose, formatDuration }) {
       })
     : null;
 
-  // Subscriber daily quota rolls over at the server day boundary (UTC
-  // midnight), not the user's local midnight — same math as My Plan. The hook
-  // above ticks the component, so this recomputes on each render. The hook's
-  // own msLeft/nextResetTime only cover the free-tier window and stay at 0 for
-  // subscribers, which is why the daily case needs its own reset moment.
-  const nextDailyReset = new Date();
-  nextDailyReset.setUTCHours(24, 0, 0, 0);
-  const dailyMsLeft = Math.max(0, nextDailyReset.getTime() - Date.now());
+  const plural = (n) => (n === 1 ? '' : 's');
 
-  const effectiveMsLeft = isDaily ? dailyMsLeft : msLeft;
-  const effectiveResetTime = isDaily ? nextDailyReset : nextResetTime;
+  let pill;
+  let title;
+  let subtitle;
+  if (isExpired) {
+    pill = `Your ${limitModalData?.planName || 'subscription'} plan has ended`;
+    title = designCount
+      ? `Renew to get this design, plus ${designCount} more`
+      : 'Renew to get this design';
+    subtitle = `Your plan ended${endedOnLabel ? ` on ${endedOnLabel}` : ''}. You're on the free plan now (${total} download${plural(total)} every ${windowEvery}), and everything you already downloaded is still yours to re-download free.`;
+  } else if (isFree) {
+    pill = isDayWindow
+      ? `You've used today's ${used} free download${plural(used)}`
+      : `You've used all ${used} free download${plural(used)}`;
+    title = designCount
+      ? `Get this design now, plus ${designCount} more`
+      : 'Get this design now with Pro';
+    subtitle =
+      maxDaily > 0
+        ? `Pro members download up to ${maxDaily} designs a day, in every machine format.`
+        : 'Pro members get more downloads every day, in every machine format.';
+  } else if (isPeriod) {
+    pill = `You've used all ${total} downloads this billing period`;
+    title = 'Download Limit Reached';
+    subtitle =
+      'Your downloads refill when your next billing period starts. You can review usage and billing on My Plan.';
+  } else {
+    pill = `You've used today's ${total} download${plural(total)}`;
+    title = 'Daily Download Limit Reached';
+    subtitle =
+      'Your daily downloads refill automatically. Everything you already downloaded is still available to re-download.';
+  }
 
-  const title = isExpired
-    ? 'Your Plan Has Ended'
-    : isPeriod || isFree
-      ? 'Download Limit Reached'
-      : 'Daily Download Limit Reached';
-
-  const subtitle = isExpired
-    ? `Your ${limitModalData?.planName || 'subscription'} plan ended${
-        endedOnLabel ? ` on ${endedOnLabel}` : ''
-      }, so premium designs aren't included any more. You're on the free plan — ${total} download${
-        total === 1 ? '' : 's'
-      } every ${windowAdj} window — and everything you already downloaded is still yours to re-download free.`
+  const footerText = isFree
+    ? resetLabel
+      ? `Free downloads reset ${resetLabel}`
+      : `Free downloads reset every ${windowEvery}`
     : isPeriod
-      ? `You've used all ${total} downloads for this billing period.`
-      : isFree
-        ? `You've used all ${total} free download${total === 1 ? '' : 's'} for this ${windowAdj} window. They all reset together when the timer below ends.`
-        : `You've used all ${total} download${total === 1 ? '' : 's'} available today. Your limit will reset automatically.`;
+      ? 'Downloads reset with your next billing period'
+      : resetLabel
+        ? `Downloads reset ${resetLabel}`
+        : 'Downloads reset at midnight (UTC)';
 
   useEffect(() => {
     const onKeyDown = (e) => e.key === 'Escape' && onClose?.();
@@ -127,26 +135,16 @@ function DownloadLimitModal({ limitModalData = {}, onClose, formatDuration }) {
     const prevFocus = document.activeElement;
     dialogRef.current?.focus();
 
-    const raf = requestAnimationFrame(() => setBarReady(true));
-
     return () => {
       document.removeEventListener('keydown', onKeyDown);
       document.body.style.overflow = '';
-      cancelAnimationFrame(raf);
       if (prevFocus instanceof HTMLElement) prevFocus.focus();
     };
   }, [onClose]);
 
-  const goToUpgrade = () => {
-    setIsUpgrading(true);
-    router.push('/subscriptions');
-  };
-
-  const resetLabel = formatResetTime(effectiveResetTime);
-
   return (
     <div
-      className='fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm p-4'
+      className='fixed inset-0 z-50 flex items-center justify-center bg-black/60 p-4 backdrop-blur-sm'
       onClick={onClose}
     >
       <div
@@ -157,283 +155,86 @@ function DownloadLimitModal({ limitModalData = {}, onClose, formatDuration }) {
         aria-describedby='dl-desc'
         tabIndex={-1}
         onClick={(e) => e.stopPropagation()}
-        className='relative w-full max-w-3xl max-h-[95vh] overflow-y-auto rounded-3xl bg-white dark:bg-neutral-900 p-6 sm:p-8 shadow-2xl outline-none animate-fade-in'
+        className='relative max-h-[95vh] w-full max-w-md overflow-y-auto rounded-3xl bg-white p-5 shadow-2xl outline-none animate-fade-in sm:p-6'
       >
-        {/* Close */}
         <button
+          type='button'
           onClick={onClose}
           aria-label='Close dialog'
-          className='absolute top-4 right-4 flex h-12 w-12 items-center justify-center rounded-full text-red-500 bg-gray-100 p-2  transition hover:bg-red-100 hover:text-red-700 dark:hover:bg-red-800 dark:hover:text-red-200'
+          className='absolute right-3 top-3 z-10 flex h-9 w-9 items-center justify-center rounded-full bg-white/90 text-slate-600 shadow-sm ring-1 ring-slate-200 transition hover:bg-slate-100 hover:text-slate-900'
         >
-          <span aria-hidden className='text-2xl leading-none font-extrabold'>
-            <XCircleIcon />
-          </span>
+          <X className='h-4 w-4' aria-hidden />
         </button>
+
+        {/* ── The design they tried to download ── */}
+        {product?.imageUrl && (
+          <div className='relative mb-4 aspect-[16/7] w-full overflow-hidden rounded-2xl bg-pink-50'>
+            <Image
+              src={product.imageUrl}
+              alt={product.name || 'Embroidery design'}
+              fill
+              sizes='(max-width: 480px) 100vw, 420px'
+              className='object-contain p-2'
+              unoptimized
+            />
+          </div>
+        )}
 
         {/* ── Header ── */}
         <div className='text-center'>
-          <div className='mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-red-50 text-red-500 dark:bg-red-500/15 dark:text-red-400'>
-            <AlertTriangle className='h-8 w-8' strokeWidth={2.2} aria-hidden />
-          </div>
+          <span className='inline-flex items-center gap-1.5 rounded-full bg-slate-100 px-3 py-1 text-xs font-medium text-slate-600'>
+            <Download className='h-3.5 w-3.5' aria-hidden />
+            {pill}
+          </span>
           <h2
             id='dl-title'
-            className='text-2xl font-bold tracking-tight text-neutral-900 dark:text-white'
+            className='mt-3 text-2xl font-extrabold leading-tight tracking-tight text-slate-900'
           >
             {title}
           </h2>
           <p
             id='dl-desc'
-            className='mx-auto mt-2 max-w-md text-sm leading-relaxed text-neutral-500 dark:text-neutral-400'
+            className='mx-auto mt-2 max-w-sm text-sm leading-relaxed text-slate-500'
           >
             {subtitle}
           </p>
         </div>
 
-        {/* ── Countdown ── */}
-        <div className='mt-6 rounded-2xl border border-red-100 bg-red-50 p-4 dark:border-red-500/20 dark:bg-red-500/10'>
-          {effectiveMsLeft > 0 ? (
-            <div className='flex items-center justify-center gap-4'>
-              <div className='flex items-center gap-2 text-neutral-500 dark:text-neutral-300'>
-                <Clock
-                  className='h-5 w-5 text-red-500 dark:text-red-400'
-                  aria-hidden
-                />
-                <span className='text-sm font-medium'>Resets in</span>
-              </div>
-              <div className='text-left'>
-                <p className='text-2xl font-extrabold tabular-nums leading-none text-red-500 dark:text-red-400'>
-                  {formatResetCountdown(effectiveMsLeft)}
-                </p>
-                {resetLabel && (
-                  <p className='mt-1 text-xs text-neutral-500 dark:text-neutral-400'>
-                    ({resetLabel})
-                  </p>
-                )}
-              </div>
-            </div>
-          ) : (
-            <div className='flex items-center justify-center gap-2'>
-              <Clock
-                className='h-5 w-5 text-red-500 dark:text-red-400'
-                aria-hidden
-              />
-              <span className='text-lg font-medium text-neutral-500 dark:text-neutral-300'>
-                Resets :
-              </span>
-              <span className='text-lg font-bold text-neutral-900 dark:text-white'>
-                {isPeriod ? 'Next Billing Period' : 'Automatically At Midnight'}
-              </span>
-            </div>
-          )}
-        </div>
-
-        {/* ── Usage progress ── */}
+        {/* ── Action ── */}
         <div className='mt-5'>
-          <div className='flex items-center justify-between text-sm'>
-            <span className='font-semibold text-neutral-700 dark:text-neutral-200'>
-              Downloads used
-            </span>
-            <span className='font-bold tabular-nums text-red-500 dark:text-red-400'>
-              {used} / {total}
-            </span>
-          </div>
-          <div
-            className='mt-2 h-2.5 w-full overflow-hidden rounded-full bg-neutral-200 dark:bg-neutral-700'
-            role='progressbar'
-            aria-valuenow={used}
-            aria-valuemin={0}
-            aria-valuemax={total}
-            aria-label='Downloads used'
-          >
-            <div
-              className={`h-full rounded-full transition-[width] duration-700 ease-out ${
-                pct >= 100 ? 'bg-red-500' : 'bg-green-500'
-              }`}
-              style={{ width: barReady ? `${pct}%` : '0%' }}
+          {isFree ? (
+            <UpgradePlanPicker
+              plans={plans}
+              ctaLabel={
+                isExpired
+                  ? 'Renew and download this design'
+                  : 'Download this design with Pro'
+              }
             />
-          </div>
-          <p className='mt-1.5 text-xs text-neutral-500 dark:text-neutral-400'>
-            {used} out of {total} download{total === 1 ? '' : 's'} used
-          </p>
-        </div>
-
-        <div className='my-6 h-px w-full bg-neutral-100 dark:bg-neutral-800' />
-
-        {/* ── Upgrade tiers ── */}
-        {tiers.length > 0 && (
-          <div>
-            <div className='mb-4 flex justify-center gap-3'>
-              <Crown
-                className='h-7 w-7 shrink-0 text-yellow-400'
-                fill='currentColor'
-                strokeWidth={1.5}
-                aria-hidden
-              />
-              <div>
-                <p className='text-sm font-bold text-neutral-900 dark:text-white'>
-                  Upgrade for More Downloads
-                </p>
-                <p className='text-xs text-neutral-500 dark:text-neutral-400'>
-                  Unlock higher daily limits and enjoy uninterrupted downloads.
-                </p>
-              </div>
-            </div>
-
-            <div className='mx-auto flex flex-wrap justify-center gap-2.5 max-w-[680px]'>
-              {tiers.map((tier) => {
-                const isCurrent =
-                  !!currentPlanName &&
-                  currentPlanName.toLowerCase() === tier.name?.toLowerCase();
-                const perDay =
-                  tier.dailyLimit != null
-                    ? tier.dailyLimit
-                    : tier.downloadLimit != null
-                      ? tier.downloadLimit
-                      : '∞';
-                return (
-                  <button
-                    key={tier._id || tier.name}
-                    onClick={() => {
-                      onClose?.();
-                      router.push('/subscriptions');
-                    }}
-                    aria-label={`Upgrade to ${tier.name}, ${perDay} downloads per day`}
-                    className={`group relative flex items-center gap-2.5 rounded-2xl border p-3 text-left transition-all duration-200 hover:-translate-y-0.5 hover:shadow-md focus:outline-none focus-visible:ring-2 focus-visible:ring-green-500 ${
-                      isCurrent
-                        ? 'border-green-600 bg-green-600 text-white'
-                        : 'border-green-100 bg-green-50 hover:border-green-400 dark:border-green-500/20 dark:bg-green-500/10 dark:hover:border-green-400'
-                    }`}
-                  >
-                    <span
-                      className={`flex h-9 w-9 shrink-0 items-center justify-center rounded-lg ${
-                        isCurrent
-                          ? 'bg-white/20 text-white'
-                          : 'bg-green-100 text-green-600 dark:bg-green-500/20 dark:text-green-400'
-                      }`}
-                    >
-                      <Download className='h-5 w-5' aria-hidden />
-                    </span>
-                    <span className='flex flex-col leading-tight'>
-                      <span
-                        className={`text-base font-extrabold tabular-nums ${
-                          isCurrent
-                            ? 'text-white'
-                            : 'text-green-700 dark:text-green-400'
-                        }`}
-                      >
-                        {perDay}
-                        <span className='ml-0.5 text-[11px] font-medium'>
-                          / day
-                        </span>
-                      </span>
-                      <span
-                        className={`text-xs font-semibold ${
-                          isCurrent
-                            ? 'text-white/90'
-                            : 'text-green-800 dark:text-green-300'
-                        }`}
-                      >
-                        {tier.name}
-                        {isCurrent && (
-                          <span className='ml-1 text-[9px] font-semibold uppercase opacity-80'>
-                            · Current
-                          </span>
-                        )}
-                      </span>
-                    </span>
-                  </button>
-                );
-              })}
-            </div>
-          </div>
-        )}
-
-        <div className='mt-6 space-y-2'>
-          <Button
-            onPress={goToUpgrade}
-            isLoading={isUpgrading}
-            aria-label='Upgrade now'
-            className='h-14 w-full rounded-xl bg-green-600 text-xl font-semibold text-white hover:bg-green-700'
-            startContent={
-              !isUpgrading ? (
-                <Crown className='h-4 w-4' fill='currentColor' aria-hidden />
-              ) : null
-            }
-          >
-            {isExpired ? 'Renew My Plan' : 'Upgrade Now'}
-          </Button>
-        </div>
-
-        {/* ── Manage current plan ── */}
-        <div className='mt-6 rounded-2xl border border-blue-200 bg-blue-50 p-4 dark:border-blue-500/20 dark:bg-blue-500/10'>
-          <div className='flex items-center justify-between gap-4'>
-            <div className='flex items-center gap-3'>
-              <div className='rounded-xl bg-blue-100 p-2 text-blue-600 dark:bg-blue-500/20 dark:text-blue-400'>
-                <Settings className='h-5 w-5' />
-              </div>
-
-              <div>
-                <p className='text-sm font-semibold text-neutral-900 dark:text-white'>
-                  Manage your plan
-                </p>
-                <p className='text-xs text-neutral-500 dark:text-neutral-400'>
-                  Usage, billing & upgrades.
-                </p>
-              </div>
-            </div>
-
-            <Button
-              size='sm'
-              color='primary'
-              onPress={() => {
+          ) : (
+            <button
+              type='button'
+              onClick={() => {
                 onClose?.();
                 router.push('/user/my-plan');
               }}
-              className='font-semibold'
+              className='flex h-12 w-full items-center justify-center rounded-xl bg-slate-900 text-[15px] font-semibold text-white transition hover:bg-black'
             >
-              My Plan →
-            </Button>
-          </div>
+              Manage my plan
+            </button>
+          )}
         </div>
 
         {/* ── Footer ── */}
-        <div className='mt-5 flex flex-col gap-2 border-t border-neutral-100 pt-4 text-xs text-neutral-500 dark:border-neutral-800 dark:text-neutral-400 sm:flex-row sm:items-center sm:justify-between'>
-          <span className='flex items-center gap-1.5'>
-            <Info className='h-3.5 w-3.5 text-blue-500' aria-hidden />
-            {limit > 0 ? (
-              <span>
-                Free Plan:{' '}
-                <span className='font-semibold text-neutral-700 dark:text-neutral-200'>
-                  {limit} download{limit === 1 ? '' : 's'} every {windowEvery}
-                </span>
-              </span>
-            ) : limitModalData?.duration && formatDuration ? (
-              <span>
-                Limit:{' '}
-                <span className='font-semibold text-neutral-700 dark:text-neutral-200 capitalize'>
-                  {total} per{' '}
-                  {limitModalData?.type === 'daily'
-                    ? limitModalData.duration
-                    : formatDuration(limitModalData.duration)}
-                </span>
-              </span>
-            ) : (
-              <span>
-                Plan limit:{' '}
-                <span className='font-semibold text-neutral-700 dark:text-neutral-200'>
-                  {total}
-                </span>
-              </span>
-            )}
-          </span>
-          {resetLabel && (
-            <span>
-              Next reset:{' '}
-              <span className='font-semibold text-neutral-700 dark:text-neutral-200'>
-                {resetLabel}
-              </span>
-            </span>
-          )}
+        <div className='mt-5 flex items-center justify-between gap-3 border-t border-slate-100 pt-4 text-xs text-slate-500'>
+          <span>{footerText}</span>
+          <button
+            type='button'
+            onClick={onClose}
+            className='shrink-0 font-semibold text-pink-700 underline underline-offset-2 hover:text-pink-800'
+          >
+            Maybe later
+          </button>
         </div>
       </div>
     </div>

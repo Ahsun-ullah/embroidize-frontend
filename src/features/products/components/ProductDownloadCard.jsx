@@ -108,14 +108,6 @@ export default function ProductDownloadCard({ data }) {
     setIsMobile(isiOS || isSmallDevice);
   }, []);
 
-  const formatDuration = (duration) => {
-    if (!duration) return '';
-    const num = duration.slice(0, -1);
-    const unit = duration.slice(-1);
-    const units = { d: 'day', h: 'hour', m: 'minute' };
-    return `${num} ${units[unit]}${num === '1' ? '' : 's'}`;
-  };
-
   const copyLinkToClipboard = () => {
     navigator.clipboard.writeText(window.location.href);
     setLinkCopied(true);
@@ -577,8 +569,8 @@ export default function ProductDownloadCard({ data }) {
       {showLimitModal && (
         <DownloadLimitModal
           limitModalData={limitModalData}
+          product={{ name: data?.name, imageUrl: data?.image?.url }}
           onClose={() => setShowLimitModal(false)}
-          formatDuration={formatDuration}
         />
       )}
 
