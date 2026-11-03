@@ -9,6 +9,7 @@ import PremiumDesignBanner from '@/components/Common/PremiumDesignBanner';
 import SkuFlag from '@/components/Common/SkuFlag';
 import { clearAuthToken } from '@/lib/auth';
 import { useUserInfoQuery } from '@/lib/redux/common/user/userInfoSlice';
+import { trackUserEvent } from '@/lib/analytics/userEvents';
 import {
   filenameFromContentDisposition,
   formatNumber,
@@ -28,6 +29,12 @@ import { useEffect, useState } from 'react';
 export default function ProductDownloadCard({ data }) {
   const pathName = usePathname();
   const router = useRouter();
+
+  // Design page view for the admin tracking pages (signed-in users only; the
+  // backend counts repeat views within 30 minutes once).
+  useEffect(() => {
+    if (data?._id) trackUserEvent('design_view', { productId: data._id });
+  }, [data?._id]);
   const [isLoading, setIsLoading] = useState(false);
   const [showLimitModal, setShowLimitModal] = useState(false);
   const [showFormatSheet, setShowFormatSheet] = useState(false);

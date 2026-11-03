@@ -16,6 +16,7 @@ import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { useEffect, useMemo, useState } from 'react';
 import ChangePasswordForm from './UserChangePasswordForm';
+import MarketingPreference from './MarketingPreference';
 import UserProfile from './UserProfile';
 
 const PAGE_SIZE_OPTIONS = [10, 20, 50];
@@ -740,7 +741,12 @@ export default function UserDetailsComponent({
 
       {/* Content */}
       <div className='w-full px-3 sm:px-6 mt-4 sm:mt-6'>
-        {activeTab === 'account' && <UserProfile />}
+        {activeTab === 'account' && (
+          <>
+            <UserProfile />
+            <MarketingPreference />
+          </>
+        )}
         {activeTab === 'downloads' && renderDownloadTab}
         {activeTab === 'password' && <ChangePasswordForm />}
         {activeTab === 'favourites' && (

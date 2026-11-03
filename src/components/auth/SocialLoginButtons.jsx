@@ -1,4 +1,5 @@
 'use client';
+import { readFirstTouch } from '@/lib/analytics/firstTouch';
 
 import { ErrorToast } from '@/components/Common/ErrorToast';
 import { useFingerprint } from '@/lib/hooks/useFingerprint';
@@ -140,6 +141,8 @@ export default function SocialLoginButtons({ showThankYou = true }) {
                 idToken: response.credential,
                 // Read at call time, so the real value is sent.
                 fingerprint: fingerprintRef.current,
+                // Only used when this sign-in creates the account.
+                signupSource: readFirstTouch(),
               }).unwrap();
 
               completeSocialLogin({ ...result, method: 'google' });
@@ -223,6 +226,7 @@ export default function SocialLoginButtons({ showThankYou = true }) {
             const result = await appleAuth({
               idToken: event.detail.authorization.id_token,
               fingerprint: fingerprintRef.current,
+              signupSource: readFirstTouch(),
             }).unwrap();
 
             completeSocialLogin({ ...result, method: 'apple' });

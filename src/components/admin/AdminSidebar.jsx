@@ -308,6 +308,11 @@ export default function AdminSidebar({ isCollapsed, setIsCollapsed }) {
               label: 'All Users',
               icon: 'ri-user-fill',
             },
+            {
+              href: '/admin/tracking',
+              label: 'User Tracking',
+              icon: 'ri-line-chart-fill',
+            },
           ]}
         />
 

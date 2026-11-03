@@ -118,7 +118,7 @@ export default function CreditPackList({
           },
           // The size is the whole request. The price comes from the saved pack
           // on the server, so there is nothing here worth tampering with.
-          body: JSON.stringify({ credits: pack.credits }),
+          body: JSON.stringify({ credits: pack.credits, source: 'pricing' }),
         });
 
         const data = await res.json();

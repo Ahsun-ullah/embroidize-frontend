@@ -1,3 +1,4 @@
+import TrackUserEvent from '@/components/Common/TrackUserEvent';
 import ListingEventBanner from '@/components/Common/EventPromotions/ListingEventBanner';
 import { getActiveEventPromotions } from '@/lib/apis/public/eventPromotions';
 import Pagination from '@/components/Common/Pagination';
@@ -75,6 +76,9 @@ export default async function SearchPage({ searchParams }) {
   return (
     <div className='bg-[#fafafa]'>
       <Header />
+      {searchQuery ? (
+        <TrackUserEvent type='search' value={searchQuery} />
+      ) : null}
       <div className='container pt-4 pb-8'>
         <h1 className='text-2xl font-bold'>
           Search Results: <span className='font-medium'>{searchQuery}</span>

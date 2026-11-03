@@ -1,6 +1,7 @@
 import SiteTopBar from '@/components/Common/SiteTopBar';
 import ScrollToTopBottom from '@/components/Common/ScrollToTopBottom';
 import WhatsAppButton from '@/components/Common/WhatsAppButton';
+import FirstTouchCapture from '@/components/Common/FirstTouchCapture';
 import ChatIdentify from '@/components/Common/TawkIdentify';
 import { NProgressProvider } from '@/components/providers/NProgressProvider';
 import ClientProviders from '@/lib/providers/ClientProviders';
@@ -147,6 +148,7 @@ export default function RootLayout({ children }) {
                   and the scroll control. Renders nothing until a number is
                   configured in Settings → WhatsApp. */}
               <WhatsAppButton />
+              <FirstTouchCapture />
             </NProgressProvider>
           </Suspense>
           </SiteConfigProvider>

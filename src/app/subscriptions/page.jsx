@@ -1,3 +1,4 @@
+import TrackUserEvent from '@/components/Common/TrackUserEvent';
 import { getSiteConfig, windowPhrase } from '@/lib/apis/public/siteConfig';
 import { getFeaturedReviews } from '@/lib/apis/public/featuredReviews';
 import { buildFaqJsonLd, buildSubscriptionFaqs } from './faqs';
@@ -61,6 +62,7 @@ export default async function SubscriptionsPage() {
           __html: JSON.stringify(buildFaqJsonLd(faqs)),
         }}
       />
+      <TrackUserEvent type='pricing_view' source='pricing' />
       <SubscriptionsPageClient
         siteConfig={siteConfig}
         featuredReviews={featured.reviews}

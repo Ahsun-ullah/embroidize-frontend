@@ -1,3 +1,4 @@
+import TrackUserEvent from '@/components/Common/TrackUserEvent';
 import LandingPlanCards from '@/components/Common/LandingPlanCards';
 import PlanCheckoutButton from '@/components/Common/PlanCheckoutButton';
 import LandingReviews from '@/components/Common/LandingReviews';
@@ -324,6 +325,7 @@ export default function EmbroiderySubscriptionPage() {
       <a className='skip' href='#main'>
         Skip to content
       </a>
+      <TrackUserEvent type='pricing_view' source='embroidery-subscription' />
 
       <svg
         width='0'

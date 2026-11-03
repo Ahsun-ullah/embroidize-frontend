@@ -3,6 +3,22 @@ import { ErrorToast } from '@/components/Common/ErrorToast';
 import { SuccessToast } from '@/components/Common/SuccessToast';
 import UserTable from '@/components/Common/Table';
 import ExportFieldsModal from '@/features/admin/ExportFieldsModal';
+import UserTimelineModal from '@/features/users/UserTimelineModal';
+import ZohoPushModal from '@/features/users/ZohoPushModal';
+import BehaviourFilters, {
+  BEHAVIOUR_NUMBER_KEYS,
+  CHECKOUT_LABELS,
+  CHECKOUT_OPTIONS,
+  MARKETING_LABELS,
+  MARKETING_OPTIONS,
+  EVER_DOWNLOADED_OPTIONS,
+  SIGNUP_CHANNEL_LABELS,
+  SIGNUP_CHANNEL_OPTIONS,
+  SUB_STATE_LABELS,
+  SUB_STATE_OPTIONS,
+  matchingPreset,
+} from '@/features/users/BehaviourFilters';
+import SavedSegmentsMenu from '@/features/users/SavedSegmentsMenu';
 import {
   readUserFilters,
   userFiltersToQuery,
@@ -23,7 +39,7 @@ import {
   User,
   useDisclosure,
 } from '@heroui/react';
-import { Download, Search, X } from 'lucide-react';
+import { Download, Search, Send, X } from 'lucide-react';
 import AddCreditsModal from '@/features/admin/AddCreditsModal';
 import GrantAccessModal from '@/features/admin/GrantAccessModal';
 import Cookies from 'js-cookie';
@@ -69,7 +85,13 @@ const labelOf = (options, value) =>
   options.find(([v]) => v === (value || ''))?.[1] || 'All';
 
 // Text inputs wait for a pause in typing before they reload the page.
-const TEXT_FILTERS = ['search', 'country', 'minDownloads', 'maxDownloads'];
+const TEXT_FILTERS = [
+  'search',
+  'country',
+  'minDownloads',
+  'maxDownloads',
+  ...BEHAVIOUR_NUMBER_KEYS,
+];
 
 // ─── Export fields ────────────────────────────────────────────────────────────
 
@@ -134,6 +156,33 @@ const USER_EXPORT_FIELDS = [
   { key: 'credits', label: 'Download credits', group: 'Usage', get: (u) => u.downloadCredits ?? 0 },
   { key: 'creditsExpire', label: 'Credits expire', group: 'Usage', get: (u) => isoDay(u.creditsExpireAt) },
   { key: 'creditsEver', label: 'Ever bought credits', group: 'Usage', get: (u) => !!u.creditsEverGranted },
+
+  // Behaviour: counted over the window chosen in the filters (default 30 days)
+  { key: 'windowDays', label: 'Window (days)', group: 'Behaviour', get: (u) => u.activity?.windowDays },
+  { key: 'windowDownloads', label: 'Downloads in window', group: 'Behaviour', default: true, get: (u) => u.activity?.downloads ?? 0 },
+  { key: 'windowDownloadDays', label: 'Download days in window', group: 'Behaviour', default: true, get: (u) => u.activity?.downloadDays ?? 0 },
+  { key: 'windowFree', label: 'Free downloads in window', group: 'Behaviour', get: (u) => u.activity?.freeDownloads ?? 0 },
+  { key: 'subState', label: 'Subscription state', group: 'Behaviour', default: true, get: (u) => SUB_STATE_LABELS[u.subscriptionState] || '' },
+  { key: 'designViews', label: 'Design views in window', group: 'Behaviour', get: (u) => u.activity?.designViews ?? 0 },
+  { key: 'pricingViews', label: 'Pricing visits in window', group: 'Behaviour', get: (u) => u.activity?.pricingViews ?? 0 },
+  { key: 'checkoutState', label: 'Checkout in window', group: 'Behaviour', get: (u) => CHECKOUT_LABELS[u.activity?.checkoutState] ?? '' },
+  { key: 'lastCheckoutStart', label: 'Last checkout started', group: 'Behaviour', get: (u) => isoDay(u.activity?.lastCheckoutStart) },
+  { key: 'limitHits', label: 'Limit hits in window', group: 'Behaviour', get: (u) => u.activity?.limitHits ?? 0 },
+  { key: 'premiumBlocked', label: 'Premium tries in window', group: 'Behaviour', get: (u) => u.activity?.premiumBlocked ?? 0 },
+  { key: 'lastSeen', label: 'Last seen', group: 'Behaviour', get: (u) => isoDay(u.lastSeenAt) },
+  { key: 'lastLogin', label: 'Last sign-in', group: 'Behaviour', get: (u) => isoDay(u.lastLoginAt) },
+
+  // Email
+  { key: 'marketingState', label: 'Offer emails', group: 'Email', get: (u) => MARKETING_LABELS[u.marketingState] || '' },
+  { key: 'marketingEmailable', label: 'Can receive offers', group: 'Email', get: (u) => !!u.marketingEmailable },
+
+  // Signup source (first touch, saved when the account was created)
+  { key: 'signupChannel', label: 'Came from', group: 'Signup source', get: (u) => SIGNUP_CHANNEL_LABELS[u.signupChannel] || 'Not recorded' },
+  { key: 'utmSource', label: 'UTM source', group: 'Signup source', get: (u) => u.signupSource?.utmSource || '' },
+  { key: 'utmMedium', label: 'UTM medium', group: 'Signup source', get: (u) => u.signupSource?.utmMedium || '' },
+  { key: 'utmCampaign', label: 'UTM campaign', group: 'Signup source', get: (u) => u.signupSource?.utmCampaign || '' },
+  { key: 'referrer', label: 'Referring site', group: 'Signup source', get: (u) => u.signupSource?.referrer || '' },
+  { key: 'landing', label: 'First page', group: 'Signup source', get: (u) => u.signupSource?.landing || '' },
 ];
 
 const EXPORT_PAGE_SIZE = 500;
@@ -273,7 +322,9 @@ export default function UsersTableWrapper({
     Object.keys(filters).forEach((k) => {
       if (k !== 'blocked') changes[k] = '';
     });
-    setDrafts({ search: '', country: '', minDownloads: '', maxDownloads: '' });
+    const emptyDrafts = {};
+    TEXT_FILTERS.forEach((k) => (emptyDrafts[k] = ''));
+    setDrafts(emptyDrafts);
     pushFilters(changes);
   };
 
@@ -294,6 +345,12 @@ export default function UsersTableWrapper({
   };
 
   const [blockConfirm, setBlockConfirm] = useState(null);
+  const [timelineUser, setTimelineUser] = useState(null);
+  const {
+    isOpen: isZohoOpen,
+    onOpen: onZohoOpen,
+    onClose: onZohoClose,
+  } = useDisclosure();
   const [isBlocking, setIsBlocking] = useState(false);
 
   // ── Manual "Grant / Extend Access" ────────────────────────────────────────
@@ -452,6 +509,54 @@ export default function UsersTableWrapper({
           </span>
         );
       }
+      case 'activity': {
+        const a = user.activity || {};
+        return (
+          <div className='flex flex-col text-xs'>
+            <span className='font-semibold text-gray-900'>
+              {a.downloads ?? 0} download{a.downloads === 1 ? '' : 's'}
+            </span>
+            <span className='text-gray-500'>
+              {a.downloadDays ?? 0} day{a.downloadDays === 1 ? '' : 's'} · {a.freeDownloads ?? 0} free
+            </span>
+            <span className='text-gray-400'>
+              Last: {user.lastDownloadAt ? isoDay(user.lastDownloadAt) : 'never'}
+            </span>
+            {(a.designViews > 0 || a.pricingViews > 0) && (
+              <span className='text-gray-500'>
+                {a.designViews ?? 0} views · {a.pricingViews ?? 0} pricing
+              </span>
+            )}
+            {(a.checkoutState === 'abandoned' || a.limitHits > 0 || a.premiumBlocked > 0) && (
+              <span className='font-semibold text-amber-700'>
+                {[
+                  a.checkoutState === 'abandoned' ? 'Abandoned checkout' : '',
+                  a.limitHits > 0 ? `${a.limitHits} limit hits` : '',
+                  a.premiumBlocked > 0 ? `${a.premiumBlocked} premium tries` : '',
+                ]
+                  .filter(Boolean)
+                  .join(' · ')}
+              </span>
+            )}
+          </div>
+        );
+      }
+      case 'subscriptionState': {
+        const st = user.subscriptionState;
+        const tone =
+          st === 'active'
+            ? 'bg-green-100 text-green-800'
+            : st === 'cancelling' || st === 'payment_failed'
+              ? 'bg-amber-100 text-amber-800'
+              : st === 'lapsed'
+                ? 'bg-red-100 text-red-700'
+                : 'bg-gray-100 text-gray-600';
+        return (
+          <span className={`rounded-full px-2 py-0.5 text-xs font-semibold ${tone}`}>
+            {SUB_STATE_LABELS[st] || '—'}
+          </span>
+        );
+      }
       case 'id':
         return <span>{user._id}</span>;
       case 'actions':
@@ -469,6 +574,12 @@ export default function UsersTableWrapper({
                   onPress={() => handleOpenModal(user)}
                 >
                   More Info
+                </DropdownItem>
+                <DropdownItem
+                  key='timeline'
+                  onPress={() => setTimelineUser(user)}
+                >
+                  Activity timeline
                 </DropdownItem>
                 {/* Manual payments: convert any user into a subscriber. Lives
                     here as well as on the Subscribers page because a first-time
@@ -537,8 +648,49 @@ export default function UsersTableWrapper({
     if (f.maxDownloads) parts.push(`≤ ${f.maxDownloads} downloads`);
     if (f.startDate || f.endDate)
       parts.push(`Joined ${f.startDate || '…'} to ${f.endDate || '…'}`);
+    const preset = matchingPreset(f);
+    if (preset) parts.push(`Preset: ${preset.label}`);
+    const win = `in ${f.window || 30} days`;
+    if (f.winMin) parts.push(`≥ ${f.winMin} downloads ${win}`);
+    if (f.winMax) parts.push(`≤ ${f.winMax} downloads ${win}`);
+    if (f.daysMin) parts.push(`≥ ${f.daysMin} download days ${win}`);
+    if (f.daysMax) parts.push(`≤ ${f.daysMax} download days ${win}`);
+    if (f.freeMin) parts.push(`≥ ${f.freeMin} free downloads ${win}`);
+    if (f.inactiveDays) parts.push(`No download for ${f.inactiveDays} days`);
+    if (f.everDownloaded)
+      parts.push(labelOf(EVER_DOWNLOADED_OPTIONS, f.everDownloaded));
+    if (f.subState)
+      parts.push(`Subscription: ${labelOf(SUB_STATE_OPTIONS, f.subState)}`);
+    if (f.viewsMin) parts.push(`≥ ${f.viewsMin} design views ${win}`);
+    if (f.pricingMin) parts.push(`≥ ${f.pricingMin} pricing visits ${win}`);
+    if (f.limitHitsMin) parts.push(`≥ ${f.limitHitsMin} limit hits ${win}`);
+    if (f.premiumMin) parts.push(`≥ ${f.premiumMin} premium tries ${win}`);
+    if (f.checkout) parts.push(`Checkout: ${labelOf(CHECKOUT_OPTIONS, f.checkout)}`);
+    if (f.notSeenDays) parts.push(`Not on site for ${f.notSeenDays} days`);
+    if (f.marketing) parts.push(`Offer emails: ${labelOf(MARKETING_OPTIONS, f.marketing)}`);
+    if (f.signupChannel)
+      parts.push(`Came from: ${labelOf(SIGNUP_CHANNEL_OPTIONS, f.signupChannel)}`);
+    if (f.utmCampaign) parts.push(`Campaign "${f.utmCampaign}"`);
     return parts;
   }, [filters, planOptions]);
+
+  // The filters as a query string (what a saved segment stores). Blocked view
+  // is a tab, not a filter, so it stays out.
+  const segmentQuery = useMemo(() => {
+    const rest = { ...filters };
+    delete rest.blocked;
+    return userFiltersToQuery(rest).toString();
+  }, [filters]);
+
+  const openSegment = useCallback(
+    (query) => {
+      const params = new URLSearchParams(query);
+      if (blockedView) params.set('blocked', '1');
+      params.set('page', '1');
+      router.push(`?${params.toString()}`);
+    },
+    [router, blockedView],
+  );
 
   const hasNarrowingFilter = Object.keys(filters).some(
     (k) => k !== 'sort' && k !== 'blocked',
@@ -589,7 +741,12 @@ export default function UsersTableWrapper({
             Blocked Users
           </Button>
         </div>
-        <div className='flex gap-2'>
+        <div className='flex flex-wrap gap-2'>
+          <SavedSegmentsMenu
+            page='users'
+            currentQuery={segmentQuery}
+            onOpen={openSegment}
+          />
           {hasNarrowingFilter && (
             <Button
               size='sm'
@@ -608,6 +765,14 @@ export default function UsersTableWrapper({
             onPress={onExportOpen}
           >
             Export
+          </Button>
+          <Button
+            size='sm'
+            variant='flat'
+            startContent={<Send size={14} />}
+            onPress={onZohoOpen}
+          >
+            Send to Zoho
           </Button>
         </div>
       </div>
@@ -723,6 +888,13 @@ export default function UsersTableWrapper({
           onChange={(e) => handleFilterChange('endDate', e.target.value)}
         />
       </div>
+
+      <BehaviourFilters
+        filters={filters}
+        drafts={drafts}
+        setDraft={setDraft}
+        pushFilters={pushFilters}
+      />
     </div>
   );
 
@@ -759,6 +931,21 @@ export default function UsersTableWrapper({
         filenameBase='users'
         storageKey='embroidize.usersExport.fields'
       />
+
+      <ZohoPushModal
+        isOpen={isZohoOpen}
+        onClose={onZohoClose}
+        matchCount={pagination?.total ?? 0}
+        filterSummary={filterSummary}
+        loadRows={(onProgress) => loadExportRows('filtered', onProgress)}
+      />
+
+      {timelineUser && (
+        <UserTimelineModal
+          user={timelineUser}
+          onClose={() => setTimelineUser(null)}
+        />
+      )}
 
       {creditUser && (
         <AddCreditsModal

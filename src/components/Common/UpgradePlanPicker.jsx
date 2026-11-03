@@ -65,6 +65,8 @@ export default function UpgradePlanPicker({
   plans = [],
   ctaLabel = 'Upgrade to Pro',
   showTrust = true,
+  // Labels the checkout on the admin tracking pages: limit_popup, my_plan...
+  source,
 }) {
   const router = useRouter();
   const pathName = usePathname();
@@ -98,7 +100,7 @@ export default function UpgradePlanPicker({
     }
     setBusy(true);
     try {
-      await startSubscriptionCheckout(selected, pathName);
+      await startSubscriptionCheckout(selected, pathName, source);
       // Leaving the page — keep the button disabled until it goes.
     } catch (err) {
       console.error('Checkout error:', err);

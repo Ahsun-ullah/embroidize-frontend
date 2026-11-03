@@ -346,6 +346,7 @@ export default function MyPlanPage() {
 
               <UpgradePlanPicker
                 plans={plans}
+                source='my_plan'
                 ctaLabel={
                   isLimitReached ? 'Skip the wait with Pro' : 'Upgrade to Pro'
                 }

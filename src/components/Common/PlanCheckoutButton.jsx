@@ -15,7 +15,8 @@ import { useState } from 'react';
  * sends the visitor there if the checkout cannot be created — that page shows
  * an active plan and the other ways to pay.
  */
-export default function PlanCheckoutButton({ plan, className, children }) {
+// `source` labels the button on the admin tracking pages; defaults to the page.
+export default function PlanCheckoutButton({ plan, className, children, source }) {
   const [busy, setBusy] = useState(false);
   const pathName = usePathname();
 
@@ -38,7 +39,7 @@ export default function PlanCheckoutButton({ plan, className, children }) {
   const handleClick = async () => {
     setBusy(true);
     try {
-      await startSubscriptionCheckout(plan, pathName);
+      await startSubscriptionCheckout(plan, pathName, source);
       // Leaving the page — keep the button disabled until it goes.
     } catch (err) {
       console.error('Checkout error:', err);

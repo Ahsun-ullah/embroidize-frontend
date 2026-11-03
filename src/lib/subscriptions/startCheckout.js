@@ -2,6 +2,7 @@
 
 import { getMetaBrowserIds } from '@/lib/analytics/metaBrowserIds';
 import { trackSubscriptionCheckout } from '@/lib/analytics/subscriptionCheckout';
+import { sourceFromPath, trackUserEvent } from '@/lib/analytics/userEvents';
 import Cookies from 'js-cookie';
 
 // Starts the gateway checkout for one subscription plan — shared by the
@@ -13,8 +14,13 @@ import Cookies from 'js-cookie';
 //   'redirecting' — checkout created and tracked; the browser is on its way to
 //                   the gateway
 // Throws when the checkout could not be created.
-export async function startSubscriptionCheckout(plan, returnPath) {
+//
+// `source` names the button for the admin tracking pages (pricing, limit_popup,
+// my_plan, ...); without one it is derived from the page path.
+export async function startSubscriptionCheckout(plan, returnPath, source) {
   const token = Cookies.get('token');
+  const from = source || sourceFromPath(returnPath);
+  trackUserEvent('plan_click', { planId: plan?._id, source: from });
   if (!token) {
     window.location.href = `/auth/login?pathName=${returnPath}`;
     return 'login';
@@ -31,7 +37,11 @@ export async function startSubscriptionCheckout(plan, returnPath) {
       // Canonical planId — the backend resolves the active gateway's product.
       // _fbp/_fbc ride along for the server-side Meta Purchase the payment
       // webhook sends (it has no browser of its own).
-      body: JSON.stringify({ planId: plan._id, ...getMetaBrowserIds() }),
+      body: JSON.stringify({
+        planId: plan._id,
+        source: from,
+        ...getMetaBrowserIds(),
+      }),
     },
   );
 
