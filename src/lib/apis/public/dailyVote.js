@@ -44,10 +44,13 @@ export function votePageUrl(designSlug) {
 
 // The preview picture a pasted link shows. `day` is part of the URL so
 // Facebook and WhatsApp, which cache images by URL, fetch a new one each day.
-export function voteShareImageUrl({ design, mode, day } = {}) {
+// format: 'link' (1200x630, default) | 'square' (1080x1080 feed post)
+//       | 'portrait' (1080x1350 tall feed post)
+export function voteShareImageUrl({ design, mode, day, format } = {}) {
   const params = new URLSearchParams();
   if (design) params.set('design', design);
   if (mode) params.set('mode', mode);
+  if (format && format !== 'link') params.set('format', format);
   if (day) params.set('d', day);
   const qs = params.toString();
   return `${BASE}/public/daily-vote/share-image${qs ? `?${qs}` : ''}`;

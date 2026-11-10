@@ -3,7 +3,7 @@ import {
   voteShareImageUrl,
   VOTE_PAGE_PATH,
 } from '@/lib/apis/public/dailyVote';
-import { ArrowRight, Info } from 'lucide-react';
+import { ArrowRight, Info, Vote } from 'lucide-react';
 import Link from 'next/link';
 import VoteCountdown from './VoteCountdown';
 import { EmptyVoteSlot, FreeTodayCard, VoteCard } from './VoteCards';
@@ -77,7 +77,7 @@ export default function DailyFreeVoteBoard({
         ))}
       </div>
 
-      <div className='mt-6 flex flex-col items-center gap-4'>
+      <div className='mt-5 flex flex-col items-center gap-3'>
         <p className='flex items-center gap-1.5 text-sm text-gray-500'>
           <Info className='h-4 w-4' aria-hidden />
           One vote per member daily · Vote for any premium design · Votes reset
@@ -89,12 +89,18 @@ export default function DailyFreeVoteBoard({
           text='Vote for the embroidery design you want FREE tomorrow on Embroidize! 🧵'
         />
         {isHome && (
+          // The way into the vote: big and bright, so nobody
+          // has to guess where to go to pick a design.
           <Link
-            href={VOTE_PAGE_PATH}
-            className='inline-flex items-center gap-1.5 text-sm font-bold text-gray-900 underline-offset-4 hover:underline'
+            href={`${VOTE_PAGE_PATH}#vote-any-design`}
+            className='group inline-flex items-center gap-3 rounded-2xl bg-gradient-to-r from-amber-400 via-amber-300 to-yellow-300 px-7 py-4 text-base font-extrabold text-black shadow-lg shadow-amber-300/60 ring-4 ring-amber-200 transition hover:scale-[1.03] hover:shadow-xl sm:text-lg'
           >
-            See the full leaderboard{' '}
-            <ArrowRight className='h-4 w-4' aria-hidden />
+            <Vote className='h-6 w-6' aria-hidden />
+            Vote now: pick your favorite design
+            <ArrowRight
+              className='h-5 w-5 transition-transform group-hover:translate-x-1'
+              aria-hidden
+            />
           </Link>
         )}
       </div>

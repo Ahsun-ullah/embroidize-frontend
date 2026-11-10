@@ -54,7 +54,18 @@ const Thumb = ({ p, size = 48 }) =>
     />
   );
 
-function CopyBox({ title, text, imageUrl, imageName }) {
+// The sizes each network wants. Square is the safe default for a Facebook
+// page or group post; the link size is what a pasted link shows by itself.
+const IMAGE_SIZES = [
+  { format: 'square', label: 'Post 1080×1080' },
+  { format: 'portrait', label: 'Tall 1080×1350' },
+  { format: 'link', label: 'Link 1200×630' },
+];
+
+function CopyBox({ title, text, image }) {
+  const imageUrl = image
+    ? voteShareImageUrl({ ...image, format: 'square' })
+    : null;
   const [copied, setCopied] = useState(false);
   const copy = async () => {
     try {
@@ -70,17 +81,6 @@ function CopyBox({ title, text, imageUrl, imageName }) {
       <div className='mb-2 flex items-center justify-between gap-2'>
         <p className='font-bold'>{title}</p>
         <div className='flex gap-2'>
-          {imageUrl && (
-            <a
-              href={imageUrl}
-              download={imageName}
-              target='_blank'
-              rel='noreferrer'
-              className='inline-flex items-center gap-1 rounded-lg border px-3 py-1.5 text-sm font-semibold hover:bg-gray-50'
-            >
-              <Download className='h-4 w-4' /> Image
-            </a>
-          )}
           <button
             type='button'
             onClick={copy}
@@ -99,13 +99,29 @@ function CopyBox({ title, text, imageUrl, imageName }) {
         {text}
       </pre>
       {imageUrl && (
-        // eslint-disable-next-line @next/next/no-img-element
-        <img
-          src={imageUrl}
-          alt=''
-          className='mt-3 w-full max-w-md rounded-xl border'
-          loading='lazy'
-        />
+        <>
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img
+            src={imageUrl}
+            alt=''
+            className='mt-3 w-full max-w-sm rounded-xl border'
+            loading='lazy'
+          />
+          <div className='mt-3 flex flex-wrap gap-2'>
+            {IMAGE_SIZES.map((sz) => (
+              <a
+                key={sz.format}
+                href={voteShareImageUrl({ ...image, format: sz.format })}
+                download={`${image.name}-${sz.format}.jpg`}
+                target='_blank'
+                rel='noreferrer'
+                className='inline-flex items-center gap-1 rounded-lg border px-3 py-1.5 text-sm font-semibold hover:bg-gray-50'
+              >
+                <Download className='h-4 w-4' /> {sz.label}
+              </a>
+            ))}
+          </div>
+        </>
       )}
     </div>
   );
@@ -438,15 +454,17 @@ export default function DailyVoteAdmin() {
             <CopyBox
               title="Morning: today's free design"
               text={winnerPost}
-              imageUrl={voteShareImageUrl({ mode: 'winner', day: data.day })}
-              imageName={`free-design-${data.day}.jpg`}
+              image={{
+                mode: 'winner',
+                day: data.day,
+                name: `free-design-${data.day}`,
+              }}
             />
           )}
           <CopyBox
             title='Vote now'
             text={votePost}
-            imageUrl={voteShareImageUrl({ day: data.day })}
-            imageName={`vote-${data.day}.jpg`}
+            image={{ day: data.day, name: `vote-${data.day}` }}
           />
           {lastCallPost && (
             <CopyBox title='Evening: last call' text={lastCallPost} />

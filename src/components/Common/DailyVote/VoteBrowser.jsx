@@ -6,7 +6,7 @@ import {
   ChevronRight,
   Crown,
   Gift,
-  Heart,
+  Vote,
   Search,
   X,
 } from 'lucide-react';
@@ -88,11 +88,7 @@ function VoteTile({ product }) {
           <Crown size={10} className='fill-amber-400 text-amber-400' /> Pro
         </span>
         <span className='absolute right-2 top-2 inline-flex items-center gap-1 rounded-full bg-white/95 px-2 py-1 text-[11px] font-bold text-gray-800 shadow-sm'>
-          <Heart
-            className='h-3 w-3 fill-amber-400 text-amber-500'
-            aria-hidden
-          />{' '}
-          {votes}
+          <Vote className='h-3 w-3 text-amber-600' aria-hidden /> {votes}
         </span>
       </Link>
       <div className='flex flex-1 flex-col gap-2 p-3'>

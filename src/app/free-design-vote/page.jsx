@@ -12,7 +12,7 @@ import {
 } from '@/lib/apis/public/dailyVote';
 import { getCategories } from '@/lib/apis/public/category';
 import { getSingleProduct } from '@/lib/apis/public/products';
-import { Download, Heart, Trophy } from 'lucide-react';
+import { Download, Vote, Trophy } from 'lucide-react';
 import Image from 'next/image';
 import Link from 'next/link';
 
@@ -164,7 +164,7 @@ export default async function FreeDesignVotePage({ searchParams }) {
           <div className='mt-6 grid gap-4 sm:grid-cols-3'>
             {[
               {
-                icon: Heart,
+                icon: Vote,
                 t: 'Vote once a day',
                 d: 'Log in, find any premium design below and vote for it. One vote a day.',
               },

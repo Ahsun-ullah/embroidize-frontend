@@ -4,7 +4,7 @@ import { ErrorToast } from '@/components/Common/ErrorToast';
 import { SuccessToast } from '@/components/Common/SuccessToast';
 import { castDailyVote, useMyDailyVote } from '@/lib/hooks/useDailyVote';
 import { bumpDailyVoteCount } from '@/lib/hooks/useDailyVoteCounts';
-import { Check, Heart } from 'lucide-react';
+import { Check, Vote } from 'lucide-react';
 import { usePathname, useRouter, useSearchParams } from 'next/navigation';
 import { useState } from 'react';
 
@@ -78,7 +78,7 @@ export default function VoteButton({
         className={`${base} cursor-not-allowed bg-gray-100 text-gray-500`}
         title={`You voted for ${votedFor?.name || 'another design'} today`}
       >
-        <Heart className='h-5 w-5' aria-hidden />{' '}
+        <Vote className='h-5 w-5' aria-hidden />{' '}
         {small ? 'Voted today' : 'Voted today · back tomorrow'}
       </button>
     );
@@ -90,7 +90,7 @@ export default function VoteButton({
       disabled={busy || (isLoggedIn && !loaded)}
       className={`${base} bg-amber-400 text-black shadow-sm hover:bg-amber-500 disabled:opacity-60`}
     >
-      <Heart className='h-5 w-5' aria-hidden />
+      <Vote className='h-5 w-5' aria-hidden />
       {busy ? 'Voting…' : isLoggedIn || small ? 'Vote' : 'Log in to vote'}
     </button>
   );

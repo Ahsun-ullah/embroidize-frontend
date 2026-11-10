@@ -245,7 +245,7 @@ export default async function Home() {
 
       {/* Daily free-design vote. Hidden when switched off or unreachable. */}
       {dailyVoteBoard?.enabled && (
-        <section id='free-design-vote' className='py-10 sm:py-14'>
+        <section id='free-design-vote' className='pt-8 pb-6 sm:pt-10 sm:pb-8'>
           <DailyFreeVoteBoard board={dailyVoteBoard} variant='home' />
         </section>
       )}
