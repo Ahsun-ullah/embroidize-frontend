@@ -355,6 +355,11 @@ export default function AdminSidebar({ isCollapsed, setIsCollapsed }) {
               icon: 'ri-instagram-line',
             },
             {
+              href: '/admin/daily-vote',
+              label: 'Daily Free Vote',
+              icon: 'ri-trophy-line',
+            },
+            {
               href: '/admin/contact-submissions',
               label: 'Contact Submissions',
               icon: 'ri-mail-line',
