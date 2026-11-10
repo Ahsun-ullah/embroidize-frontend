@@ -1,17 +1,17 @@
+import HomeEventSections from '@/components/Common/EventPromotions/HomeEventSections';
 import AdminChoiceDesign from '@/components/user/HomePage/AdminChoiceSection';
 import BrowseCategories from '@/components/user/HomePage/BrowseCategories';
 import CustomDigitizingBanner from '@/components/user/HomePage/CustomDigitizingBanner';
 import Footer from '@/components/user/HomePage/Footer';
+import Header from '@/components/user/HomePage/Header';
 import HeroMembershipCard from '@/components/user/HomePage/HeroMembershipCard';
 import HomeSection, { HOME_GRID } from '@/components/user/HomePage/HomeSection';
-import Header from '@/components/user/HomePage/Header';
 import MostFavoritedDesigns from '@/components/user/HomePage/MostFavoritedDesigns';
 import PopularDesign from '@/components/user/HomePage/PopularDesign';
 import RecentBundleSection from '@/components/user/HomePage/RecentBundleSection';
 import RecentProductsSection from '@/components/user/HomePage/RecentProductsSection';
-import HomeEventSections from '@/components/Common/EventPromotions/HomeEventSections';
-import { getActiveEventPromotions } from '@/lib/apis/public/eventPromotions';
 import { getAllBundlesForDashboard } from '@/lib/apis/protected/bundles';
+import { getActiveEventPromotions } from '@/lib/apis/public/eventPromotions';
 import {
   getAdminChoiceProducts,
   getMostFavoritedProducts,
@@ -94,9 +94,9 @@ export default async function Home() {
     eventPromotionsPromise,
   ] = [
     getPopularProducts('', 1, 8, { cache: 'no-store' }),
-    getAdminChoiceProducts('', 1, 8, { cache: 'no-store' }),
+    getAdminChoiceProducts('', 1, 4, { cache: 'no-store' }),
     getProducts('', 1, 8, { cache: 'no-store' }),
-    getAllBundlesForDashboard('', 1, 8, { cache: 'no-store' }),
+    getAllBundlesForDashboard('', 1, 4, { cache: 'no-store' }),
     getMostFavoritedProducts('', 1, 8, { cache: 'no-store' }),
     getActiveEventPromotions(),
   ];
@@ -273,6 +273,20 @@ export default async function Home() {
       ) : null}
 
       <HomeSection
+        id='recent-designs-heading'
+        title='Recently Added Designs'
+        subtitle='Our newest creations, just for you.'
+        viewAllHref='/products?since=30'
+        viewAllLabel='View All New Designs'
+      >
+        {recentProducts?.products?.length ? (
+          <RecentProductsSection recentProducts={recentProducts} />
+        ) : (
+          <GridSkeleton />
+        )}
+      </HomeSection>
+
+      <HomeSection
         id='embroidize-choice-heading'
         title='Embroidize Choice Designs'
         subtitle='Best designs we recommend.'
@@ -296,20 +310,6 @@ export default async function Home() {
       >
         {bundles?.bundles?.length ? (
           <RecentBundleSection recentBundles={bundles} />
-        ) : (
-          <GridSkeleton />
-        )}
-      </HomeSection>
-
-      <HomeSection
-        id='recent-designs-heading'
-        title='Recently Added Designs'
-        subtitle='Our newest creations, just for you.'
-        viewAllHref='/products?since=30'
-        viewAllLabel='View All New Designs'
-      >
-        {recentProducts?.products?.length ? (
-          <RecentProductsSection recentProducts={recentProducts} />
         ) : (
           <GridSkeleton />
         )}

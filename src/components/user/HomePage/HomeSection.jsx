@@ -41,7 +41,7 @@ export function SectionHeader({
           <h2
             id={id}
             style={{ fontFamily: 'Georgia, serif' }}
-            className='text-xl font-bold leading-tight tracking-tight text-neutral-900 sm:text-2xl lg:text-3xl'
+            className='text-xl font-bold leading-tight tracking-tight text-neutral-900 sm:text-2xl lg:text-2xl'
           >
             {title}
           </h2>
