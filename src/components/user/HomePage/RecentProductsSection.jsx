@@ -1,37 +1,16 @@
-import LoadingSpinner from '@/components/Common/LoadingSpinner';
 import ProductCard from '@/components/Common/ProductCard';
-import Link from 'next/link';
-import { Suspense } from 'react';
+import { HOME_GRID } from './HomeSection';
 
+// Grid only — the header and "View all" link come from HomeSection.
 const RecentProductsSection = ({ recentProducts }) => {
-  const { products: allProducts } = recentProducts;
+  const items = recentProducts?.products || [];
 
   return (
-    <>
-      <section className='text-black my-8 py-6'>
-        <div className='container mx-auto px-4'>
-          <div className='grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6'>
-            <Suspense fallback={<LoadingSpinner />}>
-              {allProducts?.length > 0 &&
-                allProducts.map((item, index) => (
-                  // <ProductCard key={item._id || index} item={item} />
-                  <ProductCard key={item._id} item={item} index={index} />
-                ))}
-            </Suspense>
-          </div>
-
-          <div className='text-center mt-12'>
-            <Link
-              href={'/products?since=30'}
-              prefetch={false}
-              className='inline-flex items-center justify-center rounded-full bg-black px-8 py-4 text-base font-bold text-white hover:bg-gray-800 transition-all'
-            >
-              View All Designs →
-            </Link>
-          </div>
-        </div>
-      </section>
-    </>
+    <div className={HOME_GRID}>
+      {items.map((item, index) => (
+        <ProductCard key={item._id} item={item} index={index} />
+      ))}
+    </div>
   );
 };
 

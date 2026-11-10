@@ -5,9 +5,10 @@ import {
   getCachedCategories,
   setCachedCategories,
 } from '@/lib/utils/categoryCache';
-import { ArrowRight, MoreHorizontal } from 'lucide-react';
+import { MoreHorizontal } from 'lucide-react';
 import Link from 'next/link';
 import { useEffect, useMemo, useState } from 'react';
+import HomeSection from './HomeSection';
 
 // Strip the trailing "Embroidery Design(s)" the same way the rest of the app does.
 const cleanName = (name = '') =>
@@ -37,13 +38,13 @@ const getCount = (c) => {
 
 function CategoriesSkeleton() {
   return (
-    <div className='grid grid-cols-2 gap-3 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 xl:grid-cols-9'>
-      {Array.from({ length: 9 }).map((_, i) => (
+    <div className='grid grid-cols-4 gap-2 sm:gap-3 md:grid-cols-5 lg:grid-cols-9'>
+      {Array.from({ length: 8 }).map((_, i) => (
         <div
           key={i}
-          className='flex flex-col items-center rounded-2xl border border-neutral-100 bg-white p-3'
+          className='flex flex-col items-center rounded-xl border border-neutral-100 bg-white p-1.5 sm:p-2.5'
         >
-          <div className='mb-3 aspect-square w-full animate-pulse rounded-xl bg-neutral-100' />
+          <div className='mb-2 aspect-square w-full animate-pulse rounded-lg bg-neutral-100' />
           <div className='h-3 w-3/4 animate-pulse rounded bg-neutral-100' />
           <div className='mt-1.5 h-2.5 w-1/2 animate-pulse rounded bg-neutral-100' />
         </div>
@@ -89,33 +90,18 @@ export default function BrowseCategories({
     [categories, limit],
   );
 
+  // Defined per render as a thin pass-through so the grid and the skeleton
+  // share one header; the real shell lives in HomeSection.
   const Section = ({ children }) => (
-    <section aria-labelledby='browse-categories-heading' className=' bg-white'>
-      <div className='container mx-auto max-w-7xl py-10 sm:py-12'>
-        {/* ── Header row ── */}
-        <div className='mb-6 flex items-center justify-between gap-4'>
-          <h2
-            id='browse-categories-heading'
-            style={{ fontFamily: 'Georgia, serif' }}
-            className='text-2xl sm:text-3xl font-bold tracking-tight text-neutral-900'
-          >
-            Browse Categories
-          </h2>
-          <Link
-            href={viewAllHref}
-            prefetch={false}
-            className='group inline-flex items-center gap-1.5 whitespace-nowrap text-sm font-medium text-neutral-500 transition hover:text-neutral-900'
-          >
-            View All Categories
-            <ArrowRight
-              className='h-4 w-4 transition-transform group-hover:translate-x-0.5'
-              aria-hidden
-            />
-          </Link>
-        </div>
-        {children}
-      </div>
-    </section>
+    <HomeSection
+      id='browse-categories-heading'
+      title='Browse Categories'
+      viewAllHref={viewAllHref}
+      viewAllLabel='View All Categories'
+      tone='white'
+    >
+      {children}
+    </HomeSection>
   );
 
   // While the first fetch is in flight (no cache yet), hold the space.
@@ -132,7 +118,7 @@ export default function BrowseCategories({
 
   return (
     <Section>
-      <div className='grid grid-cols-2 gap-3 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 xl:grid-cols-9'>
+      <div className='grid grid-cols-4 gap-2 sm:gap-3 md:grid-cols-5 lg:grid-cols-9'>
         {visible.map((category) => {
           const name = cleanName(category.name);
           const img = getImage(category);
@@ -144,16 +130,16 @@ export default function BrowseCategories({
               href={`/category/${category.slug}`}
               prefetch={false}
               aria-label={`${name}${count != null ? `, ${count.toLocaleString()} designs` : ''}`}
-              className='group flex flex-col items-center rounded-2xl border border-neutral-100 bg-white p-3 text-center transition-all duration-200 hover:-translate-y-0.5 hover:border-neutral-200 hover:shadow-md focus:outline-none focus-visible:ring-2 focus-visible:ring-neutral-900'
+              className='group flex flex-col items-center rounded-xl border border-neutral-100 bg-white p-1.5 pb-2 text-center sm:p-2.5 transition-all duration-200 hover:-translate-y-0.5 hover:border-neutral-200 hover:shadow-md focus:outline-none focus-visible:ring-2 focus-visible:ring-neutral-900'
             >
-              <div className='relative mb-3 aspect-square w-full overflow-hidden rounded-xl bg-neutral-50'>
+              <div className='relative mb-2 aspect-square w-full overflow-hidden rounded-lg bg-neutral-50'>
                 {img ? (
                   // eslint-disable-next-line @next/next/no-img-element
                   <img
                     src={img}
                     alt={name}
                     loading='lazy'
-                    className='absolute inset-0 h-full w-full object-contain p-2 transition-transform duration-300 group-hover:scale-105'
+                    className='absolute inset-0 h-full w-full object-contain p-1 sm:p-2 transition-transform duration-300 group-hover:scale-105'
                   />
                 ) : (
                   <span className='flex h-full w-full items-center justify-center text-2xl text-neutral-300'>
@@ -162,11 +148,11 @@ export default function BrowseCategories({
                 )}
               </div>
 
-              <span className='text-sm font-semibold capitalize leading-tight text-neutral-800'>
+              <span className='line-clamp-2 text-[11px] font-semibold capitalize leading-tight text-neutral-800 sm:text-xs xl:text-sm'>
                 {name}
               </span>
               {count != null && (
-                <span className='mt-1 text-xs text-neutral-400'>
+                <span className='mt-0.5 text-[10px] text-neutral-400 sm:text-xs'>
                   {count.toLocaleString()} Designs
                 </span>
               )}
@@ -179,22 +165,24 @@ export default function BrowseCategories({
           href={viewAllHref}
           prefetch={false}
           aria-label='More categories, explore more'
-          className='hidden md:flex group flex-col items-center rounded-2xl border border-neutral-100 bg-white p-3 text-center transition-all duration-200 hover:-translate-y-0.5 hover:border-neutral-200 hover:shadow-md focus:outline-none focus-visible:ring-2 focus-visible:ring-neutral-900'
+          className='hidden md:flex group flex-col items-center rounded-xl border border-neutral-100 bg-white p-2.5 text-center transition-all duration-200 hover:-translate-y-0.5 hover:border-neutral-200 hover:shadow-md focus:outline-none focus-visible:ring-2 focus-visible:ring-neutral-900'
         >
-          <div className='relative mb-3 flex aspect-square w-full items-center justify-center overflow-hidden rounded-xl bg-neutral-50'>
-            <span className='flex h-12 w-12 items-center justify-center rounded-full bg-white shadow-sm ring-1 ring-neutral-100 transition-transform duration-300 group-hover:scale-105'>
+          <div className='relative mb-2 flex aspect-square w-full items-center justify-center overflow-hidden rounded-lg bg-neutral-50'>
+            <span className='flex h-10 w-10 items-center justify-center rounded-full bg-white shadow-sm ring-1 ring-neutral-100 transition-transform duration-300 group-hover:scale-105'>
               <MoreHorizontal
-                className='h-6 w-6 text-neutral-400'
+                className='h-5 w-5 text-neutral-400'
                 aria-hidden
               />
             </span>
           </div>
 
-          <span className='text-sm font-semibold leading-tight text-neutral-800'>
+          <span className='text-xs font-semibold leading-tight text-neutral-800 xl:text-sm'>
             More Categories
           </span>
 
-          <span className='mt-1 text-xs text-neutral-400'>Explore more</span>
+          <span className='mt-0.5 text-[10px] text-neutral-400 sm:text-xs'>
+            Explore more
+          </span>
         </Link>
       </div>
     </Section>
