@@ -568,8 +568,8 @@ span {
 .custom-blog-content th {
   background: linear-gradient(
     to right,
-    var(--cd--primary),
-    var(--cd--secondary)
+    var(--text-soft),
+    var(--secondary-color)
   );
   color: #fff;
   padding: 12px;
