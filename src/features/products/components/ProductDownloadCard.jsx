@@ -3,7 +3,7 @@
 import DownloadLimitModal from '@/components/Common/DownloadLimitModal';
 import { isAdminOnlyFormat } from '@/utils/adminOnlyFormats';
 import { ErrorToast } from '@/components/Common/ErrorToast';
-import DesignVotePanel, { FreeTodayNotice } from '@/components/Common/DailyVote/DesignVotePanel';
+import { FreeTodayNotice } from '@/components/Common/DailyVote/DesignVotePanel';
 import FavoriteButton from '@/components/Common/FavoriteButton';
 import { getDailyVoteStanding } from '@/lib/apis/public/dailyVote';
 import LoadingSpinner from '@/components/Common/LoadingSpinner';
@@ -78,9 +78,12 @@ export default function ProductDownloadCard({ data }) {
   // used to live here: that duplicated the rule, ignored the paid-through date,
   // and so disagreed with what the download endpoint actually allowed.
   const accessState = userInfoData?.accessState;
-  const isSubscribed = ['active', 'cancelling', 'lifetime', 'payment_failed'].includes(
-    accessState,
-  );
+  const isSubscribed = [
+    'active',
+    'cancelling',
+    'lifetime',
+    'payment_failed',
+  ].includes(accessState);
   const isAdmin = userInfoData?.role === 'admin';
   // Daily free-design vote: this design's standing today, and whether it is
   // today's winner. A winner downloads free for everyone signed in, so it must
@@ -94,7 +97,8 @@ export default function ProductDownloadCard({ data }) {
       live = false;
     };
   }, [data?._id]);
-  const isVoteFreeToday = voteStanding?.enabled === true && voteStanding?.isFreeToday === true;
+  const isVoteFreeToday =
+    voteStanding?.enabled === true && voteStanding?.isFreeToday === true;
 
   const isPremium = data?.isFree !== true && !isVoteFreeToday;
 
@@ -449,10 +453,6 @@ export default function ProductDownloadCard({ data }) {
           </>
         )}
 
-        {voteStanding?.canBeVoted && (
-          <DesignVotePanel product={data} standing={voteStanding} />
-        )}
-
         {showUpgrade && isAdmin ? (
           <Button
             variant='flat'
@@ -519,7 +519,10 @@ export default function ProductDownloadCard({ data }) {
                 </p>
                 <ol className='list-decimal list-inside space-y-1 text-gray-600'>
                   <li>Tap the three dots (⋯) at the top/bottom</li>
-                  <li>Select &quot;Open in browser&quot; or &quot;Open in Chrome&quot;</li>
+                  <li>
+                    Select &quot;Open in browser&quot; or &quot;Open in
+                    Chrome&quot;
+                  </li>
                   <li>Download your file from there</li>
                 </ol>
               </div>
