@@ -12,9 +12,16 @@ export default function CategoryMenu({ isMobileMenuOpen }) {
   // Initialize to null on both server and client to avoid hydration mismatch.
   // The useEffect below loads from localStorage after hydration completes.
   const [cachedData, setCachedDataState] = useState(null);
+  // The categories query is shared with the home page's Browse Categories
+  // row. When that row's request finishes before the header hydrates, this
+  // component's first client render already has data while the server
+  // rendered nothing — a hydration mismatch. Render nothing until mounted so
+  // the first client render always matches the server.
+  const [mounted, setMounted] = useState(false);
 
   // ✅ Load from localStorage first
   useEffect(() => {
+    setMounted(true);
     const cached = getCachedCategories();
     if (cached) {
       setCachedDataState(cached);
@@ -39,7 +46,7 @@ export default function CategoryMenu({ isMobileMenuOpen }) {
     return cachedData || categoryData?.data || [];
   }, [cachedData, categoryData]);
 
-  if (!categories.length) return null;
+  if (!mounted || !categories.length) return null;
 
   const renderCategoryLink = (category) => {
     const displayName = category.name

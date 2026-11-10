@@ -1,3 +1,4 @@
+import { SectionHeader } from '@/components/user/HomePage/HomeSection';
 import PromoPoster from './PromoPoster';
 
 // Home page event posters for ONE position, in the admin's sort order. The
@@ -8,8 +9,8 @@ import PromoPoster from './PromoPoster';
 //                  2–3 square posters side by side (one alone goes full width)
 //   before_footer  full-width sections after the last product section
 //
-// Full-width sections reuse the other home sections' white header band so a
-// poster reads as part of the page, not an ad slot.
+// Full-width sections reuse the other home sections' header row so a poster
+// reads as part of the page, not an ad slot.
 
 const forPosition = (promotions, position) =>
   promotions.filter(
@@ -23,29 +24,20 @@ function FullWidthSection({ promo, eager }) {
   const hasHeader = promo.sectionTitle || promo.sectionSubtitle;
   return (
     <section
-      aria-labelledby={promo.sectionTitle ? `event-${promo._id}-heading` : undefined}
+      aria-labelledby={
+        promo.sectionTitle ? `event-${promo._id}-heading` : undefined
+      }
       aria-label={promo.sectionTitle ? undefined : promo.name}
-      className='text-black my-8 py-6'
+      className='text-black py-6 sm:py-8'
     >
-      {hasHeader ? (
-        <div className='bg-[#ffffff] flex flex-col items-center justify-center gap-2 py-6 mb-6 px-4 text-center'>
-          {promo.sectionTitle ? (
-            <h2
-              id={`event-${promo._id}-heading`}
-              className='text-2xl sm:text-2xl md:text-3xl font-bold leading-snug'
-            >
-              {promo.sectionTitle}
-            </h2>
-          ) : null}
-          {promo.sectionSubtitle ? (
-            <p className='text-base sm:text-base md:text-lg font-medium text-gray-600'>
-              {promo.sectionSubtitle}
-            </p>
-          ) : null}
-        </div>
-      ) : null}
-
-      <div className='container mx-auto max-w-7xl px-4'>
+      <div className='container mx-auto max-w-7xl'>
+        {hasHeader ? (
+          <SectionHeader
+            id={promo.sectionTitle ? `event-${promo._id}-heading` : undefined}
+            title={promo.sectionTitle}
+            subtitle={promo.sectionSubtitle}
+          />
+        ) : null}
         <PromoPoster promo={promo} eager={eager} />
       </div>
     </section>
@@ -75,51 +67,50 @@ function EventRow({ items }) {
   const compact = perRow > 3;
 
   return (
-    <section aria-labelledby='home-events-row-heading' className='text-black my-8 py-6'>
-      <div className='bg-[#ffffff] flex flex-col items-center justify-center gap-2 py-6 mb-6 px-4 text-center'>
-        <h2
+    <section
+      aria-labelledby='home-events-row-heading'
+      className='text-black py-6 sm:py-8'
+    >
+      <div className='container mx-auto max-w-7xl'>
+        <SectionHeader
           id='home-events-row-heading'
-          className='text-2xl sm:text-2xl md:text-3xl font-bold leading-snug'
-        >
-          Shop by Event
-        </h2>
-        <p className='text-base sm:text-base md:text-lg font-medium text-gray-600'>
-          Seasonal collections, ready for your next project.
-        </p>
-      </div>
-
-      <div
-        className={`container mx-auto max-w-7xl px-4 grid ${compact ? 'gap-4' : 'gap-6'} ${cols}`}
-      >
-        {items.map((promo) => (
-          <div key={promo._id} className='flex flex-col'>
-            <PromoPoster promo={promo} prefer='square' />
-            {promo.sectionTitle || promo.sectionSubtitle ? (
-              <div className='mt-2 px-1 text-center'>
-                {promo.sectionTitle ? (
-                  <h3
-                    className={`font-bold leading-snug ${compact ? 'text-sm' : 'text-lg'}`}
-                  >
-                    {promo.sectionTitle}
-                  </h3>
-                ) : null}
-                {promo.sectionSubtitle ? (
-                  <p
-                    className={`mt-0.5 font-medium text-gray-600 ${compact ? 'text-xs line-clamp-2' : 'text-sm'}`}
-                  >
-                    {promo.sectionSubtitle}
-                  </p>
-                ) : null}
-              </div>
-            ) : null}
-          </div>
-        ))}
+          title='Shop by Event'
+          subtitle='Seasonal collections, ready for your next project.'
+        />
+        <div className={`grid ${compact ? 'gap-3' : 'gap-4'} ${cols}`}>
+          {items.map((promo) => (
+            <div key={promo._id} className='flex flex-col'>
+              <PromoPoster promo={promo} prefer='square' />
+              {promo.sectionTitle || promo.sectionSubtitle ? (
+                <div className='mt-2 px-1 text-center'>
+                  {promo.sectionTitle ? (
+                    <h3
+                      className={`font-bold leading-snug ${compact ? 'text-sm' : 'text-lg'}`}
+                    >
+                      {promo.sectionTitle}
+                    </h3>
+                  ) : null}
+                  {promo.sectionSubtitle ? (
+                    <p
+                      className={`mt-0.5 font-medium text-gray-600 ${compact ? 'text-xs line-clamp-2' : 'text-sm'}`}
+                    >
+                      {promo.sectionSubtitle}
+                    </p>
+                  ) : null}
+                </div>
+              ) : null}
+            </div>
+          ))}
+        </div>
       </div>
     </section>
   );
 }
 
-export default function HomeEventSections({ promotions = [], position = 'after_hero' }) {
+export default function HomeEventSections({
+  promotions = [],
+  position = 'after_hero',
+}) {
   const items = forPosition(promotions, position);
   if (!items.length) return null;
 
