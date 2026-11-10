@@ -1,7 +1,7 @@
 'use client';
 
 import { votePageUrl } from '@/lib/apis/public/dailyVote';
-import { Crown, Download, Gift, Heart, Plus } from 'lucide-react';
+import { Crown, Download, Gift, Vote, Plus } from 'lucide-react';
 
 // Same Free / Pro tag as ProductCard, so a design reads the same everywhere.
 function TierBadge({ product }) {
@@ -166,7 +166,7 @@ export function VoteCard({ entry, highlight = false, showShare = true }) {
           )}
         </div>
         <span className='flex items-center gap-1 rounded-full border border-gray-200 px-3 py-1 text-sm font-semibold text-gray-700'>
-          <Heart className='h-4 w-4' aria-hidden /> {votes || 0}
+          <Vote className='h-4 w-4' aria-hidden /> {votes || 0}
         </span>
       </div>
       <DesignImage product={p} />
@@ -234,8 +234,8 @@ export function EmptyVoteSlot({ rank }) {
         Your favourite could be here
       </p>
       <p className='text-sm text-gray-500'>
-        Open any premium design and tap Vote. The most-voted design is free
-        tomorrow.
+        Pick any premium design on the vote page and tap Vote. The most-voted
+        design is free tomorrow.
       </p>
       <Link
         href='/free-design-vote#vote-any-design'
