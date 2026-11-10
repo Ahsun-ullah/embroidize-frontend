@@ -1,5 +1,6 @@
 import DailyFreeVoteBoard from '@/components/Common/DailyVote/DailyFreeVoteBoard';
 import DesignVotePanel from '@/components/Common/DailyVote/DesignVotePanel';
+import VoteBrowser from '@/components/Common/DailyVote/VoteBrowser';
 import Footer from '@/components/user/HomePage/Footer';
 import Header from '@/components/user/HomePage/Header';
 import {
@@ -9,6 +10,7 @@ import {
   VOTE_PAGE_PATH,
   voteShareImageUrl,
 } from '@/lib/apis/public/dailyVote';
+import { getCategories } from '@/lib/apis/public/category';
 import { getSingleProduct } from '@/lib/apis/public/products';
 import { Download, Heart, Trophy } from 'lucide-react';
 import Image from 'next/image';
@@ -107,13 +109,16 @@ export default async function FreeDesignVotePage({ searchParams }) {
   const sp = await searchParams;
   const design = safeSlug(sp?.design);
 
-  const [board, spotlightProduct] = await Promise.all([
+  const [board, spotlightProduct, categories] = await Promise.all([
     getDailyVoteBoard(24),
     design
       ? getSingleProduct(design)
           .then((r) => r?.data)
           .catch(() => null)
       : null,
+    getCategories('', 0, 100)
+      .then((r) => (Array.isArray(r?.categories) ? r.categories : []))
+      .catch(() => []),
   ]);
   const spotlightStanding = spotlightProduct?._id
     ? await getDailyVoteStanding(spotlightProduct._id)
@@ -150,6 +155,8 @@ export default async function FreeDesignVotePage({ searchParams }) {
           </div>
         )}
 
+        {board?.enabled && <VoteBrowser categories={categories} />}
+
         <section className='container mx-auto max-w-5xl px-4'>
           <h2 className='text-center text-2xl font-extrabold text-gray-900'>
             How it works
@@ -159,7 +166,7 @@ export default async function FreeDesignVotePage({ searchParams }) {
               {
                 icon: Heart,
                 t: 'Vote once a day',
-                d: 'Log in and vote for any premium design, here or from the design’s own page.',
+                d: 'Log in, find any premium design below and vote for it. One vote a day.',
               },
               {
                 icon: Trophy,
@@ -184,7 +191,7 @@ export default async function FreeDesignVotePage({ searchParams }) {
           </div>
           <div className='mt-6 text-center'>
             <Link
-              href='/products'
+              href='#vote-any-design'
               className='inline-flex items-center gap-2 rounded-xl bg-black px-5 py-3 font-bold text-white hover:bg-gray-800'
             >
               Find a design to vote for

@@ -53,7 +53,9 @@ export default function VoteButton({
     }
   };
 
-  const h = size === 'lg' ? 'h-14 text-lg' : 'h-12 text-base';
+  const small = size === 'sm';
+  const h =
+    size === 'lg' ? 'h-14 text-lg' : small ? 'h-10 text-sm' : 'h-12 text-base';
   const base = `inline-flex w-full items-center justify-center gap-2 rounded-xl font-bold transition ${h} ${className}`;
 
   if (votedThis) {
@@ -63,7 +65,8 @@ export default function VoteButton({
         disabled
         className={`${base} cursor-default bg-green-100 text-green-800`}
       >
-        <Check className='h-5 w-5' aria-hidden /> You voted for this today
+        <Check className='h-5 w-5' aria-hidden />{' '}
+        {small ? 'Voted' : 'You voted for this today'}
       </button>
     );
   }
@@ -75,7 +78,8 @@ export default function VoteButton({
         className={`${base} cursor-not-allowed bg-gray-100 text-gray-500`}
         title={`You voted for ${votedFor?.name || 'another design'} today`}
       >
-        <Heart className='h-5 w-5' aria-hidden /> Voted today · back tomorrow
+        <Heart className='h-5 w-5' aria-hidden />{' '}
+        {small ? 'Voted today' : 'Voted today · back tomorrow'}
       </button>
     );
   }
@@ -87,7 +91,7 @@ export default function VoteButton({
       className={`${base} bg-amber-400 text-black shadow-sm hover:bg-amber-500 disabled:opacity-60`}
     >
       <Heart className='h-5 w-5' aria-hidden />
-      {busy ? 'Voting…' : isLoggedIn ? 'Vote' : 'Log in to vote'}
+      {busy ? 'Voting…' : isLoggedIn || small ? 'Vote' : 'Log in to vote'}
     </button>
   );
 }

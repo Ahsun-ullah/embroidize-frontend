@@ -1,7 +1,7 @@
 'use client';
 
 import { getDailyVoteStanding, votePageUrl } from '@/lib/apis/public/dailyVote';
-import { Crown, Gift } from 'lucide-react';
+import { Crown } from 'lucide-react';
 import Link from 'next/link';
 import { useEffect, useState } from 'react';
 import VoteButton from './VoteButton';
@@ -60,27 +60,6 @@ export default function DesignVotePanel({ product, standing: initial = null }) {
         url={votePageUrl(product.slug)}
         text={`Help make "${product.name}" FREE tomorrow! Vote here 👉`}
       />
-    </div>
-  );
-}
-
-/** Shown in place of the upgrade wall while a design is the day's free pick. */
-export function FreeTodayNotice() {
-  return (
-    <div className='flex items-start gap-3 rounded-2xl border border-green-200 bg-green-50 p-4 text-green-900'>
-      <Gift className='mt-0.5 h-5 w-5 shrink-0 text-green-600' aria-hidden />
-      <div>
-        <p className='font-extrabold'>
-          Free today: it won yesterday&apos;s vote
-        </p>
-        <p className='text-sm'>
-          Download it free until midnight UTC. It doesn&apos;t use your download
-          limit.{' '}
-          <Link href='/free-design-vote' className='font-semibold underline'>
-            Vote for tomorrow&apos;s free design
-          </Link>
-        </p>
-      </div>
     </div>
   );
 }

@@ -238,7 +238,7 @@ export function EmptyVoteSlot({ rank }) {
         tomorrow.
       </p>
       <Link
-        href='/products'
+        href='/free-design-vote#vote-any-design'
         className='inline-flex items-center gap-1.5 rounded-xl bg-black px-4 py-2.5 text-sm font-bold text-white hover:bg-gray-800'
       >
         <Plus className='h-4 w-4' aria-hidden /> Pick a design

@@ -3,7 +3,6 @@
 import DownloadLimitModal from '@/components/Common/DownloadLimitModal';
 import { isAdminOnlyFormat } from '@/utils/adminOnlyFormats';
 import { ErrorToast } from '@/components/Common/ErrorToast';
-import { FreeTodayNotice } from '@/components/Common/DailyVote/DesignVotePanel';
 import FavoriteButton from '@/components/Common/FavoriteButton';
 import { getDailyVoteStanding } from '@/lib/apis/public/dailyVote';
 import LoadingSpinner from '@/components/Common/LoadingSpinner';
@@ -419,8 +418,6 @@ export default function ProductDownloadCard({ data }) {
             </span>
           </div>
         )}
-
-        {isVoteFreeToday && <FreeTodayNotice />}
 
         {showUpgrade ? (
           <PremiumDesignBanner onGetAccess={handleGetAllAccess} />
