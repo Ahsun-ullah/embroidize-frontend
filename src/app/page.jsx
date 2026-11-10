@@ -1,3 +1,4 @@
+import DailyFreeVoteBoard from '@/components/Common/DailyVote/DailyFreeVoteBoard';
 import HomeEventSections from '@/components/Common/EventPromotions/HomeEventSections';
 import AdminChoiceDesign from '@/components/user/HomePage/AdminChoiceSection';
 import BrowseCategories from '@/components/user/HomePage/BrowseCategories';
@@ -11,6 +12,7 @@ import PopularDesign from '@/components/user/HomePage/PopularDesign';
 import RecentBundleSection from '@/components/user/HomePage/RecentBundleSection';
 import RecentProductsSection from '@/components/user/HomePage/RecentProductsSection';
 import { getAllBundlesForDashboard } from '@/lib/apis/protected/bundles';
+import { getDailyVoteBoard } from '@/lib/apis/public/dailyVote';
 import { getActiveEventPromotions } from '@/lib/apis/public/eventPromotions';
 import {
   getAdminChoiceProducts,
