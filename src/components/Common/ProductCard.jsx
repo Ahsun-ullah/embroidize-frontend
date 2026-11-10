@@ -9,6 +9,7 @@ import Image from 'next/image';
 import Link from 'next/link';
 import React from 'react';
 import AdminChoiceToggle from './AdminChoiceToggle';
+import CardVoteButton from './DailyVote/CardVoteButton';
 import FavoriteButton from './FavoriteButton';
 import SkuFlag from './SkuFlag';
 
@@ -205,6 +206,17 @@ const ProductCard = React.memo(function ProductCard({ item, index = 0 }) {
             }).format(downloadCount)}
           </span>
         </div>
+      </div>
+
+      {/* Daily free-design vote: vote from the listing, or see that this
+          design is today's free winner. */}
+      <div className='px-4 pb-4 empty:hidden'>
+        <CardVoteButton
+          productId={item._id}
+          productName={productName}
+          productSlug={item.slug}
+          isFreeTier={isFreeTier}
+        />
       </div>
     </div>
   );

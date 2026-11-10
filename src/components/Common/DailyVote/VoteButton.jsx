@@ -3,6 +3,7 @@
 import { ErrorToast } from '@/components/Common/ErrorToast';
 import { SuccessToast } from '@/components/Common/SuccessToast';
 import { castDailyVote, useMyDailyVote } from '@/lib/hooks/useDailyVote';
+import { bumpDailyVoteCount } from '@/lib/hooks/useDailyVoteCounts';
 import { Check, Heart } from 'lucide-react';
 import { usePathname, useRouter, useSearchParams } from 'next/navigation';
 import { useState } from 'react';
@@ -42,6 +43,7 @@ export default function VoteButton({
         `Thanks! If ${productName || 'this design'} finishes #1 today, it's free tomorrow.`,
         4000,
       );
+      bumpDailyVoteCount(productId);
       onVoted?.(res.data);
       router.refresh();
     } else if (res.status === 401) {
