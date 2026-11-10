@@ -9,6 +9,8 @@ import PopularDesign from '@/components/user/HomePage/PopularDesign';
 import RecentBundleSection from '@/components/user/HomePage/RecentBundleSection';
 import RecentProductsSection from '@/components/user/HomePage/RecentProductsSection';
 import HomeEventSections from '@/components/Common/EventPromotions/HomeEventSections';
+import DailyFreeVoteBoard from '@/components/Common/DailyVote/DailyFreeVoteBoard';
+import { getDailyVoteBoard } from '@/lib/apis/public/dailyVote';
 import { getActiveEventPromotions } from '@/lib/apis/public/eventPromotions';
 import { getAllBundlesForDashboard } from '@/lib/apis/protected/bundles';
 import {
@@ -90,6 +92,7 @@ export default async function Home() {
     bundlePromise,
     mostFavoritedPromise,
     eventPromotionsPromise,
+    dailyVotePromise,
   ] = [
     getPopularProducts('', 1, 8, { cache: 'no-store' }),
     getAdminChoiceProducts('', 1, 8, { cache: 'no-store' }),
@@ -97,6 +100,7 @@ export default async function Home() {
     getAllBundlesForDashboard('', 1, 8, { cache: 'no-store' }),
     getMostFavoritedProducts('', 1, 8, { cache: 'no-store' }),
     getActiveEventPromotions(),
+    getDailyVoteBoard(3),
   ];
 
   const [
@@ -106,6 +110,7 @@ export default async function Home() {
     bundles,
     mostFavoritedProducts,
     eventPromotions,
+    dailyVoteBoard,
   ] = await Promise.all([
     popularPromise,
     adminChoicePromise,
@@ -113,6 +118,7 @@ export default async function Home() {
     bundlePromise,
     mostFavoritedPromise,
     eventPromotionsPromise,
+    dailyVotePromise,
   ]);
 
   return (
@@ -234,6 +240,13 @@ export default async function Home() {
           3: "After hero". Each event picks its own spot; empty spots render
           nothing. */}
       <HomeEventSections promotions={eventPromotions} position='after_hero' />
+
+      {/* Daily free-design vote. Hidden when switched off or unreachable. */}
+      {dailyVoteBoard?.enabled && (
+        <section id='free-design-vote' className='py-10 sm:py-14'>
+          <DailyFreeVoteBoard board={dailyVoteBoard} variant='home' />
+        </section>
+      )}
 
       <BrowseCategories />
 

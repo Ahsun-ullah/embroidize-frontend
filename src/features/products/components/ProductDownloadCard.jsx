@@ -3,7 +3,9 @@
 import DownloadLimitModal from '@/components/Common/DownloadLimitModal';
 import { isAdminOnlyFormat } from '@/utils/adminOnlyFormats';
 import { ErrorToast } from '@/components/Common/ErrorToast';
+import DesignVotePanel, { FreeTodayNotice } from '@/components/Common/DailyVote/DesignVotePanel';
 import FavoriteButton from '@/components/Common/FavoriteButton';
+import { getDailyVoteStanding } from '@/lib/apis/public/dailyVote';
 import LoadingSpinner from '@/components/Common/LoadingSpinner';
 import PremiumDesignBanner from '@/components/Common/PremiumDesignBanner';
 import SkuFlag from '@/components/Common/SkuFlag';
@@ -80,7 +82,21 @@ export default function ProductDownloadCard({ data }) {
     accessState,
   );
   const isAdmin = userInfoData?.role === 'admin';
-  const isPremium = data?.isFree !== true;
+  // Daily free-design vote: this design's standing today, and whether it is
+  // today's winner. A winner downloads free for everyone signed in, so it must
+  // not show the upgrade wall (mirrors the download gate, which lets it through).
+  const [voteStanding, setVoteStanding] = useState(null);
+  useEffect(() => {
+    if (!data?._id) return;
+    let live = true;
+    getDailyVoteStanding(data._id).then((s) => live && setVoteStanding(s));
+    return () => {
+      live = false;
+    };
+  }, [data?._id]);
+  const isVoteFreeToday = voteStanding?.enabled === true && voteStanding?.isFreeToday === true;
+
+  const isPremium = data?.isFree !== true && !isVoteFreeToday;
 
   // Download credits cover premium designs when there is no active plan, so a
   // credit holder must NOT be shown the upgrade wall — they have already paid.
@@ -400,6 +416,8 @@ export default function ProductDownloadCard({ data }) {
           </div>
         )}
 
+        {isVoteFreeToday && <FreeTodayNotice />}
+
         {showUpgrade ? (
           <PremiumDesignBanner onGetAccess={handleGetAllAccess} />
         ) : isLoading ? (
@@ -413,7 +431,11 @@ export default function ProductDownloadCard({ data }) {
               onPress={() => setShowFormatSheet(true)}
             >
               <Download color='#ffffff' strokeWidth={3} />{' '}
-              {isSubscribed || canUseCredits ? 'Download' : 'Free Download'}
+              {isVoteFreeToday
+                ? 'Download Free'
+                : isSubscribed || canUseCredits
+                  ? 'Download'
+                  : 'Free Download'}
             </Button>
             {/* Tell a credit holder what this download will cost them BEFORE
                 they click — a silent balance decrement feels like a bug. */}
@@ -425,6 +447,10 @@ export default function ProductDownloadCard({ data }) {
               </p>
             )}
           </>
+        )}
+
+        {voteStanding?.canBeVoted && (
+          <DesignVotePanel product={data} standing={voteStanding} />
         )}
 
         {showUpgrade && isAdmin ? (
