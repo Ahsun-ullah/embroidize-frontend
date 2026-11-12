@@ -1,31 +1,39 @@
 'use client';
 
 import LoadingSpinner from '@/components/Common/LoadingSpinner';
-import PinToPinterestButton from '@/components/Common/PinToPinterestButton';
 import {
   capitalize,
   preserveParagraphLineBreaks,
 } from '@/utils/functions/page';
 import { marked } from 'marked';
-import { Suspense, useState } from 'react';
+import { Suspense, useMemo, useState } from 'react';
 import { BreadCrumb } from './BreadCrumb';
 import ProductDownloadCard from './ProductDownloadCard';
 import ClientOnlyRecommendations from './ProductMostPopularAndRelaventDesign';
+import ProductSpecs from './ProductSpecs';
 import ReviewSection from './ReviewSection/ReviewSection';
 import { SingleProductImageCard } from './SingleProductImageCard';
+
+const CARD = 'rounded-3xl border border-gray-100 bg-white shadow-sm';
 
 export const SingleProductComponent = ({
   singleProductData,
   allProductData,
-  popularProducts,
+  plans = [],
+  totalDesigns = null,
 }) => {
   const [imageLoaded, setImageLoaded] = useState(false);
   const [descExpanded, setDescExpanded] = useState(false);
 
-  const rawMarkup = marked(singleProductData?.description || '');
-  const formattedMarkup = preserveParagraphLineBreaks(rawMarkup);
+  const formattedMarkup = useMemo(
+    () =>
+      preserveParagraphLineBreaks(marked(singleProductData?.description || '')),
+    [singleProductData?.description],
+  );
+  const isPremium = singleProductData?.isFree !== true;
+
   return (
-    <main className='container mx-auto px-4'>
+    <main className='container mx-auto px-4 pb-12'>
       {/* Breadcrumb */}
       <div className='mb-6 font-normal text-xs'>
         <BreadCrumb
@@ -52,220 +60,64 @@ export const SingleProductComponent = ({
         />
       </div>
 
-      {/* Product Image & Download Section */}
-      <div className='flex flex-col lg:flex-row gap-10'>
-        <div className=' flex  flex-col gap-6'>
-          {/* <Suspense fallback={<LoadingSpinner />}> */}
-          <SingleProductImageCard
-            data={singleProductData}
-            onImageLoad={() => setImageLoaded(true)}
-          />
+      {/* Two columns on desktop. On mobile the column wrappers dissolve
+          (display: contents) and `order-*` puts the blocks in buying order:
+          media → buy box → formats → sizes → about → related → reviews. */}
+      <div className='flex flex-col gap-5 lg:grid lg:grid-cols-[minmax(0,1fr)_minmax(360px,440px)] lg:items-start lg:gap-6'>
+        {/* ── Left column ── */}
+        <div className='contents lg:flex lg:flex-col lg:gap-6'>
+          <div className='order-1 lg:order-none'>
+            <SingleProductImageCard
+              data={singleProductData}
+              isPremium={isPremium}
+              onImageLoad={() => setImageLoaded(true)}
+            />
+          </div>
 
-          {/* </Suspense> */}
-        </div>
+          {/* About */}
+          <section className={`order-6 lg:order-none ${CARD} p-5 sm:p-6`}>
+            <h2 className='mb-4 text-xl font-bold capitalize text-[#1a1f4e] sm:text-2xl'>
+              About {singleProductData?.name}
+            </h2>
 
-        <div className='flex flex-col gap-6 w-full rounded-2xl h-fit'>
-          <ProductDownloadCard data={singleProductData} />
+            <div className='relative'>
+              <div
+                dangerouslySetInnerHTML={{ __html: formattedMarkup }}
+                className='custom-blog-content break-words text-black leading-relaxed overflow-hidden transition-all duration-500'
+                itemProp='articleBody'
+                style={{ maxHeight: descExpanded ? '2000px' : '30rem' }}
+              />
 
-          <div className='flex flex-col gap-4 bg-[#ffffff] p-4 rounded-2xl'>
-            <div className='flex flex-col hover:bg-black/5 transition border-2 border-black rounded-3xl'>
-              {singleProductData?.product_pdf?.url && (
-                <a
-                  href={singleProductData.product_pdf.url}
-                  target='_blank'
-                  rel='noopener noreferrer'
-                  className='inline-flex items-center justify-center gap-2 px-4 py-3 text-black font-bold '
-                  title='Download Product PDF'
-                >
-                  <svg
-                    xmlns='http://www.w3.org/2000/svg'
-                    viewBox='0 0 24 24'
-                    width='24'
-                    height='24'
-                    fill='black'
-                  >
-                    <path d='M3.9985 2C3.44749 2 3 2.44405 3 2.9918V21.0082C3 21.5447 3.44476 22 3.9934 22H20.0066C20.5551 22 21 21.5489 21 20.9925L20.9997 7L16 2H3.9985ZM10.5 7.5H12.5C12.5 9.98994 14.6436 12.6604 17.3162 13.5513L16.8586 15.49C13.7234 15.0421 10.4821 16.3804 7.5547 18.3321L6.3753 16.7191C7.46149 15.8502 8.50293 14.3757 9.27499 12.6534C10.0443 10.9373 10.5 9.07749 10.5 7.5ZM11.1 13.4716C11.3673 12.8752 11.6043 12.2563 11.8037 11.6285C12.2754 12.3531 12.8553 13.0182 13.5102 13.5953C12.5284 13.7711 11.5666 14.0596 10.6353 14.4276C10.8 14.1143 10.9551 13.7948 11.1 13.4716Z' />
-                  </svg>
-
-                  <span>MORE SEWING INFO (PDF)</span>
-                </a>
+              {/* Fade gradient when collapsed */}
+              {!descExpanded && (
+                <div className='absolute bottom-0 left-0 right-0 h-16 bg-gradient-to-t from-white to-transparent pointer-events-none' />
               )}
             </div>
 
-            {/* Admin-only: post this product to Pinterest. Renders nothing for
-                logged-out visitors and normal users. */}
-            <PinToPinterestButton
-              productId={singleProductData?._id}
-              className='w-full'
-            />
-
-            {/* Cards */}
-            <div className='flex flex-col sm:flex-row justify-between gap-4 w-full'>
-              {/* Card 1 */}
-              <div className='flex flex-col items-center justify-center p-4 border rounded-3xl hover:bg-black/5 transition-all flex-1 gap-2'>
-                <svg
-                  xmlns='http://www.w3.org/2000/svg'
-                  width='24'
-                  height='24'
-                  viewBox='0 0 24 24'
-                  fill='none'
-                  stroke='#50a54a'
-                  strokeWidth='3'
-                  strokeLinecap='round'
-                  strokeLinejoin='round'
-                  className='lucide lucide-badge-check-icon lucide-badge-check'
-                >
-                  <path d='M3.85 8.62a4 4 0 0 1 4.78-4.77 4 4 0 0 1 6.74 0 4 4 0 0 1 4.78 4.78 4 4 0 0 1 0 6.74 4 4 0 0 1-4.77 4.78 4 4 0 0 1-6.75 0 4 4 0 0 1-4.78-4.77 4 4 0 0 1 0-6.76Z' />
-                  <path d='m9 12 2 2 4-4' />
-                </svg>
-                <p className='font-bold text-xs text-center'>
-                  Commercial Use
-                  <br />
-                  Physical Products
-                </p>
-              </div>
-
-              {/* Card 2 */}
-              <div className='flex flex-col items-center justify-center p-4 hover:bg-black/5 transition-all  border rounded-3xl flex-1 gap-2'>
-                <svg
-                  xmlns='http://www.w3.org/2000/svg'
-                  width='24'
-                  height='24'
-                  viewBox='0 0 24 24'
-                  fill='none'
-                  stroke='#8d928b'
-                  strokeWidth='3'
-                  strokeLinecap='round'
-                  strokeLinejoin='round'
-                  className='lucide lucide-headset-icon lucide-headset'
-                >
-                  <path d='M3 11h3a2 2 0 0 1 2 2v3a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-5Zm0 0a9 9 0 1 1 18 0m0 0v5a2 2 0 0 1-2 2h-1a2 2 0 0 1-2-2v-3a2 2 0 0 1 2-2h3Z' />
-                  <path d='M21 16v2a4 4 0 0 1-4 4h-5' />
-                </svg>
-                <p className='font-bold text-xs text-center'>
-                  Premium
-                  <br />
-                  Support
-                </p>
-              </div>
-
-              {/* Card 3 */}
-              <div className='flex flex-col items-center justify-center p-4 hover:bg-black/5 transition-all  border rounded-3xl flex-1 gap-2'>
-                <svg
-                  xmlns='http://www.w3.org/2000/svg'
-                  width='24'
-                  height='24'
-                  viewBox='0 0 24 24'
-                  fill='none'
-                  stroke='#aebcd0'
-                  strokeWidth='3'
-                  strokeLinecap='round'
-                  strokeLinejoin='round'
-                  className='lucide lucide-spool-icon lucide-spool'
-                >
-                  <path d='M17 13.44 4.442 17.082A2 2 0 0 0 4.982 21H19a2 2 0 0 0 .558-3.921l-1.115-.32A2 2 0 0 1 17 14.837V7.66' />
-                  <path d='m7 10.56 12.558-3.642A2 2 0 0 0 19.018 3H5a2 2 0 0 0-.558 3.921l1.115.32A2 2 0 0 1 7 9.163v7.178' />
-                </svg>
-                <p className='font-bold text-xs text-center'>
-                  Easy To
-                  <br />
-                  Use
-                </p>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      {/* Details & Related Section */}
-      <div className='flex flex-col lg:flex-row gap-10 my-12'>
-        {/* Left: Description & Keywords */}
-        <div className='w-full lg:w-3/4'>
-          {/* Product Details */}
-          <Suspense fallback={<LoadingSpinner />}>
-            <div className='mb-10'>
-              <div className='flex flex-col md:flex-row md:items-center md:justify-between gap-4'>
-                <h2 className='text-black font-bold text-3xl mb-6 capitalize'>
-                  About {singleProductData?.name}
-                </h2>
-              </div>
-
-              <div className='relative'>
-                <div
-                  dangerouslySetInnerHTML={{ __html: formattedMarkup }}
-                  className='custom-blog-content break-words text-black leading-relaxed overflow-hidden transition-all duration-500'
-                  itemProp='articleBody'
-                  style={{ maxHeight: descExpanded ? '2000px' : '45rem' }}
-                />
-
-                {/* Fade gradient when collapsed */}
-                {!descExpanded && (
-                  <div className='absolute bottom-0 left-0 right-0 h-16 bg-gradient-to-t from-white to-transparent pointer-events-none rounded-2xl' />
-                )}
-              </div>
-
-              <button
-                onClick={() => setDescExpanded((v) => !v)}
-                className='mt-3 flex items-center gap-1.5 text-sm font-semibold text-black hover:text-gray-600 transition w-full justify-center'
+            <button
+              onClick={() => setDescExpanded((v) => !v)}
+              className='mt-3 flex w-full items-center justify-center gap-1.5 border-t border-gray-100 pt-3 text-sm font-semibold text-[#1a1f4e] transition hover:text-black'
+            >
+              {descExpanded ? 'Show less' : 'Show more'}
+              <svg
+                width={16}
+                height={16}
+                viewBox='0 0 24 24'
+                fill='none'
+                stroke='currentColor'
+                strokeWidth={2.5}
+                aria-hidden
               >
-                {descExpanded ? (
-                  <>
-                    Show less
-                    <svg
-                      width={16}
-                      height={16}
-                      viewBox='0 0 24 24'
-                      fill='none'
-                      stroke='currentColor'
-                      strokeWidth={2.5}
-                    >
-                      <path d='m18 15-6-6-6 6' />
-                    </svg>
-                  </>
-                ) : (
-                  <>
-                    Show more
-                    <svg
-                      width={16}
-                      height={16}
-                      viewBox='0 0 24 24'
-                      fill='none'
-                      stroke='currentColor'
-                      strokeWidth={2.5}
-                    >
-                      <path d='m6 9 6 6 6-6' />
-                    </svg>
-                  </>
-                )}
-              </button>
-            </div>
-          </Suspense>
-
-          {/* Related Keywords */}
-          {/* <Suspense fallback={<LoadingSpinner />}>
-            {Array.isArray(singleProductData?.meta_keywords) && (
-              <div className='my-10'>
-                <h2 className='text-black text-lg font-semibold mb-4'>
-                  Related Keywords
-                </h2>
-                <div className='flex flex-wrap gap-2'>
-                  {singleProductData?.meta_keywords.map((item, index) => (
-                    <Link
-                      key={index}
-                      href={`/search?searchQuery=${item.split(' ').join('+')}`}
-                      prefetch={false}
-                      className='bg-gray-200 text-gray-800 px-3 py-1 rounded-full text-sm font-medium capitalize hover:bg-black hover:text-white transition'
-                    >
-                      {item}
-                    </Link>
-                  ))}
-                </div>
-              </div>
-            )}
-          </Suspense> */}
+                <path d={descExpanded ? 'm18 15-6-6-6 6' : 'm6 9 6 6 6-6'} />
+              </svg>
+            </button>
+          </section>
 
           {/* Reviews */}
-          <div id='review-section' className='my-12'>
+          <div
+            id='review-section'
+            className={`order-8 scroll-mt-24 lg:order-none ${CARD} p-5 sm:p-6`}
+          >
             <ReviewSection
               productId={singleProductData?._id}
               initialAvgRating={singleProductData?.averageRating ?? 0}
@@ -274,20 +126,37 @@ export const SingleProductComponent = ({
           </div>
         </div>
 
-        {/* Right: Recommendations */}
-        {imageLoaded && (
-          <Suspense fallback={<LoadingSpinner />}>
-            <ClientOnlyRecommendations
-              allProductData={allProductData}
-              popularProducts={popularProducts}
-              singleProductData={singleProductData}
+        {/* ── Right column ── */}
+        <div className='contents lg:flex lg:flex-col lg:gap-5'>
+          <div className='order-3 lg:order-none'>
+            <ProductDownloadCard
+              data={singleProductData}
+              plans={plans}
+              totalDesigns={totalDesigns}
             />
-          </Suspense>
-        )}
-      </div>
+          </div>
 
-      {/* Future Section */}
-      {/* <SubscribeSearchSection /> */}
+          <ProductSpecs
+            description={singleProductData?.description}
+            availableFileTypes={singleProductData?.available_file_types}
+            formatsClassName={`order-4 lg:order-none ${CARD}`}
+            sizesClassName={`order-5 lg:order-none ${CARD}`}
+          />
+
+          {/* Relevant designs wait for the hero image so they never compete
+              with it for bandwidth (LCP). */}
+          <div className='order-7 lg:order-none'>
+            {imageLoaded && (
+              <Suspense fallback={<LoadingSpinner />}>
+                <ClientOnlyRecommendations
+                  allProductData={allProductData}
+                  singleProductData={singleProductData}
+                />
+              </Suspense>
+            )}
+          </div>
+        </div>
+      </div>
     </main>
   );
 };

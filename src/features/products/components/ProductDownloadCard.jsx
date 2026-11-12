@@ -6,7 +6,7 @@ import { ErrorToast } from '@/components/Common/ErrorToast';
 import FavoriteButton from '@/components/Common/FavoriteButton';
 import { getDailyVoteStanding } from '@/lib/apis/public/dailyVote';
 import LoadingSpinner from '@/components/Common/LoadingSpinner';
-import PremiumDesignBanner from '@/components/Common/PremiumDesignBanner';
+import PinToPinterestButton from '@/components/Common/PinToPinterestButton';
 import SkuFlag from '@/components/Common/SkuFlag';
 import { clearAuthToken } from '@/lib/auth';
 import { useUserInfoQuery } from '@/lib/redux/common/user/userInfoSlice';
@@ -26,8 +26,13 @@ import Cookies from 'js-cookie';
 import { Check, Download, RefreshCw } from 'lucide-react';
 import { usePathname, useRouter } from 'next/navigation';
 import { useEffect, useState } from 'react';
+import ProUpsellBox from './ProUpsellBox';
 
-export default function ProductDownloadCard({ data }) {
+export default function ProductDownloadCard({
+  data,
+  plans = [],
+  totalDesigns = null,
+}) {
   const pathName = usePathname();
   const router = useRouter();
 
@@ -343,25 +348,24 @@ export default function ProductDownloadCard({ data }) {
 
   return (
     <>
-      <div className='relative flex flex-col p-8 overflow-hidden gap-4 border rounded-3xl bg-white'>
-        {/* Shown to everyone, not just admins — customers quote this code to
-            support when reporting an issue with a design. */}
-        {data?.sku_code && <SkuFlag sku={data.sku_code} />}
-
-        <div className='flex items-start justify-between gap-3'>
-          <h1 className='text-black font-bold text-2xl'>{data?.name}</h1>
-          <div className='flex items-center gap-2 flex-shrink-0 mt-1'>
-            <FavoriteButton
-              productId={data?._id}
-              initialCount={data?.favoriteCount || 0}
-              variant='detail'
-            />
-          </div>
+      <div className='flex flex-col gap-4 rounded-3xl border border-gray-100 bg-white p-5 shadow-sm sm:p-6'>
+        {/* SKU pill + favourite. The SKU stays visible to everyone — customers
+            quote it to support when reporting an issue with a design. */}
+        <div className='flex items-center justify-end gap-2'>
+          {data?.sku_code && <SkuFlag sku={data.sku_code} variant='pill' />}
+          <FavoriteButton
+            productId={data?._id}
+            initialCount={data?.favoriteCount || 0}
+            variant='detail'
+          />
         </div>
-        <p className='text-gray-600 my-2'>{data?.meta_description}</p>
+
+        <h1 className='-mt-1 text-2xl font-bold leading-tight text-[#1a1f4e]'>
+          {data?.name}
+        </h1>
 
         {/* Rating + Downloads row */}
-        <div className='flex items-center justify-between mb-2'>
+        <div className='flex flex-wrap items-center gap-x-4 gap-y-1'>
           {/* Rating — clickable, scrolls to reviews */}
           <button
             onClick={() =>
@@ -369,16 +373,15 @@ export default function ProductDownloadCard({ data }) {
                 .getElementById('review-section')
                 ?.scrollIntoView({ behavior: 'smooth', block: 'start' })
             }
-            className='flex items-center gap-1.5 group'
+            className='group flex items-center gap-1.5'
             title='Go to reviews'
           >
-            {/* Stars */}
             <div className='flex items-center gap-0.5'>
               {[1, 2, 3, 4, 5].map((star) => (
                 <svg
                   key={star}
-                  width={16}
-                  height={16}
+                  width={18}
+                  height={18}
                   viewBox='0 0 24 24'
                   fill={
                     star <= Math.round(data?.averageRating ?? 0)
@@ -390,19 +393,19 @@ export default function ProductDownloadCard({ data }) {
                 </svg>
               ))}
             </div>
-            <span className='text-sm font-bold text-gray-800'>
+            <span className='text-sm font-medium text-gray-800 underline-offset-2 group-hover:underline'>
               {data?.averageRating > 0
                 ? Number(data.averageRating).toFixed(1)
-                : '—'}
-            </span>
-            <span className='text-xs text-gray-400 group-hover:underline'>
+                : '—'}{' '}
               ({data?.reviewCount ?? 0}{' '}
-              {(data?.reviewCount ?? 0) === 1 ? 'review' : 'reviews'})
+              {(data?.reviewCount ?? 0) === 1 ? 'Review' : 'Reviews'})
             </span>
           </button>
 
+          <span className='hidden h-4 w-px bg-gray-300 sm:block' aria-hidden />
+
           {/* Downloads */}
-          <span className='font-semibold flex items-center gap-1 text-sm'>
+          <span className='flex items-center gap-1 text-sm font-medium text-gray-800'>
             <i className='ri-download-2-line'></i>
             {formatNumber(data?.downloadCount)} Downloads
           </span>
@@ -420,7 +423,11 @@ export default function ProductDownloadCard({ data }) {
         )}
 
         {showUpgrade ? (
-          <PremiumDesignBanner onGetAccess={handleGetAllAccess} />
+          <ProUpsellBox
+            plans={plans}
+            totalDesigns={totalDesigns}
+            onGetAccess={handleGetAllAccess}
+          />
         ) : isLoading ? (
           <LoadingSpinner />
         ) : (
@@ -428,7 +435,7 @@ export default function ProductDownloadCard({ data }) {
             <Button
               variant='flat'
               size='lg'
-              className='border w-full bg-black text-white font-semibold text-xl h-14'
+              className='w-full h-14 rounded-xl bg-neutral-900 text-white font-semibold text-xl'
               onPress={() => setShowFormatSheet(true)}
             >
               <Download color='#ffffff' strokeWidth={3} />{' '}
@@ -441,7 +448,7 @@ export default function ProductDownloadCard({ data }) {
             {/* Tell a credit holder what this download will cost them BEFORE
                 they click — a silent balance decrement feels like a bug. */}
             {canUseCredits && (
-              <p className='mt-2 text-center text-sm text-gray-600'>
+              <p className='-mt-2 text-center text-sm text-gray-600'>
                 Uses 1 of your{' '}
                 <span className='font-semibold text-black'>{credits}</span>{' '}
                 download credit{credits === 1 ? '' : 's'}
@@ -454,7 +461,7 @@ export default function ProductDownloadCard({ data }) {
           <Button
             variant='flat'
             size='lg'
-            className='border w-full bg-black text-white font-semibold text-xl h-14'
+            className='w-full h-14 rounded-xl bg-neutral-900 text-white font-semibold text-xl'
             onPress={() => setShowFormatSheet(true)}
           >
             <Download color='#ffffff' strokeWidth={3} /> Free Download
@@ -462,6 +469,32 @@ export default function ProductDownloadCard({ data }) {
         ) : (
           ''
         )}
+
+        {data?.product_pdf?.url && (
+          <a
+            href={data.product_pdf.url}
+            target='_blank'
+            rel='noopener noreferrer'
+            className='inline-flex items-center justify-center gap-2 rounded-full border-2 border-neutral-900 px-4 py-2.5 text-sm font-bold uppercase text-neutral-900 transition hover:bg-black/5'
+            title='Download Product PDF'
+          >
+            <svg
+              xmlns='http://www.w3.org/2000/svg'
+              viewBox='0 0 24 24'
+              width='20'
+              height='20'
+              fill='currentColor'
+              aria-hidden
+            >
+              <path d='M3.9985 2C3.44749 2 3 2.44405 3 2.9918V21.0082C3 21.5447 3.44476 22 3.9934 22H20.0066C20.5551 22 21 21.5489 21 20.9925L20.9997 7L16 2H3.9985ZM10.5 7.5H12.5C12.5 9.98994 14.6436 12.6604 17.3162 13.5513L16.8586 15.49C13.7234 15.0421 10.4821 16.3804 7.5547 18.3321L6.3753 16.7191C7.46149 15.8502 8.50293 14.3757 9.27499 12.6534C10.0443 10.9373 10.5 9.07749 10.5 7.5ZM11.1 13.4716C11.3673 12.8752 11.6043 12.2563 11.8037 11.6285C12.2754 12.3531 12.8553 13.0182 13.5102 13.5953C12.5284 13.7711 11.5666 14.0596 10.6353 14.4276C10.8 14.1143 10.9551 13.7948 11.1 13.4716Z' />
+            </svg>
+            More sewing info (PDF)
+          </a>
+        )}
+
+        {/* Admin-only: post this product to Pinterest. Renders nothing for
+            logged-out visitors and normal users. */}
+        <PinToPinterestButton productId={data?._id} className='w-full' />
       </div>
 
       {/* Facebook Browser Warning Modal */}

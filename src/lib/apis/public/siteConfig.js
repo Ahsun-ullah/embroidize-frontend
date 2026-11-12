@@ -35,6 +35,8 @@ const UNKNOWN = {
   // its own default rather than be handed one that looks authoritative.
   recentTabDays: null,
   newBadgeDays: null,
+  // Published catalogue size, for "this design + 18,000 more" copy.
+  totalDesigns: null,
 };
 
 export async function getSiteConfig() {
@@ -57,6 +59,10 @@ export async function getSiteConfig() {
       whatsappMessage: result?.data?.whatsappMessage ?? '',
       recentTabDays: result?.data?.recentTabDays ?? null,
       newBadgeDays: result?.data?.newBadgeDays ?? null,
+      totalDesigns:
+        Number(result?.data?.totalDesigns) > 0
+          ? Number(result.data.totalDesigns)
+          : null,
     };
   } catch (error) {
     // Next signals "this route cannot be static" by THROWING out of the fetch.

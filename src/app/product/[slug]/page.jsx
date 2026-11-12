@@ -3,10 +3,9 @@ import Footer from '@/components/user/HomePage/Footer';
 import Header from '@/components/user/HomePage/Header';
 import { SingleProductComponent } from '@/features/products/components/SingleProductComponent';
 import { getAllProductsByCategory } from '@/lib/apis/public/category';
-import {
-  getPopularProducts,
-  getSingleProduct,
-} from '@/lib/apis/public/products';
+import { getSingleProduct } from '@/lib/apis/public/products';
+import { getSiteConfig } from '@/lib/apis/public/siteConfig';
+import { getSubscriptionPlans } from '@/lib/apis/public/subscriptionPlans';
 import { getAllProductsBySubCategory } from '@/lib/apis/public/subcategory';
 import { notFound, permanentRedirect } from 'next/navigation';
 
@@ -61,15 +60,17 @@ export default async function ProductDetails({ params }) {
 
   const hasSubCategory = !!product?.sub_category?.slug;
 
-  const [productListResponse, popularProductsResponse] = await Promise.all([
+  // All fetched in parallel, so the Pro box's live prices add no waterfall.
+  // 7 related: the current design is filtered out of that list, leaving 6.
+  const [productListResponse, plans, siteConfig] = await Promise.all([
     hasSubCategory
-      ? getAllProductsBySubCategory(product.sub_category.slug, 1, 6)
-      : getAllProductsByCategory(product.category?.slug, 1, 6),
-    getPopularProducts('', 1, 4),
+      ? getAllProductsBySubCategory(product.sub_category.slug, 1, 7)
+      : getAllProductsByCategory(product.category?.slug, 1, 7),
+    getSubscriptionPlans(),
+    getSiteConfig(),
   ]);
 
   const allProducts = productListResponse?.products ?? [];
-  const popularProducts = popularProductsResponse?.products ?? [];
 
   // ---- Schema.org JSON-LD ----
   const today = new Date();
@@ -166,7 +167,8 @@ export default async function ProductDetails({ params }) {
       <SingleProductComponent
         singleProductData={product}
         allProductData={allProducts}
-        popularProducts={popularProducts}
+        plans={plans}
+        totalDesigns={siteConfig?.totalDesigns ?? null}
       />
       <Footer />
     </div>
