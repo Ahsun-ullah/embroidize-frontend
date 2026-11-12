@@ -51,11 +51,13 @@ export default function ProductSpecs({
             <PencilIcon />
             Available formats
           </h2>
-          <ul className='flex flex-wrap gap-2'>
+          {/* Always one row: chips share the width evenly; a design with
+              unusually many formats scrolls sideways instead of wrapping. */}
+          <ul className='flex flex-nowrap gap-1 overflow-x-auto sm:gap-1.5 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden'>
             {formats.map((f) => (
               <li
                 key={f}
-                className='rounded-full border border-gray-200 bg-gray-50 px-3 py-1.5 text-sm font-medium text-neutral-800'
+                className='min-w-[36px] flex-1 shrink-0 rounded-full border border-gray-200 bg-gray-50 px-1.5 py-1.5 text-center text-xs font-medium text-neutral-800 sm:text-[13px]'
               >
                 {f}
               </li>

@@ -117,6 +117,16 @@ function parseSizeLine(line) {
   const pairs = [];
   for (const m of line.matchAll(PAIR_RE)) {
     if (m[5]) continue; // "4x4 hoop" names the hoop, not the design size
+    // "Hoop: 4x4", "fits a 4" x 4" hoop or larger", "min. hoop size 4 x 4" —
+    // any pair with hoop/frame right before or after it is the hoop.
+    const before = line.slice(Math.max(0, m.index - 30), m.index);
+    const after = line.slice(m.index + m[0].length, m.index + m[0].length + 20);
+    // ("4x4 hoop: 3.9" x 3.5"" — there the hoop word already belongs to the
+    // 4x4 before it, so the size after it is kept.)
+    const hoopRightBefore =
+      /\b(?:hoops?|frames?)\b(?:\s*size)?\s*[:=\-–]?\s*(?:of\s*)?$/i.test(before) &&
+      !/\d\s*(?:["”″]|in(?:ch(?:es)?)?)?\s*(?:hoops?|frames?)\b[^\d]*$/i.test(before);
+    if (hoopRightBefore || /^\W*(?:\w+\W+)?(?:hoops?|frames?)\b/i.test(after)) continue;
     const a = decimalNum(m[1]);
     const b = decimalNum(m[3]);
     if (!(a > 0 && b > 0)) continue;
@@ -203,10 +213,19 @@ export function parseSizes(description) {
       const key = `${size.widthIn}x${size.heightIn}`;
       if (seen.has(key)) continue;
       seen.add(key);
-      sizes.push(size);
+      sizes.push({ ...size, explicitMm: /mm|cm|millim|centim/i.test(line) });
     }
   }
-  return sizes;
+
+  // When the real size rows carry stitch counts, a row with neither a stitch
+  // count nor its own mm figures is a stray mention (hoop, minimum size,
+  // note) — not one of the design's sizes.
+  const withStitches = sizes.filter((x) => x.stitches != null).length;
+  const kept =
+    withStitches >= 2
+      ? sizes.filter((x) => x.stitches != null || x.explicitMm)
+      : sizes;
+  return kept.map(({ explicitMm: _ignored, ...rest }) => rest);
 }
 
 const FORMAT_TOKEN = /^[A-Z0-9]{2,4}$/;
