@@ -6,7 +6,14 @@ import {
 import { ArrowRight, Info, Vote } from 'lucide-react';
 import Link from 'next/link';
 import VoteCountdown from './VoteCountdown';
-import { EmptyVoteSlot, FreeTodayCard, VoteCard } from './VoteCards';
+import {
+  EmptyVoteSlot,
+  EmptyVoteSlotCompact,
+  FreeTodayCard,
+  FreeTodayCardCompact,
+  VoteCard,
+  VoteCardCompact,
+} from './VoteCards';
 import VoteShareBar from './VoteShareBar';
 
 // "Which design do you want for free?" — today's free design next to today's
@@ -21,6 +28,7 @@ export default function DailyFreeVoteBoard({
   highlightSlug = null,
 }) {
   if (!board?.enabled) return null;
+  if (variant === 'home') return <HomeStrip board={board} />;
   const leaders = board.leaders || [];
   const isHome = variant === 'home';
   const slots = isHome ? 3 : Math.max(3, leaders.length);
@@ -103,6 +111,69 @@ export default function DailyFreeVoteBoard({
             />
           </Link>
         )}
+      </div>
+    </div>
+  );
+}
+
+// Homepage version: one short row. Small heading with the countdown beside it,
+// compact cards (thumbnail + details), and a single link to the full vote page
+// where the share buttons and the rules live.
+function HomeStrip({ board }) {
+  const shown = (board.leaders || []).slice(0, 3);
+  const empties = Array.from(
+    { length: Math.max(0, 3 - shown.length) },
+    (_, i) => shown.length + i + 1,
+  );
+  const cell = 'w-[85%] shrink-0 snap-center sm:w-auto';
+
+  return (
+    <div className='container mx-auto max-w-7xl px-4'>
+      <div className='flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between'>
+        <div>
+          <h2 className='text-2xl font-extrabold tracking-tight text-gray-900 sm:text-3xl'>
+            Which Design Do You Want for Free?
+          </h2>
+          <p className='mt-1 text-sm text-gray-500 sm:text-base'>
+            Vote for your favorite. The most-voted design becomes free tomorrow.
+          </p>
+        </div>
+        <div className='flex flex-wrap items-center gap-2'>
+          <VoteCountdown
+            endsAt={board.endsAt}
+            serverNow={board.serverNow}
+            className='!px-3 !py-1.5'
+          />
+          <Link
+            href={`${VOTE_PAGE_PATH}#vote-any-design`}
+            className='group inline-flex items-center gap-2 rounded-2xl bg-black px-4 py-2.5 text-sm font-bold text-white transition hover:bg-gray-800'
+          >
+            <Vote className='h-4 w-4' aria-hidden />
+            Vote now
+            <ArrowRight
+              className='h-4 w-4 transition-transform group-hover:translate-x-0.5'
+              aria-hidden
+            />
+          </Link>
+        </div>
+      </div>
+
+      <div className='mt-4 -mx-4 flex snap-x snap-mandatory gap-3 overflow-x-auto px-4 pb-2 sm:mx-0 sm:grid sm:grid-cols-2 sm:overflow-visible sm:px-0 lg:grid-cols-4'>
+        {board.freeDesign && (
+          <div className={cell}>
+            <FreeTodayCardCompact freeDesign={board.freeDesign} />
+          </div>
+        )}
+        {shown.map((entry) => (
+          <div key={entry.product?._id} className={cell}>
+            <VoteCardCompact entry={entry} />
+          </div>
+        ))}
+        {empties.map((rank) => (
+          <div key={`empty-${rank}`} className={cell}>
+            <EmptyVoteSlotCompact rank={rank} />
+          </div>
+        ))}
       </div>
     </div>
   );
