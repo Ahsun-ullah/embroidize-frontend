@@ -305,6 +305,7 @@ export default async function Home() {
         subtitle='Best designs we recommend.'
         viewAllHref='/products?filter=embroidize-choice'
         viewAllLabel='View All Choice Designs'
+        tone='white'
       >
         {adminChoiceProducts?.products?.length ? (
           <AdminChoiceDesign adminChoiceProducts={adminChoiceProducts} />
@@ -319,7 +320,6 @@ export default async function Home() {
         subtitle='Browse our most loved bundle designs.'
         viewAllHref='/bundles'
         viewAllLabel='View All Bundles'
-        tone='white'
       >
         {bundles?.bundles?.length ? (
           <RecentBundleSection recentBundles={bundles} />

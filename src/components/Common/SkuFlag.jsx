@@ -27,6 +27,21 @@ export default function SkuFlag({ sku, variant = 'flag' }) {
     setTimeout(() => setCopied(false), 1500);
   };
 
+  // Rounded pill for the product page header (next to the favourite heart).
+  if (variant === 'pill') {
+    return (
+      <button
+        type='button'
+        onClick={handleCopy}
+        title='Click to copy SKU'
+        aria-label={`Copy SKU ${sku}`}
+        className='inline-flex items-center rounded-full border border-gray-200 bg-gray-50 px-3 py-1 text-sm font-semibold text-neutral-900 transition-colors hover:bg-gray-100'
+      >
+        {copied ? '✓ SKU copied' : `SKU: ${sku}`}
+      </button>
+    );
+  }
+
   if (variant === 'inline') {
     return (
       <button

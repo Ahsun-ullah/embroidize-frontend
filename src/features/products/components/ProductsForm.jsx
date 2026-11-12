@@ -8,6 +8,10 @@ import {
   useGetPublicProductSubCategoriesQuery,
 } from '@/lib/redux/admin/categoryAndSubcategory/categoryAndSubcategorySlice';
 import { useGetNextSkuQuery } from '@/lib/redux/admin/protectedProducts/protectedProductSlice';
+import {
+  buildProductMediaForm,
+  uploadProductMedia,
+} from '@/lib/redux/admin/protectedProducts/uploadProductMedia';
 import { uploadProductWithProgress } from '@/lib/redux/admin/protectedProducts/uploadProductWithProgress';
 import { useAllProductsQuery } from '@/lib/redux/public/products/productSlice';
 import { productSchema } from '@/lib/zodValidation/productValidation';
@@ -23,6 +27,7 @@ import {
   FilesDropZone,
   matchFileToSlot,
 } from './FileDragAndDropInput';
+import ProductMediaSection, { emptyProductMedia } from './ProductMediaSection';
 // import { CreatableTagsInput } from './TagsInput';
 
 // Field chrome shared by every input below, so a compact form does not mean a
@@ -92,6 +97,12 @@ export function ProductsForm({ product }) {
   // Upload state for the progress bar: null = idle, 0–100 = sending files,
   // 'processing' = all bytes sent, server is storing them.
   const [uploadProgress, setUploadProgress] = useState(null);
+  // Which upload the progress bar is describing: the product itself, or the
+  // gallery/video that goes up right after it.
+  const [uploadStage, setUploadStage] = useState('product');
+  // Extra product-page images + video. Kept outside react-hook-form: they go
+  // to their own endpoint after the product is saved.
+  const [media, setMedia] = useState(() => emptyProductMedia(product));
   // The meta title follows the product name until the admin edits it by hand.
   const [metaTitleTouched, setMetaTitleTouched] = useState(false);
   const { refetch: allProductRefetch } = useAllProductsQuery();
@@ -160,6 +171,7 @@ export function ProductsForm({ product }) {
       });
       setDescription(product.description ?? '');
       setSlug(product.slug ?? '');
+      setMedia(emptyProductMedia(product));
     }
     if (product?.category?._id) {
       setSelectedCategory(product.category._id);
@@ -214,7 +226,39 @@ export function ProductsForm({ product }) {
     }
   };
 
+  // Sends the gallery/video once the product exists. Returns true when there
+  // was nothing to send or it succeeded; on failure the product is already
+  // saved, so the admin is told exactly that rather than "save failed".
+  const sendMedia = async (productId) => {
+    const mediaForm = buildProductMediaForm(media, {
+      gallery: product?.gallery || [],
+      video: product?.video || null,
+    });
+    if (!mediaForm || !productId) return true;
+    setUploadStage('media');
+    setUploadProgress(0);
+    try {
+      await uploadProductMedia({
+        id: productId,
+        formData: mediaForm,
+        onProgress: (pct) => setUploadProgress(pct ?? 'processing'),
+      });
+      return true;
+    } catch (err) {
+      ErrorToast(
+        'Product saved, gallery not saved',
+        err?.data?.message || 'The extra images/video could not be uploaded.',
+        6000,
+      );
+      return false;
+    } finally {
+      setUploadProgress(null);
+      setUploadStage('product');
+    }
+  };
+
   const sendForm = async (formData, id) => {
+    setUploadStage('product');
     setUploadProgress(0);
     try {
       return await uploadProductWithProgress({
@@ -270,6 +314,8 @@ export function ProductsForm({ product }) {
         if (response.error) {
           ErrorToast('Error', response.error.data.message || 'API Error', 3000);
         } else {
+          // Stay on the form if the gallery failed, so the admin can retry.
+          if (!(await sendMedia(product._id))) return;
           SuccessToast(
             'Success',
             response.message || 'Action successfully done!',
@@ -293,6 +339,12 @@ export function ProductsForm({ product }) {
         if (response.error) {
           ErrorToast('Error', response.error.data.message || 'API Error', 3000);
         } else {
+          const newId = response?.data?._id;
+          if (!(await sendMedia(newId)) && newId) {
+            // Product exists now — reopen it in edit mode to retry the media.
+            router.push(`/admin/add-products?productId=${newId}`);
+            return;
+          }
           SuccessToast(
             'Success',
             response.message || 'Action successfully done!',
@@ -388,9 +440,13 @@ export function ProductsForm({ product }) {
         >
           <div className='mb-1 flex justify-between text-xs text-gray-600'>
             <span>
-              {uploadProgress === 'processing'
-                ? 'Files sent. Saving them to storage…'
-                : 'Uploading files…'}
+              {uploadStage === 'media'
+                ? uploadProgress === 'processing'
+                  ? 'Optimising gallery images and video… (a video takes up to a minute)'
+                  : 'Uploading gallery images and video…'
+                : uploadProgress === 'processing'
+                  ? 'Files sent. Saving them to storage…'
+                  : 'Uploading files…'}
             </span>
             {uploadProgress !== 'processing' && <span>{uploadProgress}%</span>}
           </div>
@@ -795,6 +851,8 @@ export function ProductsForm({ product }) {
           )}
         </div>
       </section>
+
+      <ProductMediaSection media={media} onChange={setMedia} />
 
       {/* The sticky bar above is the primary action; this is its small-screen
           counterpart, where a long form makes scrolling back up expensive. */}

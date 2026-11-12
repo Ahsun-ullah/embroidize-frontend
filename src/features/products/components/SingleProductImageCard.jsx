@@ -39,15 +39,18 @@ function ImageLightbox({ src, alt, onClose }) {
   };
 
   // Scroll wheel zoom
-  const handleWheel = useCallback((e) => {
-    e.preventDefault();
-    const delta = e.deltaY > 0 ? -0.2 : 0.2;
-    setScale((prev) => {
-      const next = clampScale(parseFloat((prev + delta).toFixed(1)));
-      resetIfNeeded(next);
-      return next;
-    });
-  }, [resetIfNeeded]);
+  const handleWheel = useCallback(
+    (e) => {
+      e.preventDefault();
+      const delta = e.deltaY > 0 ? -0.2 : 0.2;
+      setScale((prev) => {
+        const next = clampScale(parseFloat((prev + delta).toFixed(1)));
+        resetIfNeeded(next);
+        return next;
+      });
+    },
+    [resetIfNeeded],
+  );
 
   useEffect(() => {
     const el = containerRef.current;
@@ -70,7 +73,9 @@ function ImageLightbox({ src, alt, onClose }) {
   // Lock body scroll while open
   useEffect(() => {
     document.body.style.overflow = 'hidden';
-    return () => { document.body.style.overflow = ''; };
+    return () => {
+      document.body.style.overflow = '';
+    };
   }, []);
 
   // Drag to pan
@@ -79,12 +84,18 @@ function ImageLightbox({ src, alt, onClose }) {
     e.preventDefault();
     setIsDragging(true);
     didPan.current = false;
-    dragStart.current = { x: e.clientX - position.x, y: e.clientY - position.y };
+    dragStart.current = {
+      x: e.clientX - position.x,
+      y: e.clientY - position.y,
+    };
   };
   const onMouseMove = (e) => {
     if (!isDragging || !dragStart.current) return;
     didPan.current = true;
-    setPosition({ x: e.clientX - dragStart.current.x, y: e.clientY - dragStart.current.y });
+    setPosition({
+      x: e.clientX - dragStart.current.x,
+      y: e.clientY - dragStart.current.y,
+    });
   };
   const onMouseUp = () => {
     setIsDragging(false);
@@ -96,15 +107,23 @@ function ImageLightbox({ src, alt, onClose }) {
     if (scale <= 1 || e.touches.length !== 1) return;
     const t = e.touches[0];
     didPan.current = false;
-    dragStart.current = { x: t.clientX - position.x, y: t.clientY - position.y };
+    dragStart.current = {
+      x: t.clientX - position.x,
+      y: t.clientY - position.y,
+    };
   };
   const onTouchMove = (e) => {
     if (!dragStart.current || e.touches.length !== 1) return;
     didPan.current = true;
     const t = e.touches[0];
-    setPosition({ x: t.clientX - dragStart.current.x, y: t.clientY - dragStart.current.y });
+    setPosition({
+      x: t.clientX - dragStart.current.x,
+      y: t.clientY - dragStart.current.y,
+    });
   };
-  const onTouchEnd = () => { dragStart.current = null; };
+  const onTouchEnd = () => {
+    dragStart.current = null;
+  };
 
   // Close when click lands on the backdrop (not on the image itself) and wasn't a pan
   const onBackdropClick = (e) => {
@@ -116,9 +135,7 @@ function ImageLightbox({ src, alt, onClose }) {
   };
 
   return (
-    <div
-      className='fixed inset-0 z-50 flex items-center justify-center bg-black/90'
-    >
+    <div className='fixed inset-0 z-50 flex items-center justify-center bg-black/90'>
       {/* Image area — clicking on the backdrop (not the image) closes the lightbox */}
       <div
         ref={containerRef}
@@ -131,7 +148,9 @@ function ImageLightbox({ src, alt, onClose }) {
         onTouchStart={onTouchStart}
         onTouchMove={onTouchMove}
         onTouchEnd={onTouchEnd}
-        style={{ cursor: scale > 1 ? (isDragging ? 'grabbing' : 'grab') : 'zoom-out' }}
+        style={{
+          cursor: scale > 1 ? (isDragging ? 'grabbing' : 'grab') : 'zoom-out',
+        }}
       >
         <img
           src={src}
@@ -155,7 +174,14 @@ function ImageLightbox({ src, alt, onClose }) {
         className='absolute top-4 right-4 z-10 w-10 h-10 flex items-center justify-center rounded-full bg-white/10 hover:bg-white/20 text-white transition'
         aria-label='Close'
       >
-        <svg width={20} height={20} viewBox='0 0 24 24' fill='none' stroke='currentColor' strokeWidth={2.5}>
+        <svg
+          width={20}
+          height={20}
+          viewBox='0 0 24 24'
+          fill='none'
+          stroke='currentColor'
+          strokeWidth={2.5}
+        >
           <path d='M18 6 6 18M6 6l12 12' />
         </svg>
       </button>
@@ -163,18 +189,32 @@ function ImageLightbox({ src, alt, onClose }) {
       {/* Zoom controls */}
       <div className='absolute bottom-6 left-1/2 -translate-x-1/2 flex items-center gap-2 bg-white/10 backdrop-blur-sm rounded-full px-4 py-2'>
         <button
-          onClick={(e) => { e.stopPropagation(); zoomOut(); }}
+          onClick={(e) => {
+            e.stopPropagation();
+            zoomOut();
+          }}
           disabled={scale <= MIN_SCALE}
           className='w-8 h-8 flex items-center justify-center rounded-full text-white hover:bg-white/20 transition disabled:opacity-30'
           aria-label='Zoom out'
         >
-          <svg width={18} height={18} viewBox='0 0 24 24' fill='none' stroke='currentColor' strokeWidth={2.5}>
-            <circle cx='11' cy='11' r='8' /><path d='m21 21-4.35-4.35M8 11h6' />
+          <svg
+            width={18}
+            height={18}
+            viewBox='0 0 24 24'
+            fill='none'
+            stroke='currentColor'
+            strokeWidth={2.5}
+          >
+            <circle cx='11' cy='11' r='8' />
+            <path d='m21 21-4.35-4.35M8 11h6' />
           </svg>
         </button>
 
         <button
-          onClick={(e) => { e.stopPropagation(); resetZoom(); }}
+          onClick={(e) => {
+            e.stopPropagation();
+            resetZoom();
+          }}
           className='px-3 py-1 text-xs text-white font-medium hover:bg-white/20 rounded-full transition min-w-[3rem] text-center'
           aria-label='Reset zoom'
         >
@@ -182,13 +222,24 @@ function ImageLightbox({ src, alt, onClose }) {
         </button>
 
         <button
-          onClick={(e) => { e.stopPropagation(); zoomIn(); }}
+          onClick={(e) => {
+            e.stopPropagation();
+            zoomIn();
+          }}
           disabled={scale >= MAX_SCALE}
           className='w-8 h-8 flex items-center justify-center rounded-full text-white hover:bg-white/20 transition disabled:opacity-30'
           aria-label='Zoom in'
         >
-          <svg width={18} height={18} viewBox='0 0 24 24' fill='none' stroke='currentColor' strokeWidth={2.5}>
-            <circle cx='11' cy='11' r='8' /><path d='m21 21-4.35-4.35M11 8v6M8 11h6' />
+          <svg
+            width={18}
+            height={18}
+            viewBox='0 0 24 24'
+            fill='none'
+            stroke='currentColor'
+            strokeWidth={2.5}
+          >
+            <circle cx='11' cy='11' r='8' />
+            <path d='m21 21-4.35-4.35M11 8v6M8 11h6' />
           </svg>
         </button>
       </div>
@@ -201,88 +252,232 @@ function ImageLightbox({ src, alt, onClose }) {
   );
 }
 
-// ── Main image card ───────────────────────────────────────────────────────────
+// ── Main media card + thumbnail row ──────────────────────────────────────────
 
-export const SingleProductImageCard = ({ data, onImageLoad }) => {
+const ProBadge = () => (
+  <span className='pointer-events-none absolute left-4 top-4 z-10 inline-flex items-center gap-1.5 rounded-full bg-amber-400 px-4 py-1.5 text-base font-extrabold text-neutral-900 shadow-sm sm:text-lg'>
+    <svg
+      width='20'
+      height='20'
+      viewBox='0 0 24 24'
+      fill='currentColor'
+      aria-hidden
+    >
+      <path d='M2.5 7.5 7 11l5-7 5 7 4.5-3.5L19.5 19h-15L2.5 7.5Z' />
+    </svg>
+    PRO
+  </span>
+);
+
+const PlayIcon = ({ size = 18 }) => (
+  <svg
+    width={size}
+    height={size}
+    viewBox='0 0 24 24'
+    fill='currentColor'
+    aria-hidden
+  >
+    <path d='M8 5v14l11-7z' />
+  </svg>
+);
+
+/** Main image + up to 2 gallery images + 1 video, in thumbnail order. */
+export function productMediaItems(data) {
+  const items = [];
+  if (data?.image?.url) items.push({ type: 'image', url: data.image.url });
+  for (const g of data?.gallery || []) {
+    if (g?.url) items.push({ type: 'image', url: g.url });
+  }
+  if (data?.video?.url) {
+    items.push({
+      type: 'video',
+      url: data.video.url,
+      poster: data.video.poster_url || data?.image?.url || null,
+    });
+  }
+  if (!items.length) items.push({ type: 'image', url: '/blog.jpg' });
+  return items;
+}
+
+export const SingleProductImageCard = ({ data, onImageLoad, isPremium }) => {
+  const items = productMediaItems(data);
+  const [active, setActive] = useState(0);
   const [isLoading, setIsLoading] = useState(true);
   const [isHovered, setIsHovered] = useState(false);
   const [lightboxOpen, setLightboxOpen] = useState(false);
-
-  const imageUrl = data?.image?.url || '/blog.jpg';
+  // The video element is only created after the shopper picks the video tile,
+  // so it costs nothing on page load.
+  const current = items[active] || items[0];
   const imageAlt = data?.name || 'Product image';
 
   return (
-    <>
+    <div className='flex flex-col gap-3'>
       <div
-        className='relative aspect-[3/2] w-full md:w-[688px] md:h-[459px] lg:w-[580px] lg:h-[533px] xl:w-[768px] xl:h-[509px] overflow-hidden border rounded-3xl'
+        className='relative aspect-[3/2] w-full overflow-hidden rounded-3xl border border-gray-100 bg-white shadow-sm'
         onMouseEnter={() => setIsHovered(true)}
         onMouseLeave={() => setIsHovered(false)}
       >
-        {isLoading && (
-          <div className='absolute inset-0 z-10 flex items-center justify-center'>
-            <LoadingSpinner />
-          </div>
-        )}
+        {isPremium && <ProBadge />}
 
-        {/* Product-page hero shows the REAL, full-resolution original (not a
-            resized/recompressed variant). `unoptimized` opts this single image
-            out of Next's optimizer — thumbnails/cards elsewhere stay optimized.
-            Bonus: it's the same URL the zoom lightbox uses, so opening zoom is
-            instant (already cached) with no quality jump. */}
-        <Image
-          src={imageUrl}
-          alt={imageAlt}
-          fill
-          unoptimized
-          sizes='(max-width: 768px) 100vw, 800px'
-          className='object-cover transition-opacity duration-300'
-          onLoad={() => {
-            setIsLoading(false);
-            if (onImageLoad) onImageLoad();
-          }}
-          priority
-        />
-
-        {/* Hover overlay with zoom icon */}
-        {!isLoading && (
-          <button
-            onClick={() => setLightboxOpen(true)}
-            aria-label='Zoom image'
-            className='absolute inset-0 flex items-center justify-center transition-all duration-200'
-            style={{
-              background: isHovered ? 'rgba(0,0,0,0.25)' : 'transparent',
-              opacity: isHovered ? 1 : 0,
-              cursor: 'zoom-in',
-            }}
-          >
+        {/* Gallery images and the video can be any shape (square shirt
+            mockups, portrait phone clips). They are shown whole — never
+            cropped — over a soft blurred copy of themselves, so the 3:2 box
+            has no hard empty bars. The main image keeps its usual fill. */}
+        {active !== 0 &&
+          (current.type === 'image' ? current.url : current.poster) && (
             <div
-              className='flex items-center justify-center w-14 h-14 rounded-full bg-white/90 shadow-lg transition-transform duration-200'
-              style={{ transform: isHovered ? 'scale(1)' : 'scale(0.7)' }}
-            >
-              <svg
-                width={28}
-                height={28}
-                viewBox='0 0 24 24'
-                fill='none'
-                stroke='#111'
-                strokeWidth={2.2}
+              aria-hidden
+              className='absolute inset-0 scale-110 bg-cover bg-center opacity-60 blur-2xl'
+              style={{
+                backgroundImage: `url("${current.type === 'image' ? current.url : current.poster}")`,
+              }}
+            />
+          )}
+
+        {current.type === 'video' ? (
+          <video
+            key={current.url}
+            src={current.url}
+            poster={current.poster || undefined}
+            controls
+            autoPlay
+            muted
+            loop
+            playsInline
+            preload='metadata'
+            className='relative h-full w-full object-contain'
+          />
+        ) : (
+          <>
+            {isLoading && active === 0 && (
+              <div className='absolute inset-0 z-10 flex items-center justify-center'>
+                <LoadingSpinner />
+              </div>
+            )}
+
+            {/* Product-page hero shows the REAL, full-resolution original (not a
+                resized/recompressed variant). `unoptimized` opts this single
+                image out of Next's optimizer — thumbnails/cards elsewhere stay
+                optimized. It's the same URL the zoom lightbox uses, so opening
+                zoom is instant (already cached) with no quality jump. Gallery
+                images are already WebP ≤1600px from the upload step. */}
+            <Image
+              key={current.url}
+              src={current.url}
+              alt={active === 0 ? imageAlt : `${imageAlt} – view ${active + 1}`}
+              fill
+              unoptimized
+              sizes='(max-width: 1024px) 100vw, 800px'
+              className={`${active === 0 ? 'object-cover' : 'object-contain'} transition-opacity duration-300`}
+              onLoad={() => {
+                if (active === 0) {
+                  setIsLoading(false);
+                  if (onImageLoad) onImageLoad();
+                }
+              }}
+              priority={active === 0}
+            />
+
+            {/* Hover overlay with zoom icon */}
+            {!(isLoading && active === 0) && (
+              <button
+                onClick={() => setLightboxOpen(true)}
+                aria-label='Zoom image'
+                className='absolute inset-0 flex items-center justify-center transition-all duration-200'
+                style={{
+                  background: isHovered ? 'rgba(0,0,0,0.25)' : 'transparent',
+                  opacity: isHovered ? 1 : 0,
+                  cursor: 'zoom-in',
+                }}
               >
-                <circle cx='11' cy='11' r='8' />
-                <path d='m21 21-4.35-4.35M11 8v6M8 11h6' />
-              </svg>
-            </div>
-          </button>
+                <div
+                  className='flex items-center justify-center w-14 h-14 rounded-full bg-white/90 shadow-lg transition-transform duration-200'
+                  style={{ transform: isHovered ? 'scale(1)' : 'scale(0.7)' }}
+                >
+                  <svg
+                    width={28}
+                    height={28}
+                    viewBox='0 0 24 24'
+                    fill='none'
+                    stroke='#111'
+                    strokeWidth={2.2}
+                  >
+                    <circle cx='11' cy='11' r='8' />
+                    <path d='m21 21-4.35-4.35M11 8v6M8 11h6' />
+                  </svg>
+                </div>
+              </button>
+            )}
+          </>
         )}
       </div>
 
+      {/* Thumbnail row — only when there is more than the main image. */}
+      {items.length > 1 && (
+        <div
+          className='grid grid-cols-4 gap-2 rounded-3xl border border-gray-100 bg-white p-2 shadow-sm sm:gap-3 sm:p-3'
+          role='tablist'
+          aria-label='Product images'
+        >
+          {items.map((item, i) => (
+            <button
+              key={`${item.type}-${item.url}`}
+              type='button'
+              role='tab'
+              aria-selected={active === i}
+              aria-label={
+                item.type === 'video'
+                  ? 'Play product video'
+                  : `Show image ${i + 1}`
+              }
+              onClick={() => setActive(i)}
+              className={`relative aspect-square overflow-hidden rounded-xl bg-gray-50 transition ${
+                active === i
+                  ? 'ring-2 ring-neutral-900 ring-offset-2'
+                  : 'opacity-90 hover:opacity-100'
+              }`}
+            >
+              {item.type === 'video' ? (
+                <>
+                  {item.poster && (
+                    <Image
+                      src={item.poster}
+                      alt=''
+                      fill
+                      sizes='160px'
+                      quality={75}
+                      className='object-cover'
+                    />
+                  )}
+                  <span className='absolute inset-0 flex items-center justify-center bg-black/15'>
+                    <span className='flex h-9 w-9 items-center justify-center rounded-full bg-white/90 text-neutral-900 shadow'>
+                      <PlayIcon />
+                    </span>
+                  </span>
+                </>
+              ) : (
+                <Image
+                  src={item.url}
+                  alt=''
+                  fill
+                  sizes='160px'
+                  quality={75}
+                  className='object-cover'
+                />
+              )}
+            </button>
+          ))}
+        </div>
+      )}
+
       {/* Lightbox */}
-      {lightboxOpen && (
+      {lightboxOpen && current.type === 'image' && (
         <ImageLightbox
-          src={imageUrl}
+          src={current.url}
           alt={imageAlt}
           onClose={() => setLightboxOpen(false)}
         />
       )}
-    </>
+    </div>
   );
 };
