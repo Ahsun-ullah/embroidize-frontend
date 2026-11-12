@@ -1,6 +1,7 @@
 'use client';
 
 import { useEffect, useState } from 'react';
+import { FilesDropZone } from './FileDragAndDropInput';
 
 // Product-page media: 2 extra images + 1 short video, shown as the thumbnail
 // row under the main image. Uploaded separately from the product itself
@@ -17,7 +18,8 @@ export const emptyProductMedia = (product) => ({
 });
 
 const IMAGE_ACCEPT = 'image/png,image/jpeg,image/jpg,image/webp,image/avif';
-const VIDEO_ACCEPT = 'video/mp4,video/quicktime,video/webm,.mp4,.mov,.webm,.m4v';
+const VIDEO_ACCEPT =
+  'video/mp4,video/quicktime,video/webm,.mp4,.mov,.webm,.m4v';
 const MAX_VIDEO_MB = 200;
 
 const formatMb = (bytes) => `${(bytes / (1024 * 1024)).toFixed(1)} MB`;
@@ -44,7 +46,8 @@ function MediaTile({ id, title, kind, slot, onPick, onClear, hint }) {
     if (!file) return;
     const ok =
       kind === 'video'
-        ? file.type.startsWith('video/') || /\.(mp4|mov|webm|m4v)$/i.test(file.name)
+        ? file.type.startsWith('video/') ||
+          /\.(mp4|mov|webm|m4v)$/i.test(file.name)
         : file.type.startsWith('image/');
     if (!ok) {
       setError(
@@ -55,7 +58,9 @@ function MediaTile({ id, title, kind, slot, onPick, onClear, hint }) {
       return;
     }
     if (kind === 'video' && file.size > MAX_VIDEO_MB * 1024 * 1024) {
-      setError(`Video is ${formatMb(file.size)} — the limit is ${MAX_VIDEO_MB} MB.`);
+      setError(
+        `Video is ${formatMb(file.size)} — the limit is ${MAX_VIDEO_MB} MB.`,
+      );
       return;
     }
     setError(null);
@@ -150,12 +155,73 @@ function MediaTile({ id, title, kind, slot, onPick, onClear, hint }) {
   );
 }
 
+const isVideoFile = (file) =>
+  file?.type?.startsWith('video/') ||
+  /\.(mp4|mov|webm|m4v)$/i.test(file?.name || '');
+const isImageFile = (file) => file?.type?.startsWith('image/');
+
 export default function ProductMediaSection({ media, onChange }) {
+  const [dropError, setDropError] = useState(null);
+
   const setGallery = (index, next) =>
     onChange({
       ...media,
       gallery: media.gallery.map((s, i) => (i === index ? next : s)),
     });
+
+  // Drop anywhere in the section: the video goes to the video slot, images
+  // fill the empty image slots first (then replace from slot 1), exactly like
+  // the Files section routes the cover/ZIP/EMB/PDF.
+  const handleDroppedFiles = (files) => {
+    const rejected = [];
+    const images = [];
+    let video = null;
+
+    files.forEach((file) => {
+      if (!file || file.size === 0) {
+        rejected.push(file?.name || 'file');
+      } else if (isVideoFile(file)) {
+        if (file.size > MAX_VIDEO_MB * 1024 * 1024) {
+          rejected.push(`${file.name} (over ${MAX_VIDEO_MB} MB)`);
+        } else if (!video) {
+          video = file;
+        } else {
+          rejected.push(`${file.name} (only 1 video)`);
+        }
+      } else if (isImageFile(file)) {
+        images.push(file);
+      } else {
+        rejected.push(file.name);
+      }
+    });
+
+    const gallery = [...media.gallery];
+    const order = [
+      ...gallery
+        .map((s, i) => i)
+        .filter((i) => !gallery[i].file && !gallery[i].existing),
+      ...gallery
+        .map((s, i) => i)
+        .filter((i) => gallery[i].file || gallery[i].existing),
+    ];
+    images.forEach((file, n) => {
+      if (n < order.length) gallery[order[n]] = { existing: null, file };
+      else rejected.push(`${file.name} (only ${gallery.length} extra images)`);
+    });
+
+    if (images.length || video) {
+      onChange({
+        ...media,
+        gallery,
+        video: video ? { existing: null, file: video } : media.video,
+      });
+    }
+    setDropError(
+      rejected.length
+        ? `Not added: ${rejected.join(', ')} — drop up to ${gallery.length} images and 1 video (MP4, MOV, WebM).`
+        : null,
+    );
+  };
 
   return (
     <section className='mt-4 rounded-lg border border-gray-200 bg-white p-4'>
@@ -164,36 +230,44 @@ export default function ProductMediaSection({ media, onChange }) {
           Product page gallery
         </h3>
         <p className='text-xs text-gray-400'>
-          Shown as thumbnails under the main image. Optimised automatically on
-          upload.
+          Drag images and a video anywhere in this box — each one lands in its
+          own slot. Optimised automatically on upload.
         </p>
       </div>
 
-      <div className='grid grid-cols-1 gap-3 sm:grid-cols-3'>
-        {media.gallery.map((slot, i) => (
+      <FilesDropZone onFiles={handleDroppedFiles}>
+        <div className='grid grid-cols-1 gap-3 sm:grid-cols-3'>
+          {media.gallery.map((slot, i) => (
+            <MediaTile
+              key={i}
+              id={`gallery-upload-${i}`}
+              title={`Extra image ${i + 1}`}
+              kind='image'
+              slot={slot}
+              hint='Saved as WebP, max 1600px.'
+              onPick={(file) => setGallery(i, { existing: null, file })}
+              onClear={() => setGallery(i, { existing: null, file: null })}
+            />
+          ))}
           <MediaTile
-            key={i}
-            id={`gallery-upload-${i}`}
-            title={`Extra image ${i + 1}`}
-            kind='image'
-            slot={slot}
-            hint='Saved as WebP, max 1600px.'
-            onPick={(file) => setGallery(i, { existing: null, file })}
-            onClear={() => setGallery(i, { existing: null, file: null })}
+            id='video-upload'
+            title='Product video'
+            kind='video'
+            slot={media.video}
+            hint='MP4/MOV/WebM. Saved as 720p, max 20s, no sound (~2 MB).'
+            onPick={(file) =>
+              onChange({ ...media, video: { existing: null, file } })
+            }
+            onClear={() =>
+              onChange({ ...media, video: { existing: null, file: null } })
+            }
           />
-        ))}
-        <MediaTile
-          id='video-upload'
-          title='Product video'
-          kind='video'
-          slot={media.video}
-          hint='MP4/MOV/WebM. Saved as 720p, max 20s, no sound (~2 MB).'
-          onPick={(file) => onChange({ ...media, video: { existing: null, file } })}
-          onClear={() =>
-            onChange({ ...media, video: { existing: null, file: null } })
-          }
-        />
-      </div>
+        </div>
+      </FilesDropZone>
+
+      {dropError && (
+        <p className='mt-2 text-xs font-light text-red-500'>{dropError}</p>
+      )}
     </section>
   );
 }
