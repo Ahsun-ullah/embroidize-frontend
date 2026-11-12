@@ -39,15 +39,18 @@ function ImageLightbox({ src, alt, onClose }) {
   };
 
   // Scroll wheel zoom
-  const handleWheel = useCallback((e) => {
-    e.preventDefault();
-    const delta = e.deltaY > 0 ? -0.2 : 0.2;
-    setScale((prev) => {
-      const next = clampScale(parseFloat((prev + delta).toFixed(1)));
-      resetIfNeeded(next);
-      return next;
-    });
-  }, [resetIfNeeded]);
+  const handleWheel = useCallback(
+    (e) => {
+      e.preventDefault();
+      const delta = e.deltaY > 0 ? -0.2 : 0.2;
+      setScale((prev) => {
+        const next = clampScale(parseFloat((prev + delta).toFixed(1)));
+        resetIfNeeded(next);
+        return next;
+      });
+    },
+    [resetIfNeeded],
+  );
 
   useEffect(() => {
     const el = containerRef.current;
@@ -70,7 +73,9 @@ function ImageLightbox({ src, alt, onClose }) {
   // Lock body scroll while open
   useEffect(() => {
     document.body.style.overflow = 'hidden';
-    return () => { document.body.style.overflow = ''; };
+    return () => {
+      document.body.style.overflow = '';
+    };
   }, []);
 
   // Drag to pan
@@ -79,12 +84,18 @@ function ImageLightbox({ src, alt, onClose }) {
     e.preventDefault();
     setIsDragging(true);
     didPan.current = false;
-    dragStart.current = { x: e.clientX - position.x, y: e.clientY - position.y };
+    dragStart.current = {
+      x: e.clientX - position.x,
+      y: e.clientY - position.y,
+    };
   };
   const onMouseMove = (e) => {
     if (!isDragging || !dragStart.current) return;
     didPan.current = true;
-    setPosition({ x: e.clientX - dragStart.current.x, y: e.clientY - dragStart.current.y });
+    setPosition({
+      x: e.clientX - dragStart.current.x,
+      y: e.clientY - dragStart.current.y,
+    });
   };
   const onMouseUp = () => {
     setIsDragging(false);
@@ -96,15 +107,23 @@ function ImageLightbox({ src, alt, onClose }) {
     if (scale <= 1 || e.touches.length !== 1) return;
     const t = e.touches[0];
     didPan.current = false;
-    dragStart.current = { x: t.clientX - position.x, y: t.clientY - position.y };
+    dragStart.current = {
+      x: t.clientX - position.x,
+      y: t.clientY - position.y,
+    };
   };
   const onTouchMove = (e) => {
     if (!dragStart.current || e.touches.length !== 1) return;
     didPan.current = true;
     const t = e.touches[0];
-    setPosition({ x: t.clientX - dragStart.current.x, y: t.clientY - dragStart.current.y });
+    setPosition({
+      x: t.clientX - dragStart.current.x,
+      y: t.clientY - dragStart.current.y,
+    });
   };
-  const onTouchEnd = () => { dragStart.current = null; };
+  const onTouchEnd = () => {
+    dragStart.current = null;
+  };
 
   // Close when click lands on the backdrop (not on the image itself) and wasn't a pan
   const onBackdropClick = (e) => {
@@ -116,9 +135,7 @@ function ImageLightbox({ src, alt, onClose }) {
   };
 
   return (
-    <div
-      className='fixed inset-0 z-50 flex items-center justify-center bg-black/90'
-    >
+    <div className='fixed inset-0 z-50 flex items-center justify-center bg-black/90'>
       {/* Image area — clicking on the backdrop (not the image) closes the lightbox */}
       <div
         ref={containerRef}
@@ -131,7 +148,9 @@ function ImageLightbox({ src, alt, onClose }) {
         onTouchStart={onTouchStart}
         onTouchMove={onTouchMove}
         onTouchEnd={onTouchEnd}
-        style={{ cursor: scale > 1 ? (isDragging ? 'grabbing' : 'grab') : 'zoom-out' }}
+        style={{
+          cursor: scale > 1 ? (isDragging ? 'grabbing' : 'grab') : 'zoom-out',
+        }}
       >
         <img
           src={src}
@@ -155,7 +174,14 @@ function ImageLightbox({ src, alt, onClose }) {
         className='absolute top-4 right-4 z-10 w-10 h-10 flex items-center justify-center rounded-full bg-white/10 hover:bg-white/20 text-white transition'
         aria-label='Close'
       >
-        <svg width={20} height={20} viewBox='0 0 24 24' fill='none' stroke='currentColor' strokeWidth={2.5}>
+        <svg
+          width={20}
+          height={20}
+          viewBox='0 0 24 24'
+          fill='none'
+          stroke='currentColor'
+          strokeWidth={2.5}
+        >
           <path d='M18 6 6 18M6 6l12 12' />
         </svg>
       </button>
@@ -163,18 +189,32 @@ function ImageLightbox({ src, alt, onClose }) {
       {/* Zoom controls */}
       <div className='absolute bottom-6 left-1/2 -translate-x-1/2 flex items-center gap-2 bg-white/10 backdrop-blur-sm rounded-full px-4 py-2'>
         <button
-          onClick={(e) => { e.stopPropagation(); zoomOut(); }}
+          onClick={(e) => {
+            e.stopPropagation();
+            zoomOut();
+          }}
           disabled={scale <= MIN_SCALE}
           className='w-8 h-8 flex items-center justify-center rounded-full text-white hover:bg-white/20 transition disabled:opacity-30'
           aria-label='Zoom out'
         >
-          <svg width={18} height={18} viewBox='0 0 24 24' fill='none' stroke='currentColor' strokeWidth={2.5}>
-            <circle cx='11' cy='11' r='8' /><path d='m21 21-4.35-4.35M8 11h6' />
+          <svg
+            width={18}
+            height={18}
+            viewBox='0 0 24 24'
+            fill='none'
+            stroke='currentColor'
+            strokeWidth={2.5}
+          >
+            <circle cx='11' cy='11' r='8' />
+            <path d='m21 21-4.35-4.35M8 11h6' />
           </svg>
         </button>
 
         <button
-          onClick={(e) => { e.stopPropagation(); resetZoom(); }}
+          onClick={(e) => {
+            e.stopPropagation();
+            resetZoom();
+          }}
           className='px-3 py-1 text-xs text-white font-medium hover:bg-white/20 rounded-full transition min-w-[3rem] text-center'
           aria-label='Reset zoom'
         >
@@ -182,13 +222,24 @@ function ImageLightbox({ src, alt, onClose }) {
         </button>
 
         <button
-          onClick={(e) => { e.stopPropagation(); zoomIn(); }}
+          onClick={(e) => {
+            e.stopPropagation();
+            zoomIn();
+          }}
           disabled={scale >= MAX_SCALE}
           className='w-8 h-8 flex items-center justify-center rounded-full text-white hover:bg-white/20 transition disabled:opacity-30'
           aria-label='Zoom in'
         >
-          <svg width={18} height={18} viewBox='0 0 24 24' fill='none' stroke='currentColor' strokeWidth={2.5}>
-            <circle cx='11' cy='11' r='8' /><path d='m21 21-4.35-4.35M11 8v6M8 11h6' />
+          <svg
+            width={18}
+            height={18}
+            viewBox='0 0 24 24'
+            fill='none'
+            stroke='currentColor'
+            strokeWidth={2.5}
+          >
+            <circle cx='11' cy='11' r='8' />
+            <path d='m21 21-4.35-4.35M11 8v6M8 11h6' />
           </svg>
         </button>
       </div>
@@ -205,7 +256,13 @@ function ImageLightbox({ src, alt, onClose }) {
 
 const ProBadge = () => (
   <span className='pointer-events-none absolute left-4 top-4 z-10 inline-flex items-center gap-1.5 rounded-full bg-amber-400 px-4 py-1.5 text-base font-extrabold text-neutral-900 shadow-sm sm:text-lg'>
-    <svg width='20' height='20' viewBox='0 0 24 24' fill='currentColor' aria-hidden>
+    <svg
+      width='20'
+      height='20'
+      viewBox='0 0 24 24'
+      fill='currentColor'
+      aria-hidden
+    >
       <path d='M2.5 7.5 7 11l5-7 5 7 4.5-3.5L19.5 19h-15L2.5 7.5Z' />
     </svg>
     PRO
@@ -213,7 +270,13 @@ const ProBadge = () => (
 );
 
 const PlayIcon = ({ size = 18 }) => (
-  <svg width={size} height={size} viewBox='0 0 24 24' fill='currentColor' aria-hidden>
+  <svg
+    width={size}
+    height={size}
+    viewBox='0 0 24 24'
+    fill='currentColor'
+    aria-hidden
+  >
     <path d='M8 5v14l11-7z' />
   </svg>
 );
@@ -256,6 +319,21 @@ export const SingleProductImageCard = ({ data, onImageLoad, isPremium }) => {
       >
         {isPremium && <ProBadge />}
 
+        {/* Gallery images and the video can be any shape (square shirt
+            mockups, portrait phone clips). They are shown whole — never
+            cropped — over a soft blurred copy of themselves, so the 3:2 box
+            has no hard empty bars. The main image keeps its usual fill. */}
+        {active !== 0 &&
+          (current.type === 'image' ? current.url : current.poster) && (
+            <div
+              aria-hidden
+              className='absolute inset-0 scale-110 bg-cover bg-center opacity-60 blur-2xl'
+              style={{
+                backgroundImage: `url("${current.type === 'image' ? current.url : current.poster}")`,
+              }}
+            />
+          )}
+
         {current.type === 'video' ? (
           <video
             key={current.url}
@@ -267,7 +345,7 @@ export const SingleProductImageCard = ({ data, onImageLoad, isPremium }) => {
             loop
             playsInline
             preload='metadata'
-            className='h-full w-full bg-black object-contain'
+            className='relative h-full w-full object-contain'
           />
         ) : (
           <>
@@ -290,7 +368,7 @@ export const SingleProductImageCard = ({ data, onImageLoad, isPremium }) => {
               fill
               unoptimized
               sizes='(max-width: 1024px) 100vw, 800px'
-              className='object-cover transition-opacity duration-300'
+              className={`${active === 0 ? 'object-cover' : 'object-contain'} transition-opacity duration-300`}
               onLoad={() => {
                 if (active === 0) {
                   setIsLoading(false);
@@ -347,7 +425,11 @@ export const SingleProductImageCard = ({ data, onImageLoad, isPremium }) => {
               type='button'
               role='tab'
               aria-selected={active === i}
-              aria-label={item.type === 'video' ? 'Play product video' : `Show image ${i + 1}`}
+              aria-label={
+                item.type === 'video'
+                  ? 'Play product video'
+                  : `Show image ${i + 1}`
+              }
               onClick={() => setActive(i)}
               className={`relative aspect-square overflow-hidden rounded-xl bg-gray-50 transition ${
                 active === i
