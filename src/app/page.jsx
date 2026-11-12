@@ -243,13 +243,6 @@ export default async function Home() {
           nothing. */}
       <HomeEventSections promotions={eventPromotions} position='after_hero' />
 
-      {/* Daily free-design vote. Hidden when switched off or unreachable. */}
-      {dailyVoteBoard?.enabled && (
-        <section id='free-design-vote' className='pt-8 pb-6 sm:pt-10 sm:pb-8'>
-          <DailyFreeVoteBoard board={dailyVoteBoard} variant='home' />
-        </section>
-      )}
-
       <BrowseCategories />
 
       <HomeSection
@@ -284,6 +277,17 @@ export default async function Home() {
           <MostFavoritedDesigns mostFavoritedProducts={mostFavoritedProducts} />
         </HomeSection>
       ) : null}
+
+      {/* Daily free-design vote: a short strip after Most Favourited. Hidden
+          when switched off or unreachable. */}
+      {dailyVoteBoard?.enabled && (
+        <section
+          id='free-design-vote'
+          className='border-y border-amber-100 bg-amber-50/60 py-6 sm:py-8'
+        >
+          <DailyFreeVoteBoard board={dailyVoteBoard} variant='home' />
+        </section>
+      )}
 
       <HomeSection
         id='recent-designs-heading'

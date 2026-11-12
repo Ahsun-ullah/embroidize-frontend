@@ -246,3 +246,136 @@ export function EmptyVoteSlot({ rank }) {
     </div>
   );
 }
+
+// ---------------------------------------------------------------------------
+// Compact cards for the homepage strip: small thumbnail beside the details, so
+// the whole board fits in one short row instead of a tall card grid.
+
+function Thumb({ product, priority = false }) {
+  return (
+    <Link
+      href={`/product/${product.slug}`}
+      className='relative block h-24 w-24 shrink-0 overflow-hidden rounded-xl bg-gray-50'
+    >
+      <Image
+        src={product?.image?.url || FALLBACK_IMG}
+        alt={product?.name || 'Embroidery design'}
+        fill
+        sizes='96px'
+        className='object-contain p-1 transition-transform duration-300 hover:scale-105'
+        priority={priority}
+      />
+    </Link>
+  );
+}
+
+function CompactName({ product }) {
+  return (
+    <Link
+      href={`/product/${product.slug}`}
+      className='line-clamp-2 text-sm font-bold leading-snug text-gray-900 hover:underline'
+      title={product.name}
+    >
+      {product.name}
+    </Link>
+  );
+}
+
+/** Today's free design, homepage strip size. */
+export function FreeTodayCardCompact({ freeDesign }) {
+  const p = freeDesign?.product;
+  if (!p) return null;
+  return (
+    <div className='flex h-full gap-3 rounded-2xl border-2 border-green-300 bg-white p-3 shadow-sm'>
+      <Thumb product={p} priority />
+      <div className='flex min-w-0 flex-1 flex-col gap-1.5'>
+        <span className='flex w-fit items-center gap-1 rounded-full bg-green-100 px-2 py-0.5 text-[11px] font-extrabold uppercase text-green-800'>
+          <Gift className='h-3 w-3' aria-hidden /> Free today
+        </span>
+        <CompactName product={p} />
+        <Link
+          href={`/product/${p.slug}`}
+          className='mt-auto inline-flex h-10 w-full items-center justify-center gap-1.5 rounded-xl bg-amber-400 text-sm font-bold text-black shadow-sm transition hover:bg-amber-500'
+        >
+          <Download className='h-4 w-4' aria-hidden /> Download Free
+        </Link>
+      </div>
+    </div>
+  );
+}
+
+/** A design in today's race, homepage strip size. */
+export function VoteCardCompact({ entry }) {
+  const { product: p, rank, votes, percent } = entry;
+  if (!p) return null;
+  const leading = rank === 1 && votes > 0;
+  return (
+    <div className='flex h-full gap-3 rounded-2xl border border-gray-100 bg-white p-3 shadow-sm'>
+      <Thumb product={p} />
+      <div className='flex min-w-0 flex-1 flex-col gap-1.5'>
+        <div className='flex items-center justify-between gap-2'>
+          <span className='flex items-center gap-1.5'>
+            {rank && (
+              <span
+                className={`flex h-6 w-6 items-center justify-center rounded-full text-xs font-extrabold ring-2 ${
+                  RANK_STYLES[rank] || 'bg-gray-100 text-gray-700 ring-white'
+                }`}
+                aria-label={`Rank ${rank}`}
+              >
+                {rank}
+              </span>
+            )}
+            {leading && (
+              <span
+                className='flex items-center text-amber-500'
+                title='Leading: free tomorrow if it stays #1'
+              >
+                <Crown className='h-4 w-4' aria-hidden />
+                <span className='sr-only'>Leading</span>
+              </span>
+            )}
+          </span>
+          <span className='whitespace-nowrap text-xs font-semibold text-gray-500'>
+            {votes || 0} vote{votes === 1 ? '' : 's'} · {percent || 0}%
+          </span>
+        </div>
+        <CompactName product={p} />
+        <div className='h-1.5 w-full overflow-hidden rounded-full bg-gray-100'>
+          <div
+            className='h-full rounded-full bg-amber-400 transition-all duration-700'
+            style={{ width: `${Math.max(percent || 0, votes ? 3 : 0)}%` }}
+          />
+        </div>
+        <div className='mt-auto'>
+          <VoteButton
+            productId={p._id}
+            productName={p.name}
+            size='sm'
+          />
+        </div>
+      </div>
+    </div>
+  );
+}
+
+/** Placeholder slot, homepage strip size. */
+export function EmptyVoteSlotCompact({ rank }) {
+  return (
+    <Link
+      href='/free-design-vote#vote-any-design'
+      className='flex h-full min-h-[120px] items-center gap-3 rounded-2xl border-2 border-dashed border-amber-200 bg-amber-50/40 p-3 transition hover:bg-amber-50'
+    >
+      <span className='flex h-24 w-24 shrink-0 items-center justify-center rounded-xl bg-white text-amber-500'>
+        <Plus className='h-8 w-8' aria-hidden />
+      </span>
+      <span className='min-w-0'>
+        <span className='block text-sm font-bold text-gray-800'>
+          #{rank} is open
+        </span>
+        <span className='block text-xs text-gray-500'>
+          Pick any premium design and vote for it.
+        </span>
+      </span>
+    </Link>
+  );
+}
