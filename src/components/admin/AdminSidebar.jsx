@@ -350,6 +350,11 @@ export default function AdminSidebar({ isCollapsed, setIsCollapsed }) {
               icon: 'ri-calendar-event-line',
             },
             {
+              href: '/admin/offers',
+              label: 'Offers & Campaigns',
+              icon: 'ri-price-tag-3-line',
+            },
+            {
               href: '/admin/links-page',
               label: 'Links Page',
               icon: 'ri-instagram-line',

@@ -9,6 +9,10 @@ import { useDownloadReset } from '@/lib/hooks/useDownloadReset';
 import { formatDesignCount, useUpgradeOffer } from '@/lib/hooks/useUpgradeOffer';
 import { formatResetTime } from '@/utils/functions/page';
 import { Download, X } from 'lucide-react';
+import OfferCheckoutButton from '@/components/Common/Offer/OfferCheckoutButton';
+import { useOfferAudience } from '@/components/Common/Offer/useOfferAudience';
+import { useCurrentOffer } from '@/lib/hooks/useCurrentOffer';
+import { endsLabel, offerLine } from '@/lib/offers/format';
 import Image from 'next/image';
 import { useRouter } from 'next/navigation';
 import { useEffect, useRef } from 'react';
@@ -39,6 +43,8 @@ function DownloadLimitModal({ limitModalData = {}, product, onClose }) {
   const { usedDownloads, limit, downloadWindow, msLeft, nextResetTime } =
     useDownloadReset({ tickMs: 60_000 });
   const { plans, totalDesigns } = useUpgradeOffer();
+  const liveOffer = useCurrentOffer('limitPopup');
+  const audience = useOfferAudience(liveOffer);
 
   const total = limit > 0 ? limit : (limitModalData?.count ?? 0);
   const used = limit > 0 ? usedDownloads : total;
@@ -199,6 +205,24 @@ function DownloadLimitModal({ limitModalData = {}, product, onClose }) {
             {subtitle}
           </p>
         </div>
+
+        {/* ── Live offer line (Offers & Campaigns → "Download-limit pop-up") ── */}
+        {isFree && liveOffer && audience.ready && audience.canBuy && (
+          <div className='mt-4 rounded-2xl bg-black p-4 text-center text-white'>
+            <p className='text-sm'>
+              <span className='font-bold text-[#E8C26A]'>{liveOffer.name}:</span>{' '}
+              {offerLine(liveOffer)}
+            </p>
+            <OfferCheckoutButton
+              offer={liveOffer}
+              source='limit_popup_offer'
+              className='mt-3 flex h-11 w-full items-center justify-center rounded-xl bg-[#E8C26A] text-[15px] font-bold text-black transition hover:bg-[#F0D088]'
+            >
+              {liveOffer.ctaLabel || `Get the ${liveOffer.name}`}
+            </OfferCheckoutButton>
+            <p className='mt-2 text-xs text-white/50'>{endsLabel(liveOffer)}</p>
+          </div>
+        )}
 
         {/* ── Action ── */}
         <div className='mt-5'>

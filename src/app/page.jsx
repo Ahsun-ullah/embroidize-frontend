@@ -1,5 +1,6 @@
 import DailyFreeVoteBoard from '@/components/Common/DailyVote/DailyFreeVoteBoard';
 import HomeEventSections from '@/components/Common/EventPromotions/HomeEventSections';
+import OfferHomeHero from '@/components/Common/Offer/OfferHomeHero';
 import AdminChoiceDesign from '@/components/user/HomePage/AdminChoiceSection';
 import BrowseCategories from '@/components/user/HomePage/BrowseCategories';
 import CustomDigitizingBanner from '@/components/user/HomePage/CustomDigitizingBanner';
@@ -242,6 +243,10 @@ export default async function Home() {
           3: "After hero". Each event picks its own spot; empty spots render
           nothing. */}
       <HomeEventSections promotions={eventPromotions} position='after_hero' />
+
+      {/* Live offer banner with countdown (Admin → Content → Offers &
+          Campaigns, "Homepage hero"). Renders nothing outside its window. */}
+      <OfferHomeHero />
 
       <BrowseCategories />
 

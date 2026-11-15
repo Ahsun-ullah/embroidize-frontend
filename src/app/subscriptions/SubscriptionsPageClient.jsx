@@ -2,6 +2,7 @@
 import CreditPackList from '@/components/Common/CreditPackList';
 import { ErrorToast } from '@/components/Common/ErrorToast';
 import OfferCountdown from '@/components/Common/OfferCountdown';
+import OfferPricingCard from '@/components/Common/Offer/OfferPricingCard';
 import PaymentHelpModal from '@/components/Common/PaymentHelpModal';
 import PurchaseButton from '@/components/Common/PurchaseButton';
 import { SuccessToast } from '@/components/Common/SuccessToast';
@@ -29,6 +30,7 @@ import {
 import { usePathname, useRouter } from 'next/navigation';
 import { useCallback, useEffect, useState } from 'react';
 import { buildSubscriptionFaqs } from './faqs';
+import { useCurrentOffer } from '@/lib/hooks/useCurrentOffer';
 
 /* One-Time Payment — diamond/gem (premium one-time investment) */
 const OneTimeIcon = () => (
@@ -445,6 +447,9 @@ export default function SubscriptionsPageClient({
   const freeAllowance =
     freeLimit && freeWindow ? `${freeLimit} downloads per ${freeWindow}` : null;
   const [plans, setPlans] = useState([]);
+  // A live offer brings its own countdown to its real deadline; the everyday
+  // "ends today" timer would then show a second, different deadline.
+  const liveOffer = useCurrentOffer('pricingCard');
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   // Message shown (with a Contact CTA) when a plan can't be bought right now —
@@ -695,7 +700,7 @@ export default function SubscriptionsPageClient({
 
           {/* One offer timer above the grid, green like the homepage promo
               pill so the two read as the same offer. */}
-          {plans.length > 0 && (
+          {plans.length > 0 && !liveOffer && (
             <div className='mt-5 inline-flex items-center gap-2.5 rounded-full bg-green-50 px-6 py-2.5 text-base shadow-sm ring-1 ring-green-200'>
               <span className='text-green-600'>
                 <ClockIcon size={18} />
@@ -748,6 +753,12 @@ export default function SubscriptionsPageClient({
             </button>
           </div>
         )}
+
+        {/* Live offer (Black Friday …) as its own highlighted card above the
+            regular plans. Renders nothing outside the offer's window. */}
+        <div className='relative z-10'>
+          <OfferPricingCard />
+        </div>
 
         <div className='max-w-7xl mx-auto relative z-10'>
           {/* The Free plan is ALWAYS shown. Paid plans render when available;

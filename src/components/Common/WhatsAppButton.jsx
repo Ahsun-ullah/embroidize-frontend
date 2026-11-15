@@ -45,7 +45,8 @@ export default function WhatsAppButton() {
       // WhatsApp green, not the site's grayscale. This is a third-party brand
       // mark, not decoration: people recognise it at a glance and tap it
       // without reading, which is the entire point of the button.
-      className='group fixed bottom-4 left-4 z-50 flex h-14 w-14 items-center justify-center rounded-full bg-[#25D366] text-white shadow-lg transition hover:bg-[#1DA851] focus:outline-none focus-visible:ring-2 focus-visible:ring-[#25D366] focus-visible:ring-offset-2'
+      style={{ bottom: 'calc(1rem + var(--offer-bar-h, 0px))' }}
+      className='group fixed left-4 z-50 flex h-14 w-14 items-center justify-center rounded-full bg-[#25D366] text-white shadow-lg transition hover:bg-[#1DA851] focus:outline-none focus-visible:ring-2 focus-visible:ring-[#25D366] focus-visible:ring-offset-2'
     >
       {/* Remixicon is already loaded site-wide (see the root layout), so the
           official glyph costs nothing extra. */}

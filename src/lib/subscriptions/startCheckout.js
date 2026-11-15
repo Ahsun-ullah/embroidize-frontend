@@ -17,7 +17,10 @@ import Cookies from 'js-cookie';
 //
 // `source` names the button for the admin tracking pages (pricing, limit_popup,
 // my_plan, ...); without one it is derived from the page path.
-export async function startSubscriptionCheckout(plan, returnPath, source) {
+//
+// `opts.offer` (an offer slug) buys the plan through that offer: the backend
+// picks the plan, applies the offer's discount and grants its add-ons.
+export async function startSubscriptionCheckout(plan, returnPath, source, opts = {}) {
   const token = Cookies.get('token');
   const from = source || sourceFromPath(returnPath);
   trackUserEvent('plan_click', { planId: plan?._id, source: from });
@@ -39,6 +42,7 @@ export async function startSubscriptionCheckout(plan, returnPath, source) {
       // webhook sends (it has no browser of its own).
       body: JSON.stringify({
         planId: plan._id,
+        ...(opts.offer ? { offer: opts.offer } : {}),
         source: from,
         ...getMetaBrowserIds(),
       }),

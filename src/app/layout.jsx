@@ -1,6 +1,8 @@
 import SiteTopBar from '@/components/Common/SiteTopBar';
 import ScrollToTopBottom from '@/components/Common/ScrollToTopBottom';
 import WhatsAppButton from '@/components/Common/WhatsAppButton';
+import OfferExitPopup from '@/components/Common/Offer/OfferExitPopup';
+import OfferMobileBar from '@/components/Common/Offer/OfferMobileBar';
 import FirstTouchCapture from '@/components/Common/FirstTouchCapture';
 import ChatIdentify from '@/components/Common/TawkIdentify';
 import { NProgressProvider } from '@/components/providers/NProgressProvider';
@@ -143,11 +145,19 @@ export default function RootLayout({ children }) {
               >
                 {children}
               </main>
+              {/* Room under the footer for the offer's phone bar, so it never
+                  covers the last links. 0 when the bar is not showing. */}
+              <div aria-hidden style={{ height: 'var(--offer-bar-h, 0px)' }} />
               <ScrollToTopBottom />
               {/* Bottom-left: the right corner already holds the Crisp bubble
                   and the scroll control. Renders nothing until a number is
                   configured in Settings → WhatsApp. */}
               <WhatsAppButton />
+              {/* Live offer (Admin → Content → Offers & Campaigns): phone
+                  sticky bar and the once-per-visit exit pop-up. Both render
+                  nothing unless the offer is public and that placement is on. */}
+              <OfferMobileBar />
+              <OfferExitPopup />
               <FirstTouchCapture />
             </NProgressProvider>
           </Suspense>
