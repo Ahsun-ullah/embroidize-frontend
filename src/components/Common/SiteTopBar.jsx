@@ -5,6 +5,7 @@ import OfferStrip from '@/components/Common/Offer/OfferStrip';
 import SubscriptionStatusBanner from '@/components/Common/SubscriptionStatusBanner';
 import { useCurrentOffer } from '@/lib/hooks/useCurrentOffer';
 import { useUserInfoQuery } from '@/lib/redux/common/user/userInfoSlice';
+import { usePathname } from 'next/navigation';
 import { useState } from 'react';
 
 // The ONE bar above every page. Three notices can want that spot — the account
@@ -22,6 +23,9 @@ export default function SiteTopBar() {
   const { data, isLoading } = useUserInfoQuery();
   const [accountDismissed, setAccountDismissed] = useState(false);
   const offer = useCurrentOffer('topBar');
+  const pathname = usePathname() || '';
+  // Offer landing pages carry their own top bar.
+  const onOfferLanding = pathname === '/black-friday' || pathname.startsWith('/offers/');
 
   // Wait for the account check before showing anything, or a lapsed
   // subscriber sees the event strip flash and then get replaced.
@@ -33,6 +37,7 @@ export default function SiteTopBar() {
   if (needsAction && !accountDismissed) {
     return <SubscriptionStatusBanner onDismiss={() => setAccountDismissed(true)} />;
   }
+  if (onOfferLanding) return null;
   if (offer) return <OfferStrip offer={offer} />;
   return <EventStrip />;
 }
