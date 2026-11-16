@@ -6,6 +6,7 @@ import { ArrowRight } from 'lucide-react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { useOfferAudience } from './useOfferAudience';
+import { offerSurfaceStyle } from '@/lib/offers/theme';
 
 /**
  * Top of the account pages for logged-in FREE users:
@@ -25,16 +26,17 @@ export default function OfferDashboardBanner() {
       <Link
         href={offer.landingPath}
         prefetch={false}
-        className='group flex flex-col gap-2 rounded-2xl bg-black px-5 py-4 text-white sm:flex-row sm:items-center sm:justify-between'
+        className='group flex flex-col gap-2 rounded-2xl px-5 py-4 sm:flex-row sm:items-center sm:justify-between'
+        style={offerSurfaceStyle(offer)}
       >
-        <span className='text-sm sm:text-base'>
-          <span className='font-bold'>
-            {who} <span className='text-[#E8C26A]'>{offer.name}</span> is waiting:
+        <span className='o-fg text-sm sm:text-base'>
+          <span className='o-fg font-bold'>
+            {who} <span className='o-accent'>{offer.name}</span> is waiting:
           </span>{' '}
-          <span className='text-white/80'>{offerLine(offer)}</span>
-          <span className='text-white/50'> · {endsLabel(offer)}</span>
+          <span className='o-muted'>{offerLine(offer)}</span>
+          <span className='o-faint'> · {endsLabel(offer)}</span>
         </span>
-        <span className='inline-flex shrink-0 items-center gap-1 font-semibold text-[#E8C26A]'>
+        <span className='o-accent inline-flex shrink-0 items-center gap-1 font-semibold'>
           See the offer
           <ArrowRight className='h-4 w-4 transition-transform group-hover:translate-x-0.5' aria-hidden />
         </span>

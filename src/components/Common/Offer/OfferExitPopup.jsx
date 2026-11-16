@@ -7,6 +7,7 @@ import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { useEffect, useRef, useState } from 'react';
 import { useOfferAudience } from './useOfferAudience';
+import { offerSurfaceStyle } from '@/lib/offers/theme';
 
 const HIDDEN_PREFIXES = ['/admin', '/auth', '/custom-order-checkout', '/reset-password', '/user'];
 const seenKey = (id) => `offer-exit-seen:${id}`;
@@ -76,33 +77,34 @@ export default function OfferExitPopup() {
         aria-modal='true'
         aria-labelledby='offer-exit-title'
         onClick={(e) => e.stopPropagation()}
-        className='relative w-full max-w-md overflow-hidden rounded-3xl bg-black p-7 text-center text-white shadow-2xl ring-1 ring-[#E8C26A]/50'
+        className='o-ring-soft relative w-full max-w-md overflow-hidden rounded-3xl p-7 text-center shadow-2xl'
+        style={offerSurfaceStyle(offer)}
       >
         <button
           type='button'
           onClick={() => setOpen(false)}
           aria-label='Close'
-          className='absolute right-3 top-3 rounded-full p-2 text-white/60 hover:bg-white/10 hover:text-white'
+          className='o-faint o-hover-tint absolute right-3 top-3 rounded-full p-2'
         >
           <X className='h-4 w-4' aria-hidden />
         </button>
-        <p className='text-xs font-bold uppercase tracking-[0.2em] text-[#E8C26A]'>Wait!</p>
-        <h2 id='offer-exit-title' className='mt-2 text-2xl font-extrabold'>
+        <p className='o-accent text-xs font-bold uppercase tracking-[0.2em]'>Wait!</p>
+        <h2 id='offer-exit-title' className='o-fg mt-2 text-2xl font-extrabold'>
           The {offer.name} {endsLabel(offer).replace(/^Ends/, 'ends')}
         </h2>
-        <p className='mt-3 text-white/80'>{offerLine(offer)}</p>
+        <p className='o-muted mt-3'>{offerLine(offer)}</p>
         <Link
           href={offer.landingPath}
           prefetch={false}
           onClick={() => setOpen(false)}
-          className='mt-6 flex h-12 w-full items-center justify-center rounded-xl bg-[#E8C26A] font-bold text-black transition hover:bg-[#F0D088]'
+          className='o-btn mt-6 flex h-12 w-full items-center justify-center rounded-xl font-bold'
         >
           See the offer
         </Link>
         <button
           type='button'
           onClick={() => setOpen(false)}
-          className='mt-3 text-sm text-white/50 underline underline-offset-2 hover:text-white/80'
+          className='o-faint mt-3 text-sm underline underline-offset-2'
         >
           No thanks
         </button>

@@ -11,6 +11,7 @@ import Link from 'next/link';
 import { useOfferAudience } from '@/components/Common/Offer/useOfferAudience';
 import { useCurrentOffer } from '@/lib/hooks/useCurrentOffer';
 import { endsLabel, offerLine, usd } from '@/lib/offers/format';
+import { offerSurfaceStyle } from '@/lib/offers/theme';
 
 /**
  * Everything the Pro box says, derived from the live plans + catalogue size.
@@ -62,31 +63,31 @@ export default function ProUpsellBox({ plans, totalDesigns, onGetAccess }) {
 
   if (liveOffer && audience.ready && audience.canBuy) {
     return (
-      <div className='rounded-2xl bg-black p-5 text-white ring-1 ring-[#E8C26A]/60 sm:p-6'>
-        <p className='text-xs font-bold uppercase tracking-[0.2em] text-[#E8C26A]'>
+      <div className='o-ring-soft rounded-2xl p-5 sm:p-6' style={offerSurfaceStyle(liveOffer)}>
+        <p className='o-accent text-xs font-bold uppercase tracking-[0.2em]'>
           {liveOffer.name} · {endsLabel(liveOffer)}
         </p>
         <p className='mt-2 flex items-baseline gap-2'>
-          <span className='text-4xl font-extrabold tracking-tight'>
+          <span className='o-fg text-4xl font-extrabold tracking-tight'>
             {usd(liveOffer.offerPriceCents)}
           </span>
-          <span className='text-lg font-semibold'>for 1 {liveOffer.plan.billingInterval}</span>
+          <span className='o-fg text-lg font-semibold'>for 1 {liveOffer.plan.billingInterval}</span>
           {liveOffer.savingsCents > 0 && (
-            <span className='text-base text-white/50 line-through'>
+            <span className='o-faint text-base line-through'>
               {usd(liveOffer.regularPriceCents)}
             </span>
           )}
         </p>
-        <p className='mt-1 text-sm text-white/70'>{offerLine(liveOffer)}</p>
+        <p className='o-muted mt-1 text-sm'>{offerLine(liveOffer)}</p>
         <Link
           href={liveOffer.landingPath}
           prefetch={false}
-          className='mt-4 flex h-14 w-full items-center justify-center gap-3 rounded-xl bg-[#E8C26A] text-lg font-bold text-black transition-colors hover:bg-[#F0D088]'
+          className='o-btn mt-4 flex h-14 w-full items-center justify-center gap-3 rounded-xl text-lg font-bold'
         >
           <CrownIcon size={22} strokeWidth={1.8} aria-hidden />
           Download with Pro
         </Link>
-        <p className='mt-3 text-center text-sm text-white/50'>{offer.perks}</p>
+        <p className='o-faint mt-3 text-center text-sm'>{offer.perks}</p>
       </div>
     );
   }

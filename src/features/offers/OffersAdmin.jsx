@@ -27,6 +27,7 @@ import {
 } from '@heroui/react';
 import { Copy, ExternalLink, Pencil, Plus, Trash2, Users, X } from 'lucide-react';
 import { useCallback, useEffect, useState } from 'react';
+import OfferThemeEditor, { DEFAULT_THEME_FORM } from './OfferThemeEditor';
 
 // ─────────────────────────────────────────────────────────────────────────────
 // Admin → Content → Offers & Campaigns.
@@ -65,6 +66,19 @@ function getToken() {
 }
 const apiBase = () =>
   process.env.NEXT_PUBLIC_BASE_API_URL_PROD || process.env.NEXT_PUBLIC_BASE_API_URL;
+
+async function uploadOfferImage(file) {
+  const fd = new FormData();
+  fd.append('image', file);
+  const res = await fetch(`${apiBase()}/admin/offers/upload-image`, {
+    method: 'POST',
+    headers: getToken() ? { Authorization: `Bearer ${getToken()}` } : {},
+    body: fd,
+  });
+  const data = await res.json().catch(() => ({}));
+  if (!res.ok) throw new Error(data?.message || `Upload failed (${res.status})`);
+  return data?.data;
+}
 
 async function api(path, { method = 'GET', body } = {}) {
   const res = await fetch(`${apiBase()}${path}`, {
@@ -150,6 +164,7 @@ const emptyForm = {
   description: '',
   faqs: [],
   placements: Object.fromEntries(PLACEMENTS.map((p) => [p.key, true])),
+  theme: DEFAULT_THEME_FORM,
 };
 
 function formFromOffer(o) {
@@ -171,6 +186,11 @@ function formFromOffer(o) {
     description: o.description || '',
     faqs: (o.faqs || []).map((f) => ({ q: f.q, a: f.a })),
     placements: Object.fromEntries(PLACEMENTS.map((p) => [p.key, !!o.placements?.[p.key]])),
+    theme: {
+      ...DEFAULT_THEME_FORM,
+      ...(o.theme || {}),
+      image: { url: o.theme?.image?.url || '', public_id: o.theme?.image?.public_id || '' },
+    },
   };
 }
 
@@ -201,6 +221,7 @@ function bodyFromForm(f) {
     description: f.description,
     faqs: f.faqs.filter((x) => x.q.trim() && x.a.trim()),
     placements: f.placements,
+    theme: f.theme,
   };
 }
 
@@ -595,6 +616,13 @@ export default function OffersAdmin({ plans = [] }) {
                         ))}
                       </div>
                     </section>
+
+                    <OfferThemeEditor
+                      value={form.theme}
+                      onChange={(v) => set('theme', v)}
+                      upload={uploadOfferImage}
+                      offerName={form.name}
+                    />
                   </div>
 
                   {/* Sidebar */}

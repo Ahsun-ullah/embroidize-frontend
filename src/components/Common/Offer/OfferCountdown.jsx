@@ -48,14 +48,16 @@ export function OfferCountdownText({ endsAt, className = '' }) {
   );
 }
 
-/** Boxed tiles for heroes and the landing page. `tone` = 'dark' | 'light'. */
+/** Boxed tiles for heroes and the landing page. `tone` = 'dark' | 'light' | 'theme' (offer colours). */
 export default function OfferCountdownTiles({ endsAt, tone = 'dark' }) {
   const left = useDeadline(endsAt);
   const box =
-    tone === 'dark'
-      ? 'bg-white/10 text-white ring-1 ring-white/15'
-      : 'bg-white text-black ring-1 ring-black/10 shadow-sm';
-  const label = tone === 'dark' ? 'text-white/60' : 'text-gray-500';
+    tone === 'theme'
+      ? 'o-tile o-fg'
+      : tone === 'dark'
+        ? 'bg-white/10 text-white ring-1 ring-white/15'
+        : 'bg-white text-black ring-1 ring-black/10 shadow-sm';
+  const label = tone === 'theme' ? 'o-faint' : tone === 'dark' ? 'text-white/60' : 'text-gray-500';
   const parts =
     left == null
       ? null

@@ -2,6 +2,7 @@
 
 import { endsLabel, offerLine } from '@/lib/offers/format';
 import { ArrowRight } from 'lucide-react';
+import { offerSurfaceStyle } from '@/lib/offers/theme';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { useOfferAudience } from './useOfferAudience';
@@ -23,19 +24,18 @@ export default function OfferStrip({ offer }) {
   if (!audience.ready || !audience.canBuy) return null;
 
   return (
-    <div className='bg-black text-white'>
+    <div style={offerSurfaceStyle(offer)}>
       <Link
         href={offer.landingPath}
         prefetch={false}
         className='group mx-auto flex max-w-7xl flex-wrap items-center justify-center gap-x-3 gap-y-1 px-4 py-2 text-center text-sm'
       >
-        <span className='font-medium'>
-          <span aria-hidden>🖤 </span>
-          <span className='font-bold text-[#E8C26A]'>{offer.name}:</span> {offerLine(offer)}
-          <span className='text-white/70'> · {endsLabel(offer)}</span>
+        <span className='o-fg font-medium'>
+          <span className='o-accent font-bold'>{offer.name}:</span> {offerLine(offer)}
+          <span className='o-muted'> · {endsLabel(offer)}</span>
         </span>
         <ArrowRight
-          className='h-4 w-4 text-[#E8C26A] transition-transform group-hover:translate-x-0.5'
+          className='o-accent h-4 w-4 transition-transform group-hover:translate-x-0.5'
           aria-hidden
         />
       </Link>

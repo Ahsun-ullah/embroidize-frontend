@@ -6,6 +6,7 @@ import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { useEffect } from 'react';
 import { useOfferAudience } from './useOfferAudience';
+import { offerSurfaceStyle } from '@/lib/offers/theme';
 
 const HIDDEN_PREFIXES = ['/admin', '/auth', '/custom-order-checkout', '/reset-password'];
 const BAR_HEIGHT = '56px';
@@ -44,17 +45,17 @@ export default function OfferMobileBar() {
 
   return (
     <div
-      className='fixed inset-x-0 bottom-0 z-40 flex items-center gap-3 border-t border-[#E8C26A]/40 bg-black pl-4 pr-20 text-white md:hidden'
-      style={{ height: BAR_HEIGHT }}
+      className='o-border fixed inset-x-0 bottom-0 z-40 flex items-center gap-3 border-t pl-4 pr-20 md:hidden'
+      style={{ ...offerSurfaceStyle(offer), height: BAR_HEIGHT }}
     >
-      <p className='min-w-0 flex-1 truncate text-sm'>
-        <span className='font-bold text-[#E8C26A]'>{offer.name}</span>
-        <span className='text-white/70'> · {endsLabel(offer)}</span>
+      <p className='o-fg min-w-0 flex-1 truncate text-sm'>
+        <span className='o-accent font-bold'>{offer.name}</span>
+        <span className='o-muted'> · {endsLabel(offer)}</span>
       </p>
       <Link
         href={offer.landingPath}
         prefetch={false}
-        className='shrink-0 rounded-full bg-[#E8C26A] px-4 py-1.5 text-sm font-bold text-black'
+        className='o-btn shrink-0 rounded-full px-4 py-1.5 text-sm font-bold'
       >
         Get it
       </Link>
