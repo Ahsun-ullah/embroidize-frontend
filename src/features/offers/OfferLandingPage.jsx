@@ -7,13 +7,17 @@ import { getFeaturedReviews } from '@/lib/apis/public/featuredReviews';
 import { getPopularProducts } from '@/lib/apis/public/products';
 import { getSiteConfig } from '@/lib/apis/public/siteConfig';
 import { endsLong, OFFER_TIMEZONE, perMonth, usd } from '@/lib/offers/format';
+import { offerSurfaceStyle, offerVars } from '@/lib/offers/theme';
 import { ArrowRight, Lock, Star } from 'lucide-react';
 import Image from 'next/image';
 import Link from 'next/link';
 
 /*
  * The offer landing page (/black-friday, /offers/<slug>), laid out from the
- * approved Black Friday mockup.
+ * approved Black Friday mockup. ONE page for every campaign: its colours come
+ * from the offer's Look (Admin → Offers → Look) — the top bar, hero and final
+ * call-to-action paint with the offer's background / image / text colour, and
+ * the accent drives buttons, badges and highlights. Nothing here names a season.
  *
  * EVERY NUMBER IS DERIVED, never typed: prices and the per-month figure come
  * from the offer and its plan; the credits' dollar value from the live credit
@@ -24,7 +28,7 @@ import Link from 'next/link';
  * number until one exists.
  */
 
-const BRAND = '#E8276F';
+const DEFAULT_BADGE = 'Limited-time offer';
 
 // ── Derived figures ─────────────────────────────────────────────────────────
 
@@ -63,18 +67,11 @@ const termWord = (interval) => (interval === 'month' ? 'Month' : interval === 'w
 
 // ── Small pieces ────────────────────────────────────────────────────────────
 
-function Kicker({ children, tone = 'pink' }) {
-  const cls =
-    tone === 'gold'
-      ? 'bg-[#F7C948] text-black'
-      : tone === 'solid'
-        ? 'text-white'
-        : 'bg-[#FFE4EE] text-[#C81E5B]';
+// tone 'soft' on the white sections, 'solid' (accent fill) on the coloured ones.
+function Kicker({ children, tone = 'soft' }) {
+  const cls = tone === 'solid' ? 'o-band' : 'ol-tint-strong ol-ink';
   return (
-    <span
-      className={`inline-block rounded-full px-3 py-1 text-[11px] font-bold uppercase tracking-[0.14em] ${cls}`}
-      style={tone === 'solid' ? { background: BRAND } : undefined}
-    >
+    <span className={`inline-block rounded-full px-3 py-1 text-[11px] font-bold uppercase tracking-[0.14em] ${cls}`}>
       {children}
     </span>
   );
@@ -82,7 +79,7 @@ function Kicker({ children, tone = 'pink' }) {
 
 // Every CTA on the page: the offer checkout, or the plans page once it ended.
 function BrandCta({ offer, ended, source, children, block = false }) {
-  const cls = `${block ? 'flex w-full' : 'inline-flex'} items-center justify-center gap-2 rounded-full bg-[#E8276F] px-7 py-3.5 text-[15px] font-bold text-white shadow-[0_8px_20px_-8px_rgba(232,39,111,0.7)] transition hover:brightness-110`;
+  const cls = `${block ? 'flex w-full' : 'inline-flex'} items-center justify-center gap-2 rounded-full o-btn ol-btn-shadow px-7 py-3.5 text-[15px] font-bold`;
   if (ended) {
     return (
       <Link href='/subscriptions' className={cls}>
@@ -149,7 +146,7 @@ function buildFaqs(offer, { creditValue }) {
       a: `The ${offer.name} is for new ${offer.plan.name} members, so it can't be added to an active ${offer.plan.name} plan. Your plan already includes every design and your daily downloads.`,
     },
     {
-      q: 'I joined at Halloween. Did I miss out?',
+      q: 'I joined recently. Did I miss out?',
       a: `If you're on the Monthly plan, no — you can switch to the ${offer.name} today and your monthly plan stops automatically. If you joined on ${offer.plan.name}, your full ${unit} is already running.`,
     },
     {
@@ -177,6 +174,7 @@ export default async function OfferLandingPage({ offer }) {
 
   const ended = offer.phase === 'ended' || new Date(offer.endsAt).getTime() <= Date.now();
   const cta = offer.ctaLabel || `Get the ${offer.name}`;
+  const badge = offer.badge || DEFAULT_BADGE;
   const credits = offer.bonusCredits || 0;
   const creditValue = creditValueCents(credits, site.creditPacks);
   const totalValue = offer.regularPriceCents + (creditValue || 0);
@@ -201,16 +199,17 @@ export default async function OfferLandingPage({ offer }) {
   return (
     <div
       className={`${poppins.variable} ${inter.variable} ${caveat.variable} bg-white font-[family-name:var(--font-inter)] text-[#6B6B75]`}
+      style={offerVars(offer)}
     >
       {/* ══ Top bar ══ */}
-      <div className='px-4 py-2 text-center text-[12px] font-medium text-white' style={{ background: BRAND }}>
+      <div className='o-band px-4 py-2 text-center text-[12px] font-medium'>
         <span className='font-bold uppercase tracking-[0.18em]'>{offer.name.replace(/\s+plan$/i, '')}</span>
         <span className='mx-2 opacity-60'>·</span>
-        <span>{offer.badge || 'Best deal of the year'}</span>
+        <span>{badge}</span>
         <span className='mx-2 hidden opacity-60 sm:inline'>·</span>
         <span className='hidden sm:inline'>{ended ? 'Offer ended' : `ends ${ends}`}</span>
         {!ended && (
-          <span className='ml-3 inline-block rounded-full bg-black/85 px-2.5 py-0.5 text-[11px] font-bold'>
+          <span className='ol-invert ml-3 inline-block rounded-full px-2.5 py-0.5 text-[11px] font-bold'>
             <OfferCountdownText endsAt={offer.endsAt} />
           </span>
         )}
@@ -229,18 +228,15 @@ export default async function OfferLandingPage({ offer }) {
       </header>
 
       {/* ══ Hero ══ */}
-      <section
-        className='text-white'
-        style={{ background: 'linear-gradient(115deg,#0B0B10 0%,#140A12 45%,#5E0F33 80%,#9B1450 100%)' }}
-      >
+      <section className='o-fg' style={offerSurfaceStyle(offer)}>
         <div className='mx-auto grid max-w-[1180px] items-center gap-10 px-4 py-12 md:grid-cols-[1.15fr_1fr] md:py-16'>
           <div>
             <Kicker tone='solid'>{campaign}</Kicker>
-            <h1 className='mt-4 font-[family-name:var(--font-poppins)] text-[36px] font-bold leading-[1.08] tracking-tight sm:text-[48px] text-white/80'>
+            <h1 className='mt-4 font-[family-name:var(--font-poppins)] text-[36px] font-bold leading-[1.08] tracking-tight sm:text-[48px] o-fg'>
               1 {termWord(unit)} of Embroidize Pro for{' '}
-              <span style={{ color: '#FF5C9A' }}>{usd(offer.offerPriceCents)}</span>
+              <span className='o-accent'>{usd(offer.offerPriceCents)}</span>
             </h1>
-            <p className='mt-4 max-w-lg text-[16px] leading-relaxed text-white/80'>
+            <p className='o-muted mt-4 max-w-lg text-[16px] leading-relaxed'>
               {offer.description ||
                 [
                   credits > 0 &&
@@ -255,16 +251,16 @@ export default async function OfferLandingPage({ offer }) {
                 {cta} <ArrowRight className='h-4 w-4' aria-hidden />
               </BrandCta>
             </div>
-            <p className='mt-4 flex items-center gap-1.5 text-[12.5px] text-white/60'>
+            <p className='o-faint mt-4 flex items-center gap-1.5 text-[12.5px]'>
               <Lock className='h-3.5 w-3.5' aria-hidden /> Secure checkout · No code needed · Cancel anytime
             </p>
           </div>
 
           {/* Price card */}
           <div className='relative mx-auto w-full max-w-[400px]'>
-            <div className='relative rounded-2xl bg-white p-6 pt-8 text-[#0B0F1E] shadow-2xl'>
-              <span className='absolute -top-3 left-1/2 -translate-x-1/2 whitespace-nowrap rounded-full bg-[#F7C948] px-4 py-1 text-[11px] font-bold uppercase tracking-[0.12em] text-black shadow'>
-                ★ {offer.badge || 'Best deal of the year'}
+            <div className='relative rounded-2xl bg-white p-6 pt-8 text-[#0B0F1E] shadow-2xl ring-1 ring-black/5'>
+              <span className='o-band absolute -top-3 left-1/2 -translate-x-1/2 whitespace-nowrap rounded-full px-4 py-1 text-[11px] font-bold uppercase tracking-[0.12em] shadow'>
+                ★ {badge}
               </span>
               <p className='text-center text-sm font-semibold text-[#3F4350]'>{offer.name}</p>
               <div className='mt-1 flex items-baseline justify-center gap-3'>
@@ -281,11 +277,8 @@ export default async function OfferLandingPage({ offer }) {
               </p>
 
               {credits > 0 && (
-                <div className='mt-4 flex items-center gap-3 rounded-xl bg-[#FFF0F5] p-3'>
-                  <span
-                    className='flex h-10 w-12 shrink-0 items-center justify-center rounded-lg text-sm font-bold text-white'
-                    style={{ background: BRAND }}
-                  >
+                <div className='ol-tint mt-4 flex items-center gap-3 rounded-xl p-3'>
+                  <span className='o-band flex h-10 w-12 shrink-0 items-center justify-center rounded-lg text-sm font-bold'>
                     +{credits}
                   </span>
                   <div className='text-left'>
@@ -310,7 +303,7 @@ export default async function OfferLandingPage({ offer }) {
               </div>
             </div>
             {credits > 0 && (
-              <p className='mt-3 -rotate-2 text-center font-[family-name:var(--font-caveat)] text-[22px] text-white/85'>
+              <p className='o-muted mt-3 -rotate-2 text-center font-[family-name:var(--font-caveat)] text-[22px]'>
                 Your designs keep coming, even after your {unit}!
               </p>
             )}
@@ -329,7 +322,8 @@ export default async function OfferLandingPage({ offer }) {
               </>
             }
           >
-            A full {unit} of Pro at our lowest price of the year
+            A full {unit} of Pro
+            {offer.savingsCents > 0 ? ` for ${usd(offer.savingsCents)} less than the regular price` : ''}
             {credits > 0 ? `, plus ${credits} extra designs that stay with you after the ${unit} ends.` : '.'}
           </SectionHead>
 
@@ -356,7 +350,7 @@ export default async function OfferLandingPage({ offer }) {
             </div>
             <div className='flex items-center justify-between pt-4'>
               <span className='font-bold text-[#0B0F1E]'>You pay today</span>
-              <span className='font-[family-name:var(--font-poppins)] text-[30px] font-bold' style={{ color: BRAND }}>
+              <span className='ol-ink font-[family-name:var(--font-poppins)] text-[30px] font-bold'>
                 {usd(offer.offerPriceCents)}
               </span>
             </div>
@@ -399,9 +393,9 @@ export default async function OfferLandingPage({ offer }) {
                 <Link
                   key={c.slug}
                   href={`/${c.slug}`}
-                  className='rounded-full border border-[#EFE7EC] bg-white px-3.5 py-1.5 text-[13px] font-medium text-[#3F4350] transition hover:border-[#E8276F] hover:text-[#C81E5B]'
+                  className='rounded-full border border-[#EFE7EC] bg-white px-3.5 py-1.5 text-[13px] font-medium text-[#3F4350] transition ol-chip'
                 >
-                  <span style={{ color: BRAND }}>+</span> {c.name}
+                  <span className='ol-ink'>+</span> {c.name}
                 </Link>
               ))}
               <Link
@@ -417,7 +411,7 @@ export default async function OfferLandingPage({ offer }) {
             <>
               <div className='mt-10 flex items-center justify-between'>
                 <h3 className='font-[family-name:var(--font-poppins)] text-lg font-bold text-[#0B0F1E]'>Trending now</h3>
-                <Link href='/products?sort=newest' className='text-sm font-semibold hover:underline' style={{ color: BRAND }}>
+                <Link href='/products?sort=newest' className='ol-ink text-sm font-semibold hover:underline'>
                   See all new designs →
                 </Link>
               </div>
@@ -459,18 +453,17 @@ export default async function OfferLandingPage({ offer }) {
               ].map((s, i) => (
                 <div
                   key={s.t}
-                  className={`rounded-2xl p-6 ${s.hi ? 'text-white' : 'border border-[#EFE7EC] bg-white'}`}
-                  style={s.hi ? { background: BRAND } : undefined}
+                  className={`rounded-2xl p-6 ${s.hi ? 'o-band' : 'border border-[#EFE7EC] bg-white'}`}
                 >
                   <span
                     className={`flex h-8 w-8 items-center justify-center rounded-full text-sm font-bold ${
-                      s.hi ? 'bg-white text-[#C81E5B]' : 'bg-[#FFE4EE] text-[#C81E5B]'
+                      s.hi ? 'ol-invert' : 'ol-tint-strong ol-ink'
                     }`}
                   >
                     {i + 1}
                   </span>
-                  <p className={`mt-4 font-bold ${s.hi ? 'text-white' : 'text-[#0B0F1E]'}`}>{s.t}</p>
-                  <p className={`mt-1 text-[14px] ${s.hi ? 'text-white/85' : ''}`}>{s.b}</p>
+                  <p className={`mt-4 font-bold ${s.hi ? '' : 'text-[#0B0F1E]'}`}>{s.t}</p>
+                  <p className={`mt-1 text-[14px] ${s.hi ? 'opacity-85' : ''}`}>{s.b}</p>
                 </div>
               ))}
             </div>
@@ -480,11 +473,11 @@ export default async function OfferLandingPage({ offer }) {
                 <p className='text-[11px] font-bold uppercase tracking-[0.14em] text-[#9B9BA4]'>Buying single designs</p>
                 <p className='mt-2 font-[family-name:var(--font-poppins)] text-2xl font-bold text-[#0B0F1E]'>$1 – $5 each</p>
                 <p className='mt-1 text-[14px]'>
-                  A few Christmas projects add up fast, and every new idea means paying again.
+                  A few projects add up fast, and every new idea means paying again.
                 </p>
               </div>
-              <div className='rounded-2xl border-2 bg-[#FFF5F9] p-6' style={{ borderColor: BRAND }}>
-                <p className='text-[11px] font-bold uppercase tracking-[0.14em]' style={{ color: BRAND }}>
+              <div className='ol-tint ol-accent-border rounded-2xl border-2 p-6'>
+                <p className='ol-ink text-[11px] font-bold uppercase tracking-[0.14em]'>
                   {offer.name}
                 </p>
                 <p className='mt-2 font-[family-name:var(--font-poppins)] text-2xl font-bold text-[#0B0F1E]'>
@@ -506,7 +499,7 @@ export default async function OfferLandingPage({ offer }) {
             <div className='flex flex-col justify-between gap-4 md:flex-row md:items-end'>
               <SectionHead kicker='Reviews' title='Loved by embroiderers' />
               {reviewCount && (
-                <span className='inline-flex items-center gap-2 self-start rounded-full bg-[#FFF5F9] px-4 py-2 text-[13px] font-semibold text-[#0B0F1E] md:self-auto'>
+                <span className='inline-flex items-center gap-2 self-start rounded-full ol-tint px-4 py-2 text-[13px] font-semibold text-[#0B0F1E] md:self-auto'>
                   <span className='flex text-[#E8A82A]' aria-hidden>
                     {[0, 1, 2, 3, 4].map((i) => (
                       <Star key={i} className='h-3.5 w-3.5 fill-current' />
@@ -523,7 +516,7 @@ export default async function OfferLandingPage({ offer }) {
                 return (
                   <article key={r._id} className='overflow-hidden rounded-2xl border border-[#EFE7EC] bg-white'>
                     {shot && (
-                      <div className='relative aspect-[4/3] bg-[#FFF5F9]'>
+                      <div className='ol-tint relative aspect-[4/3]'>
                         <Image src={shot} alt={`Stitched by ${name}`} fill sizes='(min-width:768px) 33vw, 100vw' className='object-cover' />
                       </div>
                     )}
@@ -535,7 +528,7 @@ export default async function OfferLandingPage({ offer }) {
                       </div>
                       <p className='mt-3 line-clamp-4 text-[14px] text-[#3F4350]'>{r.reviewText}</p>
                       <div className='mt-4 flex items-center gap-3'>
-                        <span className='flex h-8 w-8 items-center justify-center overflow-hidden rounded-full bg-[#FFE4EE] text-xs font-bold text-[#C81E5B]'>
+                        <span className='flex h-8 w-8 items-center justify-center overflow-hidden rounded-full ol-tint-strong ol-ink text-xs font-bold'>
                           {r.author?.profile_image ? (
                             // eslint-disable-next-line @next/next/no-img-element
                             <img src={r.author.profile_image} alt='' className='h-full w-full object-cover' />
@@ -566,7 +559,7 @@ export default async function OfferLandingPage({ offer }) {
               <details key={q} className='group py-4'>
                 <summary className='flex cursor-pointer list-none items-center justify-between gap-4 text-[15px] font-semibold text-[#0B0F1E]'>
                   {q}
-                  <span className='text-xl leading-none transition group-open:rotate-45' style={{ color: BRAND }} aria-hidden>
+                  <span className='ol-ink text-xl leading-none transition group-open:rotate-45' aria-hidden>
                     +
                   </span>
                 </summary>
@@ -578,16 +571,13 @@ export default async function OfferLandingPage({ offer }) {
       </section>
 
       {/* ══ Final CTA ══ */}
-      <section
-        className='text-center text-white'
-        style={{ background: 'linear-gradient(115deg,#0B0B10 0%,#1A0A14 50%,#7A1240 100%)' }}
-      >
+      <section className='o-fg text-center' style={offerSurfaceStyle(offer)}>
         <div className='mx-auto max-w-[760px] px-4 py-16'>
-          <Kicker tone='gold'>{offer.badge || 'Best deal of the year'}</Kicker>
-          <h2 className='mt-4 font-[family-name:var(--font-poppins)] text-[30px] font-bold sm:text-[38px] text-white/80'>
+          <Kicker tone='solid'>{badge}</Kicker>
+          <h2 className='mt-4 font-[family-name:var(--font-poppins)] text-[30px] font-bold sm:text-[38px] o-fg'>
             {ended ? 'This offer has ended' : `Ends ${ends}`}
           </h2>
-          <p className='mt-2 text-white/80'>
+          <p className='o-muted mt-2'>
             1 {unit} of Pro for {usd(offer.offerPriceCents)}
             {credits > 0 ? ` + ${credits} bonus credits` : ''}
           </p>
@@ -597,7 +587,7 @@ export default async function OfferLandingPage({ offer }) {
             </BrandCta>
           </div>
           {!ended && (
-            <p className='mt-4 text-[13px] font-semibold uppercase tracking-[0.15em] text-white/70'>
+            <p className='mt-4 text-[13px] font-semibold uppercase tracking-[0.15em] o-faint'>
               <OfferCountdownText endsAt={offer.endsAt} />
             </p>
           )}

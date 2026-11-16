@@ -21,7 +21,7 @@ export const DEFAULT_THEME_FORM = {
 
 const PRESETS = [
   { name: 'Black & gold', bg: '#000000', bg2: '', text: '#FFFFFF', accent: '#E8C26A', buttonText: '#000000' },
-  { name: 'Black & pink', bg: '#0B0B10', bg2: '#7A1240', text: '#FFFFFF', accent: '#E8276F', buttonText: '#FFFFFF' },
+  { name: 'Black & pink (Black Friday page)', bg: '#0B0B10', bg2: '#9B1450', text: '#FFFFFF', accent: '#E8276F', buttonText: '#FFFFFF' },
   { name: 'Christmas', bg: '#7F1D1D', bg2: '#14532D', text: '#FFFFFF', accent: '#FACC15', buttonText: '#14532D' },
   { name: 'Midnight blue', bg: '#0F172A', bg2: '#1E3A8A', text: '#FFFFFF', accent: '#38BDF8', buttonText: '#0F172A' },
   { name: 'Light', bg: '#FFFFFF', bg2: '', text: '#0B0F1E', accent: '#000000', buttonText: '#FFFFFF' },
@@ -110,7 +110,7 @@ export default function OfferThemeEditor({ value, onChange, upload, offerName })
     <section>
       <h3 className='text-sm font-semibold'>Look</h3>
       <p className='mb-3 text-xs text-gray-500'>
-        The colours every banner, card and pop-up of this offer uses. Text is always drawn in the text colour you
+        The colours of this offer&apos;s landing page and of every banner, card and pop-up it shows. Text is always drawn in the text colour you
         pick, so it stays readable on any page.
       </p>
 

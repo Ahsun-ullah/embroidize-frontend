@@ -995,3 +995,14 @@ span {
 .o-band * { color: inherit !important; }
 .o-rule { background: var(--o-accent); }
 .o-hover-tint:hover { background: color-mix(in srgb, var(--o-fg) 12%, transparent); }
+
+/* Offer landing page (/black-friday, /offers/<slug>): the offer's accent on the
+   page's WHITE sections. Text uses the accent darkened toward ink, so a light
+   accent (gold, yellow) still reads on white. */
+.ol-ink { color: color-mix(in srgb, var(--o-accent) 80%, #0B0F1E) !important; }
+.ol-tint { background: color-mix(in srgb, var(--o-accent) 9%, #fff) !important; }
+.ol-tint-strong { background: color-mix(in srgb, var(--o-accent) 16%, #fff) !important; }
+.ol-accent-border { border-color: var(--o-accent) !important; }
+.ol-chip:hover { border-color: var(--o-accent) !important; color: color-mix(in srgb, var(--o-accent) 80%, #0B0F1E) !important; }
+.ol-btn-shadow { box-shadow: 0 8px 20px -8px color-mix(in srgb, var(--o-accent) 70%, transparent); }
+.o-band .ol-invert, .o-btn .ol-invert { background: var(--o-btn-fg) !important; color: var(--o-accent) !important; }
