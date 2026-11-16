@@ -236,7 +236,7 @@ export default async function OfferLandingPage({ offer }) {
         <div className='mx-auto grid max-w-[1180px] items-center gap-10 px-4 py-12 md:grid-cols-[1.15fr_1fr] md:py-16'>
           <div>
             <Kicker tone='solid'>{campaign}</Kicker>
-            <h1 className='mt-4 font-[family-name:var(--font-poppins)] text-[36px] font-bold leading-[1.08] tracking-tight sm:text-[48px]'>
+            <h1 className='mt-4 font-[family-name:var(--font-poppins)] text-[36px] font-bold leading-[1.08] tracking-tight sm:text-[48px] text-white/80'>
               1 {termWord(unit)} of Embroidize Pro for{' '}
               <span style={{ color: '#FF5C9A' }}>{usd(offer.offerPriceCents)}</span>
             </h1>
@@ -584,7 +584,7 @@ export default async function OfferLandingPage({ offer }) {
       >
         <div className='mx-auto max-w-[760px] px-4 py-16'>
           <Kicker tone='gold'>{offer.badge || 'Best deal of the year'}</Kicker>
-          <h2 className='mt-4 font-[family-name:var(--font-poppins)] text-[30px] font-bold sm:text-[38px]'>
+          <h2 className='mt-4 font-[family-name:var(--font-poppins)] text-[30px] font-bold sm:text-[38px] text-white/80'>
             {ended ? 'This offer has ended' : `Ends ${ends}`}
           </h2>
           <p className='mt-2 text-white/80'>
