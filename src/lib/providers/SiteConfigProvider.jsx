@@ -22,6 +22,8 @@ const DEFAULTS = {
   recentTabDays: 30,
   whatsappNumber: '',
   whatsappMessage: '',
+  facebookGroupUrl: '',
+  facebookGroupMembers: '',
 };
 
 const SiteConfigContext = createContext(DEFAULTS);
@@ -46,6 +48,8 @@ export default function SiteConfigProvider({ children }) {
           recentTabDays: Number(data.data.recentTabDays) || DEFAULTS.recentTabDays,
           whatsappNumber: data.data.whatsappNumber || '',
           whatsappMessage: data.data.whatsappMessage || '',
+          facebookGroupUrl: data.data.facebookGroupUrl || '',
+          facebookGroupMembers: data.data.facebookGroupMembers || '',
         });
       } catch {
         // Keep the defaults. Nothing here is load-bearing enough to surface.

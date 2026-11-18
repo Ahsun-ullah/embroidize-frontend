@@ -1,3 +1,4 @@
+import { FacebookCommunitySection } from '@/components/Common/FacebookCommunity';
 import DailyFreeVoteBoard from '@/components/Common/DailyVote/DailyFreeVoteBoard';
 import HomeEventSections from '@/components/Common/EventPromotions/HomeEventSections';
 import OfferHomeHero from '@/components/Common/Offer/OfferHomeHero';
@@ -336,6 +337,10 @@ export default async function Home() {
           <GridSkeleton />
         )}
       </HomeSection>
+
+      {/* Facebook group invite: after the designs, before the footer. Hidden
+          until a group link is saved in Settings → Community. */}
+      <FacebookCommunitySection />
 
       {/* Event posters, spot 3 of 3: after the last section, before the footer. */}
       <HomeEventSections

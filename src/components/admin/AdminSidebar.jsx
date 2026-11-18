@@ -413,6 +413,11 @@ export default function AdminSidebar({ isCollapsed, setIsCollapsed }) {
               icon: 'ri-whatsapp-line',
             },
             {
+              href: '/admin/settings/community',
+              label: 'Community',
+              icon: 'ri-facebook-circle-line',
+            },
+            {
               label: 'Financial',
               icon: 'ri-lock-2-fill',
               items: [

@@ -31,6 +31,8 @@ const UNKNOWN = {
   showOtherPaymentMethodsLink: true,
   whatsappNumber: '',
   whatsappMessage: '',
+  facebookGroupUrl: '',
+  facebookGroupMembers: '',
   // Null, not a number: a caller that cannot read the config must fall back to
   // its own default rather than be handed one that looks authoritative.
   recentTabDays: null,
@@ -57,6 +59,8 @@ export async function getSiteConfig() {
         result?.data?.showOtherPaymentMethodsLink !== false,
       whatsappNumber: result?.data?.whatsappNumber ?? '',
       whatsappMessage: result?.data?.whatsappMessage ?? '',
+      facebookGroupUrl: result?.data?.facebookGroupUrl ?? '',
+      facebookGroupMembers: result?.data?.facebookGroupMembers ?? '',
       recentTabDays: result?.data?.recentTabDays ?? null,
       newBadgeDays: result?.data?.newBadgeDays ?? null,
       totalDesigns:
