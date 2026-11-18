@@ -24,6 +24,19 @@ export const BEHAVIOUR_FILTER_KEYS = [
   'marketing', // emailable | opted_in | opted_out | not_asked | unsubscribed
   'signupChannel', // where the account came from (google, pinterest, …, unknown)
   'utmCampaign', // exact utm_campaign of the signup link
+  'inactiveIncludeNever', // '1' = inactiveDays also counts never-downloaded
+  'billing', // month | year | week | one_time — current paid plan's interval
+];
+
+// Campaign filters. Presets never touch these, so an exclusion list ("not
+// yearly, not the Halloween coupon, not the BF offer") survives switching
+// between segments.
+export const CAMPAIGN_FILTER_KEYS = [
+  'excludeBilling', // month | year | week | one_time — current members removed
+  'coupon', // a coupon code, 'any' or 'none'
+  'couponExclude', // '1' = remove the coupon match instead of keeping it
+  'offer', // an Offer id or 'any'
+  'offerExclude', // '1' = remove the offer buyers instead of keeping them
 ];
 
 export const USER_FILTER_KEYS = [
@@ -42,6 +55,7 @@ export const USER_FILTER_KEYS = [
   'sort', // newest | oldest
   'blocked', // '1' = blocked users only
   ...BEHAVIOUR_FILTER_KEYS,
+  ...CAMPAIGN_FILTER_KEYS,
 ];
 
 // searchParams may be a plain object (server component) or URLSearchParams.

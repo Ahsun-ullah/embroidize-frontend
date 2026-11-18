@@ -19,6 +19,13 @@ import BehaviourFilters, {
   matchingPreset,
 } from '@/features/users/BehaviourFilters';
 import SavedSegmentsMenu from '@/features/users/SavedSegmentsMenu';
+import CampaignFilters, {
+  BILLING_OPTIONS,
+  EXCLUDE_BILLING_OPTIONS,
+  couponOptionList,
+  offerOptionList,
+  useCampaignOptions,
+} from '@/features/users/CampaignFilters';
 import {
   readUserFilters,
   userFiltersToQuery,
@@ -148,6 +155,7 @@ const USER_EXPORT_FIELDS = [
   { key: 'cancelling', label: 'Cancels at period end', group: 'Plan', get: (u) => (u.subscription ? !!u.subscription.cancelAtPeriodEnd : '') },
   { key: 'subscribed', label: 'Subscribed', group: 'Plan', get: (u) => isoDay(u.subscription?.subscribedAt) },
   { key: 'periodEnd', label: 'Renews / expires', group: 'Plan', get: (u) => isoDay(u.subscription?.periodEndDate) },
+  { key: 'coupons', label: 'Coupons used', group: 'Plan', get: (u) => (u.couponsUsed || []).join(', ') },
 
   // Usage
   { key: 'downloads', label: 'Total downloads', group: 'Usage', default: true, get: (u) => u.downloadCount ?? 0 },
@@ -362,6 +370,7 @@ export default function UsersTableWrapper({
   // because that page lists people who already hold or held credits.
   const [creditUser, setCreditUser] = useState(null);
   const [grantPlans, setGrantPlans] = useState([]);
+  const campaignOptions = useCampaignOptions();
 
   // Plans feed both the Plan filter and the Grant Access modal (inactive ones
   // included: a hidden "Custom Access" plan is the usual target for a grant).
@@ -671,8 +680,20 @@ export default function UsersTableWrapper({
     if (f.signupChannel)
       parts.push(`Came from: ${labelOf(SIGNUP_CHANNEL_OPTIONS, f.signupChannel)}`);
     if (f.utmCampaign) parts.push(`Campaign "${f.utmCampaign}"`);
+    if (f.inactiveIncludeNever && f.inactiveDays) parts.push('incl. never downloaded');
+    if (f.billing) parts.push(`Billing: ${labelOf(BILLING_OPTIONS, f.billing)}`);
+    if (f.excludeBilling)
+      parts.push(`Excluding ${labelOf(EXCLUDE_BILLING_OPTIONS, f.excludeBilling).toLowerCase()}`);
+    if (f.coupon) {
+      const name = labelOf(couponOptionList(campaignOptions.coupons), f.coupon);
+      parts.push(`${f.couponExclude === '1' ? 'Excluding coupon' : 'Coupon'}: ${name}`);
+    }
+    if (f.offer) {
+      const name = labelOf(offerOptionList(campaignOptions.offers), f.offer);
+      parts.push(`${f.offerExclude === '1' ? 'Excluding offer' : 'Offer'}: ${name}`);
+    }
     return parts;
-  }, [filters, planOptions]);
+  }, [filters, planOptions, campaignOptions]);
 
   // The filters as a query string (what a saved segment stores). Blocked view
   // is a tab, not a filter, so it stays out.
@@ -894,6 +915,12 @@ export default function UsersTableWrapper({
         drafts={drafts}
         setDraft={setDraft}
         pushFilters={pushFilters}
+      />
+
+      <CampaignFilters
+        filters={filters}
+        pushFilters={pushFilters}
+        options={campaignOptions}
       />
     </div>
   );

@@ -107,6 +107,11 @@ export const SUB_STATE_LABELS = {
 // Applying one clears the other behaviour fields (and the plan filter), so
 // two presets never mix. `plan` is set where the preset is about free users.
 export const BEHAVIOUR_PRESETS = [
+  // Campaign audience segments.
+  { key: 'free_active90', label: 'Free – active', hint: 'Free users who downloaded in the last 90 days', values: { plan: 'free', window: '90', winMin: '1' } },
+  { key: 'free_inactive90', label: 'Free – inactive', hint: 'Free users with no download in 90+ days, including those who never downloaded', values: { plan: 'free', inactiveDays: '90', inactiveIncludeNever: '1' } },
+  { key: 'cancelled', label: 'Cancelled (had Pro)', hint: 'Paid before, no access now', values: { subState: 'lapsed' } },
+  { key: 'monthly', label: 'Monthly subscribers', hint: 'Currently subscribed on a monthly plan', values: { billing: 'month' } },
   { key: 'active', label: 'Active', hint: 'Downloaded in the last 14 days', values: { window: '14', winMin: '1' } },
   { key: 'regular', label: 'Regular', hint: '8+ download days in 30 days', values: { window: '30', daysMin: '8' } },
   { key: 'occasional', label: 'Occasional', hint: '2–7 download days in 30 days', values: { window: '30', daysMin: '2', daysMax: '7' } },

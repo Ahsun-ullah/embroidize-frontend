@@ -429,6 +429,12 @@ export default function AdminSidebar({ isCollapsed, setIsCollapsed }) {
                   icon: 'ri-coin-line',
                 },
                 {
+                  // What each coupon / offer actually brought in.
+                  href: '/admin/coupons',
+                  label: 'Coupons & Offers',
+                  icon: 'ri-coupon-3-line',
+                },
+                {
                   href: '/admin/settings/manual-requests',
                   label: 'Manual Requests',
                   icon: 'ri-hand-coin-line',

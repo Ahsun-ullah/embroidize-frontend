@@ -246,6 +246,12 @@ function estLtv(sub) {
         ? 7
         : 30.44;
   const cycles = 1 + Math.floor(days / periodDays);
+  // The first cycle is what the customer actually paid for it (excl. tax) when
+  // the purchase is known — a coupon buyer did not pay the list price.
+  const p = sub.purchase;
+  if (p && Number.isFinite(p.paid) && p.paid > 0) {
+    return Math.max(0, p.paid - (p.tax || 0)) + plan.price * (cycles - 1);
+  }
   return plan.price * cycles;
 }
 
@@ -301,6 +307,12 @@ const SUBSCRIBER_EXPORT_FIELDS = [
 
   // Payment
   { key: 'ltv', label: 'Est. LTV', group: 'Payment', default: true, get: (u) => Math.round(estLtv(u.subscription) * 100) / 100 },
+  { key: 'coupon', label: 'Coupon', group: 'Payment', default: true, get: (u) => u.subscription?.purchase?.couponCode || '' },
+  { key: 'couponName', label: 'Coupon name', group: 'Payment', get: (u) => u.subscription?.purchase?.couponName || '' },
+  { key: 'firstList', label: 'First payment — list price', group: 'Payment', get: (u) => u.subscription?.purchase?.listPrice ?? '' },
+  { key: 'firstDiscount', label: 'First payment — discount', group: 'Payment', default: true, get: (u) => u.subscription?.purchase?.discount ?? '' },
+  { key: 'firstTax', label: 'First payment — tax', group: 'Payment', get: (u) => u.subscription?.purchase?.tax ?? '' },
+  { key: 'firstPaid', label: 'First payment — paid', group: 'Payment', default: true, get: (u) => u.subscription?.purchase?.paid ?? '' },
   { key: 'manualMethod', label: 'Manual payment method', group: 'Payment', get: (u) => u.subscription?.manualPayment?.method },
   { key: 'manualTotal', label: 'Manual total paid', group: 'Payment', get: (u) => u.subscription?.manualPayment?.totalPaid },
   { key: 'manualLastDate', label: 'Manual last payment', group: 'Payment', get: (u) => isoDay(u.subscription?.manualPayment?.receivedAt) },
@@ -454,6 +466,17 @@ export default function SubscribersTableWrapper({ subscribers, revenue }) {
     return [...m.entries()].map(([id, name]) => ({ id, name }));
   }, [subscribers]);
 
+  // Coupon codes present on the current subscribers' purchases.
+  const [couponFilter, setCouponFilter] = useState('all'); // all | any | none | CODE
+  const couponOptions = useMemo(() => {
+    const s = new Set();
+    subscribers.forEach((u) => {
+      const c = u.subscription?.purchase?.couponCode;
+      if (c) s.add(c);
+    });
+    return [...s].sort();
+  }, [subscribers]);
+
   // View details modal
   const {
     isOpen: isViewOpen,
@@ -557,6 +580,14 @@ export default function SubscribersTableWrapper({ subscribers, revenue }) {
     if (planFilter !== 'all') {
       list = list.filter((u) => u.subscription?.planId?._id === planFilter);
     }
+    if (couponFilter !== 'all') {
+      list = list.filter((u) => {
+        const code = u.subscription?.purchase?.couponCode || null;
+        if (couponFilter === 'any') return !!code;
+        if (couponFilter === 'none') return !code;
+        return code === couponFilter;
+      });
+    }
     if (cancelingOnly) {
       list = list.filter((u) => u.subscription?.cancelAtPeriodEnd);
     }
@@ -570,7 +601,7 @@ export default function SubscribersTableWrapper({ subscribers, revenue }) {
       );
     }
     return list;
-  }, [subscribers, statusFilter, providerFilter, planFilter, cancelingOnly, search]);
+  }, [subscribers, statusFilter, providerFilter, planFilter, couponFilter, cancelingOnly, search]);
 
   // Sorting. Accessors return comparable primitives; missing values sort low.
   // Returns a sorter rather than a list so the export can apply the table's
@@ -630,9 +661,18 @@ export default function SubscribersTableWrapper({ subscribers, revenue }) {
     if (planFilter !== 'all') {
       parts.push(`Plan: ${planOptions.find((p) => p.id === planFilter)?.name || planFilter}`);
     }
+    if (couponFilter !== 'all') {
+      parts.push(
+        couponFilter === 'any'
+          ? 'Used a coupon'
+          : couponFilter === 'none'
+            ? 'No coupon'
+            : `Coupon: ${couponFilter}`,
+      );
+    }
     if (cancelingOnly) parts.push('Cancelling only');
     return parts;
-  }, [search, statusFilter, providerFilter, planFilter, planOptions, cancelingOnly]);
+  }, [search, statusFilter, providerFilter, planFilter, planOptions, couponFilter, cancelingOnly]);
 
   const allSorted = useMemo(() => sortRows(subscribers), [sortRows, subscribers]);
 
@@ -652,6 +692,10 @@ export default function SubscribersTableWrapper({ subscribers, revenue }) {
     setPlanFilter(val);
     setPage(1);
   };
+  const handleCouponFilter = (val) => {
+    setCouponFilter(val);
+    setPage(1);
+  };
   const toggleCancelingOnly = () => {
     setCancelingOnly((v) => !v);
     setPage(1);
@@ -661,6 +705,7 @@ export default function SubscribersTableWrapper({ subscribers, revenue }) {
     statusFilter !== 'all' ||
     providerFilter !== 'all' ||
     planFilter !== 'all' ||
+    couponFilter !== 'all' ||
     cancelingOnly ||
     search.trim() !== '';
 
@@ -1096,6 +1141,17 @@ export default function SubscribersTableWrapper({ subscribers, revenue }) {
                 : `${plan.billingInterval}ly`}{' '}
               · ${plan.price}
             </p>
+            {sub?.purchase?.couponCode && (
+              <p
+                className='mt-0.5 text-xs text-gray-700'
+                title={`List $${sub.purchase.listPrice.toFixed(2)} − coupon $${sub.purchase.discount.toFixed(2)} + tax $${sub.purchase.tax.toFixed(2)}`}
+              >
+                <span className='rounded bg-gray-100 px-1.5 py-0.5 font-mono'>
+                  {sub.purchase.couponCode}
+                </span>{' '}
+                paid ${sub.purchase.paid.toFixed(2)}
+              </p>
+            )}
           </div>
         ) : (
           <span className='text-gray-400 text-xs'>—</span>
@@ -1566,6 +1622,40 @@ export default function SubscribersTableWrapper({ subscribers, revenue }) {
               <DropdownItem key='stripe'>Stripe</DropdownItem>
               <DropdownItem key='creem'>Creem</DropdownItem>
               <DropdownItem key='manual'>Manual</DropdownItem>
+            </DropdownMenu>
+          </Dropdown>
+          <Dropdown>
+            <DropdownTrigger>
+              <Button
+                variant={couponFilter === 'all' ? 'flat' : 'solid'}
+                className={`max-w-[220px] min-w-[130px] ${couponFilter === 'all' ? '' : 'bg-black text-white'}`}
+              >
+                <span className='truncate'>
+                  Coupon:{' '}
+                  {couponFilter === 'all'
+                    ? 'All'
+                    : couponFilter === 'any'
+                      ? 'Any coupon'
+                      : couponFilter === 'none'
+                        ? 'No coupon'
+                        : couponFilter}
+                </span>
+              </Button>
+            </DropdownTrigger>
+            <DropdownMenu
+              aria-label='Coupon filter'
+              selectedKeys={[couponFilter]}
+              onAction={(k) => handleCouponFilter(String(k))}
+              className='max-h-80 overflow-y-auto'
+            >
+              {[
+                <DropdownItem key='all'>All</DropdownItem>,
+                <DropdownItem key='any'>Used a coupon</DropdownItem>,
+                <DropdownItem key='none'>No coupon</DropdownItem>,
+                ...couponOptions.map((c) => (
+                  <DropdownItem key={c}>{c}</DropdownItem>
+                )),
+              ]}
             </DropdownMenu>
           </Dropdown>
           {planOptions.length > 0 && (
@@ -2073,6 +2163,15 @@ export default function SubscribersTableWrapper({ subscribers, revenue }) {
                           </div>
                         )}
 
+                        {(invoiceData.warnings || []).map((w) => (
+                          <p
+                            key={w}
+                            className='rounded-lg border border-gray-300 bg-gray-50 p-2 text-xs text-gray-700'
+                          >
+                            {w}
+                          </p>
+                        ))}
+
                         {/* Summary strip */}
                         <div className='grid grid-cols-3 gap-3'>
                           <div className='p-3 bg-gray-50 dark:bg-gray-800 rounded-lg text-center'>
@@ -2156,6 +2255,20 @@ export default function SubscribersTableWrapper({ subscribers, revenue }) {
                                 </Chip>
                               </div>
                             </div>
+                            {Number(inv.discount) > 0 && (
+                              <p className='text-xs text-gray-600 dark:text-gray-300'>
+                                List ${Number(inv.subtotal).toFixed(2)} · coupon{' '}
+                                {inv.discountCode ? (
+                                  <span className='rounded bg-white px-1 font-mono dark:bg-gray-900'>
+                                    {inv.discountCode}
+                                  </span>
+                                ) : (
+                                  '(code not recorded)'
+                                )}{' '}
+                                −${Number(inv.discount).toFixed(2)}
+                                {Number(inv.tax) > 0 && ` · tax $${Number(inv.tax).toFixed(2)}`}
+                              </p>
+                            )}
                             {Number(inv.amountRefunded) > 0 && (
                               <p className='text-xs font-medium text-gray-600 dark:text-gray-300'>
                                 Refunded: $

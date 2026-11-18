@@ -29,6 +29,13 @@ function fmtDate(value) {
 }
 
 
+// Creem's camelCase statuses, printed in words.
+const STATUS_LABEL = {
+  partialRefund: 'Partly refunded',
+  refunded: 'Refunded',
+  chargedBack: 'Charged back',
+};
+
 function invoiceHtml({ invoice, customer }) {
   const generated = new Date().toLocaleString('en-US');
   const currency = invoice.currency || 'USD';
@@ -38,11 +45,16 @@ function invoiceHtml({ invoice, customer }) {
   // card later failed can hold both Stripe invoices and bank-transfer ones, and
   // each must print its own payment story.
   const isManual = invoice.source === 'manual';
+  // The ROW says which gateway took the money. A customer can hold Stripe and
+  // Creem payments side by side; the customer's CURRENT gateway is only a
+  // fallback for rows from before rows carried their own.
   const gateway = isManual
     ? 'manual'
-    : customer.gateway === 'creem'
-      ? 'creem'
-      : 'stripe';
+    : invoice.gateway === 'creem' || invoice.gateway === 'stripe'
+      ? invoice.gateway
+      : customer.gateway === 'creem'
+        ? 'creem'
+        : 'stripe';
   const providerName = isManual
     ? 'Direct payment'
     : gateway === 'creem'
@@ -50,12 +62,27 @@ function invoiceHtml({ invoice, customer }) {
       : 'Stripe';
   const providerCustomerId = isManual
     ? ''
-    : customer.stripeCustomerId || customer.creemCustomerId || '';
+    : invoice.providerCustomerId ||
+      (gateway === 'creem' ? customer.creemCustomerId : customer.stripeCustomerId) ||
+      '';
   const providerSubscriptionId = isManual
     ? ''
-    : customer.stripeSubscriptionId || customer.creemSubscriptionId || '';
+    : invoice.providerSubscriptionId ||
+      (gateway === 'creem' ? customer.creemSubscriptionId : customer.stripeSubscriptionId) ||
+      '';
   const hasRefund = Number(invoice.amountRefunded) > 0;
-  const netTotal = (Number(invoice.amount) || 0) - (Number(invoice.amountRefunded) || 0);
+  // invoice.amount is what the customer was charged (tax included). The line
+  // item shows the list price and the coupon/tax are itemised below it, so a
+  // coupon buyer's invoice adds up instead of printing the full price as paid.
+  const paid = Number(invoice.amount) || 0;
+  const discount = Number(invoice.discount) || 0;
+  const tax = Number(invoice.tax) || 0;
+  const subtotal =
+    Number(invoice.subtotal) > 0 ? Number(invoice.subtotal) : paid - tax + discount;
+  const netTotal = paid - (Number(invoice.amountRefunded) || 0);
+  const couponLabel = invoice.discountCode
+    ? `Coupon ${invoice.discountCode}${invoice.discountName ? ` (${invoice.discountName})` : ''}`
+    : 'Discount';
 
   
 
@@ -86,7 +113,9 @@ function invoiceHtml({ invoice, customer }) {
   // was recorded, not from the live plan. Re-deriving it would silently rewrite
   // an issued invoice whenever a plan is renamed or its limits change, which
   // would make the document worthless as a record.
-  const plan = isManual ? invoice.manualPlan || null : customer.plan || null;
+  // Gateway rows carry the plan they bought when it is known; the customer's
+  // current plan is only the fallback (it may have changed since).
+  const plan = isManual ? invoice.manualPlan || null : invoice.plan || customer.plan || null;
   // A credit pack is a prepaid quantity, not a subscription: no billing cycle,
   // and its downloadLimit is a credit count rather than a per-period allowance.
   const isCredits = plan?.accessType === 'credits';
@@ -191,7 +220,7 @@ function invoiceHtml({ invoice, customer }) {
         <h1>Invoice</h1>
         <div class="muted">Invoice no: <strong>${esc(invoice.number)}</strong></div>
         <div class="muted">Date: ${esc(fmtDate(invoice.date))}</div>
-        <div class="stamp ${isPaid ? '' : 'unpaid'}">${esc(isPaid ? 'Paid' : invoice.status)}</div>
+        <div class="stamp ${isPaid ? '' : 'unpaid'}">${esc(isPaid ? 'Paid' : STATUS_LABEL[invoice.status] || invoice.status)}</div>
       </div>
     </div>
 
@@ -228,8 +257,17 @@ function invoiceHtml({ invoice, customer }) {
             }</div>
           </td>
           <td class="amt">1</td>
-          <td class="amt">${esc(money(invoice.amount, currency))}</td>
+          <td class="amt">${esc(money(subtotal, currency))}</td>
         </tr>
+        ${
+          discount > 0
+            ? `<tr>
+          <td><strong>${esc(couponLabel)}</strong></td>
+          <td class="amt"></td>
+          <td class="amt">${esc(money(-discount, currency))}</td>
+        </tr>`
+            : ''
+        }
         ${
           hasRefund
             ? `<tr>
@@ -244,7 +282,10 @@ function invoiceHtml({ invoice, customer }) {
 
     <div class="totals">
       <div class="box">
-        <div class="row"><span>Subtotal</span><span>${esc(money(invoice.amount, currency))}</span></div>
+        <div class="row"><span>Subtotal</span><span>${esc(money(subtotal, currency))}</span></div>
+        ${discount > 0 ? `<div class="row"><span>${esc(couponLabel)}</span><span>${esc(money(-discount, currency))}</span></div>` : ''}
+        ${tax > 0 ? `<div class="row"><span>Tax / VAT</span><span>${esc(money(tax, currency))}</span></div>` : ''}
+        <div class="row"><span>Amount paid</span><span>${esc(money(paid, currency))}</span></div>
         ${hasRefund ? `<div class="row"><span>Refunded</span><span>${esc(money(-invoice.amountRefunded, currency))}</span></div>` : ''}
         <div class="row grand"><span>Total ${hasRefund ? '(net)' : 'paid'}</span><span>${esc(money(netTotal, currency))}</span></div>
       </div>
@@ -285,7 +326,9 @@ function invoiceHtml({ invoice, customer }) {
       ${
         isManual
           ? 'Payment received directly. This receipt is issued by Embroidize as the record of that payment.'
-          : `All referenced IDs are verifiable in the ${esc(providerName)} Dashboard.`
+          : gateway === 'creem'
+            ? 'Payment processed by Creem as merchant of record; Creem also emails its own receipt for this payment. All referenced IDs are verifiable in the Creem Dashboard.'
+            : `All referenced IDs are verifiable in the ${esc(providerName)} Dashboard.`
       }<br />
       Embroidize · <a href="https://embroidize.com">embroidize.com</a> · ${SUPPORT_EMAIL} · Generated ${esc(generated)}
     </div>

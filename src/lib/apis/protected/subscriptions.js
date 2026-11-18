@@ -72,3 +72,24 @@ export async function getCreditCustomers() {
     return { customers: [], totals: null };
   }
 }
+
+// Coupons & Offers report (finance-gated). from/to are YYYY-MM-DD or empty.
+export async function getCouponReport({ from = '', to = '' } = {}) {
+  'use server';
+  try {
+    const headers = await serverHeaders();
+    const qs = new URLSearchParams();
+    if (from) qs.set('from', from);
+    if (to) qs.set('to', to);
+    const response = await fetch(`${apiUrl()}/admin/campaigns/coupons?${qs.toString()}`, {
+      headers,
+      cache: 'no-store',
+    });
+    if (!response.ok) throw new Error(`API request failed: ${response.status}`);
+    const data = await response.json();
+    return data?.data || null;
+  } catch (error) {
+    console.error('Error fetching coupon report:', error);
+    return null;
+  }
+}
