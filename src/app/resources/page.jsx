@@ -38,15 +38,15 @@ export const metadata = {
 };
 
 export default async function AllResourcesPageInFrontSite({ searchParams }) {
-  const { resources } = await getResources();
-
-
-  const currentPage = parseInt(searchParams?.page || '1', 10);
+  // Paginate on the server (see app/blog/page.jsx for why).
+  const params = await searchParams;
+  const currentPage = Math.max(parseInt(params?.page || '1', 10) || 1, 1);
   const perPageData = 6;
-  const totalPages = Math.ceil(resources.length / perPageData);
-  const startIndex = (currentPage - 1) * perPageData;
-  const endIndex = startIndex + perPageData;
-  const paginatedResources = resources.slice(startIndex, endIndex);
+  const { resources: paginatedResources, totalPages } = await getResources(
+    undefined,
+    currentPage,
+    perPageData,
+  );
 
   return (
     <>
@@ -68,7 +68,7 @@ export default async function AllResourcesPageInFrontSite({ searchParams }) {
             </div>
           </section>
           <div className='flex items-center justify-center my-6'>
-            <Pagination totalPages={totalPages} perPage={perPageData} />
+            <Pagination totalPages={totalPages} perPageData={perPageData} />
           </div>
         </>
       )}

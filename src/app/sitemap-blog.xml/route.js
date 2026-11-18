@@ -6,8 +6,10 @@ export async function GET() {
   try {
     const baseUrl = process.env.NEXT_PUBLIC_BASE_URL_CLIENT;
 
-    const { blogs } = await getBlogs();
-    const { resources } = await getResources();
+    // Explicit high limit: the API defaults to 20, which left every older
+    // post out of the sitemap.
+    const { blogs } = await getBlogs(undefined, 1, 5000);
+    const { resources } = await getResources(undefined, 1, 5000);
 
     const sitemap = `<?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">

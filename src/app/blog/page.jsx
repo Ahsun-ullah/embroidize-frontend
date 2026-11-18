@@ -38,15 +38,16 @@ export const metadata = {
 };
 
 export default async function AllBlogsPageInFrontSite({ searchParams }) {
-  const { blogs } = await getBlogs();
-
-  const currentPage = parseInt(searchParams?.page || '1', 10);
+  // Paginate on the server. Fetching without page/limit returned only the
+  // backend's default 20 newest posts, so everything older was unreachable.
+  const params = await searchParams;
+  const currentPage = Math.max(parseInt(params?.page || '1', 10) || 1, 1);
   const perPageData = 6;
-  const totalPages = Math.ceil(blogs.length / perPageData);
-
-  const startIndex = (currentPage - 1) * perPageData;
-  const endIndex = startIndex + perPageData;
-  const paginatedBlogs = blogs.slice(startIndex, endIndex);
+  const { blogs: paginatedBlogs, totalPages } = await getBlogs(
+    undefined,
+    currentPage,
+    perPageData,
+  );
 
   return (
     <>
@@ -68,7 +69,7 @@ export default async function AllBlogsPageInFrontSite({ searchParams }) {
             </div>
           </section>
           <div className='flex items-center justify-center my-6'>
-            <Pagination totalPages={totalPages} perPage={perPageData} />
+            <Pagination totalPages={totalPages} perPageData={perPageData} />
           </div>
         </>
       )}
