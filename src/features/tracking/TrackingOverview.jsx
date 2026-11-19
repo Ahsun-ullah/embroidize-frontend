@@ -11,6 +11,8 @@ import { ErrorToast } from '@/components/Common/ErrorToast';
 import { SIGNUP_CHANNEL_LABELS } from '@/features/users/BehaviourFilters';
 import Cookies from 'js-cookie';
 import Link from 'next/link';
+import ButtonUsers from './ButtonUsers';
+import TrackingInsights from './TrackingInsights';
 import TrackingSettings from './TrackingSettings';
 import { useEffect, useState } from 'react';
 
@@ -57,6 +59,12 @@ export default function TrackingOverview() {
   const [days, setDays] = useState(30);
   const [state, setState] = useState({ loading: true, error: '', data: null });
   const [reload, setReload] = useState(0);
+  const [buttonSource, setButtonSource] = useState('');
+
+  const showButtonUsers = (source) => {
+    setButtonSource(source);
+    document.getElementById('button-users')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  };
 
   useEffect(() => {
     let cancelled = false;
@@ -216,39 +224,73 @@ export default function TrackingOverview() {
           <section className='flex flex-col gap-3'>
             <h2 className='text-lg font-semibold'>Which buttons start checkouts</h2>
             <div className='overflow-x-auto rounded-xl border border-gray-200 bg-white'>
-              <table className='w-full min-w-[480px] text-sm'>
+              <table className='w-full min-w-[720px] text-sm'>
                 <thead className='bg-gray-50 text-left text-xs uppercase text-gray-500'>
                   <tr>
-                    <th className='px-4 py-2'>Source</th>
+                    <th className='px-4 py-2'>Button</th>
                     <th className='px-4 py-2 text-right'>Plan clicks</th>
                     <th className='px-4 py-2 text-right'>Checkouts started</th>
                     <th className='px-4 py-2 text-right'>Paid</th>
+                    <th className='px-4 py-2 text-right'>Users paid</th>
+                    <th className='px-4 py-2 text-right'>Users not paid</th>
+                    <th className='px-4 py-2 text-right'>Checkout → paid</th>
                   </tr>
                 </thead>
                 <tbody>
                   {d.sources.length === 0 && (
                     <tr>
-                      <td className='px-4 py-3 text-gray-500' colSpan={4}>
+                      <td className='px-4 py-3 text-gray-500' colSpan={7}>
                         No checkouts in this period yet.
                       </td>
                     </tr>
                   )}
                   {d.sources.map((s) => (
-                    <tr key={s.source} className='border-t border-gray-100'>
-                      <td className='px-4 py-2 font-medium'>{s.source}</td>
-                      <td className='px-4 py-2 text-right'>{s.planClicks}</td>
-                      <td className='px-4 py-2 text-right'>{s.checkoutsStarted}</td>
+                    <tr
+                      key={s.source}
+                      className={`cursor-pointer border-t border-gray-100 hover:bg-gray-50 ${
+                        s.source === buttonSource ? 'bg-gray-100' : ''
+                      }`}
+                      onClick={() => showButtonUsers(s.source)}
+                    >
+                      <td className='px-4 py-2 font-medium underline-offset-2 hover:underline'>
+                        {s.source}
+                      </td>
+                      <td className='px-4 py-2 text-right'>
+                        {s.planClicks}
+                        <span className='ml-1 text-xs text-gray-500'>({s.clickUsers ?? '—'} users)</span>
+                      </td>
+                      <td className='px-4 py-2 text-right'>
+                        {s.checkoutsStarted}
+                        <span className='ml-1 text-xs text-gray-500'>({s.startUsers ?? '—'} users)</span>
+                      </td>
                       <td className='px-4 py-2 text-right'>{s.checkoutsCompleted}</td>
+                      <td className='px-4 py-2 text-right font-semibold'>{s.paidUsers ?? '—'}</td>
+                      <td className='px-4 py-2 text-right'>
+                        {Math.max((s.startUsers || 0) - (s.paidUsers || 0), 0)}
+                      </td>
+                      <td className='px-4 py-2 text-right'>{pct(s.paidUsers, s.startUsers)}</td>
                     </tr>
                   ))}
                 </tbody>
               </table>
             </div>
             <p className='text-xs text-gray-500'>
-              Counts are events, not users. A payment is credited to the button of that
-              user&apos;s latest checkout start. Credit packs are included.
+              Plan clicks, checkouts and paid are events; the users columns count each person
+              once. &quot;Users not paid&quot; = started a checkout from that button, no payment
+              credited to it. A payment is credited to the button of that user&apos;s latest
+              checkout start. Credit packs are included. Backfilled history and events with no
+              button are left out. Click a button to see its users.
             </p>
           </section>
+
+          <ButtonUsers
+            days={days}
+            sources={d.sources}
+            source={buttonSource}
+            onSourceChange={setButtonSource}
+          />
+
+          <TrackingInsights days={days} />
 
           <section className='flex flex-col gap-3'>
             <h2 className='text-lg font-semibold'>Where new signups came from</h2>
