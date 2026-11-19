@@ -27,6 +27,7 @@ import {
 } from '@heroui/react';
 import { Copy, ExternalLink, Pencil, Plus, Trash2, Users, X } from 'lucide-react';
 import { useCallback, useEffect, useState } from 'react';
+import OfferReviewPicker, { pickFromPublicReview } from './OfferReviewPicker';
 import OfferThemeEditor, { DEFAULT_THEME_FORM } from './OfferThemeEditor';
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -163,6 +164,7 @@ const emptyForm = {
   ctaLabel: '',
   description: '',
   faqs: [],
+  reviews: [],
   placements: Object.fromEntries(PLACEMENTS.map((p) => [p.key, true])),
   theme: DEFAULT_THEME_FORM,
 };
@@ -185,6 +187,7 @@ function formFromOffer(o) {
     ctaLabel: o.ctaLabel || '',
     description: o.description || '',
     faqs: (o.faqs || []).map((f) => ({ q: f.q, a: f.a })),
+    reviews: (o.pickedReviews || []).map(pickFromPublicReview),
     placements: Object.fromEntries(PLACEMENTS.map((p) => [p.key, !!o.placements?.[p.key]])),
     theme: {
       ...DEFAULT_THEME_FORM,
@@ -220,6 +223,7 @@ function bodyFromForm(f) {
     ctaLabel: f.ctaLabel,
     description: f.description,
     faqs: f.faqs.filter((x) => x.q.trim() && x.a.trim()),
+    reviewIds: f.reviews.map((r) => r._id),
     placements: f.placements,
     theme: f.theme,
   };
@@ -616,6 +620,12 @@ export default function OffersAdmin({ plans = [] }) {
                         ))}
                       </div>
                     </section>
+
+                    <OfferReviewPicker
+                      value={form.reviews}
+                      onChange={(v) => set('reviews', v)}
+                      api={api}
+                    />
 
                     <OfferThemeEditor
                       value={form.theme}

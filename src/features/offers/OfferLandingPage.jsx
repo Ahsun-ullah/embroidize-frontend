@@ -194,7 +194,18 @@ export default async function OfferLandingPage({ offer }) {
     .filter((c) => c?.slug && c?.name)
     .map((c) => ({ slug: c.slug, name: c.name.replace(/\s+Embroidery Designs$/i, '') }));
   const products = (popular.products || []).slice(0, 10);
-  const featured = (reviews.reviews || []).slice(0, 3);
+  // Reviews picked for this offer in Admin → Offers, in that order; when none
+  // are picked, the first 3 site-wide featured reviews.
+  const featured = Array.isArray(offer.reviews) && offer.reviews.length
+    ? offer.reviews
+    : (reviews.reviews || []).slice(0, 3);
+  // 1 card centred, 2 or 4 in pairs, anything else in rows of 3.
+  const reviewGrid =
+    featured.length === 1
+      ? "mx-auto max-w-[420px]"
+      : featured.length === 2 || featured.length === 4
+        ? "md:grid-cols-2"
+        : "md:grid-cols-3";
 
   return (
     <div
@@ -509,7 +520,7 @@ export default async function OfferLandingPage({ offer }) {
                 </span>
               )}
             </div>
-            <div className='mt-8 grid gap-5 md:grid-cols-3'>
+            <div className={`mt-8 grid gap-5 ${reviewGrid}`}>
               {featured.map((r) => {
                 const name = r.author?.name || 'Customer';
                 const shot = r.images?.[0]?.url;
